@@ -1,0 +1,1 @@
+init device failureresrc/model/ponko2-3/pk2skirt.MESH none.png のテクスチャ読み込みに失敗

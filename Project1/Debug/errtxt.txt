@@ -1,0 +1,1 @@
+init device failureno shader

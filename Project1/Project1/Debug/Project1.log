@@ -1,0 +1,87 @@
+﻿2016/01/15 15:18:39 にビルドを開始しました。
+     1>ノード 2 上のプロジェクト "C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\Project1.vcxproj" (Build ターゲット)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include" /ZI /nologo /W3 /WX- /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt KTRoboDemoRender.cpp
+         KTRoboDemoRender.cpp
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(12): warning C4005: 'DXGI_STATUS_OCCLUDED' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49449) : 'DXGI_STATUS_OCCLUDED' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(13): warning C4005: 'DXGI_STATUS_CLIPPED' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49458) : 'DXGI_STATUS_CLIPPED' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(14): warning C4005: 'DXGI_STATUS_NO_REDIRECTION' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49467) : 'DXGI_STATUS_NO_REDIRECTION' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(15): warning C4005: 'DXGI_STATUS_NO_DESKTOP_ACCESS' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49476) : 'DXGI_STATUS_NO_DESKTOP_ACCESS' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(16): warning C4005: 'DXGI_STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49485) : 'DXGI_STATUS_GRAPHICS_VIDPN_SOURCE_IN_USE' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(17): warning C4005: 'DXGI_STATUS_MODE_CHANGED' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49494) : 'DXGI_STATUS_MODE_CHANGED' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(18): warning C4005: 'DXGI_STATUS_MODE_CHANGE_IN_PROGRESS' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49503) : 'DXGI_STATUS_MODE_CHANGE_IN_PROGRESS' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(21): warning C4005: 'DXGI_ERROR_INVALID_CALL' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49518) : 'DXGI_ERROR_INVALID_CALL' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(22): warning C4005: 'DXGI_ERROR_NOT_FOUND' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49527) : 'DXGI_ERROR_NOT_FOUND' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(23): warning C4005: 'DXGI_ERROR_MORE_DATA' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49536) : 'DXGI_ERROR_MORE_DATA' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(24): warning C4005: 'DXGI_ERROR_UNSUPPORTED' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49545) : 'DXGI_ERROR_UNSUPPORTED' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(25): warning C4005: 'DXGI_ERROR_DEVICE_REMOVED' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49554) : 'DXGI_ERROR_DEVICE_REMOVED' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(26): warning C4005: 'DXGI_ERROR_DEVICE_HUNG' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49563) : 'DXGI_ERROR_DEVICE_HUNG' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(27): warning C4005: 'DXGI_ERROR_DEVICE_RESET' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49573) : 'DXGI_ERROR_DEVICE_RESET' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(28): warning C4005: 'DXGI_ERROR_WAS_STILL_DRAWING' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49582) : 'DXGI_ERROR_WAS_STILL_DRAWING' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(29): warning C4005: 'DXGI_ERROR_FRAME_STATISTICS_DISJOINT' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49592) : 'DXGI_ERROR_FRAME_STATISTICS_DISJOINT' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(30): warning C4005: 'DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49601) : 'DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(31): warning C4005: 'DXGI_ERROR_DRIVER_INTERNAL_ERROR' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49611) : 'DXGI_ERROR_DRIVER_INTERNAL_ERROR' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(32): warning C4005: 'DXGI_ERROR_NONEXCLUSIVE' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49620) : 'DXGI_ERROR_NONEXCLUSIVE' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(33): warning C4005: 'DXGI_ERROR_NOT_CURRENTLY_AVAILABLE' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49629) : 'DXGI_ERROR_NOT_CURRENTLY_AVAILABLE' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(34): warning C4005: 'DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49639) : 'DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\dxgitype.h(35): warning C4005: 'DXGI_ERROR_REMOTE_OUTOFMEMORY' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49648) : 'DXGI_ERROR_REMOTE_OUTOFMEMORY' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\d3d11.h(917): warning C4005: 'D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49817) : 'D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\d3d11.h(918): warning C4005: 'D3D11_ERROR_FILE_NOT_FOUND' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49826) : 'D3D11_ERROR_FILE_NOT_FOUND' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\d3d11.h(919): warning C4005: 'D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49836) : 'D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\d3d11.h(920): warning C4005: 'D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49845) : 'D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\d3d10.h(608): warning C4005: 'D3D10_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49793) : 'D3D10_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS' の前の定義を確認してください
+     1>c:\program files (x86)\microsoft directx sdk (june 2010)\include\d3d10.h(609): warning C4005: 'D3D10_ERROR_FILE_NOT_FOUND' : マクロが再定義されました。
+                 c:\program files (x86)\windows kits\8.0\include\shared\winerror.h(49802) : 'D3D10_ERROR_FILE_NOT_FOUND' の前の定義を確認してください
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Debug\Project1.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86" /LIBPATH:"C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64" d3d11.lib d3dx11d.lib dxerr.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Debug\Project1.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Debug\Project1.lib" /MACHINE:X86 Debug\KTRoboClock.obj
+         Debug\KTRoboCS.obj
+         Debug\KTRoboDebugText.obj
+         Debug\KTRoboDemoRender.obj
+         Debug\KTRoboEntryPoint.obj
+         Debug\KTRoboFont.obj
+         Debug\KTRoboGame.obj
+         Debug\KTRoboGameError.obj
+         Debug\KTRoboGraphics.obj
+         Debug\KTRoboLog.obj
+         Debug\KTRoboMesh.obj
+         Debug\KTRoboMeshInstanced.obj
+         Debug\KTRoboTask.obj
+         Debug\KTRoboTelopText.obj
+         Debug\MyButukari.obj
+         Debug\MyButukari3D.obj
+         Debug\MyTextureLoader.obj
+         Debug\MyTokenAnalyzer.obj
+         Debug\stringconverter.obj
+         Project1.vcxproj -> C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Debug\Project1.exe
+     1>プロジェクト "C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\Project1.vcxproj" (Build ターゲット) のビルドが完了しました。
+
+ビルドに成功しました。
+
+経過時間 00:00:03.69

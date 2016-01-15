@@ -1,0 +1,234 @@
+init device failureno shaderinit device failureno shaderinit device failureno shaderinit device failureno shaderinit device failureno shaderinit device failureno shaderinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(34,12): error X3088: Texture2D object does not have method 'getDimensions'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(34,12): error X3088: Texture2D object does not have method 'getDimensions'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,33): error X3018: invalid subscript 'TexCoord'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,33): error X3018: invalid subscript 'TexCoord'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,33): error X3018: invalid subscript 'TexCoord'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,33): error X3018: invalid subscript 'TexCoord'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,33): error X3018: invalid subscript 'outputc'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(31,8): error X3507: 'PSFunc': Not all control paths return a value
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(31,59): error X4502: invalid ps_4_0 input semantic 'SV_DOMAINLOCATION'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(31,59): error X4502: invalid ps_4_0 input semantic 'SV_DOMAINLOCATION'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,19): error X3014: incorrect number of arguments to numeric-type constructor
+init device failurefailed in create texture: ktrobofontinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(36,41): error X3000: syntax error: unexpected token ';'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,19): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(35,19): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(18,1): error X3000: syntax error: unexpected token '}'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(18,1): error X3000: syntax error: unexpected token '}'
+init device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(11,11): error X4577: Not all elements of SV_Position were written
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(11,11): error X4576: Output signature parameter SV_POSITION (1-based Entry 0) type must be float32 and mask must be xyzw. 
+init device failurefailed in create texture: ktrobofontinit device failurefailed in create texture: ktrobofontinit device failurefailed in create texture: ktrobofontinit device failureフォントmap sippai
+init device failure正規フォント文字がテクスチャに入りきらない
+init device failure正規フォント文字がテクスチャに入りきらない
+init device failure正規フォント文字がテクスチャに入りきらない
+init device failure1 のテクスチャ rendertargetmakeに失敗init device failure1 のテクスチャ rendertargetmakeに失敗init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(33,1): error X3000: unrecognized identifier 'Sampler2D'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(33,1): error X3000: syntax error: unexpected token 'sampler_state'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(33,1): error X3000: unrecognized identifier 'Sampler'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(41,8): error X3003: redefinition of 'test'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(42,15): error X3004: undeclared identifier 'test'
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\sample.fx(42,8): error X3014: incorrect number of arguments to numeric-type constructor
+init device failure正規フォント文字がテクスチャに入りきらない
+init device failurefailed in create texture: ktrobofontinit device failurefailed in create texture: ktrobofontinit device failurefont テクスチャ読み込みに失敗init device failurefont テクスチャ読み込みに失敗init device failurevertex buffer make errorinit device failurefailed in blend state createinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\debugtext.fx(36,8): error X4566: offset texture instructions must take offset which can resolve to integer literal in the range -8 to 7
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\debugtext.fx(37,8): error X4566: offset texture instructions must take offset which can resolve to integer literal in the range -8 to 7
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\debugtext.fx(39,8): error X4566: offset texture instructions must take offset which can resolve to integer literal in the range -8 to 7
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\debugtext.fx(40,8): error X4566: offset texture instructions must take offset which can resolve to integer literal in the range -8 to 7
+init device failurevertex buffer make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\teloptext.fx(31,56): error X3004: undeclared identifier 'speed'
+init device failureno shaderinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(36,54): error X3004: undeclared identifier 'Weight'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(36,54): error X3004: undeclared identifier 'Weight'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(36,54): error X3004: undeclared identifier 'Weight'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(36,54): error X3004: undeclared identifier 'Weight'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(45,34): error X3018: invalid subscript 'xyz'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(59,1): error X3000: syntax error: unexpected token '}'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(38,67): error X3504: array index out of bounds
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(38,67): error X3504: array index out of bounds
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(38,66): error X3504: array index out of bounds
+init device failureparent bone index okasiiinit device failureparent bone index okasiiinit device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(38,64): error X3000: syntax error: unexpected token '*'
+init device failurelayout make errorinit device failureresrc/ponko/ponko.png のテクスチャ読み込みに失敗init device failureresrc/ponko2-3/ponkoeye.png のテクスチャ読み込みに失敗init device failureresrc/ponko2-3/ponko.png のテクスチャ読み込みに失敗init device failureresrc/ponko2-3/ponko.png のテクスチャ読み込みに失敗init device failureresrc/ponko2-3/ponko.png のテクスチャ読み込みに失敗init device failureresrc/ponko2-3/ponko.png のテクスチャ読み込みに失敗init device failureresrc/model/ponko2-3/pk2midarime.MESH resrc/ponko2-3/ponko.png のテクスチャ読み込みに失敗init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(67,8): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(70,13): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(70,1): error X3017: cannot implicitly convert from 'const float3' to 'float4'
+init device failurecbuf make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\meshsimple.fx(67,10): error X3000: syntax error: unexpected token '('
+init device failureno shaderinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_mb.fx(15,17): error X3017: cannot implicitly convert from 'float3' to 'float4'
+init device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_mb.fx(13,1): error X3000: unrecognized identifier 'GSPSInput'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_mb.fx(23,5): error X3000: unrecognized identifier 'GSPSInputdd'
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_mb.fx(23,19): error X3000: unrecognized identifier 'Out'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(37,26): error X3018: invalid subscript 'texCoord'
+init device failureshader:error X3501: 'GSFunc': entrypoint not found
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(58,30): error X3004: undeclared identifier 'offset'
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(58,8): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_mb.fx(61,33): error X3018: invalid subscript 'VAlue'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(24,17): error X3017: cannot implicitly convert from 'const float2' to 'float3'
+init device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(325,1): error X3000: syntax error: unexpected token 'float'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(325,1): error X3004: undeclared identifier 'value'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(472,22): error X3004: undeclared identifier 'KTROBO_MESH_INSATANCED_ANIME_MATRIX_BASIS_NUM_MAX'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(473,5): error X3011: 'texel_per_skeleton': initial value must be a literal expression
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(473,5): error X3011: 'texel_per_skeleton': initial value must be a literal expression
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(474,34): error X3004: undeclared identifier 'skeleton_index'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(507,1): error X3000: syntax error: unexpected token 'ans'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(538,14): error X3004: undeclared identifier 'MyMatrixMutiply'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(545,12): error X3018: invalid subscript 'ValueMatFOUR'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(569,37): error X3004: undeclared identifier 'b_matrix_local'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(570,41): error X3004: undeclared identifier 'bp_combined_matrix'
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(570,19): error X3013: 'MyMatrixMultiply': function does not take 2 parameters
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(572,14): error X3004: undeclared identifier 'MyMatrixMutiply'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(586,37): error X3004: undeclared identifier 'b_matrix_local'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(588,51): error X3004: undeclared identifier 'pb_matrix_lcoal'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(588,51): error X3004: undeclared identifier 'pb_matrix_lcoal'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(588,88): error X3000: syntax error: unexpected token ')'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(324,10): error X4532: cannot map expression to vs_4_0 instruction set
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(324,16): error X3088: Texture2D object does not have method 'SampleLvel'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(605,31): error X4576: Input array signature parameter SV_POSITION cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(370,1): error X3000: unrecognized identifier 'min16uint2'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(532,1): error X3013: 'MyMatrixIdentity': function does not take 1 parameter
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(539,23): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(658,17): error X4000: variable 'Out' used without having been completely initialized
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(626,31): error X4576: Input array signature parameter SV_POSITION cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(626,31): error X4576: Input array signature parameter SV_POSITION cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(516,26): error X3018: invalid subscript 'AFLCVI'
+init device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(370,1): error X3000: unrecognized identifier 'min16uint'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(370,1): error X3000: unrecognized identifier 'ushort'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(520,44): error X3018: invalid subscript 'y'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(520,44): error X3018: invalid subscript 'y'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(520,44): error X3018: invalid subscript 'y'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(524,44): error X3018: invalid subscript 'w'
+init device failurelayout make errorinit device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failurelayout make errorinit device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Components of input declaration for register 0 overlap with previous declaration for same register.  Opcode #3 (count is 1-based). 
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Can't continue validation - aborting.
+init device failurelayout make errorinit device failurevertex buffer make errorinit device failurevertex buffer make errorinit device failurevertex buffer make errorinit device failureuav make errorinit device failureuav make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(632,18): error X3000: unrecognized identifier 'place'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(656,1): error X3004: undeclared identifier 'dep'
+init device failureshader:error X3501: 'CSFunc': entrypoint not found
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(323,6): warning X3575: loop termination conditions in varying flow control cannot depend on data read from a UAV, forcing loop to unroll
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(549,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(323,6): warning X3575: loop termination conditions in varying flow control cannot depend on data read from a UAV, forcing loop to unroll
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(549,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(593,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureuav make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(593,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failurecbuf make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(595,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(595,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(595,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(595,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_compute_cm.fx(595,21): error X4509: maximum UAV register index exceeded, target has 1 slots, manual bind to slot u1 failed
+init device failureshader:error X3506: unrecognized compiler target 'cs_4_2'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(84,28): error X3513: input types for geometry shader must be arrays
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(84,31): error X3059: array dimension must be between 1 and 65536
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(85,31): error X3513: array dimension for triangle must be 3
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(116,12): error X3018: invalid subscript 'Position'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(116,12): error X3018: invalid subscript 'Position'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(51,1): error X3000: unrecognized identifier 'GSInput'
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(51,9): error X3000: unrecognized identifier 'output'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(84,22): error X3004: undeclared identifier 'PSInput'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(50,11): error X4576: Output signature parameter SV_POSITION (1-based Entry 0) type must be float32 and mask must be xyzw. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(82,33): error X4576: Input array signature parameter SV_POSITION cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(82,33): error X4576: Input array signature parameter SV_POSITION cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(82,33): error X4576: Input array signature parameter SV_POSITION cannot be indexed dynamically.
+init device failureshader:error X8000: Validation Error: Declared output vertex count (96) multiplied by the total number of declared scalar components of output data (27) equals 2592.  This value cannot be greater than 1024.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(87,68): error X3514: 'GSFunc': stream output parameter 'gsstream' must be an inout parameter 
+init device failurelayout make errorinit device failurelayout make errorinit device failurevertex buffer make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(65,11): error X3503: 'VSFunc': function return value missing semantics
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(68,10): error X3018: invalid subscript 'indexs'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(68,10): error X3018: invalid subscript 'indexs'
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(62,11): warning X3578: Output value 'VSFunc' is not completely initialized
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(62,11): error X4580: Output variable VSFunc contains a system-interpreted value (SV_POSITION) which must be written in every execution path of the shader
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(119,17): error X4000: variable 'Out' used without having been completely initialized
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(66,6): error X3000: syntax error: unexpected token '['
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(144,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(83,24): error X3018: invalid subscript 'offset'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(144,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(144,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(144,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(145,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(63,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(146,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(121,17): error X4000: variable 'Out' used without having been completely initialized
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(146,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(121,17): error X4000: variable 'Out' used without having been completely initialized
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(146,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(63,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(64,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(64,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(64,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(147,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(84,24): error X3018: invalid subscript 'offset'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(88,24): error X3018: invalid subscript 'offset'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(149,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(149,6): warning X3206: implicit truncation of vector type
+error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(66,90): error X3000: syntax error: unexpected token ')'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(149,6): warning X3206: implicit truncation of vector type
+C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(124,17): error X4000: variable 'Out' used without having been completely initialized
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(114,13): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(117,13): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(94,8): error X3018: invalid subscript 'indexs'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(95,25): error X3018: invalid subscript 'offset'
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(91,16): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(28,1): error X3000: syntax error: unexpected token '}'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(93,18): error X3004: undeclared identifier 'inst'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(70,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(70,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(70,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(94,16): error X3014: incorrect number of arguments to numeric-type constructor
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(118,16): error X3014: incorrect number of arguments to numeric-type constructor
+init device failurelayout make errorinit device failurelayout make errorinit device failurelayout make errorinit device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(26,11): error X4502: invalid vs_4_0 input semantic 'SV_PositionID'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(70,26): error X4576: Input array signature parameter SV_InstanceID cannot be indexed dynamically.
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(98,19): error X3004: undeclared identifier 'InstanceID'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(93,24): error X3018: invalid subscript 'offset'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\teloptext.fx(55,8): error X3507: 'PSFunc': Not all control paths return a value
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:error X8000: D3D11 Internal Compiler Error: Invalid Bytecode: Input index range defined from 0 to 4 includes input register [0] that was not declared. 
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(58,10): error X3004: undeclared identifier 'mod'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(58,16): error X3000: syntax error: unexpected token 'mod'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(97,27): error X3018: invalid subscript 'inputs'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(39,1): error X3000: syntax error: unexpected token '}'
+init device failureshader:C:\Users\ttt\Documents\Visual Studio 2012\Projects\Project1\Project1\resrc\shader\simplemesh_i_cm.fx(98,54): error X3018: invalid subscript 'index'
