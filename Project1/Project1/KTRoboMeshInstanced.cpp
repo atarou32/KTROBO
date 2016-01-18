@@ -1310,7 +1310,7 @@ void MeshInstanceds::_calcCombinedMatrixToTexture(Graphics* g, COMBINEDMATRIXCAL
 	}
 	g->getDeviceContext()->Dispatch(KTROBO_MESH_INSTANCED_COMBINED_MATRIX_INSTANCE_SIZE,1,1);
 	g->getDeviceContext()->Flush();
-	Sleep(10);
+	
 	ID3D11UnorderedAccessView* test[] = {
 		{NULL},
 		{NULL}
@@ -1514,8 +1514,8 @@ void MeshInstanceds::render(Graphics* g) {
 	// cbuffer2 ‚·‚²‚¢•p”É‚É•ÏX‚³‚ê‚é
 	// color_id
 	ID3D11RenderTargetView* rr = g->getRenderTargetView();
-	g->getDeviceContext()->OMSetRenderTargets(1,&rr,mss_for_render.depthstencilview);
-	g->getDeviceContext()->ClearDepthStencilView(mss_for_render.depthstencilview, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	g->getDeviceContext()->OMSetRenderTargets(1,&rr,Mesh::pDepthStencilView);//mss_for_render.depthstencilview);
+	//g->getDeviceContext()->ClearDepthStencilView(mss_for_render.depthstencilview, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	// ‚Ü‚¸
 	RENDERINSTANCEINFOSTRUCT stt[ KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE];
 	memset(stt, 0 , sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE);
@@ -1552,6 +1552,6 @@ void MeshInstanceds::render(Graphics* g) {
 
 	}
 
-	Sleep(10);
+	
 }
 

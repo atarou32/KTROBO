@@ -105,21 +105,22 @@ bool Game::Init(HWND hwnd) {
 	mesh3[6] = new Mesh();
 	mesh3[6]->readMesh(g, "resrc/model/ponko2-3/pk2mayuge.MESH", demo->tex_loader);
 	mesh3[6]->readAnime("resrc/model/ponko2-3/pk2mayuge.ANIME");
-
+/*
 	mesh3[7] = new Mesh();
 	mesh3[7]->readMesh(g, "resrc/model/ponko2-3/pk2midarime.MESH", demo->tex_loader);
 	mesh3[7]->readAnime("resrc/model/ponko2-3/pk2midarime.ANIME");
-
+*/
+/*
 	mesh3[8] = new Mesh();
 	mesh3[8]->readMesh(g, "resrc/model/ponko2-3/pk2migimedama.MESH", demo->tex_loader);
 	mesh3[8]->readAnime("resrc/model/ponko2-3/pk2migimedama.ANIME");
-	
-	mesh3[9] = new Mesh();
-	mesh3[9]->readMesh(g, "resrc/model/ponko2-4/pk2migihanddayo.MESH", demo->tex_loader);
-	mesh3[9]->readAnime("resrc/model/ponko2-4/pk2migihanddayo.ANIME");
-	mesh3[9]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];
-	mesh3[9]->RootBone->parent_bone_index = mesh3[9]->RootBone->parent_bone->bone_index;
-	mesh3[9]->RootBone_connect_without_material_local = true;
+	*/
+	mesh3[7] = new Mesh();
+	mesh3[7]->readMesh(g, "resrc/model/ponko2-4/pk2migihanddayo.MESH", demo->tex_loader);
+	mesh3[7]->readAnime("resrc/model/ponko2-4/pk2migihanddayo.ANIME");
+	mesh3[7]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];
+	mesh3[7]->RootBone->parent_bone_index = mesh2->BoneIndexes["migiArmTekubiBone"];
+	mesh3[7]->RootBone_connect_without_material_local = true;
 
 	mesh3[10] = new Mesh();
 	mesh3[10]->readMesh(g, "resrc/model/ponko2-4/pk2migihanddayo.MESH", demo->tex_loader);
@@ -129,24 +130,31 @@ bool Game::Init(HWND hwnd) {
 	//mesh3[10]->RootBone_connect_without_material_local = true;
 
 	
-//	mesh3[10] = new Mesh();
-//	mesh3[10]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
-//	mesh3[10]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
-//	mesh3[10]->RootBone->parent_bone = /*mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];*/mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
-//	mesh3[10]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
-//	mesh3[10]->RootBone_connect_without_material_local = false;
+	mesh3[9] = new Mesh();
+	mesh3[9]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
+	mesh3[9]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
+//	mesh3[9]->RootBone->parent_bone = /*mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];*/mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
+//	mesh3[9]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
+//	mesh3[9]->RootBone_connect_without_material_local = false;
+
+	mesh3[8] = new Mesh();
+	mesh3[8]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
+	mesh3[8]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
+	mesh3[8]->RootBone->parent_bone = mesh3[7]->Bones[mesh3[7]->BoneIndexes["MigiHandMotiBone"]];
+	mesh3[8]->RootBone->parent_bone_index = mesh3[7]->BoneIndexes["MigiHandMotiBone"];
+	mesh3[8]->RootBone_connect_without_material_local = false;
 	
-/*	
+	
 	MYMATRIX worldforg;
 	MyMatrixRotationZ(worldforg, 3.14/2);
-	MyMatrixMultiply(mesh3[10]->rootbone_matrix_local_kakeru, mesh3[10]->rootbone_matrix_local_kakeru, worldforg);
+	MyMatrixMultiply(mesh3[8]->rootbone_matrix_local_kakeru, mesh3[8]->rootbone_matrix_local_kakeru, worldforg);
 	
 	MyMatrixScaling(worldforg, 1/3.0,1/3.0,1/3.0);
-	MyMatrixMultiply(mesh3[10]->rootbone_matrix_local_kakeru, mesh3[10]->rootbone_matrix_local_kakeru, worldforg);
+	MyMatrixMultiply(mesh3[8]->rootbone_matrix_local_kakeru, mesh3[8]->rootbone_matrix_local_kakeru, worldforg);
 	
 	MyMatrixRotationY(worldforg, -3.14/2);
-	MyMatrixMultiply(mesh3[10]->rootbone_matrix_local_kakeru, mesh3[10]->rootbone_matrix_local_kakeru, worldforg);
-*/	
+	MyMatrixMultiply(mesh3[8]->rootbone_matrix_local_kakeru, mesh3[8]->rootbone_matrix_local_kakeru, worldforg);
+	
 	
 	/*
 	MyMatrixRotationX(worldforg, -3.14/4*2);
@@ -188,8 +196,20 @@ bool Game::Init(HWND hwnd) {
 	//MyMatrixTranslation(worl,2,0,2);
 	//mesh_i->setWorld(&worl);
 	mesh_i = mesh_instanceds->makeInstanced(mesh2,mesh2,NULL,NULL,false,&kakeru);
-	mesh_instanceds->makeInstanced(mesh3[10],mesh3[10],mesh_i,mesh2->BoneIndexes["migiArmTekubiBone"],true,&kakeru);
+	MeshInstanced* mesh_i2 = mesh_instanceds->makeInstanced(mesh3[10],mesh3[10],mesh_i,mesh2->BoneIndexes["migiArmTekubiBone"],true,&kakeru);
+
+	//MYMATRIX worldforg;
+	MyMatrixRotationZ(worldforg, 3.14/2);
+	MyMatrixMultiply(kakeru, kakeru, worldforg);
 	
+	MyMatrixScaling(worldforg, 1/3.0,1/3.0,1/3.0);
+	MyMatrixMultiply(kakeru, kakeru, worldforg);
+	
+	MyMatrixRotationY(worldforg, -3.14/2);
+	MyMatrixMultiply(kakeru, kakeru, worldforg);
+
+
+	mesh_instanceds->makeInstanced(mesh3[9],mesh3[9], mesh_i2, mesh3[10]->BoneIndexes["MigiHandMotiBone"],false, &kakeru);
 	MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
 	memset(colors,0,sizeof(colors));
 
@@ -369,10 +389,12 @@ void Game::Run() {
 	//frame = 30.001;
 //	mesh->animate(frame, true);
 	mesh2->animate(frame, true);
-	for (int i = 0 ; i <= 10 ; i++) {
+	for (int i = 0 ; i <= 6 ; i++) {
 		mesh3[i]->animate(frame, true);
 	}
-
+	
+	mesh3[7]->animate(0,true);
+	mesh3[8]->animate(0,true);
 	mesh3[9]->animate(0,true);
 	mesh3[10]->animate(0,true);
 	}
@@ -419,9 +441,9 @@ void Game::Run() {
 	
 
 	MyMatrixRotationZ(worldforg, frame);
-	for (int i = 0 ; i <= 9; i ++) {
+	for (int i = 0 ; i <= 8; i ++) {
 		
-//		mesh3[i]->draw(g, &world, &view, &proj);
+		mesh3[i]->draw(g, &world, &view, &proj);
 
 	}
 	
