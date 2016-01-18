@@ -4,6 +4,7 @@
 #include "KTRoboClock.h"
 #include "KTRoboCS.h"
 #include "KTRoboGameError.h"
+#include "stringconverter.h"
 
 using namespace KTROBO;
 
@@ -71,9 +72,9 @@ bool Game::Init(HWND hwnd) {
 	telop_texts->Init(g,demo->font);
 	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.1);
 
-	mesh = new Mesh();
-	mesh->readMesh(g, "resrc/model/ponko2-3/pk2skirt.MESH", demo->tex_loader);
-	mesh->readAnime("resrc/model/ponko2-3/pk2skirt.ANIME");
+//	mesh = new Mesh();
+//	mesh->readMesh(g, "resrc/model/ponko2-3/pk2skirt.MESH", demo->tex_loader);
+//	mesh->readAnime("resrc/model/ponko2-3/pk2skirt.ANIME");
 	mesh2 = new Mesh();
 	mesh2->readMesh(g, "resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader);
 	mesh2->readAnime("resrc/model/ponko2-4/pk2sailordayo.ANIME");
@@ -154,7 +155,7 @@ bool Game::Init(HWND hwnd) {
 
 	float frame = 0;
 
-	mesh->animate(frame, true);
+	//mesh->animate(frame, true);
 	mesh2->animate(frame, true);
 	for (int i = 0 ; i <= 10 ; i++) {
 		mesh3[i]->animate(frame, true);
@@ -166,19 +167,50 @@ bool Game::Init(HWND hwnd) {
 
 	MeshInstanceds::Init(g);
 	mesh_instanceds = new MeshInstanceds(g, this->demo->tex_loader);
-	mesh_instanceds->setSkeleton(mesh);
-	mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
-	mesh_instanceds->loadMatrixLocalToTexture(g);
+	//mesh_instanceds->setSkeleton(mesh);
+	
 	MYMATRIX kakeru;
 	MyMatrixIdentity(kakeru);
-	mesh_i = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&kakeru);
-	mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&kakeru);
+	//mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&kakeru);
+	mesh_i = mesh_instanceds->makeInstanced(mesh2,mesh2,NULL,NULL,false,&kakeru);
+	MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
+	memset(colors,0,sizeof(colors));
+
+	mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
+	mesh_instanceds->loadMatrixLocalToTexture(g);
+	mesh_instanceds->calcCombinedMatrixToTexture(g);
+	for (int i=0;i<KTROBO_MESH_INSTANCED_COLOR_MAX; i++) {
+		colors[i].x = 1;
+		colors[i].y = 1;
+		colors[i].z = 1;
+		colors[i].w = 1;
+	}
+	mesh_i->setColor(colors);
+
+
+
+
+
+
+	mytest_for_vt = new MyTestForVertexTexture();
+	mytest_for_vt->Init(g);
+	mytest_for_vt->readVertexTexture(g,mesh_instanceds->combined_matrix_texture);//anime_matrix_basis_texture);//matrix_local_texture);
+
+
+	mytest_for_vt->writeInfo(g);
+
+
 
 	return true;
 }
 void Game::Del() {
 
 	KTROBO::DebugTexts::instance()->Del();
+
+	if (mytest_for_vt) {
+		delete mytest_for_vt;
+		mytest_for_vt = 0;
+	}
 
 	if (telop_texts) {
 		telop_texts->Del();
@@ -291,7 +323,7 @@ void Game::Run() {
 	
 	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
-//	KTROBO::DebugTexts::instance()->render(g);
+	KTROBO::DebugTexts::instance()->render(g);
 	telop_texts->plusTime(g,20);
 	if (telop_texts->isRenderFinished()) {
 		telop_texts->readFile(g,"resrc/sample/KTROBO.txt",30,14,&MYVECTOR4(1,1,1,1),0.1);
@@ -304,18 +336,55 @@ void Game::Run() {
 	frame += 0.1f;
 	
 
+
+
+
+	unsigned short animf[KTROBO_MESH_INSTANCED_BONE_MAX];
+	unsigned short animl[KTROBO_MESH_INSTANCED_BONE_MAX];
+	float animw[KTROBO_MESH_INSTANCED_BONE_MAX];
+
+
 	if (frameint != (int)(frame*5)) {
 		frameint = (int)(frame*5);
-
-	mesh->animate(frame, true);
+		if (frame >40) {
+			frame = 20;
+		}
+	//frame = 30.001;
+//	mesh->animate(frame, true);
 	mesh2->animate(frame, true);
 	for (int i = 0 ; i <= 10 ; i++) {
 		mesh3[i]->animate(frame, true);
-		if (i ==9) {
-			mesh3[i]->animate(0,true);
-		}
 	}
+
 	}
+
+
+	
+	memset(animf,0,sizeof(animf));
+	memset(animl,0,sizeof(animl));
+	memset(animw,0,sizeof(animw));
+	static int count = 0;
+	count++;
+
+	int bsize = mesh2->Bones.size();
+	
+
+	for (int i=0;i<bsize; i++) {
+
+		MeshBone* bone = mesh2->Bones[i];
+		mesh2->calculateOffsetMatrixToGetMinMaxAndWeight(bone, frame, &animl[i], &animf[i], &animw[i]);
+		animf[i] = floor(frame);////floor(frame);//count * 0.3;
+		animl[i] =ceil(frame);//count * 0.3;
+		animw[i] = animl[i]- frame;
+		//animw[i] = 1;//1- animw[i];
+	}
+
+	mesh_i->setBoneIndexInfo(animf, animl, animw);
+
+
+	
+	//frame = 30.001;
+
 	MYMATRIX world;
 	MYMATRIX view;
 	MYMATRIX proj;
@@ -337,46 +406,39 @@ void Game::Run() {
 
 	}
 	
-	//mesh3[10]->draw(g, &world, &view, &proj);
+	mesh3[0]->draw(g, &world, &view, &proj);
 
-	mesh->draw(g, &world,&view,&proj);
+	//mesh->draw(g, &world,&view,&proj);
 	mesh2->draw(g, &world, &view, &proj);
 	//float cc[] = {1.0f,1.0f,0.3f,1.0f};
 	//mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
-	unsigned short animf[KTROBO_MESH_INSTANCED_BONE_MAX];
-	unsigned short animl[KTROBO_MESH_INSTANCED_BONE_MAX];
-	float animw[KTROBO_MESH_INSTANCED_BONE_MAX];
-	memset(animf,0,sizeof(animf));
-	memset(animl,0,sizeof(animl));
-	memset(animw,0,sizeof(animw));
-	static int count = 0;
-	count++;
-	for (int i=0;i<KTROBO_MESH_INSTANCED_BONE_MAX; i++) {
-		animf[i] = count;
-		animl[i] = count;
-		animw[i] = 0.4;
-	}
 
-	mesh_i->setBoneIndexInfo(animf, animl, animw);
-
+	MYMATRIX temp_world;
+	MyMatrixTranslation(temp_world, 0,0,0);
+	mesh_i->setWorld(&temp_world);
+	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(1,1,-10,1));
 	mesh_instanceds->calcCombinedMatrixToTexture(g);
-
+	mesh_instanceds->loadColorToTexture(g);
+	mesh_instanceds->render(g);
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
-	demo->Render(g, mesh_instanceds->combined_matrix_texture);
-	//demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
-	//demo->Render(g, mesh_instanceds->matrix_local_texture);
+	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
+	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
+//	demo->Render(g, mesh_instanceds->matrix_local_texture);
 
 	g->getSwapChain()->Present(0,0);
 
 	static int s = 0;
-	if (c->getSecond() != s) {
+	//if (c->getSecond() != s) {
 		s = c->getSecond();
 		WCHAR test[512];
+		char test2[1024];
+		memset(test2,0,sizeof(1024));
 		memset(test,0,sizeof(WCHAR)*512);
-		wsprintf(test,L"testdayo%d", s);
-		
+		sprintf_s(test2,512, "aw %f af %d al %d", animw[0], (int)animf[0], (int)animl[0]);
+		stringconverter cs;
+		cs.charToWCHAR(test2,test);
 	//	KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);
-	}
+	//}
 
 	startWatch();
 }

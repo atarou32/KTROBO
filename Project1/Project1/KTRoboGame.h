@@ -16,6 +16,8 @@
 #include "KTRoboTask.h"
 #include "KTRoboMeshInstanced.h"
 
+#include "MyTestForVertexTexture.h"
+
 
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
@@ -45,6 +47,9 @@ private:
 	Mesh* mesh3[11];
 	MeshInstanceds* mesh_instanceds;
 	IMeshInstanced* mesh_i;
+
+	MyTestForVertexTexture* mytest_for_vt;
+
 public:
 	Game(void);
 	~Game(void);

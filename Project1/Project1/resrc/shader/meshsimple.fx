@@ -20,12 +20,12 @@ float3 Normal : NORMAL;
 
 
 cbuffer c0dayo :register(c0){
-float4x4 view;
-float4x4 proj;
+column_major float4x4 view;
+column_major float4x4 proj;
 };
 cbuffer c1dayo :register(c1){
-float4x4 world;
-float4x4 combined_matrixs[32];
+column_major float4x4 world;
+column_major float4x4 combined_matrixs[32];
 };
 
 cbuffer c2dayo :register(c0) {

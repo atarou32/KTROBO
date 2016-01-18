@@ -82,6 +82,7 @@ static XMVECTOR tempvec;
 #define MyMatrix4x4Store(float4x4, m) (XMStoreFloat4x4(&float4x4,m))
 #define MyMatrixMultiply(out, a1, a2) (MyMatrix4x4Store(out, XMMatrixMultiply((XMLoadFloat4x4(&a1)),(XMLoadFloat4x4(&a2)))))
 #define MyMatrixInverse(out, deter, in) (MyMatrix4x4Store(out, XMMatrixInverse((&tempvec),(XMLoadFloat4x4(&in)))))
+//#define MyMatrixInverse(out,deter, in) (MyMatrixIdentity(out))
 #define MyMatrixTranspose(out,in) (MyMatrix4x4Store(XMMatrixTranspose((XMLoadFloat4x4(&in)))))
 #define MyMatrixRotationX(out, f) (MyMatrix4x4Store(out, XMMatrixRotationX((f))))
 #define MyMatrixRotationY(out, f) (MyMatrix4x4Store(out, XMMatrixRotationY((f))))
@@ -90,6 +91,7 @@ static XMVECTOR tempvec;
 #define MyMatrixScaling(out,x,y,z) (MyMatrix4x4Store(out, XMMatrixScaling((x),(y),(z))))
 #define MyMatrixRotationAxis(out, vec,angle) (MyMatrix4x4Store(out, XMMatrixRotationAxis((XMLoadFloat3(vec)),(angle))))
 #define MyMatrixLookAtRH(out,from,at,up) (MyMatrix4x4Store(out, XMMatrixLookAtRH((XMLoadFloat3(&from.float3)),(XMLoadFloat3(&at.float3)),(XMLoadFloat3(&up.float3)))))
+#define MyMatrixLookAtLH(out,from,at,up) (MyMatrix4x4Store(out, XMMatrixLookAtLH((XMLoadFloat3(&from.float3)),(XMLoadFloat3(&at.float3)),(XMLoadFloat3(&up.float3)))))
 #define MyMatrixIdentity(out) (MyMatrix4x4Store(out, XMMatrixIdentity()))
 #define MYTEXTURE ID3D11Texture2D*
 #define MYRESOURCE ID3D11Resource*
@@ -103,6 +105,8 @@ static XMVECTOR tempvec;
 #define MyVec3TransformCoord(out, invec,inmat) (MyVec3Store(out, XMVector3TransformCoord((XMLoadFloat3(&invec.float3)),(XMLoadFloat4x4((&inmat))))))
 #define MyVec3TransformNormal(out, invec,inmat) (MyVec3Store(out, XMVector3TransformNormal((XMLoadFloat3((&invec.float3))),(XMLoadFloat4x4((&inmat))))))
 #define MyMatrixPerspectiveFovRH(out,a,b,c,d) (MyMatrix4x4Store(out, XMMatrixPerspectiveFovRH((a),(b),(c),(d))))
+#define MyMatrixPerspectiveFovLH(out,a,b,c,d) (MyMatrix4x4Store(out, XMMatrixPerspectiveFovLH((a),(b),(c),(d))))
+
 #define MyVec3Unproject(out,pos,viewport,proj,view,world) (MyVec3Store(out, XMVector3Unproject(XMLoadFloat3((&pos.float3)), \
 	(viewport.TopLeftX),(viewport.TopLeftY), (viewport.Width), (viewport.Height), (viewport.MinDepth), (viewport.MaxDepth), XMLoadFloat4x4((proj)),XMLoadFloat4x4((view)),XMLoadFloat4x4((world)))))
 #define MyShaderResourceView ID3D11ShaderResourceView*

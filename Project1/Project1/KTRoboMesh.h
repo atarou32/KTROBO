@@ -94,7 +94,7 @@ public:
 	int parent_bone_index;
 	vector<int> child_bone_indexs;
 	vector<MeshAnime*> animes;
-
+	
 	MeshBone(int bone_index, float* matrix_local, const char* bone_name) {
 		this->matrix_local._11 = matrix_local[0];
 		this->matrix_local._21 = matrix_local[1];
@@ -233,12 +233,12 @@ public:
 	void readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader);
 	void draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
 	bool RootBone_connect_without_material_local;
-private:
+public:
 	unsigned int VertexCount;
 	unsigned int FaceCount;
 	ID3D11Buffer* p_vertexbuffer;
 	ID3D11Buffer* p_indexbuffer;
-	
+private:
 	
 	static MeshCBuf1 cbuf1;
 	static MeshCBuf2 cbuf2;
@@ -247,10 +247,11 @@ private:
 	static ID3D11Buffer* cbuf2_buffer;
 	static ID3D11Buffer* cbuf3_buffer;
 
-public:
+private:
 	static void updateCBuf1(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 	static void updateCBuf2(Graphics* g, MYMATRIX* world, MYMATRIX* bone_combined_matrixs);
 	static void updateCBuf3(Graphics* g, MYVECTOR4* color, MYVECTOR4* lightdir, MYVECTOR4* viewdir);
+public:
 	MeshBone* RootBone;
 	int bone_max_depth;
 
@@ -275,6 +276,7 @@ private:
 	static ID3D11Texture2D* pDepthStencil;
 public:
 	void calculateOffsetMatrix(MeshBone* root_bone,float frame);
+	void calculateOffsetMatrixToGetMinMaxAndWeight(MeshBone* bone, float frame, unsigned short* ans_minmax, unsigned short* ans_maxmin, float* weight);
 	static ID3D11DepthStencilView* pDepthStencilView;
 };
 

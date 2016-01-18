@@ -49,7 +49,7 @@ HRESULT KTROBO::CompileShaderFromFile(char* filename, char* entrypoint, char* sh
 		return S_OK;
 
 	}
-	// fxc.exe /T cs_5_0 /E CalcCS /Ges /Fo simplemesh_i_compute_cs.ps
+	// fxc.exe simplemesh_i_compute_cm.fx /T cs_5_0 /E CalcCS /Ges /Fo simplemesh_i_compute_cm.ps
 	hr = D3DX11CompileFromFileA(filename, NULL,NULL,
 		entrypoint,shadermodel, shader_flags,0,NULL,
 		out,&pErrorBlob,NULL);

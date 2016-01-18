@@ -11,7 +11,7 @@ MeshInstanced::MeshInstanced(void)
 	MyMatrixIdentity(rootbone_matrix_local_kakeru);
 	is_render= true;
 	for (int i = 0 ; i < KTROBO_MESH_INSTANCED_COLOR_MAX; i++) {
-		colors[i] = MYVECTOR3(0,0,0);
+		colors[i] = MYVECTOR4(0,0,0,0);
 	}
 	for (int i=0; i<KTROBO_MESH_INSTANCED_BONE_MAX; i++) {
 		bones_anime_first_index[i]=0;
@@ -48,8 +48,15 @@ ID3D11UnorderedAccessView* MeshInstanceds::combined_matrix_watasu_vertexbuffer_v
 ID3D11Buffer* MeshInstanceds::combined_matrix_watasu_indexbuffer=0;
 COMBINEDMATRIXCALC_CBUF MeshInstanceds::cbuf1;
 ID3D11Buffer* MeshInstanceds::cbuf1_buffer = 0;
+ID3D11Buffer* MeshInstanceds::cbuf2_buffer = 0;
+ID3D11Buffer* MeshInstanceds::cbuf3_buffer = 0;
 ID3D11Buffer* MeshInstanceds::combined_matrix_watasu_offsetbuffer=0;
 ID3D11Buffer* MeshInstanceds::color_texture_vertexbuffer=0;
+MYSHADERSTRUCT MeshInstanceds::mss_for_color;
+ID3D11SamplerState* MeshInstanceds::combined_matrix_sampler_state=0;
+ID3D11Buffer* MeshInstanceds::render_instance_vertexbuffer=0;
+MESHINSTANCED_CBUF2 MeshInstanceds::cbuf2;
+MESHINSTANCED_CBUF3 MeshInstanceds::cbuf3;
 
 void MeshInstanceds::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
 								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
@@ -124,10 +131,10 @@ void MeshInstanceds::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_fil
 		BlendDesc.AlphaToCoverageEnable = blend_enable;
 		BlendDesc.IndependentBlendEnable = blend_enable;
 		BlendDesc.RenderTarget[0].BlendEnable = blend_enable;
-		BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_DEST_ALPHA;
+		BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;//SRC_ALPHA;
+		BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;//INV_SRC_ALPHA;
 		BlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		BlendDesc.RenderTarget[0].SrcBlendAlpha =D3D11_BLEND_ZERO;
+		BlendDesc.RenderTarget[0].SrcBlendAlpha =D3D11_BLEND_ONE;
 		BlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 		BlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		BlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -135,6 +142,30 @@ void MeshInstanceds::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_fil
 		if (FAILED(hr)) {
 			throw new GameError(KTROBO::FATAL_ERROR, "failed in blend state create");
 		}
+		/*
+		 BlendDesc.IndependentBlendEnable = FALSE;
+   // アルファブレンドを無効
+   BlendDesc.RenderTarget[0].BlendEnable = FALSE;
+   BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+   BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+   BlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+   BlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+   BlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+   BlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+   BlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+   hr = pD3DDevice->CreateBlendState( &BlendDesc, &m_Step01.pBlendState );
+   if( FAILED( hr ) )
+   */
+
+
+
+
+
+
+
+
+
+
 	
 	} catch (KTROBO::GameError* e) {
 		if (pblob) {
@@ -236,18 +267,105 @@ void MeshInstanceds::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_fil
 
 }
 
-struct SHADERCOLORTEXTUREINPUTSTRUCT {
-	unsigned int instance_id;
-	unsigned int color_index;
-	unsigned int vertex_index;
-	unsigned int offset;
-	MYVECTOR4 color;
-};
+
+void MeshInstanceds::_loadColorToTexture(Graphics* g, SHADERCOLORTEXTUREINPUTSTRUCT* stt, int temp) {
+
+
+
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	unsigned int stride = sizeof(SHADERCOLORTEXTUREINPUTSTRUCT);
+	unsigned int offset = 0;
+
+	CS::instance()->enter(CS_DEVICECON_CS, "load color texture");
+	g->getDeviceContext()->Map(MeshInstanceds::color_texture_vertexbuffer,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy(subresource.pData, stt, sizeof(SHADERCOLORTEXTUREINPUTSTRUCT)*temp);//KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE);
+	g->getDeviceContext()->Unmap(MeshInstanceds::color_texture_vertexbuffer,0);
+	D3D11_VIEWPORT vp;
+
+	vp.Height = color_texture->height;
+	vp.Width = color_texture->width;
+	vp.MaxDepth = 1.0f;
+	vp.MinDepth = 0.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+
+	g->getDeviceContext()->RSSetViewports(1, &vp);
+	float ccc[] = {
+		0.2f,0.2f,0.8f,0.7f};
+
+
+	g->getDeviceContext()->OMSetRenderTargets(1, &color_texture->target_view, this->mss_for_color.depthstencilview);
+	g->getDeviceContext()->ClearDepthStencilView(mss_for_color.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
+//	g->getDeviceContext()->ClearRenderTargetView(anime_matrix_basis_texture->target_view, ccc);
+
+	g->getDeviceContext()->IASetInputLayout(MeshInstanceds::mss_for_color.vertexlayout );
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &color_texture_vertexbuffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	
+	g->getDeviceContext()->RSSetState(mss_for_color.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_color.blendstate, blendFactor,0xFFFFFFFF);
+	g->getDeviceContext()->VSSetShader(mss_for_color.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
+		
+	g->getDeviceContext()->PSSetShader(mss_for_color.ps, NULL, 0);
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&matrix_local_texture->view);
+	g->getDeviceContext()->Draw(temp,0);
+	g->getDeviceContext()->Flush();
+	
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	ID3D11RenderTargetView* t = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &t, NULL);	
+//	ID3D11ShaderResourceView* testtt = NULL;
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "load color texture leave");
+	
+
+
+
+
+
+}
+
 
 void MeshInstanceds::loadColorToTexture(Graphics* g) {
 	// まずはじめにインスタンス毎に回す
 	SHADERCOLORTEXTUREINPUTSTRUCT stt[KTROBO_MESH_INSTANCED_COLOR_TEXTURE_STRUCT_TEMPSIZE];
 	memset(stt, 0, sizeof(SHADERCOLORTEXTUREINPUTSTRUCT) * KTROBO_MESH_INSTANCED_COLOR_TEXTURE_STRUCT_TEMPSIZE);
+	int temp = 0;
+	int temp_max = KTROBO_MESH_INSTANCED_COLOR_TEXTURE_STRUCT_TEMPSIZE;
+
+	int isize = mesh_instanceds.size();
+	for (int i=0;i<isize;i++) {
+		MeshInstanced* mm = mesh_instanceds[i];
+		if (mm->getIsNeedColorTextureLoad()) {
+			for (int c=0; c< KTROBO_MESH_INSTANCED_COLOR_MAX;c++) {
+				for (int k=0;k<6;k++) {
+				stt[temp].color_index = c;
+				stt[temp].color = *mm->getColor(c);
+				stt[temp].instance_id = i;
+				stt[temp].offset = 0;
+				stt[temp].vertex_index = k;
+				temp++;
+				if (temp >= temp_max) {
+					_loadColorToTexture(g, stt, temp);
+					temp = 0;
+					memset(stt, 0, sizeof(SHADERCOLORTEXTUREINPUTSTRUCT) * KTROBO_MESH_INSTANCED_COLOR_TEXTURE_STRUCT_TEMPSIZE);
+				}
+				}
+			}
+		}
+	}
+
+	if (temp >0) {
+		_loadColorToTexture(g, stt, temp);
+		temp = 0;
+		memset(stt, 0, sizeof(SHADERCOLORTEXTUREINPUTSTRUCT) * KTROBO_MESH_INSTANCED_COLOR_TEXTURE_STRUCT_TEMPSIZE);
+	}
 }
 
 void MeshInstanceds::loadShaderForColor(Graphics* g) {
@@ -256,7 +374,7 @@ void MeshInstanceds::loadShaderForColor(Graphics* g) {
 		{"MCOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
 		};
 	
-	loadShader(g, &mss_for_color, KTROBO_MESH_INSTANCED_SHADER_FILENAME_COMBINED_MATRIX, 
+	loadShader(g, &mss_for_color, KTROBO_MESH_INSTANCED_SHADER_FILENAME_COLOR, 
 		KTROBO_MESH_INSTANCED_SHADER_VS, KTROBO_MESH_INSTANCED_SHADER_GS, KTROBO_MESH_INSTANCED_SHADER_PS,
 		KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT, 
 		KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT, layout,2, false);
@@ -270,7 +388,7 @@ void MeshInstanceds::loadShaderForColor(Graphics* g) {
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bd.MiscFlags = 0;
 	
-	HRESULT hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(MeshInstanceds::combined_matrix_watasu_offsetbuffer));
+	HRESULT hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(MeshInstanceds::color_texture_vertexbuffer));
 	if (FAILED(hr)) {
 		Del();
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
@@ -282,7 +400,7 @@ void MeshInstanceds::Init(Graphics* g) {
 	loadShaderForCombinedMatrix(g);
 	loadShaderForMatrixBasis(g);
 	loadShaderForMatrixLocal(g);
-//	loadShaderForRender(g);
+	loadShaderForRender(g);
 	loadShaderForColor(g);
 	D3D11_BUFFER_DESC bd;
 	memset(&bd,0,sizeof(bd));
@@ -304,6 +422,8 @@ void MeshInstanceds::Init(Graphics* g) {
 	}
 	//delete[] ss;
 
+	memset(&cbuf2,0,sizeof(MESHINSTANCED_CBUF2));
+	memset(&cbuf3,0, sizeof(MESHINSTANCED_CBUF3));
 
 
 
@@ -361,10 +481,10 @@ void MeshInstanceds::loadShaderForCombinedMatrix(Graphics* g) {
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{"INDEXSDAYO", 0, DXGI_FORMAT_R32G32B32A32_UINT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0} ,
 	//	{"BONE_INDEX", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0} ,
-		{"KAKERUMONE", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"KAKERUMTWO", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"KAKERUMTHREE", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"KAKERUMFOUR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"KAKERUM", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"KAKERUM", 1, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"KAKERUM", 2, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"KAKERUM", 3, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 64, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"OFFSETDAYO",0, DXGI_FORMAT_R32G32B32A32_UINT, 1,  0 , D3D11_INPUT_PER_INSTANCE_DATA, 1},
 		};
 	
@@ -438,7 +558,7 @@ void MeshInstanceds::loadShaderForCombinedMatrix(Graphics* g) {
 	
 	ID3DBlob* pblob = 0;
 	try {
-		CompileShaderFromFile(KTROBO_MESH_INSTANCED_SHADER_FILENAME_COMBINED_MATRIX_COMPUTE, "CalcCS", "cs_4_0",&pblob,true);
+		CompileShaderFromFile(KTROBO_MESH_INSTANCED_SHADER_FILENAME_COMBINED_MATRIX_COMPUTE, "CalcCS", "cs_5_0",&pblob,true);
 		hr = g->getDevice()->CreateComputeShader(pblob->GetBufferPointer(),
 			pblob->GetBufferSize(),
 			NULL,
@@ -554,17 +674,106 @@ void MeshInstanceds::loadShaderForCombinedMatrix(Graphics* g) {
 	delete[] ss;
 
 
+	D3D11_SAMPLER_DESC descS;
+	memset(&descS, 0, sizeof(descS));
+	descS.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+	
+	descS.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	descS.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	descS.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	descS.BorderColor[0] = 0;
+	descS.BorderColor[1] = 0;
+	descS.BorderColor[2] = 0;
+	descS.BorderColor[3] = 0;
+	descS.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	descS.MaxAnisotropy = 1;
+	descS.MinLOD = -D3D11_FLOAT32_MAX;
+	descS.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = g->getDevice()->CreateSamplerState(&descS, &combined_matrix_sampler_state);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "sampler make error");;
+	}
+
 }
 
 void MeshInstanceds::loadShaderForRender(Graphics* g) {
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
-			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
-			{"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0},
+
+			{ "POSITION",    0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "INDone",  0, DXGI_FORMAT_R8_UINT,  0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "INDtwo",  0, DXGI_FORMAT_R8_UINT,  0, 13, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "INDthree",  0, DXGI_FORMAT_R8_UINT,  0, 14, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "INDfour",  0, DXGI_FORMAT_R8_UINT,  0, 15, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "INDfive", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "WEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "WEIGHTfive", 0, DXGI_FORMAT_R32_FLOAT, 0 , 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "NORMAL",      0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, 52, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+			{"INSTANCEIDDAYO", 0, DXGI_FORMAT_R32_UINT,1,0,D3D11_INPUT_PER_INSTANCE_DATA,1},
+			{"WORLDMAT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,1,4,D3D11_INPUT_PER_INSTANCE_DATA,1},
+			{"WORLDMAT", 1, DXGI_FORMAT_R32G32B32A32_FLOAT,1,20,D3D11_INPUT_PER_INSTANCE_DATA,1},
+			{"WORLDMAT", 2, DXGI_FORMAT_R32G32B32A32_FLOAT,1,36,D3D11_INPUT_PER_INSTANCE_DATA,1},
+			{"WORLDMAT", 3, DXGI_FORMAT_R32G32B32A32_FLOAT,1,52,D3D11_INPUT_PER_INSTANCE_DATA,1},
 		};
 	loadShader(g, &mss_for_render, KTROBO_MESH_INSTANCED_SHADER_FILENAME_RENDER, 
 		KTROBO_MESH_INSTANCED_SHADER_VS, KTROBO_MESH_INSTANCED_SHADER_GS, KTROBO_MESH_INSTANCED_SHADER_PS,
-		g->getScreenWidth(), g->getScreenHeight(), layout,2, true);
+		g->getScreenWidth(), g->getScreenHeight(), layout,15, true);
+	
+	D3D11_BUFFER_DESC bd;
+	memset(&bd,0,sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+	
+	HRESULT hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(MeshInstanceds::render_instance_vertexbuffer));
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
+	}
 
+	D3D11_BUFFER_DESC des;
+	des.ByteWidth = sizeof(MESHINSTANCED_CBUF2);
+	des.Usage = D3D11_USAGE_DYNAMIC;
+	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	des.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	des.MiscFlags = 0;
+	des.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA idat;
+	memset(&cbuf2, 0, sizeof(MESHINSTANCED_CBUF2));
+
+	idat.pSysMem = &cbuf2;
+	idat.SysMemPitch = 0;
+	idat.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer(&des, &idat, &cbuf2_buffer);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
+
+	des;
+	des.ByteWidth = sizeof(MESHINSTANCED_CBUF3);
+	des.Usage = D3D11_USAGE_DYNAMIC;
+	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	des.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	des.MiscFlags = 0;
+	des.StructureByteStride = 0;
+
+	idat;
+	memset(&cbuf3, 0, sizeof(MESHINSTANCED_CBUF3));
+
+	idat.pSysMem = &cbuf3;
+	idat.SysMemPitch = 0;
+	idat.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer(&des, &idat, &cbuf3_buffer);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
 }
 
 void MeshInstanceds::_loadAnimeMatrixBasisToTexture(Graphics* g, ANIMETEXTURELOADSTRUCT* st, int temp) {
@@ -770,7 +979,6 @@ void MeshInstanceds::loadMatrixLocalToTexture(Graphics* g) {
 					st[temp].pos.float3.x = xc;
 					st[temp].pos.float3.y = yc;
 					st[temp].pos.float3.z = 0.0f;
-
 					temp++;
 					if (temp >= temp_max) {
 
@@ -835,7 +1043,7 @@ void MeshInstanceds::loadAnimeMatrixBasisToTexture(Graphics* g) {
 					//	st[temp].bone_index = b;
 					//	st[temp].skeleton_index = i;
 					//	st[temp].matrix_offset = offset;
-					//	if (offset < 16) {
+					
 						st[temp].matrix_value = m->Bones[b]->offset_matrix.m[offset%4][offset/4];
 					//	}
 						int texel_per_bone = KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX * 16;
@@ -1093,7 +1301,9 @@ void MeshInstanceds::_calcCombinedMatrixToTexture(Graphics* g, COMBINEDMATRIXCAL
 	g->getDeviceContext()->CSSetShaderResources(0,1,&anime_matrix_basis_texture->view);
 	g->getDeviceContext()->CSSetShaderResources(1,1,&matrix_local_texture->view);
 	g->getDeviceContext()->CSSetShaderResources(2,1,&combined_matrix_texture->view);
-
+	for (int i = 0 ; i < 16;i++) {
+	g->getDeviceContext()->CSSetSamplers(i,1,&combined_matrix_sampler_state);
+	}
 	g->getDeviceContext()->Dispatch(KTROBO_MESH_INSTANCED_COMBINED_MATRIX_INSTANCE_SIZE,1,1);
 	g->getDeviceContext()->Flush();
 	ID3D11UnorderedAccessView* test[] = {
@@ -1169,14 +1379,127 @@ void MeshInstanceds::_calcCombinedMatrixToTexture(Graphics* g, COMBINEDMATRIXCAL
 	CS::instance()->leave(CS_DEVICECON_CS, "calc combined matrix leave");	
 }
 
+void MeshInstanceds::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR4* lightdir) {
+
+	cbuf2.proj = *proj;
+	cbuf2.view = *view;
+	cbuf2.lightdir = *lightdir;
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
+	g->getDeviceContext()->Map(cbuf2_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy( subresource.pData, &cbuf2, sizeof(MESHINSTANCED_CBUF2) );
+	g->getDeviceContext()->Unmap(cbuf2_buffer, 0);
+	//g->getDeviceContext()->UpdateSubresource(cbuf2_buffer,0,NULL,&cbuf2,0,0);
+	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
+
+}
+
+void MeshInstanceds::setCBuf3(Graphics* g, unsigned int color_id) {
+
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	cbuf3.color_id = color_id;
+	cbuf3.offset1 = color_id;
+	cbuf3.offset2 = color_id;
+	cbuf3.offset3 = color_id;
+//	CS::instance()->enter(CS_DEVICECON_CS, "setcolorid");
+	g->getDeviceContext()->Map(cbuf3_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy( subresource.pData, &cbuf3, sizeof(MESHINSTANCED_CBUF3) );
+	g->getDeviceContext()->Unmap(cbuf3_buffer, 0);
+//	CS::instance()->enter(CS_DEVICECON_CS, "setcolorid");
+
+
+}
+void MeshInstanceds::_render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp, Mesh* render_mesh) {
+
+
+	if (render_mesh->VertexCount && render_mesh->FaceCount) {
+	} else {
+		return;
+	}
+
+	/*
+	int size = render_mesh->Bones.size();
+	MYMATRIX bone_combined_matrixs[KTROBO_MESH_BONE_MAX];
+	memset(bone_combined_matrixs, 0, sizeof(MYMATRIX)* KTROBO_MESH_BONE_MAX);
+	for (int i = 0; i < size; i++) {
+		MeshBone* b = render_mesh->Bones[i];
+		if (b->bone_index >= 0  && b->bone_index < KTROBO_MESH_BONE_MAX) {
+			bone_combined_matrixs[b->bone_index] = b->combined_matrix;
+		//	MyMatrixIdentity(bone_combined_matrixs[i]);
+		}
+	}
+	*/
+	
+	//updateCBuf2(g, world, bone_combined_matrixs);
+
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	g->getDeviceContext()->Map(MeshInstanceds::render_instance_vertexbuffer,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy(subresource.pData, st, sizeof(RENDERINSTANCEINFOSTRUCT) * temp);//KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE);
+	g->getDeviceContext()->Unmap(MeshInstanceds::render_instance_vertexbuffer,0);
+
+	
+	g->getDeviceContext()->VSSetConstantBuffers(0,1, &cbuf2_buffer);
+	//g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf2_buffer);
+	//g->getDeviceContext()->VSSetConstantBuffers(1,1, &cbuf3_buffer);
+	g->getDeviceContext()->IASetInputLayout( mss_for_render.vertexlayout );
+	ID3D11Buffer* bufs[] = {render_mesh->p_vertexbuffer, render_instance_vertexbuffer};
+	unsigned int stride[] = {sizeof(MESH_VERTEX), sizeof(RENDERINSTANCEINFOSTRUCT)};
+	unsigned int offset[] = {0,0};
+
+	g->getDeviceContext()->IASetVertexBuffers( 0, 2, bufs, stride, offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->IASetIndexBuffer (render_mesh->p_indexbuffer, DXGI_FORMAT_R32_UINT,0);
+	g->getDeviceContext()->RSSetState(mss_for_render.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_render.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss_for_render.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
+	g->getDeviceContext()->PSSetSamplers(1,1, &MeshInstanceds::combined_matrix_sampler_state);
+	g->getDeviceContext()->VSSetSamplers(0,1, &MeshInstanceds::combined_matrix_sampler_state);
+
+	g->getDeviceContext()->PSSetShader(mss_for_render.ps, NULL, 0);
+	
+	g->getDeviceContext()->VSSetShaderResources(0,1, &combined_matrix_texture->view);
+	g->getDeviceContext()->PSSetShaderResources(0,1, &combined_matrix_texture->view);
+	g->getDeviceContext()->PSSetShaderResources(1,1,&color_texture->view);
+	
+	int subset_size = render_mesh->Subsets.size();
+	int material_index = -1;
+	MyTextureLoader::MY_TEXTURE_CLASS* tex_class = 0;
+	for (int i=0;i<subset_size; i++) {
+		MeshSubset* s = render_mesh->Subsets[i];
+
+		if (material_index != s->MaterialIndex) {
+			if (tex_class != render_mesh->Materials[s->MaterialIndex]->texture) {
+				g->getDeviceContext()->PSSetShaderResources(2,1,&render_mesh->Materials[s->MaterialIndex]->texture->view);
+				tex_class = render_mesh->Materials[s->MaterialIndex]->texture;
+			}
+			material_index = s->MaterialIndex;
+		}
+		
+		setCBuf3(g, s->MaterialIndex);
+		ID3D11Buffer* NUL = NULL;
+		g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf3_buffer);
+		//g->getDeviceContext()->PSSetConstantBuffers(1,1, &cbuf3_buffer);
+		g->getDeviceContext()->DrawIndexedInstanced(s->FaceCount*3,temp,s->FaceIndex*3,0, 0);
+	}
+
+	ID3D11ShaderResourceView* vi=NULL;
+	g->getDeviceContext()->VSSetShaderResources(0,1, &vi);
+	g->getDeviceContext()->PSSetShaderResources(1,1,&vi);
+	
+}
+
 
 void MeshInstanceds::render(Graphics* g) {
 
 	// 描画の手順
 	// インスタンスのメッシュ→メッシュ
 	// インスタンスごとの情報
-	// color, world, instance_id
-
+	// world, instance_id
+	// color はテクスチャに
 	// インスタンスのメッシュに共通な情報
 	// pos, normal, index weight (meshのvertexbufferと同じ)
 
@@ -1185,5 +1508,43 @@ void MeshInstanceds::render(Graphics* g) {
 
 	// cbuffer2 すごい頻繁に変更される
 	// color_id
+	ID3D11RenderTargetView* rr = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1,&rr,mss_for_render.depthstencilview);
+	g->getDeviceContext()->ClearDepthStencilView(mss_for_render.depthstencilview, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	// まず
+	RENDERINSTANCEINFOSTRUCT stt[ KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE];
+	memset(stt, 0 , sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE);
+	int temp =0;
+	int temp_max = KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE;
+	// mesh ごとに計算する
+	int meshsize = meshs.size();
+	int isize = mesh_instanceds.size();
+	for (int m = 0 ; m < meshsize; m++) {
+		Mesh* mes = meshs[m];
+		
+		for (int i = 0 ; i < isize; i++) {
+			MeshInstanced* mi = mesh_instanceds[i];
+			if (mi->getIsRender() && mi->getMeshIndex() == m) {
+				// 構造体に入れ込む
+				stt[temp].instance_id = i;
+				stt[temp].world = *mi->getWorld();
+				temp++;
+				if (temp >= temp_max) {
+					_render(g, stt,temp, mes);
+					temp = 0; 
+					memset(stt, 0 , sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE);
+	
+
+				}
+			}
+		}
+		if (temp > 0) {
+			_render(g, stt,temp, mes);
+			temp = 0;
+			memset(stt, 0 , sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE);
+	
+		}
+
+	}
 }
 

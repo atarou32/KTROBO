@@ -59,6 +59,6 @@ uint g = (gu >> 16) - (r << 8);
 uint b = (gu >> 8) - (g << 8) - (r << 16);
 uint a = gu - (b <<8) - (g << 16) - (r << 24);
 
-float4 color = float4(r/256.0f, g/256.0f, b/256.0f , a/256.0f);
+float4 color = float4(r/255.0f, g/255.0f, b/255.0f , a/255.0f);
 return float4(color.xyz,color.w);//float4(0,1,1,1);//color;
 }

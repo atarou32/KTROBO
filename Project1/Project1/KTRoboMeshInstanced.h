@@ -16,8 +16,8 @@ interface IMeshInstanced {
 	virtual void setBoneIndexInfo(unsigned short* bones_anime_first_index, unsigned short* bones_anime_last_index, float* bones_anime_first_weight)=0;
 	virtual void setWorld(MYMATRIX* world)=0;
 	virtual MYMATRIX* getWorld()=0;
-	virtual void setColor(MYVECTOR3* colors)=0;
-	virtual MYVECTOR3* getColor(int index)=0;
+	virtual void setColor(MYVECTOR4* colors)=0;
+	virtual MYVECTOR4* getColor(int index)=0;
 	virtual void setIsRender(bool t)=0;
 	virtual bool getIsRender()=0;
 };
@@ -30,7 +30,7 @@ private:
 	// 個々のインスタンスに共通な変数
 	MYMATRIX world;
 	MYMATRIX rootbone_matrix_local_kakeru; // rootbone のマトリックスにかけるマトリックス　親メッシュがある場合によく使用される 
-	MYVECTOR3 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
+	MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
 	unsigned short bones_anime_first_index[KTROBO_MESH_INSTANCED_BONE_MAX];
 	unsigned short bones_anime_last_index[KTROBO_MESH_INSTANCED_BONE_MAX];
 	float bones_anime_first_weight[KTROBO_MESH_INSTANCED_BONE_MAX];
@@ -124,14 +124,14 @@ public:
 	}
 	MYMATRIX* getWorld() {return &world;}
 	
-	void setColor(MYVECTOR3* colors) {
+	void setColor(MYVECTOR4* colors) {
 		for (int i = 0;i<KTROBO_MESH_INSTANCED_COLOR_MAX; i++) {
 			this->colors[i] = colors[i];
 		}
 
 		setIsNeedColorTextureLoad(true);
 	}
-	MYVECTOR3* getColor(int index) {
+	MYVECTOR4* getColor(int index) {
 		if (index >= 0 && index < KTROBO_MESH_INSTANCED_COLOR_MAX) {
 			return &colors[index];
 		}
@@ -225,6 +225,7 @@ public:
 #define KTROBO_MESH_INSTANCED_SHADER_FILENAME_COMBINED_MATRIX "resrc/shader/simplemesh_i_cm.fx"
 #define KTROBO_MESH_INSTANCED_SHADER_FILENAME_RENDER "resrc/shader/simplemesh_i_render.fx"
 #define KTROBO_MESH_INSTANCED_SHADER_FILENAME_COMBINED_MATRIX_COMPUTE "resrc/shader/simplemesh_i_compute_cm.ps"
+#define KTROBO_MESH_INSTANCED_SHADER_FILENAME_COLOR "resrc/shader/simplemesh_i_color.fx"
 #define KTROBO_MESH_INSTANCED_SHADER_VS "VSFunc"
 #define KTROBO_MESH_INSTANCED_SHADER_GS "GSFunc"
 #define KTROBO_MESH_INSTANCED_SHADER_PS "PSFunc"
@@ -236,6 +237,7 @@ public:
 #define KTROBO_MESH_INSTANCED_COMBINED_MATRIX_CALC_STRUCT_TEMPSIZE 64*6
 #define KTROBO_MESH_INSTANCED_COMBINED_MATRIX_WATASU_STRUCT_TEMPSIZE 64*6
 #define KTROBO_MESH_INSTANCED_COLOR_TEXTURE_STRUCT_TEMPSIZE KTROBO_MESH_INSTANCED_COLOR_MAX*6*8
+#define KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE 64 
 #define KTROBO_MESH_INSTANCED_COMBINED_MATRIX_INSTANCE_SIZE 512
 #define KTROBO_MESH_INSTANCED_COLOR_TEXTURE_WIDTH_HEIGHT 512
 
@@ -286,10 +288,49 @@ struct COMBINEDMATRIXWATASUSTRUCT {
 };
 
 
+struct SHADERCOLORTEXTUREINPUTSTRUCT {
+	unsigned int instance_id;
+	unsigned int color_index;
+	unsigned int vertex_index;
+	unsigned int offset;
+	MYVECTOR4 color;
+};
+
+struct RENDERINSTANCEINFOSTRUCT {
+	unsigned int instance_id;
+	MYMATRIX world;
+};
+
+struct MESHINSTANCED_CBUF2 {
+		MYMATRIX view;
+		MYMATRIX proj;
+		MYVECTOR4 lightdir;
+};
+
+struct MESHINSTANCED_CBUF3 {
+		unsigned int color_id;
+		unsigned int offset1;
+		unsigned int offset2;
+		unsigned int offset3;
+};
+
 #define KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL 0xFFFF
 
 
 class MeshInstanceds{
+public:
+	void clearLoadState() {
+		int sml_size = skeletons.size();
+		for (int i=0;i<sml_size;i++) {
+			skeleton_matrix_local_is_loaded[i] = false;
+			skeleton_anime_is_loaded[i]= false;
+		}
+		int msize = mesh_instanceds.size();
+		for (int m = 0; m < msize;m++) {
+			mesh_instanceds[m]->setIsNeedColorTextureLoad(true);
+			mesh_instanceds[m]->setIsNeedCombinedMatrixLoad(true);
+		}
+	}
 private:
 	vector<MeshInstanced*> mesh_instanceds;
 	vector<Mesh*> meshs;
@@ -307,16 +348,22 @@ private:
 	static COMBINEDMATRIXCALC_CBUF cbuf1;
 	static ID3D11Buffer* cbuf1_buffer;
 	static ID3D11Buffer* color_texture_vertexbuffer;
-
+	static ID3D11SamplerState* combined_matrix_sampler_state;
+	static ID3D11Buffer* render_instance_vertexbuffer;
 public:
 	MyTextureLoader::MY_TEXTURE_CLASS* matrix_local_texture;
 	MyTextureLoader::MY_TEXTURE_CLASS* anime_matrix_basis_texture;
 	MyTextureLoader::MY_TEXTURE_CLASS* combined_matrix_texture;
 	MyTextureLoader::MY_TEXTURE_CLASS* color_texture;
 private:
+	
+	static MESHINSTANCED_CBUF2 cbuf2;
+	static ID3D11Buffer* cbuf2_buffer;
 
-	MYMATRIX view;
-	MYMATRIX proj;
+	
+	static MESHINSTANCED_CBUF3 cbuf3;
+	static ID3D11Buffer* cbuf3_buffer;
+	void setCBuf3(Graphics* g, unsigned int color_id);
 
 public:
 	MeshInstanceds(Graphics* g, MyTextureLoader* tex_loader) {
@@ -324,8 +371,8 @@ public:
 		anime_matrix_basis_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_BASIS_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_BASIS_TEXTURE_WIDTH_HEIGHT);
 		combined_matrix_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT);
 		color_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_COLOR_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_COLOR_TEXTURE_WIDTH_HEIGHT);
-		MyMatrixIdentity(view);
-		MyMatrixIdentity(proj);
+		//MyMatrixIdentity(view);
+		//MyMatrixIdentity(proj);
 	}
 
 	~MeshInstanceds() {
@@ -352,6 +399,7 @@ public:
 	static MYSHADERSTRUCT mss_for_render;
 	static MYSHADERSTRUCT mss_for_color;
 
+
 	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename,
 		char* vs_func_name, char* gs_func_name, char* ps_func_name, 
 		unsigned int ds_width, unsigned int ds_height,D3D11_INPUT_ELEMENT_DESC* layout, int numoflayout,
@@ -363,9 +411,11 @@ public:
 	static void loadShaderForRender(Graphics* g);
 	static void loadShaderForColor(Graphics* g);
 private:
+	void _loadColorToTexture(Graphics* g, SHADERCOLORTEXTUREINPUTSTRUCT* st, int temp);
 	void _loadAnimeMatrixBasisToTexture(Graphics* g, ANIMETEXTURELOADSTRUCT* st, int temp);
 	void _loadMatrixLocalToTexture(Graphics* g, ANIMETEXTURELOADSTRUCT* st, int temp);
 	void _calcCombinedMatrixToTexture(Graphics* g, COMBINEDMATRIXCALCSTRUCT* stt, int temp, unsigned int depth);
+	void _render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp, Mesh* render_mesh);
 public:
 	static void Init(Graphics* g);
 	static void Del() {
@@ -402,6 +452,14 @@ public:
 			cbuf1_buffer->Release();
 			cbuf1_buffer = 0;
 		}
+		if (cbuf2_buffer) {
+			cbuf2_buffer->Release();
+			cbuf2_buffer = 0;
+		}
+		if (cbuf3_buffer) {
+			cbuf3_buffer->Release();
+			cbuf3_buffer = 0;
+		}
 
 		if (combined_matrix_watasu_indexbuffer) {
 			combined_matrix_watasu_indexbuffer->Release();
@@ -417,14 +475,20 @@ public:
 			color_texture_vertexbuffer->Release();
 			color_texture_vertexbuffer = 0;
 		}
-
-
+		if (combined_matrix_sampler_state) {
+			combined_matrix_sampler_state->Release();
+			combined_matrix_sampler_state = 0;
+		}
+		if (render_instance_vertexbuffer) {
+			render_instance_vertexbuffer->Release();
+			render_instance_vertexbuffer = 0;
+		}
 	};
 
 	void setMesh(Mesh* m);
 	void setSkeleton(Mesh* m);
 
-	void setViewProj(MYMATRIX* view, MYMATRIX* proj);
+	void setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR4* lightdir);
 
 	void loadMatrixLocalToTexture(Graphics* g); 
 	void loadAnimeMatrixBasisToTexture(Graphics* g);
@@ -450,7 +514,7 @@ public:
 				return i;
 			}
 		}
-		skeletons.push_back(skeleton);
+		setSkeleton(skeleton);
 		return skeleton_size;
 	}
 	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
@@ -458,7 +522,15 @@ public:
 		MeshInstanced* mm = new MeshInstanced();
 		mm->setMeshIndex(this->getMeshIndexOrSet(mesh));
 		mm->setSkeletonIndex(this->getSkeletonIndexOrSet(skeleton));
-		
+		MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
+		memset(colors, 0, sizeof(colors));
+
+		int msize = mesh->Materials.size();
+		for (int h = 0; h < msize && h < KTROBO_MESH_INSTANCED_COLOR_MAX; h++) {
+			colors[h] = mesh->Materials[h]->color;
+		}
+		mm->setColor(colors);
+
 		if (parent_instance) {
 			mm->setParentInstance(parent_instance, parent_bone_index, connect_without_matrix_local);
 			mm->setRootBoneMatrixLocalKakeru(matrix_local_kakeru);

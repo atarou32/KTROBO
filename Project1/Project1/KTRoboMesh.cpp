@@ -390,7 +390,7 @@ void Mesh::readAnime(char* filename) {
 					if (Bones.size() > 0) {
 						(Bones[BoneIndexes[bone_name]])->animes.push_back(anime);
 					}
-
+				
 				}
 				a.GetToken("}");
 				a.GetToken("}");
@@ -626,6 +626,8 @@ void Mesh::readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 				} else {
 					Bones[bone_inde] = b;
 				}
+			
+
 				BoneIndexes.insert(pair<string,int>(*bone_name, bone_inde));
 				delete bone_name;
 			}
@@ -842,6 +844,37 @@ void WAsetScaleToMatrix(MYMATRIX* mat, MYVECTOR3* v) {
 	mat->_33 = mat->_33 * bairituz;
 }
 
+void Mesh::calculateOffsetMatrixToGetMinMaxAndWeight(MeshBone* bone, float frame, unsigned short* ans_minmax, unsigned short* ans_maxmin, float* weight) {
+	// まず一番近いアニメフレームを取得する
+	float minmax = 1000000;
+	float maxmin = -1;
+	int minmaxindex = -1;
+	int maxminindex = -1;
+	int siz = bone->animes.size();
+	for (int i=0;i<siz; i++) {
+		MeshAnime* animebone = bone->animes[i];
+		if (animebone->frame <= minmax && animebone->frame >= frame) {
+			minmax = (float)animebone->frame;
+			minmaxindex = i;
+		}
+
+		if (animebone->frame >= maxmin && animebone->frame <= frame) {
+			maxmin = (float)animebone->frame;
+			maxminindex = i;
+		}
+	}
+
+
+	float r=1;
+	if (minmax != maxmin) {
+		r = (minmax - frame)/(minmax - maxmin);
+	}
+
+	*ans_minmax = (unsigned short)minmax;
+	*ans_maxmin = (unsigned short)maxmin;
+	*weight = r;
+}
+
 
 void Mesh::calculateOffsetMatrix(MeshBone* bone,float frame) {
 	// まず一番近いアニメフレームを取得する
@@ -852,12 +885,12 @@ void Mesh::calculateOffsetMatrix(MeshBone* bone,float frame) {
 	int siz = bone->animes.size();
 	for (int i=0;i<siz; i++) {
 		MeshAnime* animebone = bone->animes[i];
-		if (animebone->frame < minmax && animebone->frame > frame) {
+		if (animebone->frame <= minmax && animebone->frame >= frame) {
 			minmax = (float)animebone->frame;
 			minmaxindex = i;
 		}
 
-		if (animebone->frame > maxmin && animebone->frame < frame) {
+		if (animebone->frame >= maxmin && animebone->frame <= frame) {
 			maxmin = (float)animebone->frame;
 			maxminindex = i;
 		}
@@ -887,8 +920,10 @@ void Mesh::calculateOffsetMatrix(MeshBone* bone,float frame) {
 		static MYVECTOR3 v(1,1,1);
 		WAsetScaleToMatrix(&bone->offset_matrix,&v);
 	}
-		
-
+	//MyMatrixIdentity(bone->matrix_local);
+	//MyMatrixRotationZ(bone->offset_matrix, 13);//frame);
+	//bone->offset_matrix._41= 7;
+	//MyMatrixTranslation(bone->offset_matrix, 0,1,0);
 	vector<int>::iterator it;
 	it = (bone->child_bone_indexs).begin();
 	vector<int>::iterator en = bone->child_bone_indexs.end();
@@ -906,6 +941,9 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 
 	MYMATRIX restinv;
 	MyMatrixInverse(restinv,NULL,bone->matrix_local);
+	//MyMatrixIdentity(bone->matrix_local);
+	//MyMatrixScaling(bone->matrix_local,2,2,3);
+
 	if (bone->parent_bone && (bone != this->RootBone && RootBone->parent_bone == NULL)) {
 		MYMATRIX par_rest;
 		MYMATRIX tempmatrix;
@@ -915,13 +953,16 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 		MyMatrixMultiply(bone->combined_matrix, tempmatrix, bone->offset_matrix);
 		MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, par_rest);
 		MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, bone->parent_bone->combined_matrix);
-*/
+	*/	
+		
+//		MyMatrixIdentity(bone->matrix_local);
 		MyMatrixMultiply(tempmatrix, bone->matrix_local, bone->parent_bone->combined_matrix);
 		MyMatrixInverse(par_rest,NULL, tempmatrix);
 		MyMatrixMultiply(bone->combined_matrix, bone->offset_matrix, tempmatrix);
 		MyMatrixMultiply(bone->combined_matrix, par_rest, bone->combined_matrix);
 		MyMatrixMultiply(bone->combined_matrix, bone->parent_bone->combined_matrix, bone->combined_matrix);
-
+		
+	//	MyMatrixTranslation(bone->combined_matrix,0,0,0);
 
 	} else if (bone->parent_bone && bone!= RootBone && RootBone->parent_bone != NULL) {
 		MYMATRIX par_rest;
@@ -988,7 +1029,7 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 		MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, bone->parent_bone->combined_matrix);*/
 		MYMATRIX tem;
 		MyMatrixMultiply(tem, bone->matrix_local, this->rootbone_matrix_local_kakeru);
-	
+		
 		MyMatrixMultiply(tempmatrix, tem, bone->parent_bone->combined_matrix);
 		MyMatrixInverse(par_rest,NULL, tempmatrix);
 		MyMatrixMultiply(bone->combined_matrix, bone->offset_matrix, tempmatrix);
@@ -997,17 +1038,20 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 
 	} else {
 		static MYMATRIX mat_inv;
+	
+	//	MyMatrixIdentity(bone->matrix_local); 
 		MyMatrixInverse(mat_inv,NULL,bone->matrix_local);
-		MYMATRIX par_inv;
-	//	MyMatrixMultiply(bone->combined_matrix, bone->matrix_local, bone->offset_matrix);
-	//	MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, mat_inv);
-		
+//		MYMATRIX par_inv;
+//		MyMatrixMultiply(bone->combined_matrix, bone->matrix_local, bone->offset_matrix);
+//	MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, mat_inv);
 
+		
+		
 		MyMatrixMultiply(bone->combined_matrix, bone->offset_matrix, bone->matrix_local);
 		MyMatrixMultiply(bone->combined_matrix, mat_inv, bone->combined_matrix);
-		
-
-
+		//MyMatrixTranslation(bone->combined_matrix, 0,0,1);
+	//MyMatrixTranslation(bone->combined_matrix, 0,0,0);
+	//	MyMatrixIdentity(bone->combined_matrix);
 	}
 
 	vector<int>::iterator it;
@@ -1051,7 +1095,7 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 		MeshBone* b = Bones[i];
 		if (b->bone_index >= 0  && b->bone_index < KTROBO_MESH_BONE_MAX) {
 			bone_combined_matrixs[b->bone_index] = b->combined_matrix;
-		//	MyMatrixIdentity(bone_combined_matrixs[i]);
+			//MyMatrixIdentity(bone_combined_matrixs[i]);
 		}
 	}
 	Mesh::updateCBuf1(g, view, proj);
