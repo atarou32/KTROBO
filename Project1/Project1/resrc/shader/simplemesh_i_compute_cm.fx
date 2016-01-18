@@ -592,7 +592,7 @@ ans = anime_first_matrix * anime_first_weight + anime_last_matrix *  (1- anime_f
 
 
 // ans ‚ÌŠg‘åk¬¬•ª‚ð–³‚­‚·
-//ans = getZeroKAKUDAI(ans);
+ans = getZeroKAKUDAI(ans);
 return ans;
 }
 /*
@@ -716,7 +716,7 @@ column_major float4x4 ans_cm;
 
 ans_cm = MyMatrixIdentity();
 
-if ((parent_bone_index != KTROBO_MESH_BONE_NULL)/* && (is_root_bone ==0)*/) {
+if ((parent_bone_index != KTROBO_MESH_BONE_NULL)&& (is_root_bone ==0)) {
     column_major float4x4 par_rest;
     column_major float4x4 temp_matrix;
     column_major  float4x4 b_matrix_local = getLocalMatrix(skeleton_index, bone_index);
@@ -735,26 +735,36 @@ if (parent_bone_index == KTROBO_MESH_BONE_NULL) {
      ans_cm = MyMatrixMultiply(b_matrix_local, MyMatrixMultiply(b_offset_matrix, mat_inv));
 }
 
-if (false && (parent_bone_index != KTROBO_MESH_BONE_NULL) && is_root_bone > 0 && connect_without_matrix_local >0) {
-     column_major float4x4 b_matrix_local = getLocalMatrix(skeleton_index, bone_index);
+if ((parent_bone_index != KTROBO_MESH_BONE_NULL) && is_root_bone > 0 && connect_without_matrix_local >0) {
+     column_major float4x4 b_matrix_local =  getLocalMatrix(skeleton_index, bone_index);
      column_major float4x4 par_rest;
      column_major float4x4 temp_matrix;
      column_major float4x4 bp_combined_matrix = getCombinedMatrixdayo(parent_instance_index, parent_bone_index);
      column_major float4x4 b_offset_matrix = getOffsetMatrix(anime_first_index, anime_last_index, anime_first_weight, skeleton_index, bone_index);
-     column_major float4x4 tem = MyMatrixMultiply(b_matrix_local, kakeru_matrix);
-    temp_matrix = MyMatrixMultiply(tem, bp_combined_matrix);
+     column_major float4x4 tem = MyMatrixMultiply(kakeru_matrix, b_matrix_local);
+    temp_matrix = MyMatrixMultiply(bp_combined_matrix, tem);
     par_rest = MyMatrixInverse(temp_matrix);
-    ans_cm = MyMatrixMultiply(bp_combined_matrix, MyMatrixMultiply(par_rest, MyMatrixMultiply(b_offset_matrix, temp_matrix)));
+//    ans_cm = MyMatrixMultiply(bp_combined_matrix, MyMatrixMultiply(par_rest, MyMatrixMultiply(b_offset_matrix, temp_matrix)));
+
+
+   ans_cm = MyMatrixMultiply(temp_matrix, MyMatrixMultiply(b_offset_matrix, MyMatrixMultiply(par_rest, bp_combined_matrix)));
+
+
+
+
 }
 
-if (false && (parent_bone_index != KTROBO_MESH_BONE_NULL) && is_root_bone > 0 && connect_without_matrix_local ==0) {
+if ((parent_bone_index != KTROBO_MESH_BONE_NULL) && is_root_bone > 0 && connect_without_matrix_local ==0) {
      column_major float4x4 b_matrix_local = getLocalMatrix(skeleton_index, bone_index);
      column_major float4x4 pb_matrix_local = getLocalMatrix(parent_skeleton_index, parent_bone_index);
      column_major float4x4 pb_combined_matrix = getCombinedMatrixdayo(parent_instance_index, parent_bone_index);
      column_major float4x4 b_offset_matrix = getOffsetMatrix(anime_first_index, anime_last_index, anime_first_weight, skeleton_index, bone_index);
-     column_major float4x4 tem = MyMatrixMultiply(b_matrix_local, kakeru_matrix);
+     column_major float4x4 tem = MyMatrixMultiply(kakeru_matrix, b_matrix_local);
      column_major float4x4 p = MyMatrixInverse(tem);
-    ans_cm = MyMatrixMultiply(p, MyMatrixMultiply(pb_matrix_local, pb_combined_matrix));
+  //  ans_cm = MyMatrixMultiply(p, MyMatrixMultiply(pb_matrix_local, pb_combined_matrix));
+   ans_cm = MyMatrixMultiply(pb_combined_matrix, MyMatrixMultiply(pb_matrix_local, p));
+
+
 }
 
 return ans_cm;

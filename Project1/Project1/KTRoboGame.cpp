@@ -122,13 +122,21 @@ bool Game::Init(HWND hwnd) {
 	mesh3[9]->RootBone_connect_without_material_local = true;
 
 	mesh3[10] = new Mesh();
-	mesh3[10]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
-	mesh3[10]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
-	mesh3[10]->RootBone->parent_bone = /*mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];*/mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
-	mesh3[10]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
-	mesh3[10]->RootBone_connect_without_material_local = false;
+	mesh3[10]->readMesh(g, "resrc/model/ponko2-4/pk2migihanddayo.MESH", demo->tex_loader);
+	mesh3[10]->readAnime("resrc/model/ponko2-4/pk2migihanddayo.ANIME");
+	mesh3[10]->RootBone->parent_bone;// = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];
+	mesh3[10]->RootBone->parent_bone_index;// = mesh3[9]->RootBone->parent_bone->bone_index;
+	//mesh3[10]->RootBone_connect_without_material_local = true;
 
 	
+//	mesh3[10] = new Mesh();
+//	mesh3[10]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
+//	mesh3[10]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
+//	mesh3[10]->RootBone->parent_bone = /*mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];*/mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
+//	mesh3[10]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
+//	mesh3[10]->RootBone_connect_without_material_local = false;
+	
+/*	
 	MYMATRIX worldforg;
 	MyMatrixRotationZ(worldforg, 3.14/2);
 	MyMatrixMultiply(mesh3[10]->rootbone_matrix_local_kakeru, mesh3[10]->rootbone_matrix_local_kakeru, worldforg);
@@ -138,6 +146,8 @@ bool Game::Init(HWND hwnd) {
 	
 	MyMatrixRotationY(worldforg, -3.14/2);
 	MyMatrixMultiply(mesh3[10]->rootbone_matrix_local_kakeru, mesh3[10]->rootbone_matrix_local_kakeru, worldforg);
+*/	
+	
 	/*
 	MyMatrixRotationX(worldforg, -3.14/4*2);
 	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
@@ -171,8 +181,15 @@ bool Game::Init(HWND hwnd) {
 	
 	MYMATRIX kakeru;
 	MyMatrixIdentity(kakeru);
-	//mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&kakeru);
+
+	
+
+	MYMATRIX worl;
+	//MyMatrixTranslation(worl,2,0,2);
+	//mesh_i->setWorld(&worl);
 	mesh_i = mesh_instanceds->makeInstanced(mesh2,mesh2,NULL,NULL,false,&kakeru);
+	mesh_instanceds->makeInstanced(mesh3[10],mesh3[10],mesh_i,mesh2->BoneIndexes["migiArmTekubiBone"],true,&kakeru);
+	
 	MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
 	memset(colors,0,sizeof(colors));
 
@@ -347,7 +364,7 @@ void Game::Run() {
 	if (frameint != (int)(frame*5)) {
 		frameint = (int)(frame*5);
 		if (frame >40) {
-			frame = 20;
+			frame = 0;
 		}
 	//frame = 30.001;
 //	mesh->animate(frame, true);
@@ -356,6 +373,8 @@ void Game::Run() {
 		mesh3[i]->animate(frame, true);
 	}
 
+	mesh3[9]->animate(0,true);
+	mesh3[10]->animate(0,true);
 	}
 
 
@@ -373,9 +392,9 @@ void Game::Run() {
 
 		MeshBone* bone = mesh2->Bones[i];
 		mesh2->calculateOffsetMatrixToGetMinMaxAndWeight(bone, frame, &animl[i], &animf[i], &animw[i]);
-		animf[i] = floor(frame);////floor(frame);//count * 0.3;
-		animl[i] =ceil(frame);//count * 0.3;
-		animw[i] = animl[i]- frame;
+	//	animf[i] = floor(frame);////floor(frame);//count * 0.3;
+	//	animl[i] =ceil(frame);//count * 0.3;
+	//	animw[i] = animl[i]- frame;
 		//animw[i] = 1;//1- animw[i];
 	}
 
@@ -402,11 +421,12 @@ void Game::Run() {
 	MyMatrixRotationZ(worldforg, frame);
 	for (int i = 0 ; i <= 9; i ++) {
 		
-	//	mesh3[i]->draw(g, &world, &view, &proj);
+//		mesh3[i]->draw(g, &world, &view, &proj);
 
 	}
 	
 	mesh3[0]->draw(g, &world, &view, &proj);
+//	mesh3[10]->draw(g, &world, &view, &proj);
 
 	//mesh->draw(g, &world,&view,&proj);
 	mesh2->draw(g, &world, &view, &proj);
@@ -437,7 +457,7 @@ void Game::Run() {
 		sprintf_s(test2,512, "aw %f af %d al %d", animw[0], (int)animf[0], (int)animl[0]);
 		stringconverter cs;
 		cs.charToWCHAR(test2,test);
-	//	KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);
+		KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);
 	//}
 
 	startWatch();

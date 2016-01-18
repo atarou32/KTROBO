@@ -12,6 +12,7 @@ namespace KTROBO {
 #define KTROBO_MESH_INSTANCED_BONE_MAX 32
 
 interface IMeshInstanced {
+public:
 	virtual IMeshInstanced* getParentIInstance()=0;
 	virtual void setBoneIndexInfo(unsigned short* bones_anime_first_index, unsigned short* bones_anime_last_index, float* bones_anime_first_weight)=0;
 	virtual void setWorld(MYMATRIX* world)=0;
@@ -20,6 +21,7 @@ interface IMeshInstanced {
 	virtual MYVECTOR4* getColor(int index)=0;
 	virtual void setIsRender(bool t)=0;
 	virtual bool getIsRender()=0;
+	virtual int getInstanceIndex()=0;
 };
 
 
@@ -485,7 +487,7 @@ public:
 		}
 	};
 
-	void setMesh(Mesh* m);
+	//void setMesh(Mesh* m);
 	void setSkeleton(Mesh* m);
 
 	void setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR4* lightdir);
@@ -517,7 +519,7 @@ public:
 		setSkeleton(skeleton);
 		return skeleton_size;
 	}
-	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
+	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, IMeshInstanced* iparent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
 	{
 		MeshInstanced* mm = new MeshInstanced();
 		mm->setMeshIndex(this->getMeshIndexOrSet(mesh));
@@ -531,13 +533,17 @@ public:
 		}
 		mm->setColor(colors);
 
-		if (parent_instance) {
+		if (iparent_instance) {
+			int pinstance_index = iparent_instance->getInstanceIndex();
+			MeshInstanced* parent_instance = mesh_instanceds[pinstance_index];
 			mm->setParentInstance(parent_instance, parent_bone_index, connect_without_matrix_local);
 			mm->setRootBoneMatrixLocalKakeru(matrix_local_kakeru);
 			parent_instance->setChildInstance(mm);
 		}
 
 		mm->setMeshIndex(mesh_instanceds.size());
+		int instance_id = mesh_instanceds.size();
+		mm->setInstanceIndex(instance_id);
 		mesh_instanceds.push_back(mm);
 		return mm;
 	}
@@ -553,6 +559,7 @@ public:
 				int parent_depth = 0;
 				if (instance->getParentInstance()) {
 					parent_depth = this->getDepth(instance->getParentInstance(), instance->getParentBoneIndex());
+					parent_depth += 1;
 				}
 				depth = parent_depth + depth;
 				return depth;

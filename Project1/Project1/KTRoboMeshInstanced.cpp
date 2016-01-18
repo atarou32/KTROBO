@@ -1134,6 +1134,7 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 		MeshInstanced* instance = mesh_instanceds[i];
 		for (int bone_i=0; bone_i < KTROBO_MESH_INSTANCED_BONE_MAX; bone_i ++) {
 			int temp_depth = this->getDepth(instance, bone_i);
+			if (temp_depth == KTROBO_MESH_BONE_NULL) continue;
 			map_of_depth.insert(pair<pair<int,int>,int>(pair<int,int>(i,bone_i),temp_depth));
 
 			if (temp_depth != KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL) {
@@ -1195,6 +1196,8 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 						parent_instance_index = parent_instance->getInstanceIndex();
 					} else {
 						parent_bone_index = KTROBO_MESH_BONE_NULL;
+						parent_skeleton_index = skeleton_index;
+						parent_instance_index = instance_index;
 					}
 				} else {
 					is_root_bone = 0; connect_without_matrix_local = 0;
@@ -1219,6 +1222,7 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 					v->parent_bone_index = (unsigned int)parent_bone_index;
 					v->parent_instance_index = (unsigned int)parent_instance_index;
 					v->parent_skeleton_index = (unsigned int)parent_skeleton_index;
+					v->skeleton_index = (unsigned int )skeleton_index;
 					v->depth = i;
 					temp++;
 					if (temp >= temp_max) {
@@ -1306,6 +1310,7 @@ void MeshInstanceds::_calcCombinedMatrixToTexture(Graphics* g, COMBINEDMATRIXCAL
 	}
 	g->getDeviceContext()->Dispatch(KTROBO_MESH_INSTANCED_COMBINED_MATRIX_INSTANCE_SIZE,1,1);
 	g->getDeviceContext()->Flush();
+	Sleep(10);
 	ID3D11UnorderedAccessView* test[] = {
 		{NULL},
 		{NULL}
@@ -1546,5 +1551,7 @@ void MeshInstanceds::render(Graphics* g) {
 		}
 
 	}
+
+	Sleep(10);
 }
 
