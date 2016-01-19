@@ -68,6 +68,7 @@ public:
 			log(index, buf, length);
 		} else if(index == CS_DEVICECON_CS) {
 			EnterCriticalSection(&DEVICECON_CS);
+			// ‚¢‚ç‚È‚­‚È‚Á‚½‚í‚¯‚Å‚Í‚È‚¢‚Ý‚½‚¢‚¾
 			int length = strlen(buf);
 			log(index, buf, length);
 		}
@@ -82,6 +83,7 @@ public:
 			}
 		} else if(index == CS_DEVICECON_CS) {
 			LeaveCriticalSection(&DEVICECON_CS);
+			// ‚¢‚ç‚È‚­‚È‚Á‚½‚í‚¯‚Å‚Í‚È‚¢‚Ý‚½‚¢‚¾
 		}
 	}
 };

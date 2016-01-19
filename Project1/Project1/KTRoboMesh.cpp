@@ -411,7 +411,7 @@ void Mesh::readAnime(char* filename) {
 void Mesh::Release() {
 
 
-		if (p_vertexbuffer) {
+	if (p_vertexbuffer) {
 		p_vertexbuffer->Release();
 		p_vertexbuffer = 0;
 	}

@@ -541,7 +541,7 @@ public:
 			parent_instance->setChildInstance(mm);
 		}
 
-		mm->setMeshIndex(mesh_instanceds.size());
+		//mm->setMeshIndex(mesh_instanceds.size());
 		int instance_id = mesh_instanceds.size();
 		mm->setInstanceIndex(instance_id);
 		mesh_instanceds.push_back(mm);

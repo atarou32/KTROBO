@@ -22,6 +22,10 @@
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
 #define RENDERTIME_SETTIME 33
+
+#define TASKTHREADS_UPDATEANIMEFRAMENADO 0
+
+
 class Game
 {
 private:
@@ -42,12 +46,16 @@ private:
 	float dt;
 	Clock* c;
 	Task* task_threads[TASKTHREAD_NUM];
+	Graphics* g_for_task_threads[TASKTHREAD_NUM];
+
 	Mesh* mesh;
 	Mesh* mesh2;
 	Mesh* mesh3[11];
 	MeshInstanceds* mesh_instanceds;
 	IMeshInstanced* mesh_i;
-
+	IMeshInstanced* mesh_i2;
+	IMeshInstanced* mesh_is[30];
+	IMeshInstanced* mesh_is2[30];
 	MyTestForVertexTexture* mytest_for_vt;
 
 public:

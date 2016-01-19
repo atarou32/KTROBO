@@ -37,7 +37,7 @@ void CS::log(int index, char* p, int length) {
 		}
 
 		// ‚½‚­‚³‚ñ‘‚©‚ê‚é‚Ì‚ğ‘j~‚·‚é‚½‚ß‚ÉƒXƒŠ[ƒv‚ğ“ü‚ê‚é
-		Sleep(1000);
+	//	Sleep(500);
 
 #endif
 	}

@@ -214,5 +214,5 @@ void MyTestForVertexTexture::readVertexTexture(Graphics* g, MyTextureLoader::MY_
 	buf[3] = ts[3].mat;
 	g->getDeviceContext()->Unmap(buffer2,0);
 
-
+	CS::instance()->leave(CS_DEVICECON_CS, "calc combined matrix");
 }

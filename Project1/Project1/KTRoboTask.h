@@ -64,7 +64,7 @@ public:
 		throw new GameError(KTROBO::FATAL_ERROR, "too many task");
 	}
 	bool getIsExecTask() {return is_exec_task;}
-	TCB* make(void(*exec)(TCB*), void* data, unsigned int prio);
+	TCB* make(void(*exec)(TCB*), void* data,  long* work,unsigned int prio);// work ‚ÍTASK_WORK_SIZE‚Ì‘å‚«‚³‚ðŠm•Û‚·‚é‚±‚Æ
 	void kill(TCB* killTCB);
 	void change(TCB* thisTCB, void(*exec)(TCB*), void* data);
 	void deleteTask();

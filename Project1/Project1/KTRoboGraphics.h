@@ -41,6 +41,7 @@ class Graphics
 private:
 	unsigned int width;
 	unsigned int height;
+	bool is_copied;
 	HWND h;
 	D3D_DRIVER_TYPE driver_type;
 	IDXGISwapChain* p_swapchain;
@@ -65,6 +66,9 @@ public:
 	ID3D11Device* getDevice() {return p_device;}
 	unsigned int getScreenHeight() {return height;}
 	unsigned int getScreenWidth() {return width;}
+
+	Graphics* makeGraphicsOfNewDeviceContext();
+
 	Graphics(void);
 	~Graphics(void);
 };

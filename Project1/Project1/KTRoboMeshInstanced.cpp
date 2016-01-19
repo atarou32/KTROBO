@@ -1395,7 +1395,7 @@ void MeshInstanceds::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MY
 	memcpy( subresource.pData, &cbuf2, sizeof(MESHINSTANCED_CBUF2) );
 	g->getDeviceContext()->Unmap(cbuf2_buffer, 0);
 	//g->getDeviceContext()->UpdateSubresource(cbuf2_buffer,0,NULL,&cbuf2,0,0);
-	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
+	CS::instance()->leave(CS_DEVICECON_CS, "setviewproj");
 
 }
 

@@ -60,17 +60,21 @@ void KTROBO::Task::exec() {
 
 
 
-TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, unsigned int prio) {
+TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, long* work, unsigned int prio) {
 	TCB* newTCB;
 	TCB* prevTCB;
 	TCB* nextTCB;
 	int id;
+	CS::instance()->enter(CS_TASK_CS,"",index);
 
 	for(id=0;id<MAX_TASK_COUNT;id++) {
 		if (!(Tasks[id].flag & TASK_USE)) break;
 	}
 
-	if (id == MAX_TASK_COUNT) return NULL;
+	if (id == MAX_TASK_COUNT) {
+		CS::instance()->leave(CS_TASK_CS,"",index);
+		return NULL;
+	}
 	newTCB = &Tasks[id];
 	prevTCB = Tasks;
 	while (prevTCB->next->prio != TASK_HEAD_PRIO) {
@@ -83,9 +87,12 @@ TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, unsigned int prio) {
 	newTCB->Exec = exec;
 	newTCB->data = data;
 	newTCB->prio = prio;
-	CS::instance()->enter(CS_TASK_CS,"",index);
+
 	newTCB->prev = prevTCB;
 	newTCB->next = nextTCB;
+	for (int i=0;i<TASK_WORK_SIZE;i++) {
+		newTCB->Work[i] = work[i];
+	}
 	prevTCB->next = newTCB;
 	nextTCB->prev = newTCB;
 	newTCB->flag = TASK_USE;

@@ -91,6 +91,7 @@ Graphics::Graphics(void)
 	memset(&featurelevel,0,sizeof(D3D_FEATURE_LEVEL));
 	memset(&driver_type,0,sizeof(D3D_DRIVER_TYPE));
 	memset(&vp, 0 , sizeof(vp));
+	is_copied = false;
 }
 
 
@@ -224,6 +225,8 @@ void Graphics::Release() {
 		p_devicecontext = 0;
 	}
 
+	if (is_copied) return; // コピーされたものの場合はコピー元でリリースさせる
+
 	if (p_backbuffer) {
 		p_backbuffer->Release();
 		p_backbuffer = 0;
@@ -241,6 +244,7 @@ void Graphics::Release() {
 	}
 	if (p_device) {
 		p_device->Release();
+//		p_device->Release();
 		p_device = 0;
 	}
 
@@ -250,4 +254,27 @@ void Graphics::Release() {
 }
 
 
+Graphics* Graphics::makeGraphicsOfNewDeviceContext() {
+	
+	Graphics* new_g  = new Graphics();
+	new_g->driver_type = this->driver_type;
+	new_g->featurelevel = this->featurelevel;
+	new_g->h = this->h;
+	new_g->height = this->height;
+	new_g->is_copied = true;
+	new_g->p_backbuffer = this->p_backbuffer;
+	new_g->p_device = this->p_device;
+	new_g->width = this->width;
+	new_g->p_rendertargetview = this->p_rendertargetview;
+	new_g->p_backbuffer = this->p_backbuffer;
+	new_g->p_swapchain = this->p_swapchain;
+	new_g->vp = this->vp;
+	// デバイスコンテキストを作成する
+	HRESULT hr =  p_device->CreateDeferredContext(0, &new_g->p_devicecontext);
+	if (FAILED(hr)) {
+		throw new GameError(KTROBO::FATAL_ERROR, "failed in copying graphics");
+	}
+
+	return new_g;
+}
 
