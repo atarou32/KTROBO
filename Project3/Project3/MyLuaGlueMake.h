@@ -7,7 +7,7 @@
 #include <vector>
 #include <set>
 #include "MyTokenAnalyzer.h"
-#include "MyLuaGlueMakeCommon.h"
+#include "tolua_glue/MyLuaGlueMakeCommon.h"
 
 using namespace std;
 namespace KTROBO {
@@ -210,7 +210,7 @@ private:
 
 public:
 	void readInputAndOutput() {
-		int input_num = readInputsFromFile("tolua_config.txt");
+		int input_num = readInputsFromFile("tolua_glue/tolua_config.txt");
 		if (input_num) {
 			for (int i=0;i<input_num;i++) {
 				if (readInputs(i) ==0) {

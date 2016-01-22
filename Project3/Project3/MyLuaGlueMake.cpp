@@ -387,6 +387,8 @@ int MyLuaGlueMake::readInputs(int input_index) {
 				while ((strcmp(a.Toke(), "}") !=0) && !a.enddayo()) {
 					if (strcmp(a.Toke(), "TO_LUA")==0) {
 						setFUNC(&a,input);
+					} else {
+						a.GetToken();
 					}
 				}
 			}
@@ -452,11 +454,15 @@ int MyLuaGlueMake::readInputs(int input_index) {
 void MyLuaGlueMake::writeInclude(char* filename) {
 	KTROBO::mylog::writelog(filename, "#pragma once\n");
 	KTROBO::mylog::writelog(filename, "#include <vector>\n");
+	KTROBO::mylog::writelog(filename, "#include \"lua.hpp\"\n");
+	KTROBO::mylog::writelog(filename, "#include \"lualib.h\"\n");
+	KTROBO::mylog::writelog(filename, "#include \"lauxlib.h\"\n");
+
 	KTROBO::mylog::writelog(filename, "#include \"MyLuaGlueMakeCommon.h\"\n");
 	vector<MakeGlueInput*>::iterator it = inputs.begin();
 	while(it != inputs.end()) {
 		MakeGlueInput* input = *it;
-		KTROBO::mylog::writelog(filename, "#include \"%s\"\n", input->filepath);
+		KTROBO::mylog::writelog(filename, "#include \"../%s\"\n", input->filepath);
 		it++;
 	}
 
@@ -472,7 +478,7 @@ void MyLuaGlueMake::writeSingletonFunc(char* filename) {
 		MakeGlueInput* input = *it;
 		// コレクションクラスの要素に対するアセクササメソッド
 		KTROBO::mylog::writelog(filename, "%s* getCol%s ( int index) {\n", input->collection_name, input->collection_name);
-		KTROBO::mylog::writelog(filename, "  return &m_%s[index];\n", input->collection_name);
+		KTROBO::mylog::writelog(filename, "  return m_%s[index];\n", input->collection_name);
 		KTROBO::mylog::writelog(filename, "}\n");
 
 		KTROBO::mylog::writelog(filename, "void setCol%s ( %s* m) {\n", input->collection_name, input->collection_name);
@@ -483,29 +489,30 @@ void MyLuaGlueMake::writeSingletonFunc(char* filename) {
 	}
 
 	// registerするregister関数
-	KTROBO::mylog::writelog(filename, "void register(lua_State* L) {\n");
+	KTROBO::mylog::writelog(filename, "void registerdayo(lua_State* L) {\n");
 
 	it = inputs.begin();
 	while (it != inputs.end()) {
 		MakeGlueInput* input = *it;
 		int func_size = input->func_defs.size();
 		// func
+
 		for (int i=0;i<func_size; i++) {
-			KTROBO::mylog::writelog(filename, "  luaL_register(L, \"%s_%s\", %s_%sGlue);\n", input->collection_name, input->func_defs[i]->func_name,
+			KTROBO::mylog::writelog(filename, "  lua_register(L, \"%s_%s\", %s_%sGlue);\n", input->collection_name, input->func_defs[i]->func_name,
 				input->collection_name, input->func_defs[i]->func_name);
 		}
 
 		// constructor
 		int con_size  = input->construct_defs.size();
 		for (int i=0;i<con_size; i++) {
-			KTROBO::mylog::writelog(filename, "  luaL_register(L, \"%s_%s\", %s_%sGlue);\n", input->collection_name, input->construct_defs[i]->func_name,
+			KTROBO::mylog::writelog(filename, "  lua_register(L, \"%s_%s\", %s_%sGlue);\n", input->collection_name, input->construct_defs[i]->func_name,
 				input->collection_name, input->construct_defs[i]->func_name);
 		}
 
 		// destructor
 		int des_size = input->destruct_defs.size();
 		for (int i=0;i<des_size; i++) {
-			KTROBO::mylog::writelog(filename, "  luaL_register(L, \"%s_%s\", %s_%sGlue);\n", input->collection_name, input->destruct_defs[i]->func_name,
+			KTROBO::mylog::writelog(filename, "  lua_register(L, \"%s_%s\", %s_%sGlue);\n", input->collection_name, input->destruct_defs[i]->func_name,
 				input->collection_name, input->destruct_defs[i]->func_name);
 		}
 
@@ -680,7 +687,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			//KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TBOOLEAN);\n", -i-2);
 				//	KTROBO::mylog::writelog(filename, "%s = lua_toboolean(L,%d);\n", def->hikisuu[i].num_name, -i-2);
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -703,7 +710,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 				if (def->hikisuu[i].is_collected) {
 					// 連想配列の長さを取得し0だった場合NULLを指定する
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);
 					KTROBO::mylog::writelog(filename, "if (temp ==0) {\n");
 					KTROBO::mylog::writelog(filename, "  %s = NULL;\n", def->hikisuu[i].num_name);
 					KTROBO::mylog::writelog(filename, "} else {\n");
@@ -733,7 +740,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			case MyDefType::DOUBLE:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -746,7 +753,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::FLOAT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -759,7 +766,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::INT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -780,7 +787,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::SHORT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -798,7 +805,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::UINT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -811,7 +818,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::USHORT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -852,7 +859,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 
 					// 連想配列の長さを取得し0だった場合NULLを指定する
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);
 					KTROBO::mylog::writelog(filename, "if (temp ==0) {\n");
 					KTROBO::mylog::writelog(filename, "  %s = NULL;\n", def->hikisuu[i].num_name);
 					KTROBO::mylog::writelog(filename, "} else {\n");
@@ -946,10 +953,13 @@ void MyLuaGlueMake::kannsuuYobidasi(char* filename, MakeGlueInput* input, MyFunc
 	def->getKATAStr(&def->kaeriti,kata);
 	KTROBO::mylog::writelog(filename, "int ci = lua_tonumber(L, -1);\n");
 	KTROBO::mylog::writelog(filename, "int cci = lua_tonumber(L, -2);\n");
-	if (def->kaeriti.type != MyDefType::VOIDDAYO) {
-	KTROBO::mylog::writelog(filename, "%s kaeriti = KTROBO::MyLuaGlueMake::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",kata, input->collection_name,def->func_name);
+	if (is_construct) {
+		KTROBO::mylog::writelog(filename, "%s kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->%s(",kata, input->collection_name,def->func_name);
+	
+	} else if(def->kaeriti.type != MyDefType::VOIDDAYO) {
+	KTROBO::mylog::writelog(filename, "%s kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",kata, input->collection_name,def->func_name);
 	} else {
-		KTROBO::mylog::writelog(filename, "KTROBO::MyLuaGlueMake::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",input->collection_name,def->func_name);
+		KTROBO::mylog::writelog(filename, "KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",input->collection_name,def->func_name);
 	}
 	// 引数を入れていく
 	for (int i=0;i<HIKISUU_MAX;i++) {
@@ -971,7 +981,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 		switch(def->hikisuu[i].type) {
 			case MyDefType::BOOL:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
@@ -1023,7 +1033,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::DOUBLE:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  char tempp[%d];memset(tempp,0,%d);\n",TEMPSTRING_SIZE, TEMPSTRING_SIZE);
@@ -1038,7 +1048,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::FLOAT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  char tempp[%d];memset(tempp,0,%d);\n",TEMPSTRING_SIZE, TEMPSTRING_SIZE);
@@ -1052,7 +1062,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::INT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  char tempp[%d];memset(tempp,0,%d);\n",TEMPSTRING_SIZE, TEMPSTRING_SIZE);
@@ -1082,7 +1092,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			case MyDefType::SHORT:
 
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  char tempp[%d];memset(tempp,0,%d);\n",TEMPSTRING_SIZE, TEMPSTRING_SIZE);
@@ -1104,7 +1114,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::UINT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  char tempp[%d];memset(tempp,0,%d);\n",TEMPSTRING_SIZE, TEMPSTRING_SIZE);
@@ -1118,7 +1128,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::USHORT:
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "int temp = lua_objlen(L,%d);\n", -i-3);// 配列のサイズを取得
+					KTROBO::mylog::writelog(filename, "int temp = lua_rawlen(L,%d);\n", -i-3);// 配列のサイズを取得
 					KTROBO::mylog::writelog(filename, "for (int i=0;i<temp && i < %d;i++) {\n", TEMPHAIRETU_SIZE);
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  char tempp[%d];memset(tempp,0,%d);\n",TEMPSTRING_SIZE, TEMPSTRING_SIZE);
@@ -1146,35 +1156,35 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 		// スタックに新しい配列を入れ込む
 		KTROBO::mylog::writelog(filename, "{\n");
 		KTROBO::mylog::writelog(filename, "int ci = lua_tonumber(L, -1);\n");
-		KTROBO::mylog::writelog(filename, "int cci = lua_tonumber(L, -2);\n");
+		KTROBO::mylog::writelog(filename, "int cci = kaeriti;\n");
 
 		KTROBO::mylog::writelog(filename, "lua_newtable(L);\n");
 		KTROBO::mylog::writelog(filename, "int top = lua_gettop(L);\n");
-		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_CLASS_LUA_FIELD);
+	//	KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_CLASS_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", input->collected_name);
-		KTROBO::mylog::writelog(filename, "lua_setfield(L, top);\n");
+		KTROBO::mylog::writelog(filename, "lua_setfield(L, top, \"%s\");\n", COLLECTED_CLASS_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "{\n");
-		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
+	//	KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
 		KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\", cci);\n", TEMPSTRING_SIZE, "%d");
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n");
-		KTROBO::mylog::writelog(filename, "lua_setfield(L, top);\n");
+		KTROBO::mylog::writelog(filename, "lua_setfield(L, top, \"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "}\n");
-		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_INTERFACE_LUA_FIELD);
+	//	KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_INTERFACE_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", input->interface_name);
-		KTROBO::mylog::writelog(filename, "lua_setfield(L, top);\n");
+		KTROBO::mylog::writelog(filename, "lua_setfield(L, top, \"%s\");\n", COLLECTED_INTERFACE_LUA_FIELD);
 
-		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTION_CLASS_LUA_FIELD);
+	//	KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTION_CLASS_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", input->collection_name);
-		KTROBO::mylog::writelog(filename, "lua_setfield(L, top);\n");
+		KTROBO::mylog::writelog(filename, "lua_setfield(L, top, \"%s\");\n", COLLECTION_CLASS_LUA_FIELD);
 
 		
 		KTROBO::mylog::writelog(filename, "{\n");
-		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
+	//	KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
 		KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\", ci);\n", TEMPSTRING_SIZE, "%d");
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n");
-		KTROBO::mylog::writelog(filename, "lua_setfield(L, top);\n");
+		KTROBO::mylog::writelog(filename, "lua_setfield(L, top, \"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "}\n");
 	
 
@@ -1470,9 +1480,9 @@ void MyLuaGlueMake::writeYARITORIFunc(char* filename) {
 
 	while (it != class_namesdayo.end()) {
 		string s = *it;
-		KTROBO::mylog::writelog(filename, "YARITORI_get%s(lua_State* L, %s* class_inst, int index);\n", s.c_str(), s.c_str());
-		KTROBO::mylog::writelog(filename, "YARITORI_set%s(lua_State* L, %s* class_inst, int index);\n", s.c_str(), s.c_str());
-		KTROBO::mylog::writelog(filename, "YARITORI_setKAERITI%s(lua_State* L, %s* class_inst);\n", s.c_str(), s.c_str());
+		KTROBO::mylog::writelog(filename, "void YARITORI_get%s(lua_State* L, %s* class_inst, int index);\n", s.c_str(), s.c_str());
+		KTROBO::mylog::writelog(filename, "void YARITORI_set%s(lua_State* L, %s* class_inst, int index);\n", s.c_str(), s.c_str());
+		KTROBO::mylog::writelog(filename, "void YARITORI_setKAERITI%s(lua_State* L, %s* class_inst);\n", s.c_str(), s.c_str());
 		it++;
 	}
 

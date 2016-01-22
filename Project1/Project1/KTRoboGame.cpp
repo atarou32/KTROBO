@@ -87,7 +87,7 @@ bool Game::Init(HWND hwnd) {
 
 	telop_texts = new TelopTexts();
 	telop_texts->Init(g,demo->font);
-	telop_texts->readFile(g,"resrc/sample/terop.txt",20,14,&MYVECTOR4(1,1,1,1),0.1);
+	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
 
 	mesh = new Mesh();
 	mesh->readMesh(g, "resrc/model/ponko2-3/pk2skirt.MESH", demo->tex_loader);
@@ -444,7 +444,7 @@ void Game::Run() {
 
 	static float frame = 0;
 	static int frameint = 0;
-	frame += millisecond/ (float)RENDERTIME_SETTIME * 0.3f;
+	frame += millisecond/ (float)RENDERTIME_SETTIME * 0.1f;
 	
 
 
@@ -545,7 +545,7 @@ void Game::Run() {
 
 	mesh_i->setBoneIndexInfo(animf, animl, animw);
 	mesh_i2->setBoneIndexInfo(animf,animl,animw);
-	for (int i=0;i<30;i++) {
+	for (int i=0;i<5;i++) {
 		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
 		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
 	}

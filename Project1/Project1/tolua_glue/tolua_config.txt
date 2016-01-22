@@ -1,0 +1,8 @@
+{
+FILEPATH="KTRoboMeshInstanced.h"
+INTERFACE="IMeshInstanced"
+COLLECTION="MeshInstanceds"
+CONSTRUCTOR="makeInstancedID"
+DESTRUCTOR="NONEDAYO"
+COLLECTED="MeshInstanced"
+}

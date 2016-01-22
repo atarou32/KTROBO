@@ -6,7 +6,7 @@
 #include "KTRoboMesh.h"
 #include <vector>
 #include "MyDefine.h"
-
+#include "tolua_glue/MyLuaGlueMakeCommon.h"
 namespace KTROBO {
 #define KTROBO_MESH_INSTANCED_COLOR_MAX 12
 #define KTROBO_MESH_INSTANCED_BONE_MAX 32
@@ -14,14 +14,14 @@ namespace KTROBO {
 interface IMeshInstanced {
 public:
 	virtual IMeshInstanced* getParentIInstance()=0;
-	virtual void setBoneIndexInfo(unsigned short* bones_anime_first_index, unsigned short* bones_anime_last_index, float* bones_anime_first_weight)=0;
-	virtual void setWorld(MYMATRIX* world)=0;
-	virtual MYMATRIX* getWorld()=0;
-	virtual void setColor(MYVECTOR4* colors)=0;
-	virtual MYVECTOR4* getColor(int index)=0;
-	virtual void setIsRender(bool t)=0;
-	virtual bool getIsRender()=0;
-	virtual int getInstanceIndex()=0;
+	TO_LUA virtual void setBoneIndexInfo(unsigned short* bones_anime_first_index, unsigned short* bones_anime_last_index, float* bones_anime_first_weight)=0;
+	TO_LUA virtual void setWorld(YARITORI MYMATRIX* world)=0;
+	TO_LUA virtual YARITORI MYMATRIX* getWorld()=0;
+	TO_LUA virtual void setColor(MYVECTOR4* colors)=0;
+	TO_LUA virtual YARITORI MYVECTOR4* getColor(int index)=0;
+	TO_LUA virtual void setIsRender(bool t)=0;
+	TO_LUA virtual bool getIsRender()=0;
+	TO_LUA virtual int getInstanceIndex()=0;
 };
 
 
@@ -333,6 +333,14 @@ public:
 			mesh_instanceds[m]->setIsNeedCombinedMatrixLoad(true);
 		}
 	}
+
+	IMeshInstanced* getInterface(int index) {
+		return (IMeshInstanced*)mesh_instanceds[index];
+	}
+	MeshInstanced* getInstance(int index) {
+		return mesh_instanceds[index];
+	}
+
 private:
 	vector<MeshInstanced*> mesh_instanceds;
 	vector<Mesh*> meshs;
@@ -519,6 +527,12 @@ public:
 		setSkeleton(skeleton);
 		return skeleton_size;
 	}
+
+	int makeInstancedID(Mesh* mesh, Mesh* skeleton, MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru) {
+		MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
+		return m->getInstanceIndex();
+	}
+
 	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, IMeshInstanced* iparent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
 	{
 		MeshInstanced* mm = new MeshInstanced();
