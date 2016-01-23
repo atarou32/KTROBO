@@ -1664,6 +1664,7 @@ int MyLuaGlueMake::outputToFile(char* filename, char* header_name, char* cpppath
 	
 	KTROBO::mylog::writelog(user_write_h_path, "namespace KTROBO {\n");
 	writeYARITORIFunc(user_write_h_path, "extern");
+	KTROBO::mylog::writelog(user_write_h_path, "}\n");
 	KTROBO::mylog::writelog(user_write_h_path, "#endif\n");
 
 	return 1;
