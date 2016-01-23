@@ -1328,9 +1328,9 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 	
 			break;
 			case MyDefType::VOIDDAYO:
-			break;
+			return;
 			default:
-			break;
+			return;
 			
 	}
 	KTROBO::mylog::writelog(filename, "lua_insert(L,1);\n");
