@@ -15,8 +15,13 @@
 #include "MyTokenAnalyzer.h"
 #include "KTRoboTask.h"
 #include "KTRoboMeshInstanced.h"
-
 #include "MyTestForVertexTexture.h"
+#include "lua.hpp"
+#include "lualib.h"
+#include "lauxlib.h"
+
+#include "KTRoboTextFromLua.h"
+//#include "tolua_glue/tolua_glue.h"
 
 
 namespace KTROBO {
@@ -30,6 +35,7 @@ class Game
 {
 private:
 	Graphics* g;
+	lua_State* L;
 	KTRoboDemoRender* demo;
 	TelopTexts* telop_texts;
 	void startWatch();
@@ -57,7 +63,7 @@ private:
 	IMeshInstanced* mesh_is[30];
 	IMeshInstanced* mesh_is2[30];
 	MyTestForVertexTexture* mytest_for_vt;
-
+	TextFromLuas* cltf;
 public:
 	Game(void);
 	~Game(void);

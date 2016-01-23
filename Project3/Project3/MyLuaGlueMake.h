@@ -184,7 +184,7 @@ private:
 	MakeGlueOutput output;
 	int readInputsFromFile(char* filename);
 	int readInputs(int input_index);
-	int outputToFile(char* filename);
+	int outputToFile(char* headerpath, char* headername, char* cpppath, char* cppname, char* user_write_h_name);
 
 	int setNAME(MyTokenAnalyzer* a, MyFuncDef* f);
 	int setKAERITI(MyTokenAnalyzer* a, MyFuncDef* f);
@@ -197,8 +197,12 @@ private:
 	void writeSingleton(char* filename);
 	void writeSingletonMember(char* filename);
 	void writeSingletonFunc(char* filename);
-	void writeYARITORIFunc(char* filename);
+	void writeYARITORIFunc(char* filename, char* prefix);
 	void writeFunc(char* filename);
+	void writeFuncSengen(char* filename);
+	void _writeFuncSengen(char* filename, MakeGlueInput* input, MyFuncDef* def, bool is_construct, bool is_destruct);
+
+	void writeRegister(char* filename);
 	void _writeFunc(char* filename, MakeGlueInput* input, MyFuncDef* def, bool is_construct, bool is_destruct);
 	void checkType(char *filename, MakeGlueInput* input, MyFuncDef* def, int i);
 
@@ -218,7 +222,7 @@ public:
 					return;
 				}
 			}
-			outputToFile("tolua_glue/tolua_glue.h");
+			outputToFile("tolua_glue/tolua_glue.h", "tolua_glue.h", "tolua_glue/tolua_glue.cpp", "tolua_glue.cpp", "tolua_glue/tolua_glued.h");
 
 			vector<MakeGlueInput*>::iterator it = inputs.begin();
 			while(it != inputs.end()) {

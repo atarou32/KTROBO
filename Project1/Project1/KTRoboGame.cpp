@@ -5,12 +5,15 @@
 #include "KTRoboCS.h"
 #include "KTRoboGameError.h"
 #include "stringconverter.h"
+#include "tolua_glue/tolua_glue.h"
+
 
 using namespace KTROBO;
 
 
 Game::Game(void)
 {
+	L =0;
 	g = 0;
 	this->timeEnd.QuadPart = 0;
 	this->timeStart.QuadPart = 0;
@@ -41,6 +44,7 @@ Game::Game(void)
 	}
 
 	mesh_instanceds = 0;
+	cltf=0;
 }
 
 
@@ -275,12 +279,36 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
 
 
+	char buff[] = "resrc/script/sample.lua.txt";
+    int error;
 
+    L = luaL_newstate();
+    luaL_openlibs(L);
+	cltf = new TextFromLuas(g);
+	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
+	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
+	MyLuaGlueSingleton::getInstance()->registerdayo(L);
+    error = luaL_loadfile(L, buff) || lua_pcall(L, 0, 0, 0);
+
+    if (error) {
+		//mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
+		OutputDebugStringA(lua_tostring(L,-1));
+        lua_pop(L, 1);
+    }
+    
+
+   
 
 	return true;
 }
 void Game::Del() {
 
+	 lua_close(L);
+
+	 if(cltf) {
+		 delete cltf;
+		 cltf= 0;
+	 }
 
 
 	// 順番を変えないこと　cs と　タスクの間に依存関係がある
@@ -381,10 +409,10 @@ void Game::Run() {
 	char test2[1024];
 	memset(test2,0,sizeof(1024));
 	memset(test,0,sizeof(WCHAR)*512);
-	sprintf_s(test2,512, "second %f", millisecond);
-	stringconverter cs;
-	cs.charToWCHAR(test2,test);
-	KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);
+	//sprintf_s(test2,512, "second %f", millisecond);
+	//stringconverter cs;
+	//cs.charToWCHAR(test2,test);
+	//KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);
 
 
 

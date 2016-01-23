@@ -8,9 +8,7 @@
 #include "KTRoboGame.h"
 #include "KTRoboGameError.h"
 #include "KTRoboLog.h"
-#include "lua.hpp"
-#include "lualib.h"
-#include "lauxlib.h"
+
 
 HWND g_hWnd = NULL;
 
@@ -40,34 +38,6 @@ bool AnotherInstance() {
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
-
-
-	char buff[] = "resrc/script/sample.lua";
-    int error;
-
-    lua_State *L = luaL_newstate();
-    luaL_openlibs(L);
-
-  
-            error = luaL_loadbuffer(L, buff, strlen(buff), "line") || lua_pcall(L, 0, 0, 0);
-
-            if (error) {
-				mylog::writelog(KTROBO::INFO,"%s", lua_tostring(L, -1));
-                    lua_pop(L, 1);
-            }
-    
-
-    lua_close(L);
-    return 0;
-
-
-
-
-
-
-
-
-
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 #ifdef _DEBUG	
