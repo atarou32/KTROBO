@@ -829,7 +829,9 @@ void MeshInstanceds::_loadAnimeMatrixBasisToTexture(Graphics* g, ANIMETEXTURELOA
 	float ccc[] = {
 		0.2f,0.2f,0.8f,0.7f};
 
-
+	ID3D11ShaderResourceView* te = NULL;
+	g->getDeviceContext()->VSSetShaderResources(0,1, &te);
+	g->getDeviceContext()->VSSetShaderResources(1,1, &te);
 	g->getDeviceContext()->OMSetRenderTargets(1, &anime_matrix_basis_texture->target_view, this->mss_for_matrix_basis.depthstencilview);
 	g->getDeviceContext()->ClearDepthStencilView(mss_for_matrix_basis.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
 //	g->getDeviceContext()->ClearRenderTargetView(anime_matrix_basis_texture->target_view, ccc);
@@ -884,7 +886,9 @@ void MeshInstanceds::_loadMatrixLocalToTexture(Graphics* g, ANIMETEXTURELOADSTRU
 	float ccc[] = {
 		0.2f,0.2f,0.8f,0.7f};
 
-
+	ID3D11ShaderResourceView* te = NULL;
+	g->getDeviceContext()->VSSetShaderResources(0,1, &te);
+	g->getDeviceContext()->VSSetShaderResources(1,1, &te);
 	g->getDeviceContext()->OMSetRenderTargets(1, &matrix_local_texture->target_view, this->mss_for_matrix_local.depthstencilview);
 	g->getDeviceContext()->ClearDepthStencilView(mss_for_matrix_local.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
 //	g->getDeviceContext()->ClearRenderTargetView(anime_matrix_basis_texture->target_view, ccc);
@@ -1437,12 +1441,15 @@ void MeshInstanceds::_render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp
 	
 	//updateCBuf2(g, world, bone_combined_matrixs);
 
+	CS::instance()->enter(CS_DEVICECON_CS, "render in meshinstanced");
 	D3D11_MAPPED_SUBRESOURCE subresource;
 	g->getDeviceContext()->Map(MeshInstanceds::render_instance_vertexbuffer,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 	memcpy(subresource.pData, st, sizeof(RENDERINSTANCEINFOSTRUCT) * temp);//KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE);
 	g->getDeviceContext()->Unmap(MeshInstanceds::render_instance_vertexbuffer,0);
 
-	
+	ID3D11RenderTargetView* rr = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1,&rr,Mesh::pDepthStencilView);//mss_for_render.depthstencilview);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	g->getDeviceContext()->VSSetConstantBuffers(0,1, &cbuf2_buffer);
 	//g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf2_buffer);
 	//g->getDeviceContext()->VSSetConstantBuffers(1,1, &cbuf3_buffer);
@@ -1462,6 +1469,7 @@ void MeshInstanceds::_render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp
 	g->getDeviceContext()->VSSetShader(mss_for_render.vs, NULL, 0);
 	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
 	g->getDeviceContext()->PSSetSamplers(1,1, &MeshInstanceds::combined_matrix_sampler_state);
+	g->getDeviceContext()->PSSetSamplers(0,1, &MeshInstanceds::combined_matrix_sampler_state);
 	g->getDeviceContext()->VSSetSamplers(0,1, &MeshInstanceds::combined_matrix_sampler_state);
 
 	g->getDeviceContext()->PSSetShader(mss_for_render.ps, NULL, 0);
@@ -1494,7 +1502,7 @@ void MeshInstanceds::_render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp
 	ID3D11ShaderResourceView* vi=NULL;
 	g->getDeviceContext()->VSSetShaderResources(0,1, &vi);
 	g->getDeviceContext()->PSSetShaderResources(1,1,&vi);
-	
+	CS::instance()->leave(CS_DEVICECON_CS, "render in mesh instance");
 }
 
 
@@ -1513,10 +1521,15 @@ void MeshInstanceds::render(Graphics* g) {
 
 	// cbuffer2 すごい頻繁に変更される
 	// color_id
-	ID3D11RenderTargetView* rr = g->getRenderTargetView();
-	g->getDeviceContext()->OMSetRenderTargets(1,&rr,Mesh::pDepthStencilView);//mss_for_render.depthstencilview);
+	
 	//g->getDeviceContext()->ClearDepthStencilView(mss_for_render.depthstencilview, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	// まず
+
+	if (getIsLoad()) {
+		// ロード中なので描画せずにリターンする
+		return;
+	}
+
 	RENDERINSTANCEINFOSTRUCT stt[ KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE];
 	memset(stt, 0 , sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE);
 	int temp =0;

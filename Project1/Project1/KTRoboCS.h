@@ -8,16 +8,25 @@
 #include "stdio.h"
 #include "KTRoboTask.h"
 
+// 複数ロックするときの順番
+// MAIN TASK0 TASK1 TASK2 TASK3 LOAD DEVICECON LOG
+
 namespace KTROBO {
 #define CS_LOG_CS 2
 #define CS_TASK_CS 3
 #define CS_DEVICECON_CS 4
+#define CS_MAINTHREAD_CS 5
+#define CS_LOAD_CS 6
+
 class CS
 {
 private:
 	CRITICAL_SECTION LOG_CS;
 	CRITICAL_SECTION TASK_CS[TASKTHREAD_NUM];
 	CRITICAL_SECTION DEVICECON_CS;
+	CRITICAL_SECTION MAINTHREAD_CS; // メインのスレッドが止まっているかどうかに使う
+	CRITICAL_SECTION LOAD_CS;
+	bool is_main_enter;
 private:
 	CS(void);
 
@@ -42,6 +51,8 @@ public:
 			InitializeCriticalSection(&TASK_CS[i]);
 		}
 		InitializeCriticalSection(&DEVICECON_CS);
+		InitializeCriticalSection(&MAINTHREAD_CS);
+		InitializeCriticalSection(&LOAD_CS);
 	}
 
 	void Del() {
@@ -50,6 +61,8 @@ public:
 			DeleteCriticalSection(&TASK_CS[i]);
 		}
 		DeleteCriticalSection(&DEVICECON_CS);
+		DeleteCriticalSection(&MAINTHREAD_CS);
+		DeleteCriticalSection(&LOAD_CS);
 	}
 
 	~CS(void);
@@ -71,6 +84,15 @@ public:
 			// いらなくなったわけではないみたいだ
 			int length = strlen(buf);
 			log(index, buf, length);
+		} else if(index == CS_MAINTHREAD_CS) {
+			EnterCriticalSection(&MAINTHREAD_CS);
+			is_main_enter = true;
+			int length = strlen(buf);
+			log(index, buf, length);
+		} else if(index == CS_LOAD_CS) {
+			EnterCriticalSection(&LOAD_CS);
+			int length = strlen(buf);
+			log(index, buf, length);
 		}
 	}
 
@@ -84,6 +106,17 @@ public:
 		} else if(index == CS_DEVICECON_CS) {
 			LeaveCriticalSection(&DEVICECON_CS);
 			// いらなくなったわけではないみたいだ
+		} else if(index == CS_MAINTHREAD_CS) {
+			if (is_main_enter) {
+			is_main_enter = false;
+			LeaveCriticalSection(&MAINTHREAD_CS);
+			int length = strlen(buf);
+			log(index, buf, length);
+			}
+		} else if(index == CS_LOAD_CS) {
+			LeaveCriticalSection(&LOAD_CS);
+			int length = strlen(buf);
+			log(index, buf, length);
 		}
 	}
 };

@@ -46,10 +46,18 @@ void KTROBO::Task::exec() {
 		execTCB->Exec(execTCB);
 		execTCB = execTCB->next;
 	} while(execTCB->prio != TASK_HEAD_PRIO);
-	} catch (const GameError& err) {
-		mylog::writelog(err.getErrorCode(),err.getMessage());
-		MessageBoxA(hWnd,err.getMessage(),KTROBO::GameError::getErrorCodeString(err.getErrorCode()),MB_OK);
-		Sleep(10000);
+	} catch (GameError* err) {
+		mylog::writelog(err->getErrorCode(),err->getMessage());
+		MessageBoxA(hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
+		if (err->getErrorCode() == KTROBO::FATAL_ERROR) {
+			// 終了させる
+			MessageBoxA(hWnd,"タスクスレッドを終了させます","FATAL",MB_OK);
+			is_exec_task = false;
+			delete err;
+			return;
+		}
+		delete err;
+		Sleep(1); // そのまま続行
 	}
 
 	CS::instance()->leave(CS_TASK_CS,"",index);

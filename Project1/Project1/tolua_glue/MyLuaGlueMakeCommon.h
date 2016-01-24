@@ -4,14 +4,13 @@
 #include "stdio.h"
 #include "string.h"
 
-
-
 #define MAKEGLUEINPUT_FILEPATH "FILEPATH"
 #define MAKEGLUEINPUT_INTERFACE "INTERFACE"
 #define MAKEGLUEINPUT_COLLECTION "COLLECTION"
 #define MAKEGLUEINPUT_CONSTRUCTOR "CONSTRUCTOR"
 #define MAKEGLUEINPUT_DESTRUCTOR "DESTRUCTOR"
 #define MAKEGLUEINPUT_COLLECTED "COLLECTED"
+#define MAKEGLUEINPUT_SUPERCOLLECTED "SUPER_COLLECTED"
 
 
 
@@ -61,48 +60,22 @@
 // 返り値はポインタを扱うのはクラスのみ　COLLECTED　か　YARITORI を指定する必要がある
 // COLLECTED が返り値の関数は登録できない
 // YARITORI のコンストラクタはvoidが引数のものが存在していること // 例：MYVECTOR4 pos;
+// 同じSUPER_COLLECTEDを設定したクラスを複数登録するとCOLLECTEDとした引数の参照はどれかひとつしかされなくなる
+// 例　Mesh* mesh; があって　WrappedMesh : public Mesh;  WrappedMesh2 : public Mesh を登録した際に
+//     makeInstanced(COLLECTED Mesh* mesh, COLLECTED Mesh* skeleton) みたいなメソッドを読んだ際に1か2のどちらかのコレクションクラスからしか参照がされなくなる
 
 #define COLLECTION_INDEX_LUA_FIELD "collection_index"
 #define COLLECTION_CLASS_LUA_FIELD "collection_class_name"
 #define COLLECTED_INDEX_LUA_FIELD "collected_index"
 #define COLLECTED_CLASS_LUA_FIELD "collected_class_name"
 #define COLLECTED_INTERFACE_LUA_FIELD "collected_interface_name"
+#define DEF_LUA_FIELD_KEY 1
 
-int strpos(char *haystack, char *needle)
-{
+int strpos(char *haystack, char *needle);
 
-   if (strlen(haystack) ==0) return -1;
+void mystrcpy(char* dst, int max, int pos, const char* src);
 
-   char *p = strstr(haystack, needle);
-   if (p)
-      return p - haystack;
-   return -1;   // Not found = -1.
-}
-
-void mystrcpy(char* dst, int max, int pos, char* src) {
-	int count = 0;
-	int mypos = pos;
-	while (count < max && (src[mypos] != '\0')) {
-		dst[count] = src[mypos];
-		mypos++;
-		count++;
-	}
-	dst[max-1] = '\0';
-}
-
-void mystrcpy2(char *dst, int max, int mpos,  char* src) {
-	int count = 0;
-	int mypos = mpos;
-	while (count < max && mypos > count && (src[count] != '\0')) {
-		dst[count] = src[count];
-		count++;
-	}
-	dst[max-1] = '\0';
-
-}
-
-
-
+void mystrcpy2(char *dst, int max, int mpos, const  char* src);
 
 
 #endif

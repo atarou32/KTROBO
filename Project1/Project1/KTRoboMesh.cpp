@@ -401,6 +401,7 @@ void Mesh::readAnime(char* filename) {
 
 	// Œã•Ð‚Ã‚¯
 	a.deletedayo();
+	animate(0,true);
 	return;
 
 
@@ -410,15 +411,21 @@ void Mesh::readAnime(char* filename) {
 
 void Mesh::Release() {
 
+	if (VertexCount && FaceCount) {
+	} else {
+		return;
+	}
 
 	if (p_vertexbuffer) {
 		p_vertexbuffer->Release();
 		p_vertexbuffer = 0;
+		VertexCount = 0;
 	}
 
 	if (p_indexbuffer) {
 		p_indexbuffer->Release();
 		p_indexbuffer = 0 ;
+		FaceCount = 0;
 	}
 
 	vector<MeshBone*>::iterator bone_it;

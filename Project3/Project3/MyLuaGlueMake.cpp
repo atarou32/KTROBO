@@ -66,6 +66,10 @@ int MyLuaGlueMake::readInputsFromFile(char* filename) {
 					a.GetToken();
 					mystrcpy(input->collected_name,128,0,a.Toke());
 					input->collected_name[127]='\0';
+				} else if(strcmp(a.Toke(), MAKEGLUEINPUT_SUPERCOLLECTED) ==0) {
+					a.GetToken();
+					mystrcpy(input->super_collected_name,128,0,a.Toke());
+					input->super_collected_name[127] = '\0';
 				}
 			}
 			if (strlen(input->collection_name) ==0 || 
@@ -658,13 +662,28 @@ void MyLuaGlueMake::checkType(char *filename, MakeGlueInput* input, MyFuncDef* d
 	}
 }
 
+bool MyLuaGlueMake::isCharType(MyFuncNUMWITHTYPE* num) {
+	if (num->type == MyDefType::CHAR) {
+		return true;
+	}
+	if (num->type == MyDefType::PCHAR) {
+		return true;
+	}
+	if (num->type == MyDefType::PUCHAR) {
+		return true;
+	}
+	if (num->type == MyDefType::UCHAR) {
+		return true;
+	}
+	return false;
+}
 
 void MyLuaGlueMake::sengen(char* filename, MakeGlueInput* input, MyFuncDef* def, int i) {
 	char kata[1024];
 	memset(kata,0,1024);
 	def->getKATAStr(&def->hikisuu[i],kata);
 
-	if (def->hikisuu[i].type == MyDefType::PCHAR || def->hikisuu[i].type == MyDefType::PUCHAR) {
+	if ((def->hikisuu[i].type == MyDefType::PCHAR) || (def->hikisuu[i].type == MyDefType::PUCHAR)) {
 
 		KTROBO::mylog::writelog(filename, "%s %s[%d];\n", kata, def->hikisuu[i].num_name, TEMPSTRING_SIZE);
 		KTROBO::mylog::writelog(filename, "memset(%s,0, sizeof(%s)* %d);\n", def->hikisuu[i].num_name, kata, TEMPSTRING_SIZE);
@@ -678,12 +697,42 @@ void MyLuaGlueMake::sengen(char* filename, MakeGlueInput* input, MyFuncDef* def,
 		}
 		return;
 	} else if(def->hikisuu[i].is_pointer) {
+		if (isCharType(&def->hikisuu[i])) {
+
+			KTROBO::mylog::writelog(filename, "%s %s[%d];\n", kata, def->hikisuu[i].num_name, TEMPSTRING_SIZE);
+			KTROBO::mylog::writelog(filename, "memset(%s,0, sizeof(%s)* %d);\n", def->hikisuu[i].num_name, kata, TEMPSTRING_SIZE);
+	
+
+		} else {
+
 		KTROBO::mylog::writelog(filename, "%s %s[%d];\n", kata, def->hikisuu[i].num_name, TEMPHAIRETU_SIZE);
 		KTROBO::mylog::writelog(filename, "memset(%s,0, sizeof(%s)* %d);\n", def->hikisuu[i].num_name, kata, TEMPHAIRETU_SIZE);
+		}
 		return;
 	}
 	KTROBO::mylog::writelog(filename, "%s %s;\n", kata, def->hikisuu[i].num_name);
 }
+char* MyLuaGlueMake::getCollectedHIKISUUName(MyFuncNUMWITHTYPE* num) {
+	if (num->is_collected) {
+		int isize = inputs.size();
+		for (int i=0;i<isize; i++) {
+			MakeGlueInput* input = inputs[i];
+			if (strlen(input->super_collected_name)) {
+				if (strcmp(input->super_collected_name, num->kaeri6classname)==0) {
+					return input->collected_name;
+				}
+			}
+		}
+		return num->kaeri6classname;
+
+	} else {
+		KTROBO::mylog::writelog(KTROBO::FATAL_ERROR, "error in get collected hikisuu name");
+		return "ERRROR!!";
+	}
+
+}
+
+
 
 void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* def, int i) {
 
@@ -699,7 +748,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = (bool)lua_toboolean(L, 1);\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  %s[i] = (bool)lua_toboolean(L, -1);\n", def->hikisuu[i].num_name);
 					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
@@ -724,16 +773,22 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 
 					// 連想配列からキーインデックスを取得する
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, 1);\n", COLLECTION_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_remove(L,1);\n");
-					KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, 1);\n", COLLECTED_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L,%d);\n", DEF_LUA_FIELD_KEY);
+					KTROBO::mylog::writelog(filename, "lua_gettable(L,%d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L, -1, LUA_TTABLE);\n");
+
+//					KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d, \"%s\");\n", -1, COLLECTION_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, -1);\n", COLLECTION_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_remove(L,-1);\n");
+	//				KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d, \"%s\");\n", -1, COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, -1);\n", COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_remove(L,-1);\n");
+					KTROBO::mylog::writelog(filename, "lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "%s = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%ss(%s)->getInstance(%s);\n", 
-						def->hikisuu[i].num_name, def->hikisuu[i].kaeri6classname, COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
+						def->hikisuu[i].num_name, this->getCollectedHIKISUUName(&def->hikisuu[i]), COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 				} else if(def->hikisuu[i].is_yaritori) {
@@ -752,8 +807,8 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = (double)atof(lua_tostring(L, 1));\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  %s[i] = (double)atof(lua_tostring(L, -1));\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 
@@ -765,8 +820,8 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = atof(lua_tostring(L, 1));\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  %s[i] = atof(lua_tostring(L, -1));\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 
@@ -778,8 +833,8 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = (lua_tonumber(L, 1));\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  %s[i] = (lua_tonumber(L, -1));\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 
@@ -799,8 +854,8 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = (short)(lua_tonumber(L, 1));\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  %s[i] = (short)(lua_tonumber(L, -1));\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 
@@ -817,8 +872,8 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = (unsigned int)(lua_tonumber(L, 1));\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  %s[i] = (unsigned int)(lua_tonumber(L, -1));\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 
@@ -830,8 +885,8 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					// 配列の要素（クラスでない場合は数の配列とみなす)
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "  %s[i] = (unsigned short)(lua_tonumber(L, 1));\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  %s[i] = (unsigned short)(lua_tonumber(L, -1));\n", def->hikisuu[i].num_name);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 
@@ -873,16 +928,23 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 
 					// 連想配列からキーインデックスを取得する
 					KTROBO::mylog::writelog(filename, "{\n");
-					KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, 1);\n", COLLECTION_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_remove(L,1);\n");
-					KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d);\n", i+3);
-					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, 1);\n", COLLECTED_INDEX_LUA_FIELD);
-					KTROBO::mylog::writelog(filename, "lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L,%d);\n", DEF_LUA_FIELD_KEY);
+					KTROBO::mylog::writelog(filename, "lua_gettable(L,%d);\n", i+3);
+				
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L, -1, LUA_TTABLE);\n");
+
+//					KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d, \"%s\");\n", -1, COLLECTION_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, -1);\n", COLLECTION_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_remove(L,-1);\n");
+	//				KTROBO::mylog::writelog(filename, "lua_pushstring(L,\"%s\");\n", COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_getfield(L, %d, \"%s\");\n", -1, COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "int %s=lua_tonumber(L, -1);\n", COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "lua_remove(L,-1);\n");
+					KTROBO::mylog::writelog(filename, "lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "%s = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%ss(%s)->getInstance(%s);\n", 
-						def->hikisuu[i].num_name, def->hikisuu[i].kaeri6classname, COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
+						def->hikisuu[i].num_name, this->getCollectedHIKISUUName(&def->hikisuu[i]), COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
+					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 				} else if(def->hikisuu[i].is_yaritori) {
@@ -1166,6 +1228,8 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 		KTROBO::mylog::writelog(filename, "int cci = kaeriti;\n");
 
 		KTROBO::mylog::writelog(filename, "lua_newtable(L);\n");
+		KTROBO::mylog::writelog(filename, "lua_pushnumber(L, %d);\n", DEF_LUA_FIELD_KEY); 
+		KTROBO::mylog::writelog(filename, "lua_newtable(L);\n");
 		KTROBO::mylog::writelog(filename, "int top = lua_gettop(L);\n");
 	//	KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", COLLECTED_CLASS_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, \"%s\");\n", input->collected_name);
@@ -1193,6 +1257,8 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 		KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n");
 		KTROBO::mylog::writelog(filename, "lua_setfield(L, top, \"%s\");\n", COLLECTION_INDEX_LUA_FIELD);
 		KTROBO::mylog::writelog(filename, "}\n");
+
+		KTROBO::mylog::writelog(filename, "lua_settable(L,-3);\n");
 		KTROBO::mylog::writelog(filename, "lua_insert(L,1);\n");
 
 		KTROBO::mylog::writelog(filename, "}\n");
@@ -1679,3 +1745,34 @@ int main(char* argc, char** argv) {
 	delete m;
 	return 0;
 }
+
+
+
+
+int MyLuaGlueMake::outputLua(char* filename) {
+	FILE * fp;
+	fopen_s(&fp,filename,"w");// いったんクリアする
+	if (fp == NULL) {
+		KTROBO::mylog::writelog(KTROBO::FATAL_ERROR, "failed to clear output file");
+		return 0;
+	}
+	fclose(fp);
+	
+	// luaファイルを書いていく
+	// グルー関数をラップするクラスの定義を書く
+	// global my_interfaces; にクラスの定義を
+	// global my_instances; にインスタンスの参照を入れる
+
+
+	
+	
+	
+	
+	
+
+	return 1;
+	
+	
+	
+	
+};

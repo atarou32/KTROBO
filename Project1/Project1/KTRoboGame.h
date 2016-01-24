@@ -29,6 +29,10 @@ namespace KTROBO {
 #define RENDERTIME_SETTIME 33
 
 #define TASKTHREADS_UPDATEANIMEFRAMENADO 0
+#define TASKTHREADS_UPDATEINPUTS 1
+#define TASKTHREADS_UPDATEPOSBUTUKARI 2
+#define TASKTHREADS_LOADDESTRUCT 3
+#define TASKTHREADS_AIDECISION 4
 
 
 class Game
@@ -64,6 +68,7 @@ private:
 	IMeshInstanced* mesh_is2[30];
 	MyTestForVertexTexture* mytest_for_vt;
 	TextFromLuas* cltf;
+	WrappedMeshs* wmeshs;
 public:
 	Game(void);
 	~Game(void);

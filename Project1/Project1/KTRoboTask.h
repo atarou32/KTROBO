@@ -14,7 +14,7 @@ namespace KTROBO {
 #define TASK_DONTUSE_PRIO 0x0000
 #define TASK_HEAD_PRIO 0x0000
 
-#define TASKTHREAD_NUM 4 // DONT CHANGE IT
+#define TASKTHREAD_NUM 5 // DONT CHANGE IT
 
 struct TCB {
 	void (*Exec)(TCB*);

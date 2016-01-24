@@ -5,6 +5,7 @@ using namespace KTROBO;
 CS::CS(void)
 {
 	is_log = false;
+	is_main_enter = false;
 }
 CS::~CS(void)
 {

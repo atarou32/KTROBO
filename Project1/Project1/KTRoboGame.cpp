@@ -11,6 +11,26 @@
 using namespace KTROBO;
 
 
+// タスクスレッドの分割
+// メインスレッド：描画（毎回処理が走る）
+// TASK0:  描画のための更新処理（アニメの計算処理）など
+// TASK1:  オブジェクトの生成・破棄処理(ロード）　必要なときだけ走る 
+// 生成処理破棄処理（コンストラクタデストラクタ呼び出し）をする場合は
+    // 他のスレッドが使わないことを確認または使えない状態にしてから
+    // 処理を行うこと
+    // 方法その１　スレッドのロックをかけて他のスレッドの処理が走らないようなタイミングを作る
+    //             これは読み込みロード処理が長くなりそうであることを考えると有効な方法とはいえないような気がする
+    // 方法その２　ロードしたオブジェクトをもっているコレクションクラスを他のスレッドが使用しないような仕組みを作る
+    //             これはロード専用コレクションクラスを作ることのような気がする
+    // 方法その２をより具体的にどう実装するか　
+    // いつかはロードしたオブジェクトをもつコレクションクラスも利用されることを考えると
+    // 渡すさいのタイミングに気をつけなければならない→ロックする（ロードしている間ロックしているよりは普通のような気がする）
+    // 
+
+// TASK2:  オブジェクトの更新処理・AI？毎回処理が走る メイン進行処理
+// TASK3:  衝突・位置更新処理：毎回処理が走る
+// TASK4:  入力取得および入力の解釈記憶処理
+
 Game::Game(void)
 {
 	L =0;
@@ -56,13 +76,43 @@ Game::~Game(void)
 void CALCCOMBINEDTCB(TCB* thisTCB) {
 	MeshInstanceds* mis = (MeshInstanceds*)thisTCB->data;
 	Graphics* g = (Graphics*)thisTCB->Work[0];
-	mis->calcCombinedMatrixToTexture(g);
-	mis->loadColorToTexture(g);
 
-//	CS::instance()->enter(CS_DEVICECON_CS, "test");
-//	//g->getDeviceContext()->ClearState();	
+	if (!mis->getIsLoad()) {
+		
+		mis->loadAnimeMatrixBasisToTexture(g);
+		mis->loadMatrixLocalToTexture(g);
+		mis->calcCombinedMatrixToTexture(g);
+		mis->loadColorToTexture(g);
+	}
 
-//	CS::instance()->leave(CS_DEVICECON_CS, "test");
+}
+
+
+
+void LOADMESHTCB(TCB* thisTCB) {
+	lua_State* L = (lua_State*)thisTCB->data;
+	Task* t = (Task*)thisTCB->Work[0];
+	Graphics* g = (Graphics*)thisTCB->Work[1];
+	MeshInstanceds* m = (MeshInstanceds*)thisTCB->Work[2];
+
+	char buff[] = "resrc/script/sample.lua.txt";
+	int error;
+	try {
+		error = luaL_loadfile(L, buff) || lua_pcall(L, 0, 0, 0);
+		m->setIsLoad(false);
+	}catch (GameError* err) {
+		
+		MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		delete err;
+	}
+    if (error) {
+		//mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
+		OutputDebugStringA(lua_tostring(L,-1));
+        lua_pop(L, 1);
+    } else {
+	
+		t->kill(thisTCB);
+	}
 }
 
 bool Game::Init(HWND hwnd) {
@@ -243,9 +293,6 @@ bool Game::Init(HWND hwnd) {
 	MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
 	memset(colors,0,sizeof(colors));
 
-	mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
-	mesh_instanceds->loadMatrixLocalToTexture(g);
-	mesh_instanceds->calcCombinedMatrixToTexture(g);
 
 
 /*	for (int i=0;i<KTROBO_MESH_INSTANCED_COLOR_MAX; i++) {
@@ -269,8 +316,6 @@ bool Game::Init(HWND hwnd) {
 
 	mytest_for_vt->writeInfo(g);
 
-	mesh_instanceds->calcCombinedMatrixToTexture(g);
-	mesh_instanceds->loadColorToTexture(g);
 
 	long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
@@ -279,25 +324,26 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
 
 
-	char buff[] = "resrc/script/sample.lua.txt";
-    int error;
 
+    int error;
+	//Sleep(1000);
     L = luaL_newstate();
     luaL_openlibs(L);
 	cltf = new TextFromLuas(g);
+	wmeshs = new WrappedMeshs(g, demo->tex_loader);
+	MyLuaGlueSingleton::getInstance()->setColWrappedMeshs(wmeshs);
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
-    error = luaL_loadfile(L, buff) || lua_pcall(L, 0, 0, 0);
+	
+	//long work[TASK_WORK_SIZE];
+	memset(work,0, sizeof(work));
+	work[1] = (long)g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
+	work[0] = (long)task_threads[TASKTHREADS_LOADDESTRUCT];
+	work[2] = (long)mesh_instanceds;
 
-    if (error) {
-		//mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
-		OutputDebugStringA(lua_tostring(L,-1));
-        lua_pop(L, 1);
-    }
-    
+	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,L,work,0x0000FFFF);
 
-   
 
 	return true;
 }
@@ -305,10 +351,8 @@ void Game::Del() {
 
 	 lua_close(L);
 
-	 if(cltf) {
-		 delete cltf;
-		 cltf= 0;
-	 }
+
+	
 
 
 	// 順番を変えないこと　cs と　タスクの間に依存関係がある
@@ -319,13 +363,25 @@ void Game::Del() {
 			task_threads[i] = 0;
 		}
 		if(g_for_task_threads[i]) {
-		g_for_task_threads[i]->Release();
-		delete g_for_task_threads[i];
-		g_for_task_threads[i] = 0;
+			g_for_task_threads[i]->Release();
+			delete g_for_task_threads[i];
+			g_for_task_threads[i] = 0;
 		}
 	}
 
 	KTROBO::CS::instance()->Del();
+
+	 if (wmeshs) {
+		 delete wmeshs;
+		 wmeshs = 0;
+	 }
+
+	 
+	 if(cltf) {
+		 delete cltf;
+		 cltf= 0;
+	 }
+
 
 	KTROBO::DebugTexts::instance()->Del();
 
@@ -417,18 +473,19 @@ void Game::Run() {
 
 
 	if (millisecond > RENDERTIME_IGNORETIME) {
-	//	Sleep(1);
-
-	
-			
+		CS::instance()->leave(CS_MAINTHREAD_CS, "leave main");
+		Sleep(1);
 		millisecond = RENDERTIME_SETTIME;
+		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	} else if ( millisecond < RENDERTIME_SETTIME ) {
+		CS::instance()->leave(CS_MAINTHREAD_CS, "leave main");
 		Sleep(DWORD(RENDERTIME_SETTIME - millisecond));
 		millisecond = RENDERTIME_SETTIME;
+		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	} else {
-
-		//Sleep(1);
-
+		CS::instance()->leave(CS_MAINTHREAD_CS, "leave main");
+		Sleep(1);
+		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	}
 
 	
@@ -539,18 +596,7 @@ void Game::Run() {
 
 	
 
-	for (int i = 0 ; i < 4; i++) {
-		ID3D11CommandList* pd3dCommandList=0;
-		HRESULT hr = g_for_task_threads[i]->getDeviceContext()->FinishCommandList(FALSE, &pd3dCommandList);
-		if (FAILED(hr)) {
-			throw new GameError(KTROBO::FATAL_ERROR, "failed in finishing list");
-		}
-		if (pd3dCommandList) {
-			g->getDeviceContext()->ExecuteCommandList(pd3dCommandList,false);
-			pd3dCommandList->Release();
-			pd3dCommandList = 0;
-		}
-	}
+	
 
 	memset(animf,0,sizeof(animf));
 	memset(animl,0,sizeof(animl));
@@ -573,7 +619,7 @@ void Game::Run() {
 
 	mesh_i->setBoneIndexInfo(animf, animl, animw);
 	mesh_i2->setBoneIndexInfo(animf,animl,animw);
-	for (int i=0;i<5;i++) {
+	for (int i=0;i<3;i++) {
 		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
 		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
 	}
@@ -589,6 +635,24 @@ void Game::Run() {
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	KTROBO::DebugTexts::instance()->render(g);
 	telop_texts->render(g);
+
+
+	for (int i = 0 ; i < 4; i++) {
+		ID3D11CommandList* pd3dCommandList=0;
+		HRESULT hr = g_for_task_threads[i]->getDeviceContext()->FinishCommandList(FALSE, &pd3dCommandList);
+		if (FAILED(hr)) {
+			throw new GameError(KTROBO::FATAL_ERROR, "failed in finishing list");
+		}
+		if (pd3dCommandList) {
+			g->getDeviceContext()->ExecuteCommandList(pd3dCommandList,false);
+			pd3dCommandList->Release();
+			pd3dCommandList = 0;
+		}
+	}
+
+	v = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 
 
 	MyMatrixRotationZ(worldforg, frame);

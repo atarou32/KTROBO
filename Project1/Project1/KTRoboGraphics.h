@@ -57,7 +57,7 @@ private:
 public:
 	bool Init(HWND hwnd);
 	void Release();
-
+	HWND getHWND() {return h;}
 	const D3D11_VIEWPORT* getViewPort() {return &vp;} 
 
 	IDXGISwapChain* getSwapChain() {return p_swapchain;}

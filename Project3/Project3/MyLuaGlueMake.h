@@ -115,10 +115,12 @@ public:
 	char constructor_name[128];
 	char destructor_name[128];
 	char collected_name[128];
+	char super_collected_name[128];
 	vector<MyFuncDef*> func_defs;
 	vector<MyFuncDef*> construct_defs;
 	vector<MyFuncDef*> destruct_defs;
 	MakeGlueInput() {
+		memset(super_collected_name, 0, 128);
 		memset(filepath,0,256);
 		memset(interface_name,0,128);
 		memset(collection_name,0,128);
@@ -185,7 +187,7 @@ private:
 	int readInputsFromFile(char* filename);
 	int readInputs(int input_index);
 	int outputToFile(char* headerpath, char* headername, char* cpppath, char* cppname, char* user_write_h_name);
-
+	int outputLua(char* filename);
 	int setNAME(MyTokenAnalyzer* a, MyFuncDef* f);
 	int setKAERITI(MyTokenAnalyzer* a, MyFuncDef* f);
 	int setFUNC(MyTokenAnalyzer* a, MakeGlueInput* input);
@@ -208,9 +210,11 @@ private:
 
 	void sengen(char* filename, MakeGlueInput* input, MyFuncDef* def, int i);
 	void getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* def, int i);
+	char* getCollectedHIKISUUName(MyFuncNUMWITHTYPE* num);
 	void kannsuuYobidasi(char* filename, MakeGlueInput* input, MyFuncDef* def, int i, bool is_construct, bool is_destruct );
 	void hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* def, int i);
 	void pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef* def, int i, bool is_construct, bool is_destruct);
+	bool isCharType(MyFuncNUMWITHTYPE* num);
 
 public:
 	void readInputAndOutput() {
@@ -223,6 +227,7 @@ public:
 				}
 			}
 			outputToFile("tolua_glue/tolua_glue.h", "tolua_glue.h", "tolua_glue/tolua_glue.cpp", "tolua_glue.cpp", "tolua_glue/tolua_glued.h");
+			outputLua("tolua_glue/tolua.lua");
 
 			vector<MakeGlueInput*>::iterator it = inputs.begin();
 			while(it != inputs.end()) {

@@ -11,6 +11,7 @@
 #include "MyButukari3D.h"
 #include "KTRoboGraphics.h"
 #include "KTRoboGameError.h"
+#include "tolua_glue/MyLuaGlueMakeCommon.h"
 
 using namespace std;
 
@@ -219,6 +220,13 @@ struct MeshCBuf3 {
 	MYVECTOR4 viewdir;
 };
 
+interface IWrappedMesh {
+public:
+	TO_LUA virtual void readAnime(char* filename)=0;
+	TO_LUA virtual void readMesh(char* filename)=0;
+};
+
+
 class Mesh
 {
 public:
@@ -226,7 +234,7 @@ public:
 	static void Del();
 	void Release();
 	Mesh(void);
-	~Mesh(void);
+	virtual ~Mesh(void);
 
 	void animate(float frame, bool calculate_offsetmatrix);
 	void readAnime(char* filename);
@@ -280,6 +288,63 @@ public:
 	static ID3D11DepthStencilView* pDepthStencilView;
 };
 
+
+class WrappedMesh : public Mesh, public IWrappedMesh{
+private:
+	Graphics* g;
+	MyTextureLoader* loader;
+public:
+	WrappedMesh(Graphics* g, MyTextureLoader* loader) {
+		Mesh();
+		this->g = g;
+		this->loader = loader;
+	}
+	~WrappedMesh() {
+	//	Mesh::~Mesh();
+		Release();
+	}
+    void readMesh(char* filename) {
+		Mesh::readMesh(g, filename, loader);
+	}
+	void readAnime(char* filename) {
+		Mesh::readAnime(filename);
+	}
+};
+
+// Meshs に関しては　他のスレッドでMeshInstanceが参照されるので　MeshInstance でLoadableを実装しておけばMeshsに関しても守られる？
+class WrappedMeshs {
+private:
+	vector<WrappedMesh*> wrapped_meshs;
+	Graphics* g;
+	MyTextureLoader* loader;
+public:
+	WrappedMeshs(Graphics* g, MyTextureLoader* loader) {
+		this->g = g;
+		this->loader = loader;
+	}
+	~WrappedMeshs() {
+		vector<WrappedMesh*>::iterator it = wrapped_meshs.begin();
+		while(it != wrapped_meshs.end()) {
+			WrappedMesh* wrapped = *it;
+			delete wrapped;
+			it = it + 1;
+		}
+		wrapped_meshs.clear();
+	}
+	int makeInstanceID() {
+		WrappedMesh* m = new WrappedMesh(g, loader);
+		int size = wrapped_meshs.size();
+		wrapped_meshs.push_back(m);
+		return size;
+	}
+	WrappedMesh* getInstance(int index) {
+		return wrapped_meshs[index];
+	}
+	IWrappedMesh* getInterface(int index) {
+		return wrapped_meshs[index];
+	}
+
+};
 
 
 }

@@ -7,6 +7,10 @@
 #include <vector>
 #include "MyDefine.h"
 #include "tolua_glue/MyLuaGlueMakeCommon.h"
+#include "KTRoboGameError.h"
+#include "KTRoboLuaCollection.h"
+
+
 namespace KTROBO {
 #define KTROBO_MESH_INSTANCED_COLOR_MAX 12
 #define KTROBO_MESH_INSTANCED_BONE_MAX 32
@@ -319,7 +323,7 @@ struct MESHINSTANCED_CBUF3 {
 #define KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL 0xFFFF
 
 
-class MeshInstanceds{
+class MeshInstanceds : public Loadable{
 public:
 	void clearLoadState() {
 		int sml_size = skeletons.size();
@@ -376,7 +380,7 @@ private:
 	void setCBuf3(Graphics* g, unsigned int color_id);
 
 public:
-	MeshInstanceds(Graphics* g, MyTextureLoader* tex_loader) {
+	MeshInstanceds(Graphics* g, MyTextureLoader* tex_loader) : Loadable() {
 		matrix_local_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_LOCAL_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_LOCAL_TEXTURE_WIDTH_HEIGHT);
 		anime_matrix_basis_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_BASIS_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_BASIS_TEXTURE_WIDTH_HEIGHT);
 		combined_matrix_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT);
@@ -528,19 +532,25 @@ public:
 		return skeleton_size;
 	}
 
-	int makeInstancedID(Mesh* mesh, Mesh* skeleton, MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru) {
+	int makeInstancedID(COLLECTED Mesh* mesh, COLLECTED Mesh* skeleton, COLLECTED MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, YARITORI MYMATRIX* matrix_local_kakeru) {
+		execConstructOrDestruct();
 		MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
 		return m->getInstanceIndex();
 	}
 
 	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, IMeshInstanced* iparent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
 	{
+		if (!mesh || !skeleton) {
+			throw new GameError(KTROBO::WARNING, " there is no model or skeleton");
+		}
+		
+
 		MeshInstanced* mm = new MeshInstanced();
 		mm->setMeshIndex(this->getMeshIndexOrSet(mesh));
 		mm->setSkeletonIndex(this->getSkeletonIndexOrSet(skeleton));
 		MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
 		memset(colors, 0, sizeof(colors));
-
+		
 		int msize = mesh->Materials.size();
 		for (int h = 0; h < msize && h < KTROBO_MESH_INSTANCED_COLOR_MAX; h++) {
 			colors[h] = mesh->Materials[h]->color;
