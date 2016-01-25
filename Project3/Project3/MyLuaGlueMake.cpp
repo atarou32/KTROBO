@@ -347,7 +347,7 @@ int MyLuaGlueMake::setConstructFunc(MyTokenAnalyzer* a, MakeGlueInput* input) {
 int MyLuaGlueMake::setDestructFunc(MyTokenAnalyzer* a, MakeGlueInput* input) {
 	MyFuncDef* def = new MyFuncDef();
 	strcpy_s(def->func_name,128, input->constructor_name);
-	def->kaeriti.type = MyDefType::VOIDDAYO;
+	def->kaeriti.type = MyDefType::INT;
 	a->GetToken();
 	// name は入っている
 	a->GetToken();
@@ -442,7 +442,7 @@ int MyLuaGlueMake::readInputs(int input_index) {
 						
 					}
 					if (!a.enddayo()) {
-						// コレクションの該当インターフェースのデストラクタの帰り値はなしと決め討ちする
+						// コレクションの該当インターフェースのデストラクタの帰り値はintと決め討ちする
 						setDestructFunc(&a,input);
 					}
 				}
@@ -461,7 +461,7 @@ void MyLuaGlueMake::writeInclude(char* filename) {
 	KTROBO::mylog::writelog(filename, "#include \"lua.hpp\"\n");
 	KTROBO::mylog::writelog(filename, "#include \"lualib.h\"\n");
 	KTROBO::mylog::writelog(filename, "#include \"lauxlib.h\"\n");
-
+	KTROBO::mylog::writelog(filename, "#include \"../KTRoboGameError.h\"\n");
 	KTROBO::mylog::writelog(filename, "#include \"MyLuaGlueMakeCommon.h\"\n");
 	vector<MakeGlueInput*>::iterator it = inputs.begin();
 	while(it != inputs.end()) {
@@ -482,7 +482,12 @@ void MyLuaGlueMake::writeSingletonFunc(char* filename) {
 		MakeGlueInput* input = *it;
 		// コレクションクラスの要素に対するアセクササメソッド
 		KTROBO::mylog::writelog(filename, "%s* getCol%s ( int index) {\n", input->collection_name, input->collection_name);
-		KTROBO::mylog::writelog(filename, "  return m_%s[index];\n", input->collection_name);
+		KTROBO::mylog::writelog(filename, "  int size = m_%s.size();\n", input->collection_name);
+		KTROBO::mylog::writelog(filename, "  if (size > index && index >=0) {\n");
+		KTROBO::mylog::writelog(filename, "    return m_%s[index];\n", input->collection_name);
+		KTROBO::mylog::writelog(filename, "  } else {\n");
+		KTROBO::mylog::writelog(filename, "    throw new GameError(KTROBO::WARNING, \" try to access outside vector %s\");\n", input->collection_name);
+		KTROBO::mylog::writelog(filename, "  }\n");
 		KTROBO::mylog::writelog(filename, "}\n");
 
 		KTROBO::mylog::writelog(filename, "void setCol%s ( %s* m) {\n", input->collection_name, input->collection_name);
@@ -1220,7 +1225,7 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 
 void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef* def, int i, bool is_construct, bool is_destruct) {
 	// is_construct の場合　c++側ではintとなるがlua側にはテーブルで返す
-	// is_destruct の場合　何も返さない
+	// is_destruct の場合　c++側でint を返し　lua側にもintで返す
 	if (is_construct) {
 		// スタックに新しい配列を入れ込む
 		KTROBO::mylog::writelog(filename, "{\n");
@@ -1266,6 +1271,9 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 	}
 	
 	if (is_destruct) {
+//		KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
+//		KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n",TEMPSTRING_SIZE, "%d", "kaeriti");
+		KTROBO::mylog::writelog(filename, "lua_pushnumber(L, kaeriti);\n");
 		return;
 	}
 	// func の場合　
@@ -1763,16 +1771,72 @@ int MyLuaGlueMake::outputLua(char* filename) {
 	// global my_interfaces; にクラスの定義を
 	// global my_instances; にインスタンスの参照を入れる
 
+	// スレッドごとに異なるlua_Stateを採用するようにする
+	// スレッド間のデータ(オブジェクト)連携はどうするのか
+	// たとえばロード処理スレッドでオブジェクトが生成または破棄されたときに
+	// 更新処理スレッドでどうやってそのオブジェクトを追加または削除するか
+	// その１　luaファイルが呼び出されるごとに全オブジェクトをロードするようにする
+	// その２　生成破棄処理で生成破棄されたオブジェクトをｃ＋＋側またはファイルに記録しておき　
+	//         その記録をよびだされたluaファイルが読み込んで該当の処理を行う
+	// その３　更新スレッドで生成破棄スレッドに生成破棄の支持をだし、生成破棄スレッドでは完了の合図だけ送る
+	//         更新スレッドでは　破棄時は指示時から使わず、生成時は完了の合図を確認したときのみからそのオブジェクトの更新を開始する
 
+	// わけているようだが結局のところ何がロードされるかの情報をどこで持つかという話になる?
+	// 生成破棄処理スレッドで呼ばれるluaファイル自体に持たせるのか,それとも外部からよみこんでそれをロードする形にするのか
+	// luaファイルに決めうちでロードさせるのもよいけどその場合どうやって更新処理にもっていくかの話が出てくる
+	// MeshInstanced に関して考えてみると 
+	// 決まったモデルがあらかじめ分かっていて固定の量のロードをして大丈夫であれば実装が楽だが
+	// いつ新たに生成破棄が行われる必要が出てくるかわからないということになると様相が変わってくる
+	// 不確定な生成破棄が行われる場合のMeshInstancedがある場合どう対応するか
 	
+	// 生成処理
+	// 1. 今までのMeshInstancedsのコピーをとる
+	// 2. そのコピーをロード状態に設定する
+	// 3. コピーに新たに加わったMeshInstancedを加える(ロードする）
+	// 4. そのコピーのロード状態を解除し、今までのMeshInstancedsと入れ替える!(どうやって実現するかは考えどころ)
+
+	// 破棄処理
+	// 1. フラグを立ててそのインスタンスをどのスレッドも利用できないような状態または仕組みを作る
+	// 2. フラグがたっているインスタンスのデータのみ（インスタンスの参照自体は消さない）破棄する
+	//    (生成破棄スレッドでc++側のGCメソッドとよべばいいのかをよぶ仕組みを作る)
+	// 3. これでOK　現状のMeshInstancedsではMeshInstancedの参照を保存しているベクトル構造体？から破棄するとインデックスが狂うので
+	// この仕組みで大丈夫なはず！
+     
+	int isize = inputs.size();
+	for (int i=0;i<isize;i++) {
+		MakeGlueInput* input = inputs[i];
+		KTROBO::mylog::writelog(filename, "%s = %s or { count =0 }\n", input->collected_name, input->collected_name);
+		int csize = input->construct_defs.size();
+		for (int k=0;k<csize;k++) {
+			MyFuncDef* def = input->construct_defs[k];
+			KTROBO::mylog::writelog(filename, "function %s:%s(collection_index, ...)\n", input->collected_name, def->func_name);
+			KTROBO::mylog::writelog(filename, "  local t = %s_%s(collection_index,0, ...)\n", input->collection_name, def->func_name);
+			KTROBO::mylog::writelog(filename, "  %s.count = %s.count+1\n", input->collected_name, input->collected_name);
+			KTROBO::mylog::writelog(filename, "  setmetatable(t, {__index = %s})\n", input->collected_name);
+			KTROBO::mylog::writelog(filename, "  return t;\n");
+			KTROBO::mylog::writelog(filename, "end\n");
+		}
+
+		int dsize = input->destruct_defs.size();
+		for (int k=0;k<dsize;k++) {
+			MyFuncDef* def = input->destruct_defs[k];
+			KTROBO::mylog::writelog(filename, "function %s:%s(self, ...)\n", input->collected_name, def->func_name);
+			KTROBO::mylog::writelog(filename, "  c = %s_%s(self[1].%s,self[1].%s , ...)\n", input->collection_name, def->func_name, COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
+			KTROBO::mylog::writelog(filename, "  %s.count = %s.count-c\n", input->collected_name, input->collected_name);
+			KTROBO::mylog::writelog(filename, "end\n");
+		}
+
+
+		int fsize = input->func_defs.size();
+		for (int k=0;k<fsize;k++) {
+			MyFuncDef* def = input->func_defs[k];
+			KTROBO::mylog::writelog(filename, "function %s:%s(self, ...)\n", input->collected_name, def->func_name);
+			KTROBO::mylog::writelog(filename, " return %s_%s(self[1].%s,self[1].%s , ...)\n", input->collection_name, def->func_name, COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
+			KTROBO::mylog::writelog(filename, "end\n");
+		}
 	
-	
-	
-	
+	}
 
 	return 1;
-	
-	
-	
 	
 };
