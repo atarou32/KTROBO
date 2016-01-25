@@ -754,7 +754,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, i+1);\n");
 					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
 					KTROBO::mylog::writelog(filename, "  %s[i] = (bool)lua_toboolean(L, -1);\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "  lua_remove(L,1);\n");
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 					KTROBO::mylog::writelog(filename, "}\n");
 				

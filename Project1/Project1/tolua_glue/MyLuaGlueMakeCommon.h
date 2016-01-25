@@ -63,6 +63,7 @@
 // 同じSUPER_COLLECTEDを設定したクラスを複数登録するとCOLLECTEDとした引数の参照はどれかひとつしかされなくなる
 // 例　Mesh* mesh; があって　WrappedMesh : public Mesh;  WrappedMesh2 : public Mesh を登録した際に
 //     makeInstanced(COLLECTED Mesh* mesh, COLLECTED Mesh* skeleton) みたいなメソッドを読んだ際に1か2のどちらかのコレクションクラスからしか参照がされなくなる
+// コンストラクタデストラクタはひとつのクラスにつき一個のみ
 
 #define COLLECTION_INDEX_LUA_FIELD "collection_index"
 #define COLLECTION_CLASS_LUA_FIELD "collection_class_name"

@@ -401,7 +401,7 @@ void Mesh::readAnime(char* filename) {
 
 	// Œã•Ð‚Ã‚¯
 	a.deletedayo();
-	animate(0,true);
+	//animate(0,true);
 	return;
 
 

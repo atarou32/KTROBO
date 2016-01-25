@@ -77,13 +77,13 @@ void CALCCOMBINEDTCB(TCB* thisTCB) {
 	MeshInstanceds* mis = (MeshInstanceds*)thisTCB->data;
 	Graphics* g = (Graphics*)thisTCB->Work[0];
 
-	if (!mis->getIsLoad()) {
+	//if (!mis->getIsLoad()) {
 		
 		mis->loadAnimeMatrixBasisToTexture(g);
 		mis->loadMatrixLocalToTexture(g);
 		mis->calcCombinedMatrixToTexture(g);
 		mis->loadColorToTexture(g);
-	}
+	//}
 
 }
 
@@ -99,14 +99,14 @@ void LOADMESHTCB(TCB* thisTCB) {
 	int error;
 	try {
 		error = luaL_loadfile(L, buff) || lua_pcall(L, 0, 0, 0);
-		m->setIsLoad(false);
+	//	m->setIsLoad(false);
 	}catch (GameError* err) {
 		
 		MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
 		delete err;
 	}
     if (error) {
-		//mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
+		mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
 		OutputDebugStringA(lua_tostring(L,-1));
         lua_pop(L, 1);
     } else {
@@ -330,8 +330,8 @@ bool Game::Init(HWND hwnd) {
     L = luaL_newstate();
     luaL_openlibs(L);
 	cltf = new TextFromLuas(g);
-	wmeshs = new WrappedMeshs(g, demo->tex_loader);
-	MyLuaGlueSingleton::getInstance()->setColWrappedMeshs(wmeshs);
+	cmeshs = new CMeshs(g, demo->tex_loader);
+	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
@@ -349,7 +349,7 @@ bool Game::Init(HWND hwnd) {
 }
 void Game::Del() {
 
-	 lua_close(L);
+	
 
 
 	
@@ -368,12 +368,12 @@ void Game::Del() {
 			g_for_task_threads[i] = 0;
 		}
 	}
-
+	lua_close(L);
 	KTROBO::CS::instance()->Del();
 
-	 if (wmeshs) {
-		 delete wmeshs;
-		 wmeshs = 0;
+	 if (cmeshs) {
+		 delete cmeshs;
+		 cmeshs = 0;
 	 }
 
 	 

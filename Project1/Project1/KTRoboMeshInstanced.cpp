@@ -1525,10 +1525,10 @@ void MeshInstanceds::render(Graphics* g) {
 	//g->getDeviceContext()->ClearDepthStencilView(mss_for_render.depthstencilview, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	// まず
 
-	if (getIsLoad()) {
+//	if (getIsLoad()) {
 		// ロード中なので描画せずにリターンする
-		return;
-	}
+	//	return;
+//	}
 
 	RENDERINSTANCEINFOSTRUCT stt[ KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE];
 	memset(stt, 0 , sizeof(RENDERINSTANCEINFOSTRUCT)*KTROBO_MESH_INSTANCED_RENDER_INSTANCE_STRUCT_TEMPSIZE);

@@ -9,7 +9,7 @@
 #include "tolua_glue/MyLuaGlueMakeCommon.h"
 #include "KTRoboGameError.h"
 #include "KTRoboLuaCollection.h"
-
+#include "KTRoboLuaCMesh.h"
 
 namespace KTROBO {
 #define KTROBO_MESH_INSTANCED_COLOR_MAX 12
@@ -323,7 +323,7 @@ struct MESHINSTANCED_CBUF3 {
 #define KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL 0xFFFF
 
 
-class MeshInstanceds : public Loadable{
+class MeshInstanceds{
 public:
 	void clearLoadState() {
 		int sml_size = skeletons.size();
@@ -380,7 +380,7 @@ private:
 	void setCBuf3(Graphics* g, unsigned int color_id);
 
 public:
-	MeshInstanceds(Graphics* g, MyTextureLoader* tex_loader) : Loadable() {
+	MeshInstanceds(Graphics* g, MyTextureLoader* tex_loader) {
 		matrix_local_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_LOCAL_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_LOCAL_TEXTURE_WIDTH_HEIGHT);
 		anime_matrix_basis_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_BASIS_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_BASIS_TEXTURE_WIDTH_HEIGHT);
 		combined_matrix_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_MATRIX_COMBINED_TEXTURE_WIDTH_HEIGHT);
@@ -532,9 +532,30 @@ public:
 		return skeleton_size;
 	}
 
-	int makeInstancedID(COLLECTED Mesh* mesh, COLLECTED Mesh* skeleton, COLLECTED MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, YARITORI MYMATRIX* matrix_local_kakeru) {
-		execConstructOrDestruct();
+
+	int makeInstancedID(COLLECTED CMesh* cmesh, int mesh_index, int skeleton_index, COLLECTED MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, YARITORI MYMATRIX* matrix_local_kakeru) {
+		if (cmesh == NULL) {
+			throw new GameError(KTROBO::WARNING, "error in make instanceid cmesh is null");
+		}
+
+		Mesh* mesh = cmesh->getCollectedMesh(mesh_index);
+		Mesh* skeleton = cmesh->getCollectedMesh(skeleton_index);
+		
+		if (mesh == NULL || skeleton == NULL) {
+			throw new GameError(KTROBO::WARNING, "error in make instanceid");
+		}
+
+		CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
+		CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+		CS::instance()->enter(CS_MAINTHREAD_CS, "main lock");
+		CS::instance()->enter(CS_TASK_CS, "anime lock", 2);
+		// ‚±‚êˆÈ~‚Íl‚¦‚È‚­‚Ä‚æ‚¢ “–‚½‚è”»’è‚Í‚Ç‚¤‚µ‚½‚ç‚¢‚¢‚Ì‚©
 		MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
+		CS::instance()->leave(CS_TASK_CS, "anime lock",2);
+		CS::instance()->leave(CS_MAINTHREAD_CS, "main lock");
+		CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+		CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+
 		return m->getInstanceIndex();
 	}
 

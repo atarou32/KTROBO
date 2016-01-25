@@ -9,7 +9,8 @@ namespace KTROBO {
 // ロード処理を持つクラスで他のスレッドとの競合が発生しそうなクラスに使う
 // そのクラス内のコレクトされるクラスのコンストラクタまたはデストラクタでexecConstructOrDestruct() を呼ぶようにする
 // is_loadをfalseにするのは生成処理破棄処理スレッドのみ
-// is_loadをtrueにするのは他のスレッドということにしよう
+// is_loadをtrueにするのは他のスレッドのどれかひとつのみ
+// is_load を頻繁に変えられることは考えられていない
 
 class Loadable
 {
@@ -34,8 +35,9 @@ public:
 		}
 	}
 
-	void execConstructOrDestruct() {
-
+	void execConstructOrDestruct() { 
+		// このメソッドはis_loadをfalseにするのが生成破棄処理スレッドだけしかしないことを前提としている
+		// しかし、現在のところ他のスレッドでもis_loadをfalseにできるこれには注意しなければならない
 		if (is_load) {
 			// 大丈夫
 		} else {

@@ -7,6 +7,7 @@
 #include "KTRoboGraphics.h"
 
 namespace KTROBO {
+
 interface ITextFromLua {
 public:
 	TO_LUA virtual void setDebugText(char* str)=0;

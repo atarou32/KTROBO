@@ -19,7 +19,7 @@
 #include "lua.hpp"
 #include "lualib.h"
 #include "lauxlib.h"
-
+#include "KTRoboLuaCMesh.h"
 #include "KTRoboTextFromLua.h"
 //#include "tolua_glue/tolua_glue.h"
 
@@ -28,9 +28,9 @@ namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
 #define RENDERTIME_SETTIME 33
 
-#define TASKTHREADS_UPDATEANIMEFRAMENADO 0
-#define TASKTHREADS_UPDATEINPUTS 1
-#define TASKTHREADS_UPDATEPOSBUTUKARI 2
+#define TASKTHREADS_UPDATEANIMEFRAMENADO 2
+#define TASKTHREADS_UPDATEINPUTS 0
+#define TASKTHREADS_UPDATEPOSBUTUKARI 1
 #define TASKTHREADS_LOADDESTRUCT 3
 #define TASKTHREADS_AIDECISION 4
 
@@ -68,7 +68,7 @@ private:
 	IMeshInstanced* mesh_is2[30];
 	MyTestForVertexTexture* mytest_for_vt;
 	TextFromLuas* cltf;
-	WrappedMeshs* wmeshs;
+	CMeshs* cmeshs;
 public:
 	Game(void);
 	~Game(void);
