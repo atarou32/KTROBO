@@ -19,7 +19,7 @@ public:
 	TO_LUA virtual void setIsLoad(bool t)=0;
 	TO_LUA virtual void deleteMesh(char* path_without_dot)=0;
 	TO_LUA virtual void deleteALL()=0;
-	TO_LUA virtual void copyDAYO(CMesh* src)=0;
+	TO_LUA virtual void copyDAYO(COLLECTED CMesh* src)=0;
 };
 
 struct Meshdayo {
@@ -42,7 +42,7 @@ public:
 	Mesh* getCollectedMesh(int index);
 	CMesh(Graphics* g, MyTextureLoader* tex_loader);
 	~CMesh();
-	void copyDAYO(CMesh* src);
+	void copyDAYO(COLLECTED CMesh* src);
 };
 
 class CMeshs {
