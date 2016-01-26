@@ -1333,13 +1333,15 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 			break;
 			case MyDefType::INT:
 				if (def->kaeriti.is_pointer) {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n",TEMPSTRING_SIZE, "%d", "*kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+//				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
+//				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n",TEMPSTRING_SIZE, "%d", "*kaeriti");
+//				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, *kaeriti);\n");
 				} else {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n", TEMPSTRING_SIZE, "%d",  "kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+//				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
+//				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n", TEMPSTRING_SIZE, "%d",  "kaeriti");
+//				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, kaeriti);\n");
 				}
 			break;
 			case MyDefType::PCHAR:
@@ -1360,15 +1362,11 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 			break;
 			case MyDefType::SHORT:
 				if (def->kaeriti.is_pointer) {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n", TEMPSTRING_SIZE, "%d", "*kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, *kaeriti);\n");
 				} else {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n",TEMPSTRING_SIZE, "%d", "kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, kaeriti);\n");
 				}
-	
+		
 			break;
 			case MyDefType::UCHAR:
 				if (def->kaeriti.is_pointer) {
@@ -1379,27 +1377,19 @@ void MyLuaGlueMake::pushKAERITI(char* filename, MakeGlueInput* input, MyFuncDef*
 			break;
 			case MyDefType::UINT:
 				if (def->kaeriti.is_pointer) {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n", TEMPSTRING_SIZE, "%ud", "*kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, *kaeriti);\n");
 				} else {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n", TEMPSTRING_SIZE, "%ud", "kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, kaeriti);\n");
 				}
-	
+		
 			break;
 			case MyDefType::USHORT:
 				if (def->kaeriti.is_pointer) {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n",TEMPSTRING_SIZE, "%ud", "*kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, *kaeriti);\n");
 				} else {
-				KTROBO::mylog::writelog(filename, "{char tempp[%d];memset(tempp,0,%d);\n", TEMPSTRING_SIZE, TEMPSTRING_SIZE);
-				KTROBO::mylog::writelog(filename, "sprintf_s(tempp, %d, \"%s\",%s);\n", TEMPSTRING_SIZE, "%ud", "kaeriti");
-				KTROBO::mylog::writelog(filename, "lua_pushstring(L, tempp);\n}");
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L, kaeriti);\n");
 				}
-	
+		
 			break;
 			case MyDefType::VOIDDAYO:
 			return;
@@ -1519,6 +1509,34 @@ void MyLuaGlueMake::_writeFuncSengen(char* filename, MakeGlueInput* input, MyFun
 }
 
 
+void MyLuaGlueMake::_writeFunc2(char* filename, MakeGlueInput* input) {
+
+// 使わない！
+/*
+	KTROBO::mylog::writelog(filename, "int KTROBO::%s_getInstanceGlue(lua_State* L) {\n", input->collection_name);
+	int kaeriti_size = 0;
+	int hikisuu_size = 0;
+
+	// コレクションクラスのインデックスを指定する必要があるのでこれも加える
+	kaeriti_size++;kaeriti_size++; // コンストラクタデストラクタの場合も仮にcollected_indexをLua側から渡しておく
+	kaeriti_size++;// コレクションクラスを返すのでそのため
+	
+	// 変数の宣言
+	KTROBO::mylog::writelog(filename, "  int collection_index = lua_tonumber(L,1);\n");
+	KTROBO::mylog::writelog(filename, "  int collected_index = lua_tonumber(L,2);\n");
+
+
+	// 関数呼び出し
+	KTROBO::mylog::writelog(filename, "  %s* kaeri = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(collection_index)->getInstance(collected_index);\m", input->collected_name,input->collection_name);
+
+
+	// 返り値をプッシュする
+
+	// リターンする
+	KTROBO::mylog::writelog(filename, "return %d;\n", kaeriti_size); 
+	KTROBO::mylog::writelog(filename, "}\n");
+*/
+}
 
 void MyLuaGlueMake::writeFunc(char *filename) {
 	//KTROBO::mylog::writelog(filename, " public:\n");
@@ -1545,10 +1563,19 @@ void MyLuaGlueMake::writeFunc(char *filename) {
 
 			_writeFunc(filename, input, def, false, false);
 		}
+
+		// collection クラスのcollectされているクラスのアクセスメソッド
+		_writeFunc2(filename, input);
 	
 		it = it + 1;
 	}
 }
+void MyLuaGlueMake::_writeFuncSengen2(char* filename, MakeGlueInput* input) {
+
+
+	//KTROBO::mylog::writelog(filename, "int %s_getInstanceGlue(lua_State* L);\n", input->collection_name);
+}
+
 
 void MyLuaGlueMake::writeFuncSengen(char *filename) {
 	//KTROBO::mylog::writelog(filename, " public:\n");
@@ -1575,6 +1602,9 @@ void MyLuaGlueMake::writeFuncSengen(char *filename) {
 
 			_writeFuncSengen(filename, input, def, false, false);
 		}
+
+		// collection クラスのcollectされるクラスのアクセスメソッド
+		_writeFuncSengen2(filename, input);
 	
 		it = it + 1;
 	}
@@ -1813,14 +1843,28 @@ int MyLuaGlueMake::outputLua(char* filename) {
 			KTROBO::mylog::writelog(filename, "  local t = %s_%s(collection_index,0, ...)\n", input->collection_name, def->func_name);
 			KTROBO::mylog::writelog(filename, "  %s.count = %s.count+1\n", input->collected_name, input->collected_name);
 			KTROBO::mylog::writelog(filename, "  setmetatable(t, {__index = %s})\n", input->collected_name);
-			KTROBO::mylog::writelog(filename, "  return t;\n");
+			KTROBO::mylog::writelog(filename, "  return t\n");
 			KTROBO::mylog::writelog(filename, "end\n");
 		}
+
+		// 偽装オブジェクトを返すメソッド
+		KTROBO::mylog::writelog(filename, "function %s:getIS(c_index, cd_index)\n", input->collected_name);
+		KTROBO::mylog::writelog(filename, "  local t ={}\n");
+		KTROBO::mylog::writelog(filename, "  t[1] = {}\n");
+		KTROBO::mylog::writelog(filename, "  t[1].%s = c_index\n", COLLECTION_INDEX_LUA_FIELD);
+		KTROBO::mylog::writelog(filename, "  t[1].%s = cd_index\n", COLLECTED_INDEX_LUA_FIELD);
+		KTROBO::mylog::writelog(filename, "  t[1].%s = \"%s\"\n", COLLECTED_CLASS_LUA_FIELD, input->collected_name);
+		KTROBO::mylog::writelog(filename, "  t[1].%s = \"%s\"\n", COLLECTION_CLASS_LUA_FIELD, input->collection_name);
+		KTROBO::mylog::writelog(filename, "  t[1].%s = \"%s\"\n", COLLECTED_INTERFACE_LUA_FIELD, input->interface_name);
+		KTROBO::mylog::writelog(filename, "  setmetatable(t, {__index= %s})\n", input->collected_name);
+		KTROBO::mylog::writelog(filename, "  return t\n");
+		KTROBO::mylog::writelog(filename, "end\n");
+
 
 		int dsize = input->destruct_defs.size();
 		for (int k=0;k<dsize;k++) {
 			MyFuncDef* def = input->destruct_defs[k];
-			KTROBO::mylog::writelog(filename, "function %s:%s(self, ...)\n", input->collected_name, def->func_name);
+			KTROBO::mylog::writelog(filename, "function %s:%s(...)\n", input->collected_name, def->func_name);
 			KTROBO::mylog::writelog(filename, "  c = %s_%s(self[1].%s,self[1].%s , ...)\n", input->collection_name, def->func_name, COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
 			KTROBO::mylog::writelog(filename, "  %s.count = %s.count-c\n", input->collected_name, input->collected_name);
 			KTROBO::mylog::writelog(filename, "end\n");
@@ -1830,7 +1874,7 @@ int MyLuaGlueMake::outputLua(char* filename) {
 		int fsize = input->func_defs.size();
 		for (int k=0;k<fsize;k++) {
 			MyFuncDef* def = input->func_defs[k];
-			KTROBO::mylog::writelog(filename, "function %s:%s(self, ...)\n", input->collected_name, def->func_name);
+			KTROBO::mylog::writelog(filename, "function %s:%s(...)\n", input->collected_name, def->func_name);
 			KTROBO::mylog::writelog(filename, " return %s_%s(self[1].%s,self[1].%s , ...)\n", input->collection_name, def->func_name, COLLECTION_INDEX_LUA_FIELD, COLLECTED_INDEX_LUA_FIELD);
 			KTROBO::mylog::writelog(filename, "end\n");
 		}

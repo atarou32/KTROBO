@@ -203,9 +203,10 @@ private:
 	void writeFunc(char* filename);
 	void writeFuncSengen(char* filename);
 	void _writeFuncSengen(char* filename, MakeGlueInput* input, MyFuncDef* def, bool is_construct, bool is_destruct);
-
+	void _writeFuncSengen2(char* filename, MakeGlueInput* input);
 	void writeRegister(char* filename);
 	void _writeFunc(char* filename, MakeGlueInput* input, MyFuncDef* def, bool is_construct, bool is_destruct);
+	void _writeFunc2(char* filename, MakeGlueInput* input);
 	void checkType(char *filename, MakeGlueInput* input, MyFuncDef* def, int i);
 
 	void sengen(char* filename, MakeGlueInput* input, MyFuncDef* def, int i);

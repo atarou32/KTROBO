@@ -547,12 +547,12 @@ public:
 
 		CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
 		CS::instance()->enter(CS_TASK_CS, "load lock", 3);
-		CS::instance()->enter(CS_MAINTHREAD_CS, "main lock");
-		CS::instance()->enter(CS_TASK_CS, "anime lock", 2);
+		CS::instance()->enter(CS_TASK_CS, "render lock",2);
+		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		// ‚±‚êˆÈ~‚Íl‚¦‚È‚­‚Ä‚æ‚¢ “–‚½‚è”»’è‚Í‚Ç‚¤‚µ‚½‚ç‚¢‚¢‚Ì‚©
 		MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
-		CS::instance()->leave(CS_TASK_CS, "anime lock",2);
-		CS::instance()->leave(CS_MAINTHREAD_CS, "main lock");
+		CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+		CS::instance()->leave(CS_TASK_CS, "render lock",2);
 		CS::instance()->leave(CS_TASK_CS, "load lock", 3);
 		CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
 

@@ -96,6 +96,7 @@ void CMesh::copyDAYO(CMesh* src) {
 		Meshdayo* me = new Meshdayo();
 		me->has_responsibility = false;
 		me->mesh = m->mesh;
+		meshs.push_back(me);
 	}
 	meshname_index = src->meshname_index;
 }

@@ -10,14 +10,18 @@
 #include "process.h"
 
 // 複数ロックするときの順番
-// AI(TASK4) LOAD(TASK3) MAIN ANIME(TASK2) BUTUKARI(TASK1) INPUT(TASK0) DEVICE LOAD LOG の順
+// AI(TASK4) LOAD(TASK3) INPUT(MAIN) ANIME(TASK2) BUTUKARI(TASK1) MAIN(TASK0) DEVICE LOAD LOG の順
 
 namespace KTROBO {
 #define CS_LOG_CS 2
 #define CS_TASK_CS 3
 #define CS_DEVICECON_CS 4
 #define CS_MAINTHREAD_CS 5
-#define CS_LOAD_CS 6
+#define CS_LOAD_CS 6 // ロードストラクトのロード及び破棄処理に使われる
+#define CS_MESSAGE_CS 7 // スレッド間のデータのやり取りにも使われる
+// 例　GUIボタンでボタンが押されたと判定するのがhandleMessageでその処理の結果、クラスの更新キュー
+
+
 
 
 struct CRITICAL_MYSTRUCT {
@@ -34,6 +38,7 @@ private:
 	CRITICAL_MYSTRUCT DEVICECON_CS;
 	CRITICAL_MYSTRUCT MAINTHREAD_CS; // メインのスレッドが止まっているかどうかに使う
 	CRITICAL_MYSTRUCT LOAD_CS;
+	CRITICAL_MYSTRUCT MESSAGE_CS;
 	bool is_main_enter;
 private:
 	CS(void);
@@ -74,6 +79,9 @@ public:
 		InitializeCriticalSection(&LOAD_CS.cs);
 		LOAD_CS.lock_count = 0;
 		LOAD_CS.thread_id = 0;
+		InitializeCriticalSection(&MESSAGE_CS.cs);
+		MESSAGE_CS.lock_count = 0;
+		MESSAGE_CS.thread_id = 0;
 
 	}
 
@@ -85,6 +93,7 @@ public:
 		DeleteCriticalSection(&DEVICECON_CS.cs);
 		DeleteCriticalSection(&MAINTHREAD_CS.cs);
 		DeleteCriticalSection(&LOAD_CS.cs);
+		DeleteCriticalSection(&MESSAGE_CS.cs);
 	}
 
 	~CS(void);
@@ -155,6 +164,18 @@ public:
 			LOAD_CS.thread_id = GetCurrentThreadId();
 			int length = strlen(buf);
 			log(index, buf, length);
+		} else if(index == CS_MESSAGE_CS) {
+			if (MESSAGE_CS.lock_count != 0) {
+				if (GetCurrentThreadId() == MESSAGE_CS.thread_id) {
+					MESSAGE_CS.lock_count++;
+					return;
+				}
+			}
+			EnterCriticalSection(&MESSAGE_CS.cs);
+			MESSAGE_CS.lock_count++;
+			MESSAGE_CS.thread_id = GetCurrentThreadId();
+			int length = strlen(buf);
+			log(index, buf, length);
 		}
 	}
 
@@ -211,6 +232,16 @@ public:
 				return;
 			}
 			LeaveCriticalSection(&LOAD_CS.cs);
+			int length = strlen(buf);
+			log(index, buf, length);
+		} else if(index == CS_MESSAGE_CS) {
+			if (MESSAGE_CS.lock_count) {
+				MESSAGE_CS.lock_count--;
+			}
+			if (MESSAGE_CS.lock_count) {
+				return;
+			}
+			LeaveCriticalSection(&MESSAGE_CS.cs);
 			int length = strlen(buf);
 			log(index, buf, length);
 		}

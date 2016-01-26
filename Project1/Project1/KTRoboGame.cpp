@@ -72,6 +72,12 @@ Game::~Game(void)
 {
 }
 
+void RENDERTCB(TCB* thisTCB) {
+	Game* g = (Game*)(thisTCB->data);
+
+	g->Run();
+}
+
 
 void CALCCOMBINEDTCB(TCB* thisTCB) {
 	MeshInstanceds* mis = (MeshInstanceds*)thisTCB->data;
@@ -84,7 +90,6 @@ void CALCCOMBINEDTCB(TCB* thisTCB) {
 		mis->calcCombinedMatrixToTexture(g);
 		mis->loadColorToTexture(g);
 	//}
-
 }
 
 
@@ -113,6 +118,7 @@ void LOADMESHTCB(TCB* thisTCB) {
 	
 		t->kill(thisTCB);
 	}
+	Sleep(1);
 }
 
 bool Game::Init(HWND hwnd) {
@@ -344,6 +350,8 @@ bool Game::Init(HWND hwnd) {
 
 	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,L,work,0x0000FFFF);
 
+	memset(work,0,sizeof(work));
+	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 
 	return true;
 }
@@ -355,8 +363,20 @@ void Game::Del() {
 	
 
 
+	if (task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
+		task_threads[TASKTHREADS_UPDATEMAINRENDER]->deleteTask();
+		delete task_threads[TASKTHREADS_UPDATEMAINRENDER];
+		task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
+	}
+	if(g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]->Release();
+		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
+	}
+
 	// 順番を変えないこと　cs と　タスクの間に依存関係がある
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {
+		if (i != TASKTHREADS_UPDATEMAINRENDER) {
 		if (task_threads[i]) {
 			task_threads[i]->deleteTask();
 			delete task_threads[i];
@@ -367,9 +387,14 @@ void Game::Del() {
 			delete g_for_task_threads[i];
 			g_for_task_threads[i] = 0;
 		}
+		}
 	}
+
+	
+
+
 	lua_close(L);
-	KTROBO::CS::instance()->Del();
+	
 
 	 if (cmeshs) {
 		 delete cmeshs;
@@ -382,6 +407,7 @@ void Game::Del() {
 		 cltf= 0;
 	 }
 
+	KTROBO::CS::instance()->Del();
 
 	KTROBO::DebugTexts::instance()->Del();
 

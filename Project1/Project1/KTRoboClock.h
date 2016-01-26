@@ -12,6 +12,13 @@ private:
 	float dmsecond;
 	bool is_paused;
 public:
+	Clock() {
+		this->bigtimecycle = 0;
+		this->second = 0;
+		this->dmsecond = 0;
+		is_paused = false;
+	}
+
 	Clock(long bigtimecycle, long second, float dmsecond) {
 		this->bigtimecycle = bigtimecycle;
 		this->second = second;

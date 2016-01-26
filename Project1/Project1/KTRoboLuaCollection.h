@@ -15,7 +15,7 @@ namespace KTROBO {
 class Loadable
 {
 protected:
-	bool is_load; // collectされるクラスを生成中かどうか
+	volatile bool is_load; // collectされるクラスを生成中かどうか
 
 public:
 //	virtual int getInstance(int index)=0;
@@ -28,21 +28,21 @@ public:
 	}
 
 	void setIsLoad(bool t) {
-		if (t != is_load) {
+		
 			CS::instance()->enter(CS_LOAD_CS, "set isload");
 			is_load = t;
 			CS::instance()->leave(CS_LOAD_CS, "set isload");
-		}
 	}
 
 	void execConstructOrDestruct() { 
 		// このメソッドはis_loadをfalseにするのが生成破棄処理スレッドだけしかしないことを前提としている
 		// しかし、現在のところ他のスレッドでもis_loadをfalseにできるこれには注意しなければならない
+		CS::instance()->enter(CS_LOAD_CS, "set isload");
 		if (is_load) {
 			// 大丈夫
 		} else {
 
-			CS::instance()->enter(CS_LOAD_CS, "set isload");
+			
 			if (is_load) {
 				// 大丈夫
 			} else {
@@ -50,13 +50,18 @@ public:
 				CS::instance()->leave(CS_LOAD_CS, "set isload");
 				throw new GameError(KTROBO::WARNING, "exception in execConstructOrDestruct");
 			}
-			CS::instance()->leave(CS_LOAD_CS, "set isload");
+			
 		}
+		CS::instance()->leave(CS_LOAD_CS, "set isload");
 	}
 
 
 	bool getIsLoad() {
-		return is_load;
+
+		CS::instance()->enter(CS_LOAD_CS, "get isload");
+		bool t = is_load;
+		CS::instance()->leave(CS_LOAD_CS, "get isload");
+		return t;
 	}
 };
 

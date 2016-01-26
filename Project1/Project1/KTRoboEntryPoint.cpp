@@ -8,11 +8,11 @@
 #include "KTRoboGame.h"
 #include "KTRoboGameError.h"
 #include "KTRoboLog.h"
-
+#include "KTRoboInput.h"
 
 HWND g_hWnd = NULL;
 
-HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow );
+HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow, Input* input );
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM );
 KTROBO::Game* game;
 const WCHAR CLASS_NAME[] = L"KTROBO ver 0.01";
@@ -50,7 +50,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		return 0;
 	}
 
-	if(FAILED( InitWindow(hInstance, nCmdShow))){
+	Input* input = new Input();
+	if(FAILED( InitWindow(hInstance, nCmdShow, input))){
 		return 0;
 	}
 
@@ -81,7 +82,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			TranslateMessage( &msg );
 			DispatchMessage( &msg );
 		}else{
-			game->Run();
+			Sleep(1);
 		}
 	}
 	}catch (KTROBO::GameError& err) {
@@ -94,6 +95,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 ktrobo_error:
 
 	ClearMainWindow(hInstance);
+	if (input) {
+		delete input;
+		input = 0;
+	}
 	if (game) {
 		game->Del();
 		delete game;
@@ -102,12 +107,12 @@ ktrobo_error:
 	return 0;//(int)msg.wParam;
 }
 
-HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
+HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow, Input* input )
 {
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= WndProc;
+	wcex.lpfnWndProc	= input->myWndProc;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
@@ -138,6 +143,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow )
     return S_OK;
 }
 
+/*
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     PAINTSTRUCT ps;
@@ -160,5 +166,5 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
 
     return 0;
 }
-
+*/
 

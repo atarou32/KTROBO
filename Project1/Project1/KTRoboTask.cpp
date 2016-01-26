@@ -81,7 +81,8 @@ TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, long* work, unsigned int p
 
 	if (id == MAX_TASK_COUNT) {
 		CS::instance()->leave(CS_TASK_CS,"",index);
-		return NULL;
+		throw new GameError(KTROBO::FATAL_ERROR, "to many tasks");
+		//return NULL;
 	}
 	newTCB = &Tasks[id];
 	prevTCB = Tasks;
