@@ -139,7 +139,7 @@ void InputMessageDispatcher::messageDispatch() {
 		if (s->getISUSE()) {
 			// 処理を行う
 			for (int i=0;i<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;i++) {
-				if (!InputMessageDispatcher::message_getter_structs[i].getParent() && message_getter_structs[i].setIsUse()) {					
+				if (!InputMessageDispatcher::message_getter_structs[i].getParent() && message_getter_structs[i].getIsUse()) {					
 					_messageDispatch(s, &message_getter_structs[i], time);
 				}
 			}
@@ -203,13 +203,13 @@ void InputMessageDispatcher::messageMake() {
 
 	DWORD n_time = timeGetTime();
 	if (now_time != n_time) {
-		dt += n_time- now_time;
+		dt += (WORD)(n_time- now_time);
 
 		now_time = n_time;
 		if (now_time - before_time > KTROBO_INPUT_RENSYA_MAX_MILLISECOND) {
 			before_time = now_time;
-		
-			while (dt >0) {
+			int coun=0;
+			while (dt >0 && coun < INPUTJYOUTAI_FRAME_MAX) {
 				// フレームを進める
 				Input::input_jyoutai_index = (Input::input_jyoutai_index+1)% INPUTJYOUTAI_FRAME_MAX;
 				// 該当のフラグを0にする	
@@ -220,6 +220,7 @@ void InputMessageDispatcher::messageMake() {
 				if (dt <0) {
 					dt = 0;
 				}
+				coun++;
 				// 何回も回る場合はフレーム落ち？になる
 			}
 
@@ -497,18 +498,19 @@ void InputMessageDispatcher::unregisterImpl(INPUTSHORICLASS* cl) {
 
 
 
-volatile char Input::keystate[256];
+volatile unsigned char Input::keystate[256];
 volatile MOUSE_STATE Input::mouse_state;
-volatile char Input::b_keystate[256];
+volatile unsigned char Input::b_keystate[256];
 volatile MOUSE_STATE Input::b_mousestate;
-volatile char Input::nagaosi_keycode;// 最後に押されたボタンの仮想キーコード
+volatile unsigned char Input::nagaosi_keycode;// 最後に押されたボタンの仮想キーコード
 volatile DWORD Input::nagaosi_time;// 押されてからたった時間 
 
 volatile long Input::input_jyoutai_idou[INPUTJYOUTAI_FRAME_MAX];
 volatile long Input::input_jyoutai_koudou[INPUTJYOUTAI_FRAME_MAX];
 volatile unsigned int Input::input_jyoutai_index=0;
-volatile char command_key[INPUTJYOUTAI_KEY_INDEX_MAX];
 
 volatile DWORD InputMessageDispatcher::before_time=0;
-volatile DWORD InputMessageDispatcher::dt=0;
+volatile WORD InputMessageDispatcher::dt=0;
 volatile DWORD Input::nagaosi_start_time=0; // 押され始めた時間
+
+volatile unsigned char Input::command_key[INPUTJYOUTAI_KEY_INDEX_MAX];

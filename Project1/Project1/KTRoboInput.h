@@ -76,9 +76,9 @@ public:
 
 struct MOUSE_STATE {
 public:
-	char mouse_r_button;
-	char mouse_l_button;
-	char mouse_m_button;
+	unsigned char mouse_r_button;
+	unsigned char mouse_l_button;
+	unsigned char mouse_m_button;
 
 	DWORD mouse_x;
 	DWORD mouse_y;
@@ -94,7 +94,18 @@ public:
 		mouse_dy = 0;
 	}
 
-	MOUSE_STATE& operator=(MOUSE_STATE& value) {
+	/*MOUSE_STATE& operator=(MOUSE_STATE& value) {
+		this->mouse_dx = value.mouse_dx;
+		this->mouse_dy = value.mouse_dy;
+		this->mouse_l_button = value.mouse_l_button;
+		this->mouse_m_button = value.mouse_m_button;
+		this->mouse_r_button = value.mouse_r_button;
+		this->mouse_x = value.mouse_x;
+		this->mouse_y = value.mouse_y;
+        return *this;
+    }*/
+
+	volatile MOUSE_STATE& operator=(volatile MOUSE_STATE& value)volatile {
 		this->mouse_dx = value.mouse_dx;
 		this->mouse_dy = value.mouse_dy;
 		this->mouse_l_button = value.mouse_l_button;
@@ -106,44 +117,7 @@ public:
     }
 };
 
-class MYINPUTMESSAGESTRUCT : public MYMESSAGESTRUCT{
-public:
-	float X;
-	float Y;
-	float DX;
-	float DY;
-	volatile char keystate[256];
-	volatile MOUSE_STATE mousestate;
-	MYINPUTMESSAGESTRUCT() : MYMESSAGESTRUCT() {
-		X = 0;
-		Y = 0;
-		DX = 0;
-		DY = 0;
-		for (int i=0;i<256;i++) {
-			keystate[i] = 0;
-		}
-		mousestate;
-	}
-
-	float getX() {return X;}
-	float getY() {return Y;}
-	float getDX() {return DX;}
-	float getDY() {return DY;}
-	volatile char* getKEYSTATE() {return keystate;}
-	volatile MOUSE_STATE* getMOUSESTATE() {return &mousestate;}
-
-	void setX(float x) {X=x;}
-	void setY(float y) {Y=y;}
-	void setDX(float dx) {DX=dx;}
-	void setDY(float dy) {DY=dy;}
-	void setKEYSTATE(volatile char* y) {
-		for (int i=0;i<256;i++) {
-			keystate[i]=y[i];
-		}
-	}
-	void setMOUSESTATE(volatile MOUSE_STATE* m) {mousestate=*m;}
-
-};
+class MYMESSAGESTRUCT;
 
 
 #define KTROBO_INPUT_MESSAGE_SENDER_INPUTSYSTEM 0
@@ -185,6 +159,47 @@ public:
 	void setISUSE(bool i) {is_use=i;}
 };
 
+
+class MYINPUTMESSAGESTRUCT : public MYMESSAGESTRUCT{
+public:
+	float X;
+	float Y;
+	float DX;
+	float DY;
+	volatile unsigned char keystate[256];
+	volatile MOUSE_STATE mousestate;
+	MYINPUTMESSAGESTRUCT() : MYMESSAGESTRUCT() {
+		X = 0;
+		Y = 0;
+		DX = 0;
+		DY = 0;
+		for (int i=0;i<256;i++) {
+			keystate[i] = 0;
+		}
+		mousestate;
+	}
+
+	float getX() {return X;}
+	float getY() {return Y;}
+	float getDX() {return DX;}
+	float getDY() {return DY;}
+	volatile unsigned char* getKEYSTATE() {return keystate;}
+	volatile MOUSE_STATE* getMOUSESTATE() {return &mousestate;}
+
+	void setX(float x) {X=x;}
+	void setY(float y) {Y=y;}
+	void setDX(float dx) {DX=dx;}
+	void setDY(float dy) {DY=dy;}
+	void setKEYSTATE(volatile unsigned char* y) {
+		for (int i=0;i<256;i++) {
+			keystate[i]=y[i];
+		}
+	}
+	void setMOUSESTATE(volatile MOUSE_STATE* m) {mousestate=*m;}
+
+};
+
+
 #define KTROBO_INPUTMESSAGESTRUCT_SIZE 128
 #define KTROBO_INPUTGETMESSAGESTRUCT_SIZE 96
 class InputMessageDispatcher {
@@ -204,7 +219,7 @@ public:
 	static INPUTGETBYMESSAGESTRUCT message_getter_structs[KTROBO_INPUTGETMESSAGESTRUCT_SIZE];
 	static volatile DWORD now_time;
 	static volatile DWORD before_time;
-	static volatile DWORD dt;
+	static volatile WORD dt;
 
 	static MYINPUTMESSAGESTRUCT message_structs[KTROBO_INPUTMESSAGESTRUCT_SIZE];
 	static int now_message_index; 
@@ -335,25 +350,25 @@ private:
 	static DWORD last_time;
 	static Clock clock;
 public:
-	static volatile char keystate[256];
+	static volatile unsigned char keystate[256];
 	static volatile MOUSE_STATE mouse_state;
-	static volatile char b_keystate[256];
+	static volatile unsigned char b_keystate[256];
 	static volatile MOUSE_STATE b_mousestate;
-	static volatile char nagaosi_keycode;// 最後に押されたボタンの仮想キーコード // inputtext用
+	static volatile unsigned char nagaosi_keycode;// 最後に押されたボタンの仮想キーコード // inputtext用
 	static volatile DWORD nagaosi_start_time; // 押され始めた時間
 	static volatile DWORD nagaosi_time;// 押されてからたった時間 // inputtext用
 	static volatile long input_jyoutai_idou[INPUTJYOUTAI_FRAME_MAX];
 	static volatile long input_jyoutai_koudou[INPUTJYOUTAI_FRAME_MAX];
 	static volatile unsigned int input_jyoutai_index;
 
-	static volatile char command_key[INPUTJYOUTAI_KEY_INDEX_MAX];
+	static volatile unsigned char command_key[INPUTJYOUTAI_KEY_INDEX_MAX];
 
 public:
 	Input(void);
 	~Input(void);
 
 	static void Init(void);
-	static void setCommandKey(char* c) {
+	static void setCommandKey(unsigned char* c) {
 		for (int i=0;i<INPUTJYOUTAI_KEY_INDEX_MAX;i++) {
 			command_key[i] = c[i];
 		}

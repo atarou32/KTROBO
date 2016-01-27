@@ -34,26 +34,26 @@ class MeshInstanced : public IMeshInstanced
 private:
 
 	// 個々のインスタンスに共通な変数
-	volatile MYMATRIX world;
-	volatile MYMATRIX rootbone_matrix_local_kakeru; // rootbone のマトリックスにかけるマトリックス　親メッシュがある場合によく使用される 
-	volatile MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
-	volatile unsigned short bones_anime_first_index[KTROBO_MESH_INSTANCED_BONE_MAX];
-	volatile unsigned short bones_anime_last_index[KTROBO_MESH_INSTANCED_BONE_MAX];
-	volatile float bones_anime_first_weight[KTROBO_MESH_INSTANCED_BONE_MAX];
+	MYMATRIX world;
+	MYMATRIX rootbone_matrix_local_kakeru; // rootbone のマトリックスにかけるマトリックス　親メッシュがある場合によく使用される 
+	MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
+	unsigned short bones_anime_first_index[KTROBO_MESH_INSTANCED_BONE_MAX];
+	unsigned short bones_anime_last_index[KTROBO_MESH_INSTANCED_BONE_MAX];
+	float bones_anime_first_weight[KTROBO_MESH_INSTANCED_BONE_MAX];
 
-	volatile int mesh_index; // もとになるメッシュのインデックス
-	volatile int skeleton_index;// もとになるスケルトンのインデックス
-	volatile int instance_index; // このインスタンスのインデックス
+	int mesh_index; // もとになるメッシュのインデックス
+	int skeleton_index;// もとになるスケルトンのインデックス
+	int instance_index; // このインスタンスのインデックス
 
 	MeshInstanced* parent_instance;
 	int parent_bone_index;
 	vector<MeshInstanced*> child_instances;
 
-	volatile bool connect_without_matrix_local;
-	volatile bool is_need_combined_matrix_load; // meshinstancedsのコンバインドメイトリクスのロードが必要かどうか
-	volatile bool is_need_color_texture_load;
+	bool connect_without_matrix_local;
+	bool is_need_combined_matrix_load; // meshinstancedsのコンバインドメイトリクスのロードが必要かどうか
+	bool is_need_color_texture_load;
 
-	volatile bool is_render;
+	bool is_render;
 public:
 	bool getIsRender() {return is_render;}
 	void setIsRender(bool t) {is_render = t;}

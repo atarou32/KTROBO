@@ -77,6 +77,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	// Main message loop
 	//MSG msg = {0};
 	try {
+		InputMessageDispatcher::Init();
 	while( WM_QUIT != msg.message ){
 		if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) ){
 			TranslateMessage( &msg );
