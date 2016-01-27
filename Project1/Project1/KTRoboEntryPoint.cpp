@@ -83,6 +83,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			DispatchMessage( &msg );
 		}else{
 			Sleep(1);
+			InputMessageDispatcher::messageMake();
 		}
 	}
 	}catch (KTROBO::GameError& err) {
