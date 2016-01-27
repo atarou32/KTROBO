@@ -200,8 +200,60 @@ public:
 };
 
 
+#define INPUT_MYCOMMAND_FRAME_MAX 30
+class MyCommand {
+public:
+	int command;
+	int priority; // 0~15 0 のほうが優先される
+	int frame; // 0~INPUTJYOUTAI_FRAME_MAX
+	long idou[INPUT_MYCOMMAND_FRAME_MAX];
+	long koudou[INPUT_MYCOMMAND_FRAME_MAX];
+	char name[32];
+	bool is_use;
+	bool is_reset; // 発動したときバッファをクリアするかどうか
+	MyCommand() {
+		command = 0;
+		priority = 0;
+		frame = 0;
+		for (int i=0;i<INPUT_MYCOMMAND_FRAME_MAX;i++) {
+			idou[i] = 0;
+			koudou[i] = 0;
+		}
+		for (int i=0;i<32;i++) {
+			name[i] = 0;
+		}
+		is_use = false;
+		is_reset = false;
+	}
+
+
+	MyCommand& operator=(MyCommand& value) {
+		this->command = value.command;
+		this->frame = value.frame;
+		for (int i=0;i<INPUT_MYCOMMAND_FRAME_MAX;i++) {
+			this->idou[i] = value.idou[i];
+			this->koudou[i] = value.koudou[i];
+		}
+		this->priority = value.priority;
+		for (int i=0;i<32;i++) {
+			this->name[i] = value.name[i];
+		}
+		this->is_use = value.is_use;
+		this->is_reset = value.is_reset;
+
+        return *this;
+    }
+
+
+
+
+
+};
+
 #define KTROBO_INPUTMESSAGESTRUCT_SIZE 128
 #define KTROBO_INPUTGETMESSAGESTRUCT_SIZE 96
+#define KTROBO_INPUTCOMMAND_SIZE 48
+
 class InputMessageDispatcher {
 public:
 	// inputを受け取って動作する部分というのはそんなに多くない気がする
@@ -216,10 +268,51 @@ public:
 	// 二度押してもらえば大丈夫なはず・・・
 	// バッファにかんしては128設けてみる
 
+	// コマンドの種類に関して
+	// 何個必要なのだろう
+
+	// 前進
+	// 後進
+	// 右移動
+	// 左移動
+	// 戦闘態勢(構えの変更)
+	// しゃがみ
+	// ダッシュ
+	// 右ステップ
+	// 左ステップ
+	// バックステップ
+	// 中ジャンプ
+	// 小ジャンプ
+	// 大ジャンプ
+	// ダッシュジャンプ
+	// 拾う・投げる
+	// 友好行動
+	// 弱パンチ
+	// 強パンチ
+	// 弱キック
+	// 強キック
+	// 呼吸
+	// しゃがみ弱パンチ
+	// しゃがみ強パンチ
+	// しゃがみ弱キック
+	// しゃがみ強キック
+	// ジャンプ弱パンチ
+	// ジャンプ強パンチ
+	// ジャンプ弱キック
+	// ジャンプ強キック
+	// 必殺技１
+	// 必殺技２
+	// 必殺技３
+	// 必殺技４
+	// 必殺技５
+	//　で34
+
+
 	static INPUTGETBYMESSAGESTRUCT message_getter_structs[KTROBO_INPUTGETMESSAGESTRUCT_SIZE];
 	static volatile DWORD now_time;
 	static volatile DWORD before_time;
 	static volatile WORD dt;
+	static MyCommand command[KTROBO_INPUTCOMMAND_SIZE];
 
 	static MYINPUTMESSAGESTRUCT message_structs[KTROBO_INPUTMESSAGESTRUCT_SIZE];
 	static int now_message_index; 
@@ -231,7 +324,9 @@ public:
 	static void messageMakeButtonDown(int i, DWORD ntime);
 	static void messageMakeButtonUp(int i, DWORD ntime);
 
-	static void commandMake();
+	static void commandMake(DWORD time);
+	static bool _commandHantei(MyCommand* com, int k);
+
 	static void _messageDispatch(MYINPUTMESSAGESTRUCT* message, INPUTGETBYMESSAGESTRUCT* get_input, DWORD time);
 	static void registerImpl(INPUTSHORICLASS* cl, INPUTSHORICLASS* parent, INPUTSHORICLASS* child);
 	static void unregisterImpl(INPUTSHORICLASS* cl);
@@ -340,6 +435,7 @@ public:
 #define INPUTJYOUTAI_JYAKU_KICK_DOWN 0x2000
 #define INPUTJYOUTAI_KYOU_KICK_UP 0x4000
 #define INPUTJYOUTAI_KYOU_KICK_DOWN 0x8000
+
 
 
 

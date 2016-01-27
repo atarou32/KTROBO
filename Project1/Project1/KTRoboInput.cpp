@@ -151,25 +151,101 @@ void InputMessageDispatcher::messageDispatch() {
 
 	CS::instance()->leave(CS_MESSAGE_CS, "leave message dispatch");
 }
-void InputMessageDispatcher::commandMake() {
+
+bool InputMessageDispatcher::_commandHantei(MyCommand* com, int k) {
+
+	int now_index = 0;
+	int idou_max = 0;
+	int koudou_max = 0;
+	for (int t = INPUT_MYCOMMAND_FRAME_MAX-1;t >=0; t--) {
+		if (Input::input_jyoutai_idou[t]) {
+			idou_max = t;
+			break;
+		}
+	}
+
+	for (int t = INPUT_MYCOMMAND_FRAME_MAX-1;t >=0; t--) {
+		if (Input::input_jyoutai_koudou[t]) {
+			koudou_max = t;
+			break;
+		}
+	}
 
 
 
+	for (int i=k;i<k+com->frame && now_index < INPUT_MYCOMMAND_FRAME_MAX;i++) {
+		int inde = i % INPUTJYOUTAI_FRAME_MAX;
+		if (Input::input_jyoutai_idou[inde]) {
+			if ((com->idou[now_index] & Input::input_jyoutai_idou[inde]) == com->idou[now_index]) {
+				if (Input::input_jyoutai_koudou[inde]) {
+						if ((Input::input_jyoutai_koudou[inde] & com->koudou[now_index]) == com->koudou[now_index]) {
+							now_index++;
+						}
+				} else {
+					now_index++;
+				}
+			}
+		} else {
+		
+			if (Input::input_jyoutai_koudou[inde]) {
+				if ((Input::input_jyoutai_koudou[inde] & com->koudou[now_index]) == com->koudou[now_index]) {
+					now_index++;
+				}
+			} else {
+				now_index++;
+			}
+		}
+
+		if (now_index > idou_max && now_index > koudou_max) {
+			return true;
+		}
+	}
 
 
-
-
-
-
-
-
-
+	return false;
 }
 
+void InputMessageDispatcher::commandMake(DWORD time) {
+
+
+	for (int p=0;p<15;p++) {
+		for (int i=0;i<KTROBO_INPUTCOMMAND_SIZE;i++) {
+			MyCommand* com = &command[i];
+			if (com->is_use) {
+				if (com->priority == p) {
+					// 一致判定を行う
+					int j_index = (1+Input::input_jyoutai_index) % INPUTJYOUTAI_FRAME_MAX;
+					int j_max_index = j_index + INPUTJYOUTAI_FRAME_MAX;
+					for (int k = j_index; k < j_max_index - com->frame;k++) {
+						if (_commandHantei(com, k)) {
+							if (com->is_reset) {
+								// 全部input_jyoutai をクリアする
+								for (int t = 0; t < INPUTJYOUTAI_FRAME_MAX;t++) {
+									Input::input_jyoutai_idou[t] = 0;
+									Input::input_jyoutai_koudou[t] = 0;
+								}
+							}
+							// メッセージを作ってリターンする
+							MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[now_message_index];
+							s->setSENDER(KTROBO_INPUT_MESSAGE_SENDER_INPUTSYSTEM);
+							s->setMSGID(KTROBO_INPUT_MESSAGE_ID_COMMAND);
+							s->setDataINT(com->command);
+							s->setTIME(time);
+							s->setKEYSTATE(Input::keystate);
+							s->setMOUSESTATE(&Input::mouse_state);
+							s->setISUSE(true);
+							InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 void InputMessageDispatcher::messageMakeButtonDown(int i, DWORD time) {
 
-	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
 	MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[now_message_index];
 	s->setSENDER(KTROBO_INPUT_MESSAGE_SENDER_INPUTSYSTEM);
 	s->setMSGID(KTROBO_INPUT_MESSAGE_ID_KEYDOWN);
@@ -177,13 +253,13 @@ void InputMessageDispatcher::messageMakeButtonDown(int i, DWORD time) {
 	s->setKEYSTATE(Input::keystate);
 	s->setMOUSESTATE(&Input::mouse_state);
 	s->setISUSE(true);
-	
+	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
+
 }
 
 
 void InputMessageDispatcher::messageMakeButtonUp(int i, DWORD time) {
 
-	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
 	MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[now_message_index];
 	s->setSENDER(KTROBO_INPUT_MESSAGE_SENDER_INPUTSYSTEM);
 	s->setMSGID(KTROBO_INPUT_MESSAGE_ID_KEYUP);
@@ -191,6 +267,7 @@ void InputMessageDispatcher::messageMakeButtonUp(int i, DWORD time) {
 	s->setKEYSTATE(Input::keystate);
 	s->setMOUSESTATE(&Input::mouse_state);
 	s->setISUSE(true);
+	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
 
 }
 
@@ -226,7 +303,7 @@ void InputMessageDispatcher::messageMake() {
 
 
 			// フレームが進んだので　コマンド解釈処理に入る
-			commandMake();
+			commandMake(n_time);
 
 		}
 	}
@@ -514,3 +591,4 @@ volatile WORD InputMessageDispatcher::dt=0;
 volatile DWORD Input::nagaosi_start_time=0; // 押され始めた時間
 
 volatile unsigned char Input::command_key[INPUTJYOUTAI_KEY_INDEX_MAX];
+MyCommand InputMessageDispatcher::command[KTROBO_INPUTCOMMAND_SIZE];
