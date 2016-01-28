@@ -17,7 +17,7 @@ interface ITexture{
 	// lua側でコルーチンから関数呼び出しをストックしておいて、一箇所で順々に呼び出すような仕組みがlua側に必要
 
 public:
-	TO_LUA int getTexture(char* tex_name); // すでにロードされていた場合はロードは行われない
+	TO_LUA int getTexture(char* tex_name, int index_count); // すでにロードされていた場合はロードは行われない
 	// 内部でRENDERDATA_CSをロックすること
 	TO_LUA int getRenderTex(int tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
 	TO_LUA int getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMATRIX* world, float width, float height, int tex_x, int tex_y, int tex_width, int tex_height);
@@ -180,6 +180,10 @@ public:
 	bool is_use;
 };
 
+#define KTROBO_TEXTURE_INDEXBUFFER_MAX 4096
+#define KTROBO_TEXTURE_INDEXBUFFER_DEFAULT 128*3 // 少ないかも
+
+
 class Texture
 {
 private:
@@ -188,15 +192,22 @@ private:
 	vector<RenderTex*> render_texs;
 	vector<TexturePart*> parts;
 	map<string, int> texturepart_index;
+	set<RenderTex*> unuse_render_texs;
+	set<RenderBillBoard*> unuse_bill_boards;
+	set<int> unuse_render_tex_ids;
+	set<int> unuse_bill_board_ids;
 
 public:
-	Texture(void);
-	~Texture(void);
+	Texture(MyTextureLoader* l) {
+		loader = l;
+	}
+
+	~Texture(void){};
 	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
 	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
 	void createIndexBuffer(Graphics* g);// ロードスレッドで呼ぶ
 
-	int getTexture(char* tex_name); // すでにロードされていた場合はロードは行われない
+	int getTexture(char* tex_name, int index_count=KTROBO_TEXTURE_INDEXBUFFER_DEFAULT); // すでにロードされていた場合はロードは行われない
 	int getRenderTex(int tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
 	int getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMATRIX* world, float width, float height, int tex_x, int tex_y, int tex_width, int tex_height);
 
