@@ -36,7 +36,7 @@ private:
 	RENDEREFFECT_Object* render_effect; // たとえばボタンが押されたときにエフェクト？を発生させるときに使用する？
 	RENDERTEX_Object* render_obj;
 public:
-	
+		
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
@@ -86,6 +86,7 @@ private:
 	RENDERTEX_Object* render_obj;
 	GUI_BUTTON* close_button;
 	GUI_TEXT* title;
+	bool has_button_and_title;
 	vector<GUI_PART*> bodys;
 public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};

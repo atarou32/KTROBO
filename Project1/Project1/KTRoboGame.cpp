@@ -271,7 +271,7 @@ bool Game::Init(HWND hwnd) {
 
 	MYMATRIX worl;
 
-	for (int i = 0 ; i < 3;i++) {
+	for (int i = 0 ; i < 30;i++) {
 	
 		mesh_is[i] = mesh_instanceds->makeInstanced(mesh2,mesh2,NULL,NULL,false,&kakeru);
 		mesh_is2[i] = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&kakeru);
@@ -645,7 +645,7 @@ void Game::Run() {
 
 	mesh_i->setBoneIndexInfo(animf, animl, animw);
 	mesh_i2->setBoneIndexInfo(animf,animl,animw);
-	for (int i=0;i<3;i++) {
+	for (int i=0;i<13;i++) {
 		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
 		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
 	}
