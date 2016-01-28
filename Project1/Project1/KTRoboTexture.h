@@ -44,8 +44,9 @@ public:
 	TO_LUA void setRenderBillBoardChangeTex(int bill_index, int tex_index, int new_tex_index);
 
 	TO_LUA void deleteRenderTex(int render_tex_index); // vectorから消す　deleteは他のスレッドが動いていないことを確認したほうがいいかもしれない
-	TO_LUA void deleteRenderBillBoard(int bill_index); // vectorから消す  createはvectorの長さが変わるなら他のスレッドをとめる必要がある
-	TO_LUA void lightdeleteRenderTex(int render_tex_index); // vectorから消さない　indexバッファは更新するis_render is_need_load をfalseにする
+	TO_LUA void deleteRenderBillBoard(int bill_index); // vectorから消す  createはvectorの長さが変わるなら他のスレッドをとめる必要がある is_use をfalseからtrueにする場合
+	// のときはロック時間に気をつけること（ロックしてis_useを取得してからis_useをtrueにしてからロックを切ること
+	TO_LUA void lightdeleteRenderTex(int render_tex_index); // vectorから消さない　indexバッファは更新するis_use is_render is_need_load をfalseにする texのis_need_loadをtrueにする
 	TO_LUA void lightdeleteRenderBillBoard(int bill_index); // vectorから消さない  実際のindexバッファの更新はvertextotextureの中で行う
 	TO_LUA void deleteAll();
 };
@@ -56,10 +57,39 @@ private:
 	bool is_use;
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class;
 	bool is_need_load;
+	bool is_index_load;// indexbufferがクリエイトされているかどうか
 	ID3D11Buffer* indexbuffer; // 
-
+	int index_count;
 public:
+	TexturePart(int index_c) {
+		is_use =true;
+		tex_class = 0;
+		is_need_load = false;
+		is_index_load = false;
+		indexbuffer = 0;
+		index_count = index_c;
+	}
+
+	int getIndexCount() {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter texturepart");
+		int ans = index_count;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave texturepart");
+		return ans;
+	}
 	//わからないなりにすすめていく
+	void setIsIndexLoad(bool t) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter texturepart");
+		is_index_load = t;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave texturepart");
+	}
+
+	bool getIsIndexLoad() {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter texturepart");
+		bool ans = is_index_load;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave texturepart");
+		return ans;
+	}
+
 
 
 	void setIsNeedLoad(bool t) {
@@ -114,7 +144,7 @@ public:
 // このクラスにアクセスするときはRENDERDATA_CSをロックすること
 class RenderTex
 {
-private:
+public:
 	unsigned short id;
 	unsigned short tex_index; // 頂点情報に含める必要があるのか？
 	unsigned int color;
@@ -128,13 +158,13 @@ private:
 	unsigned short tex_height;
 	bool is_need_load;
 	bool is_render;
-
+	bool is_use;
 };
 
 // このクラスにアクセスするときはRENDERDATA_CSをロックすること
 class RenderBillBoard 
 {
-private:
+public:
 	unsigned short id; // 
 	unsigned short tex_index;
 	unsigned int color;
@@ -147,6 +177,7 @@ private:
 	unsigned short tex_height;
 	bool is_need_load;
 	bool is_render;
+	bool is_use;
 };
 
 class Texture
@@ -156,11 +187,14 @@ private:
 	vector<RenderBillBoard*> bill_boards;
 	vector<RenderTex*> render_texs;
 	vector<TexturePart*> parts;
+	map<string, int> texturepart_index;
+
 public:
 	Texture(void);
 	~Texture(void);
-	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること
-	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること
+	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
+	void createIndexBuffer(Graphics* g);// ロードスレッドで呼ぶ
 
 	int getTexture(char* tex_name); // すでにロードされていた場合はロードは行われない
 	int getRenderTex(int tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
