@@ -1,5 +1,7 @@
 #include "KTRoboInput.h"
 #include "mmsystem.h"
+#include "windowsx.h"
+
 #include "KTRoboCS.h"
 
 using namespace KTROBO;
@@ -19,7 +21,7 @@ Input::~Input(void)
 }
 
 
-void Input::Init() {
+void Input::Init(HWND hwnd) {
 	now_time = timeGetTime();
 	last_time = now_time;
 	nagaosi_start_time = now_time;
@@ -51,7 +53,18 @@ void Input::Init() {
 
 
 
-
+	#ifndef HID_USAGE_PAGE_GENERIC
+    #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
+    #endif
+    #ifndef HID_USAGE_GENERIC_MOUSE
+    #define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
+    #endif
+    RAWINPUTDEVICE Rid[1];
+    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
+    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
+    Rid[0].dwFlags = RIDEV_INPUTSINK;   
+    Rid[0].hwndTarget = hwnd;
+    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
 
 
 }
@@ -59,7 +72,9 @@ void Input::Init() {
 LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam ) {
 
    PAINTSTRUCT ps;
-    HDC hdc;
+   HDC hdc;
+   static BYTE keys[256];
+   memset(keys,0,256);
 
     switch( message )
     {
@@ -68,24 +83,100 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
             EndPaint( hWnd, &ps );
             break;
 		case WM_INPUT:
+			{
+			 UINT dwSize;
+      
+			 GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
+			 unsigned char* lpb = new unsigned char[dwSize];
+			 if (lpb == NULL)
+			{
+				// エラー
+				break;
+			}
 
+			if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
+			{
+				// エラー
+				delete[] lpb;
+				break;
+			}
+
+			RAWINPUT* raw = (RAWINPUT*)lpb;
+
+		    if (raw->header.dwType == RIM_TYPEMOUSE) 
+            {
+				Input::mouse_state.mouse_rawx = raw->data.mouse.lLastX;
+				Input::mouse_state.mouse_rawy = raw->data.mouse.lLastY;
+				Input::mouse_state.mouse_rawdx = mouse_state.mouse_rawx - b_mousestate.mouse_rawx;
+				Input::mouse_state.mouse_rawdy = mouse_state.mouse_rawy - b_mousestate.mouse_rawy;
+				Input::mouse_state.mouse_button = raw->data.mouse.ulButtons;
+		/*		char test[256];
+				memset(test,0,256);
+				_itoa_s(Input::mouse_state.mouse_rawx,test,10);
+				OutputDebugStringA(test);
+				OutputDebugStringA(";");
+				memset(test,0,256);
+				_itoa_s(raw->data.mouse.ulButtons,test,10);
+				OutputDebugStringA(test);
+				OutputDebugStringA("\n");*/
+			}
+
+			delete[] lpb; 
+			}
 
 			InputMessageDispatcher::messageMake();
 			break;
 		case WM_KEYUP:
-
+			if (GetKeyboardState(keys)) {
+			for (int i=0;i<256;i++) {
+				BYTE state = keys[i];
+				if ((state & 0x80)) {
+					// 押されている
+					Input::keystate[i] |= KTROBO_INPUT_BUTTON_PRESSED;
+				}
+				if ((state & 0x80) && !(b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
+					// 押された瞬間
+					Input::keystate[i] |= KTROBO_INPUT_BUTTON_DOWN;
+				}
+				if (!(state & 0x80) && (b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
+					Input::keystate[i] |= KTROBO_INPUT_BUTTON_UP;
+				}
+			}
+			}
 			InputMessageDispatcher::messageMake();
 			break;
 		case WM_KEYDOWN:
-
+			if (GetKeyboardState(keys)) {
+			for (int i=0;i<256;i++) {
+				BYTE state = keys[i];
+				if ((state & 0x80)) {
+					// 押されている
+					Input::keystate[i] |= KTROBO_INPUT_BUTTON_PRESSED;
+				}
+				if ((state & 0x80) && !(b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
+					// 押された瞬間
+					Input::keystate[i] |= KTROBO_INPUT_BUTTON_DOWN;
+				}
+				if (!(state & 0x80) && (b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
+					Input::keystate[i] |= KTROBO_INPUT_BUTTON_UP;
+				}
+			}
+			}
 			InputMessageDispatcher::messageMake();
 			break;
 
 		case WM_MOUSEMOVE:
-
+			{
+			int xPos = GET_X_LPARAM(lParam); 
+			int yPos = GET_Y_LPARAM(lParam);
+			Input::mouse_state.mouse_x = xPos;
+			Input::mouse_state.mouse_y = yPos;
+			Input::mouse_state.mouse_dx = xPos - b_mousestate.mouse_x;
+			Input::mouse_state.mouse_dy = yPos - b_mousestate.mouse_y;
 			InputMessageDispatcher::messageMake();
+			}
 			break;
-
+			
         case WM_DESTROY:
             PostQuitMessage( 0 );
             break;
@@ -151,6 +242,20 @@ void InputMessageDispatcher::messageDispatch() {
 
 	CS::instance()->leave(CS_MESSAGE_CS, "leave message dispatch");
 }
+
+
+
+void InputMessageDispatcher::messageMakeMouseRawStateChanged(DWORD n_time) {
+	MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[now_message_index];
+	s->setSENDER(KTROBO_INPUT_MESSAGE_SENDER_INPUTSYSTEM);
+	s->setMSGID(KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE);
+	s->setTIME(n_time);
+	s->setKEYSTATE(Input::keystate);
+	s->setMOUSESTATE(&Input::mouse_state);
+	s->setISUSE(true);
+	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
+}
+
 
 bool InputMessageDispatcher::_commandHantei(MyCommand* com, int k) {
 
@@ -271,6 +376,20 @@ void InputMessageDispatcher::messageMakeButtonUp(int i, DWORD time) {
 
 }
 
+void InputMessageDispatcher::messageMakeMouseMove(DWORD n_time) {
+
+	// マウスの移動メッセージ
+	MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[now_message_index];
+	s->setSENDER(KTROBO_INPUT_MESSAGE_SENDER_INPUTSYSTEM);
+	s->setMSGID(KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE);
+	s->setTIME(n_time);
+	s->setKEYSTATE(Input::keystate);
+	s->setMOUSESTATE(&Input::mouse_state);
+	s->setISUSE(true);
+	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
+
+}
+
 
 void InputMessageDispatcher::messageMake() {
 	// 複数スレッドのロックはこの関数では必要ない
@@ -341,6 +460,14 @@ void InputMessageDispatcher::messageMake() {
 				messageMakeButtonDown(Input::nagaosi_keycode, n_time);
 			}
 		}
+	}
+
+	if (Input::mouse_state.mouse_dx || Input::mouse_state.mouse_dy) {
+		messageMakeMouseMove(n_time);
+	}
+
+	if (Input::mouse_state.mouse_rawx || Input::mouse_state.mouse_rawy || Input::mouse_state.mouse_button) {
+		messageMakeMouseRawStateChanged(n_time);
 	}
 
 	for (int i=0; i<INPUTJYOUTAI_KEY_INDEX_MAX;i++) {
@@ -499,7 +626,7 @@ void InputMessageDispatcher::messageMake() {
 	for (int i=0;i<256;i++) {
 		Input::b_keystate[i] = Input::keystate[i];
 	}
-
+	Input::b_mousestate = Input::mouse_state;
 	CS::instance()->leave(CS_MESSAGE_CS, "leave message make");
 }
 

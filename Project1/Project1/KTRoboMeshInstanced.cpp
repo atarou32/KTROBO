@@ -346,7 +346,8 @@ void MeshInstanceds::loadColorToTexture(Graphics* g) {
 			for (int c=0; c< KTROBO_MESH_INSTANCED_COLOR_MAX;c++) {
 				for (int k=0;k<6;k++) {
 				stt[temp].color_index = c;
-				stt[temp].color = *mm->getColor(c);
+//				stt[temp].color = *mm->getColor(c);
+				mm->getColor(c, &stt[temp].color);
 				stt[temp].instance_id = i;
 				stt[temp].offset = 0;
 				stt[temp].vertex_index = k;
@@ -1545,7 +1546,8 @@ void MeshInstanceds::render(Graphics* g) {
 			if (mi->getIsRender() && mi->getMeshIndex() == m) {
 				// \‘¢‘Ì‚É“ü‚êž‚Þ
 				stt[temp].instance_id = i;
-				stt[temp].world = *mi->getWorld();
+//				stt[temp].world = *mi->getWorld();
+				mi->getWorld(&stt[temp].world);
 				temp++;
 				if (temp >= temp_max) {
 					_render(g, stt,temp, mes);

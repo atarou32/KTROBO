@@ -20,9 +20,9 @@ public:
 	virtual IMeshInstanced* getParentIInstance()=0;
 	TO_LUA virtual void setBoneIndexInfo(unsigned short* bones_anime_first_index, unsigned short* bones_anime_last_index, float* bones_anime_first_weight)=0;
 	TO_LUA virtual void setWorld(YARITORI MYMATRIX* world)=0;
-	TO_LUA virtual YARITORI MYMATRIX* getWorld()=0;
+	TO_LUA virtual void getWorld(OUT_ YARITORI MYMATRIX* gworld)=0;
 	TO_LUA virtual void setColor(MYVECTOR4* colors)=0;
-	TO_LUA virtual YARITORI MYVECTOR4* getColor(int index)=0;
+	TO_LUA virtual void getColor(int index, OUT_ YARITORI MYVECTOR4* gcolor)=0;
 	TO_LUA virtual void setIsRender(bool t)=0;
 	TO_LUA virtual bool getIsRender()=0;
 	TO_LUA virtual int getInstanceIndex()=0;
@@ -55,11 +55,26 @@ private:
 
 	bool is_render;
 public:
-	bool getIsRender() {return is_render;}
-	void setIsRender(bool t) {is_render = t;}
-	void setIsNeedColorTextureLoad(bool t) {is_need_color_texture_load = t;}
+	bool getIsRender() {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter getisrender");
+		bool ans = is_render;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave getisrender");
+		return ans;
+	}
+	void setIsRender(bool t) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setisrender");
+		is_render = t;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setisrender");
+	}
+	void setIsNeedColorTextureLoad(bool t) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setIsNeedColorTextureLoad");
+		is_need_color_texture_load = t;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setIsNeedColorTextureLoad");
+	}
 
 	void setIsNeedCombinedMatrixLoad(bool t) {
+
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setIsNeedCombinedMatrixLoad");
 		is_need_combined_matrix_load = t;
 		if (t) {
 			// true ‚Ìê‡‚Íchild‚É“`”d‚·‚é
@@ -70,11 +85,22 @@ public:
 				it = it + 1;
 			}
 		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setIsNeedCombinedMatrixLoad");
 	
 	}
 
-	bool getIsNeedCombinedMatrixLoad() {return is_need_combined_matrix_load;}
-	bool getIsNeedColorTextureLoad() {return is_need_color_texture_load;}
+	bool getIsNeedCombinedMatrixLoad() {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter getIsNeedCombinedMatrixLoad");
+		bool t = is_need_combined_matrix_load;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave getIsNeedCombinedMatrixLoad");
+		return t;
+	}
+	bool getIsNeedColorTextureLoad() {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter getIsNeedColorTextureLoad");
+		bool t = is_need_color_texture_load;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave getIsNeedColorTextureLoad");
+		return t;
+	}
 
 	void setMeshIndex(int mesh_index) {
 		this->mesh_index = mesh_index;
@@ -96,15 +122,18 @@ public:
 	}
 
 	void setParentInstance(MeshInstanced* parent, int parent_bone_index, bool connect_without_matrix_local) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setParentInstance");
 		this->parent_instance = parent;
 		this->parent_bone_index = parent_bone_index;
 		this->connect_without_matrix_local = connect_without_matrix_local;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setParentInstance");
 	}
 	IMeshInstanced* getParentIInstance() {return (IMeshInstanced*)parent_instance;}
 	MeshInstanced* getParentInstance() {return parent_instance;}
 	int getParentBoneIndex() {return parent_bone_index;}
 
 	void setBoneIndexInfo(unsigned short* bones_anime_first_index, unsigned short* bones_anime_last_index, float* bones_anime_first_weight) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setBoneIndexInfo");
 		for (int i=0; i< KTROBO_MESH_INSTANCED_BONE_MAX; i++) {
 			this->bones_anime_first_index[i] = bones_anime_first_index[i];
 			this->bones_anime_last_index[i] = bones_anime_last_index[i];
@@ -112,36 +141,53 @@ public:
 		}
 
 		setIsNeedCombinedMatrixLoad(true);
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setBoneIndexInfo");
 	}
 	void getBoneIndexInfo(unsigned short* bafi, unsigned short* bali, float* bafw) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter getBoneIndexInfo");
 		for (int i=0; i< KTROBO_MESH_INSTANCED_BONE_MAX; i++) {
 			bafi[i] = bones_anime_first_index[i];
 			bali[i] = bones_anime_last_index[i];
 			bafw[i] = bones_anime_first_weight[i];
 		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave getBoneIndexInfo");
 	}
 	void setRootBoneMatrixLocalKakeru(MYMATRIX* m) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setRootBoneMatrixLocalKakeru");
 		this->rootbone_matrix_local_kakeru = *m;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setRootBoneMatrixLocalKakeru");
 	}
 	MYMATRIX* getRootBoneMatrixLocalKakeru() {return &this->rootbone_matrix_local_kakeru;}
 
 	void setWorld(MYMATRIX* world) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setworld");
 		this->world = *world;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setworld");
 	}
-	MYMATRIX* getWorld() {return &world;}
+	void getWorld(MYMATRIX* gworld) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter getworld");
+		*gworld = world;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave getworld");
+	}
 	
 	void setColor(MYVECTOR4* colors) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter setcolor");
+
 		for (int i = 0;i<KTROBO_MESH_INSTANCED_COLOR_MAX; i++) {
 			this->colors[i] = colors[i];
 		}
 
 		setIsNeedColorTextureLoad(true);
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave setcolor");
 	}
-	MYVECTOR4* getColor(int index) {
+	void getColor(int index, MYVECTOR4* gcolor) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter getColor");
 		if (index >= 0 && index < KTROBO_MESH_INSTANCED_COLOR_MAX) {
-			return &colors[index];
+			*gcolor = colors[index];
+		} else {
+			*gcolor = colors[0];
 		}
-		return &colors[0];
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave getColor");
 	}
 
 	void setConnectWithoutMatrixLocal(bool m) {

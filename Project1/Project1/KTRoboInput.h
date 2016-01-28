@@ -74,24 +74,39 @@ public:
 };
 
 
+#define KTROBO_MOUSESTATE_L_DOWN 0x01
+#define KTROBO_MOUSESTATE_L_UP 0x02
+#define KTROBO_MOUSESTATE_R_DOWN 0x04
+#define KTROBO_MOUSESTATE_R_UP 0x08
+
 struct MOUSE_STATE {
 public:
-	unsigned char mouse_r_button;
-	unsigned char mouse_l_button;
-	unsigned char mouse_m_button;
+//	unsigned char mouse_r_button;
+//	unsigned char mouse_l_button;
+//	unsigned char mouse_m_button;
 
-	DWORD mouse_x;
-	DWORD mouse_y;
-	DWORD mouse_dx;
-	DWORD mouse_dy;
+	int mouse_x;
+	int mouse_y;
+	int mouse_dx;
+	int mouse_dy;
+	long mouse_rawx;
+	long mouse_rawy;
+	long mouse_rawdx;
+	long mouse_rawdy;
+	long mouse_button;
+
+
 	MOUSE_STATE() {
-		mouse_r_button = 0;
-		mouse_l_button = 0;
-		mouse_m_button = 0;
+//		mouse_r_button = 0;
+//		mouse_l_button = 0;
+//		mouse_m_button = 0;
 		mouse_x = 0;
 		mouse_y = 0;
 		mouse_dx = 0;
 		mouse_dy = 0;
+		mouse_rawx = 0;
+		mouse_rawy = 0;
+		mouse_button = 0;
 	}
 
 	/*MOUSE_STATE& operator=(MOUSE_STATE& value) {
@@ -108,11 +123,14 @@ public:
 	volatile MOUSE_STATE& operator=(volatile MOUSE_STATE& value)volatile {
 		this->mouse_dx = value.mouse_dx;
 		this->mouse_dy = value.mouse_dy;
-		this->mouse_l_button = value.mouse_l_button;
-		this->mouse_m_button = value.mouse_m_button;
-		this->mouse_r_button = value.mouse_r_button;
+//		this->mouse_l_button = value.mouse_l_button;
+//		this->mouse_m_button = value.mouse_m_button;
+//		this->mouse_r_button = value.mouse_r_button;
 		this->mouse_x = value.mouse_x;
 		this->mouse_y = value.mouse_y;
+		this->mouse_rawx = value.mouse_rawx;
+		this->mouse_rawy = value.mouse_rawy;
+		this->mouse_button = value.mouse_button;
         return *this;
     }
 };
@@ -127,7 +145,8 @@ class MYMESSAGESTRUCT;
 #define KTROBO_INPUT_MESSAGE_ID_COMMAND 2
 #define KTROBO_INPUT_MESSAGE_ID_KEYUP 3
 #define KTROBO_INPUT_MESSAGE_ID_KEYDOWN 4
-
+#define KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE 5
+#define KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE 6 // ボタンの状態変更もここに入る
 class MYMESSAGESTRUCT {
 public:
 	int msg_id;
@@ -254,6 +273,11 @@ public:
 #define KTROBO_INPUTGETMESSAGESTRUCT_SIZE 96
 #define KTROBO_INPUTCOMMAND_SIZE 48
 
+
+
+
+
+
 class InputMessageDispatcher {
 public:
 	// inputを受け取って動作する部分というのはそんなに多くない気がする
@@ -323,6 +347,8 @@ public:
 	static void messageMake();
 	static void messageMakeButtonDown(int i, DWORD ntime);
 	static void messageMakeButtonUp(int i, DWORD ntime);
+	static void messageMakeMouseMove(DWORD n_time);
+	static void messageMakeMouseRawStateChanged(DWORD n_time);
 
 	static void commandMake(DWORD time);
 	static bool _commandHantei(MyCommand* com, int k);
@@ -463,7 +489,7 @@ public:
 	Input(void);
 	~Input(void);
 
-	static void Init(void);
+	static void Init(HWND hwnd);
 	static void setCommandKey(unsigned char* c) {
 		for (int i=0;i<INPUTJYOUTAI_KEY_INDEX_MAX;i++) {
 			command_key[i] = c[i];
