@@ -94,7 +94,8 @@ public:
 	long mouse_rawdx;
 	long mouse_rawdy;
 	long mouse_button;
-
+	bool mouse_r_button_pressed;
+	bool mouse_l_button_pressed;
 
 	MOUSE_STATE() {
 //		mouse_r_button = 0;
@@ -107,6 +108,8 @@ public:
 		mouse_rawx = 0;
 		mouse_rawy = 0;
 		mouse_button = 0;
+		mouse_r_button_pressed = false;
+		mouse_l_button_pressed = false;
 	}
 
 	/*MOUSE_STATE& operator=(MOUSE_STATE& value) {
@@ -131,6 +134,8 @@ public:
 		this->mouse_rawx = value.mouse_rawx;
 		this->mouse_rawy = value.mouse_rawy;
 		this->mouse_button = value.mouse_button;
+		this->mouse_l_button_pressed = value.mouse_l_button_pressed;
+		this->mouse_r_button_pressed = value.mouse_r_button_pressed;
         return *this;
     }
 };

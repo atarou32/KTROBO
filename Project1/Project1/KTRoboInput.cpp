@@ -110,6 +110,20 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 				Input::mouse_state.mouse_rawdx = mouse_state.mouse_rawx - b_mousestate.mouse_rawx;
 				Input::mouse_state.mouse_rawdy = mouse_state.mouse_rawy - b_mousestate.mouse_rawy;
 				Input::mouse_state.mouse_button = raw->data.mouse.ulButtons;
+				if (raw->data.mouse.ulButtons & KTROBO_MOUSESTATE_R_UP) {
+					Input::mouse_state.mouse_r_button_pressed = false;
+				}
+				if (raw->data.mouse.ulButtons & KTROBO_MOUSESTATE_R_DOWN) {
+					Input::mouse_state.mouse_r_button_pressed = true;
+				}
+				if (raw->data.mouse.ulButtons & KTROBO_MOUSESTATE_L_UP) {
+					Input::mouse_state.mouse_l_button_pressed = false;
+				}
+				if (raw->data.mouse.ulButtons & KTROBO_MOUSESTATE_L_DOWN) {
+					Input::mouse_state.mouse_l_button_pressed = true;
+				}
+
+
 		/*		char test[256];
 				memset(test,0,256);
 				_itoa_s(Input::mouse_state.mouse_rawx,test,10);
@@ -173,6 +187,7 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 			Input::mouse_state.mouse_y = yPos;
 			Input::mouse_state.mouse_dx = xPos - b_mousestate.mouse_x;
 			Input::mouse_state.mouse_dy = yPos - b_mousestate.mouse_y;
+
 			InputMessageDispatcher::messageMake();
 			}
 			break;
