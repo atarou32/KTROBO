@@ -437,7 +437,7 @@ void Texture::_render(Graphics* g, int part_size, int p_index) {
 	if (p->getIsUse()) {
 		if (p->getIsIndexLoad()) {
 			// need loadがtruefalseにかかわらず描画する
-		
+		/*
 			// texの描画
 			g->getDeviceContext()->OMSetBlendState();
 			g->getDeviceContext()->OMSetRenderTargets();
@@ -464,7 +464,7 @@ void Texture::_render(Graphics* g, int part_size, int p_index) {
 			g->getDeviceContext()->VSSetConstantBuffers(0,1,&this->cbuf_1);
 
 			g->getDeviceContext()->DrawIndexed();
-
+			*/
 			// unset
 
 
@@ -693,7 +693,7 @@ void Texture::createIndexBuffer(Graphics* g) {
 
 #define KTROBO_TEXTURE_DELETEDAYO_ONELOOP_SAKUJYOKAISUU 50
 
-void Texture::deletedayo(Graphics* g){
+void Texture::deletedayo(){
 	// delete処理を行う　ロードスレッドで呼ぶ 細切れにdeleteする?たぶん描画がされていないときとか（ロード画面？画面遷移画面などで呼ぶことになりそう)
 
 
@@ -808,20 +808,79 @@ void Texture::deletedayo(Graphics* g){
 
 
 ID3D11Buffer* Texture::render_vertexbuffer = 0;
-ID3D11Buffer* Texture::vertextex_vertexbuffer = 0;
+ID3D11Buffer* Texture::vertextex_vertexbuffer_tex=0;
+ID3D11Buffer* Texture::vertextex_vertexbuffer_bill=0;
+
+
+
 MYSHADERSTRUCT Texture::mss_for_render_tex;
 MYSHADERSTRUCT Texture::mss_for_render_bill;
 MYSHADERSTRUCT Texture::mss_for_vertextex_tex;
 MYSHADERSTRUCT Texture::mss_for_vertextex_bill;
 
 void Texture::Init(Graphics* g) {
-	// renderのためのvertexbufferを作る
 
+	// renderのためのvertexbufferを作る
+	D3D11_BUFFER_DESC bd;
+	memset(&bd,0,sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(TEXTURE_RENDER_STRUCT)*KTROBO_TEXTURE_RENDER_VERTEXBUFFER_SIZE;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+	
+	D3D11_SUBRESOURCE_DATA hSubResourceData;
+
+	unsigned short* indexs = new unsigned short[KTROBO_TEXTURE_RENDER_VERTEXBUFFER_SIZE];//index_count_max*3];
+	memset(indexs, 0, sizeof(unsigned short)*KTROBO_TEXTURE_RENDER_VERTEXBUFFER_SIZE);
+	for (int i=0;i<KTROBO_TEXTURE_RENDER_VERTEXBUFFER_SIZE;i++) {
+		indexs[i] = i;
+	}
+	hSubResourceData.pSysMem = indexs;
+	hSubResourceData.SysMemPitch = 0;
+    hSubResourceData.SysMemSlicePitch = 0;
+	HRESULT hr = g->getDevice()->CreateBuffer(&bd, &hSubResourceData ,&(vertextex_vertexbuffer_tex));
+	if (FAILED(hr)) {
+		delete[] indexs;
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
+	}
+	delete[] indexs;
 	// viewを作る
 
 	// vertextextureのためのvertexbufferを作る
 
-	// viewを作る
+	bd;
+	memset(&bd,0,sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(TEXTURE_VTEX_STRUCT_TEX)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+	
+	hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(vertextex_vertexbuffer_tex));
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
+	}
+
+	bd;
+	memset(&bd,0,sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(TEXTURE_VTEX_STRUCT_BILL)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+	
+	hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(vertextex_vertexbuffer_bill));
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
+	}
+
+
+
+
 
 	// 各種shaderstructのロード
 
@@ -868,10 +927,17 @@ void Texture::Del() {
 	mss_for_vertextex_tex.Del();
 	mss_for_vertextex_bill.Del();
 
-	if (vertextex_vertexbuffer) {
-		vertextex_vertexbuffer->Release();
-		vertextex_vertexbuffer = 0;
+	if (vertextex_vertexbuffer_tex) {
+		vertextex_vertexbuffer_tex->Release();
+		vertextex_vertexbuffer_tex = 0;
 	}
+
+	if (vertextex_vertexbuffer_bill) {
+		vertextex_vertexbuffer_bill->Release();
+		vertextex_vertexbuffer_bill = 0;
+	}
+
+
 
 	if (render_vertexbuffer) {
 		render_vertexbuffer->Release();
