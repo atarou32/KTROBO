@@ -59,12 +59,18 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class;
 	bool is_need_load;
 	bool is_index_load;// indexbufferがクリエイトされているかどうか
+	
+	int index_count_max; // 最大インデックス数 buffer はこれの3倍
+public:
+	int index_count_tex; // 現在のインデックス数
+	int index_count_bill;
 	ID3D11Buffer* indexbuffer_tex; // 
 	ID3D11Buffer* indexbuffer_bill;
-	int index_count;
+private:
 	set<int> render_tex_ids;
 	set<int> bill_board_ids;
 public:
+
 	TexturePart(int index_c) {
 		is_use =true;
 		tex_class = 0;
@@ -72,8 +78,12 @@ public:
 		is_index_load = false;
 		indexbuffer_tex = 0;
 		indexbuffer_bill = 0;
-		index_count = index_c;
+		index_count_max = index_c;
+		index_count_bill = 0;
+		index_count_tex = 0;
 	}
+
+	void createIndexBuffer(Graphics* g);
 
 	// RENDERDATAをロックすること
 	void del() {
@@ -122,7 +132,7 @@ public:
 
 	int getIndexCount() {
 		CS::instance()->enter(CS_RENDERDATA_CS, "enter texturepart");
-		int ans = index_count;
+		int ans = index_count_max;
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave texturepart");
 		return ans;
 	}
@@ -261,7 +271,7 @@ public:
 	};
 };
 
-#define KTROBO_TEXTURE_INDEXBUFFER_MAX 4096
+#define KTROBO_TEXTURE_INDEXBUFFER_MAX 1024*3
 #define KTROBO_TEXTURE_INDEXBUFFER_DEFAULT 128*3 // 少ないかも
 #define KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT 512
 
@@ -288,6 +298,7 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* vtex_bill;
 
 	void _render(Graphics* g, int part_size, int p_index);
+	void _createIndexBuffer(Graphics* g, int psize, int p_index);
 public:
 	Texture(MyTextureLoader* l) {
 		loader = l;

@@ -497,13 +497,122 @@ void Texture::sendinfoToVertexTexture(Graphics* g) {
 	
 	
 }
+void Texture::updateIndexBuffer(Graphics* g) {
+
+
+
+
+
+
+
+}
+
+void Texture::_createIndexBuffer(Graphics* g, int psize, int p_index) {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "createIndexBuffer");
+	int p = parts.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "createIndexBuffer");
+
+	if (p != psize) {
+		// 次の回にまわす
+		return;
+	}
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "createIndexBuffer");
+	TexturePart* tex_part = parts[p_index];
+	tex_part->createIndexBuffer(g);
+	CS::instance()->leave(CS_RENDERDATA_CS, "createIndexBuffer");
 	
+
+
+
+
+}
+
+void TexturePart::createIndexBuffer(Graphics* g) {
+
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "createindex");
+	if (!this->is_index_load) {
+		// クリエイトする
+		
+		D3D11_BUFFER_DESC hBufferDesc;
+		hBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		hBufferDesc.ByteWidth = sizeof(unsigned short) * index_count_max*3;
+	    hBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	    hBufferDesc.CPUAccessFlags = 0;
+	    hBufferDesc.MiscFlags = 0;
+	    hBufferDesc.StructureByteStride = 0;
+	    D3D11_SUBRESOURCE_DATA hSubResourceData;
+
+		unsigned short* indexs = new unsigned short[index_count_max*3];
+
+		for (int i=0;i<index_count_max;i++) {
+			indexs[3*i] = i;
+			indexs[3*i+1] = i;
+			indexs[3*i+2] = i;
+		}
+	    hSubResourceData.pSysMem = indexs;
+	    hSubResourceData.SysMemPitch = 0;
+	    hSubResourceData.SysMemSlicePitch = 0;
+		HRESULT hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &this->indexbuffer_tex );
+	    if( FAILED( hr ) ) {
+	       delete[] indexs;
+		   	CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
+		   throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "index buffer make error");
+		}
+
+		delete[] indexs;
+
+
+		hBufferDesc;
+		hBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		hBufferDesc.ByteWidth = sizeof(unsigned short) * index_count_max*3;
+	    hBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	    hBufferDesc.CPUAccessFlags = 0;
+	    hBufferDesc.MiscFlags = 0;
+	    hBufferDesc.StructureByteStride = 0;
+	    hSubResourceData;
+
+		indexs = new unsigned short[index_count_max*3];
+
+		for (int i=0;i<index_count_max;i++) {
+			indexs[3*i] = i;
+			indexs[3*i+1] = i;
+			indexs[3*i+2] = i;
+		}
+	    hSubResourceData.pSysMem = indexs;
+	    hSubResourceData.SysMemPitch = 0;
+	    hSubResourceData.SysMemSlicePitch = 0;
+		hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &this->indexbuffer_bill );
+	    if( FAILED( hr ) ) {
+	       delete[] indexs;
+		   	CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
+		   throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "index buffer make error");
+		}
+
+		delete[] indexs;
+
+		is_index_load = true;
+
+	} 
+	CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
+
+
+}
+
+
 void Texture::createIndexBuffer(Graphics* g) {
 	// ロードスレッドで呼ぶ
+	
+	CS::instance()->enter(CS_RENDERDATA_CS, "createIndexBuffer");
+	int psize = parts.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "createIndexBuffer");
 
 
-
-
+	for (int i=0;i<psize;i++) {
+		_createIndexBuffer(g, psize, i);
+	}
 
 }
 
