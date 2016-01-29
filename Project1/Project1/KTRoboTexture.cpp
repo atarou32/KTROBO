@@ -66,6 +66,7 @@ int Texture::getRenderTex(int tex_index, unsigned int color, int x, int y, int w
 			use_tex->id = id;
 			render_tex_indexs.insert(pair<int,int>(id,id));
 		}
+		render_texs.push_back(use_tex);
 	}	
 	use_tex->color = color;
 	use_tex->height = height;
@@ -82,7 +83,7 @@ int Texture::getRenderTex(int tex_index, unsigned int color, int x, int y, int w
 	use_tex->x = x;
 	use_tex->y = y;
 	int ans = use_tex->id;
-	render_texs.push_back(use_tex);
+	parts[tex_index]->setRenderTexId(use_tex->id);
 	CS::instance()->leave(CS_RENDERDATA_CS, "rendertex");
 	return ans;
 }
@@ -104,6 +105,7 @@ int Texture::getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMA
 	}
 	if (size >0) {
 		// unuse_bill_boardsのなかのものを利用する場合はIDも再利用する
+		// indexもそのまま is_useだけfalseになってる感じ
 		use_bill  =*unuse_bill_boards.begin();
 		unuse_bill_boards.erase(use_bill);
 	} else {
@@ -122,7 +124,9 @@ int Texture::getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMA
 			int id = bill_boards.size();
 			use_bill->id = id;
 			bill_board_indexs.insert(pair<int,int>(id,id));
+
 		}
+		bill_boards.push_back(use_bill);
 	}	
 	use_bill->color = color;
 	use_bill->height = height;
@@ -137,8 +141,9 @@ int Texture::getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMA
 	use_bill->tex_y = tex_y;
 	use_bill->width = width;
 	use_bill->world = *world;
-	bill_boards.push_back(use_bill);
+	
 	int ans = use_bill->id;
+	parts[tex_index]->setBillBoardId(use_bill->id);
 	CS::instance()->leave(CS_RENDERDATA_CS, "renderbillb");
 	return ans;
 }
@@ -283,8 +288,12 @@ void Texture::setRenderTexIsRender(int render_tex_index, bool t) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "setrendertexisrender");
 	if (render_tex_indexs.find(render_tex_index) != render_tex_indexs.end()) {
 		RenderTex* e = render_texs[render_tex_indexs[render_tex_index]];
+		TexturePart* p = parts[e->tex_index];
 		e->is_render = t;
-		e->is_need_load = true;
+//		e->is_need_load = true;
+		p->setIsNeedLoad(true);
+		p->setRenderTexId(e->id);
+
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "setrendertexisrender");
 }
@@ -294,48 +303,146 @@ void Texture::setRenderBillBoardIsRender(int bill_index, bool t) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "setbillboardisrender");
 	if (bill_board_indexs.find(bill_index) != bill_board_indexs.end()) {
 		RenderBillBoard* e = bill_boards[bill_board_indexs[bill_index]];
+		TexturePart* p = parts[e->tex_index];
 		e->is_render = t;
-		e->is_need_load = true;	
+//		e->is_need_load = true;	
+		p->setIsNeedLoad(true);
+		p->setBillBoardId(e->id);
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "setbillboardisrender");
 }
 	
 void Texture::setRenderTexChangeTex(int render_tex_index, int tex_index, int new_tex_index) {
-
-
-
-
+	// 描画されるテクスチャを変えるには・・・
+	// render_texのis_need_loadは変えなくてよい（tex_indexは頂点テクスチャの中にないので)
+	// 該当するテクスチャのis_need_loadをtrueにしなくてはならない
+	
+	CS::instance()->enter(CS_RENDERDATA_CS, "setrendertexchangetex");
+	if (render_tex_indexs.find(render_tex_index) != render_tex_indexs.end()) {
+		RenderTex* t = render_texs[render_tex_indexs[render_tex_index]];
+		TexturePart* p = parts[tex_index];
+		TexturePart* p2 = parts[new_tex_index];
+		t->tex_index = new_tex_index;
+		p->setIsNeedLoad(true);
+		p2->setIsNeedLoad(true);
+		p->eraseRenderTexId(t->id);
+		p2->setRenderTexId(t->id);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "setrendertexchangetex");
 }
 
 
 void Texture::setRenderBillBoardChangeTex(int bill_index, int tex_index, int new_tex_index) {
-
-
-
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "setbillboardchangetex");
+	if (bill_board_indexs.find(bill_index) != bill_board_indexs.end()) {
+		RenderBillBoard* t = bill_boards[bill_board_indexs[bill_index]];
+		TexturePart* p = parts[tex_index];
+		TexturePart* p2 = parts[new_tex_index];
+		t->tex_index = new_tex_index;
+		p->setIsNeedLoad(true);
+		p2->setIsNeedLoad(true);
+		p->eraseBillBoardId(t->id);
+		p2->setBillBoardId(t->id);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "setbillboardchangetex");
 }
+
 
 void Texture::deleteRenderTex(int render_tex_index) {
 	
-	// ロックをどうするか考えどころ
+	// ロックをどうするか考えどころ RENDERDATAだけで大丈夫そう・・？
+	CS::instance()->instance()->enter(CS_RENDERDATA_CS, "deleterendertex");
+	if (render_tex_indexs.find(render_tex_index) != render_tex_indexs.end()) {
+		RenderTex* t = render_texs[render_tex_indexs[render_tex_index]];
+		TexturePart* p = parts[t->tex_index];
+		// p のis_need_loadをtrueにするのはdelete処理を実際に行ってから
+		erase_render_tex_ids.insert(t->id);
+	}
+	CS::instance()->instance()->leave(CS_RENDERDATA_CS, "deleterendertex");
+}
 
 
-}
-void Texture::deleteRenderBillBoard(int bill_index) {
+void Texture::deleteRenderBillBoard(int bill_id) {
 	// ロックをどうするか考えどころ
+	CS::instance()->instance()->enter(CS_RENDERDATA_CS, "deletebillboard");
+	if (bill_board_indexs.find(bill_id) != bill_board_indexs.end()) {
+		RenderBillBoard* t = bill_boards[bill_board_indexs[bill_id]];
+		erase_bill_board_ids.insert(t->id);
+	}
+	CS::instance()->instance()->leave(CS_RENDERDATA_CS, "deletebillboard");
+
 }
+
+
+
+
 void Texture::lightdeleteRenderTex(int render_tex_index) {
-
+	// ロックをどうするか考えどころ RENDERDATAだけで大丈夫そう・・？
+	CS::instance()->instance()->enter(CS_RENDERDATA_CS, "lightdeleterendertex");
+	if (render_tex_indexs.find(render_tex_index) != render_tex_indexs.end()) {
+		RenderTex* t = render_texs[render_tex_indexs[render_tex_index]];
+		TexturePart* p = parts[t->tex_index];
+		// vectorから削除しないのでフラグを立てるだけ
+		t->is_use = false;
+		p->eraseRenderTexId(t->id);
+		p->setIsNeedLoad(true);
+		unuse_render_texs.insert(t);
+	}
+	CS::instance()->instance()->leave(CS_RENDERDATA_CS, "lightdeleterendertex");
 
 }
-void Texture::lightdeleteRenderBillBoard(int bill_index) {
+void Texture::lightdeleteRenderBillBoard(int bill_id) {
+	// ロックをどうするか考えどころ
+	CS::instance()->instance()->enter(CS_RENDERDATA_CS, "deletebillboard");
+	if (bill_board_indexs.find(bill_id) != bill_board_indexs.end()) {
+		RenderBillBoard* t = bill_boards[bill_board_indexs[bill_id]];
+		TexturePart* p = parts[t->tex_index];
+		p->eraseBillBoardId(t->id);
+		p->setIsNeedLoad(true);
+		t->is_use = false;
+		unuse_bill_boards.insert(t);
+	}
+	CS::instance()->instance()->leave(CS_RENDERDATA_CS, "deletebillboard");
 
 
 }
 
 void Texture::deleteAll() {
+	// 時間とか気にしないで全てdeleteする
+
+	CS::instance()->instance()->enter(CS_RENDERDATA_CS, "deleteall");
+	
+	is_all_delete = true;
+
+	CS::instance()->instance()->leave(CS_RENDERDATA_CS, "deleteall");
+
+}
+
+
+void Texture::render(Graphics* g) {
+	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+
+}	
+	
+	
+void Texture::sendinfoToVertexTexture(Graphics* g) {
+	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
+
+	
+	
+	
+	
+}
+	
+void Texture::createIndexBuffer(Graphics* g) {
+	// ロードスレッドで呼ぶ
+
+
 
 
 
 }
 
+void Texture::deletedayo(Graphics* g){
+	// delete処理を行う　ロードスレッドで呼ぶ 細切れにdeleteする
+}
