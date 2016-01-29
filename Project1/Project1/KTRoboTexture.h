@@ -332,6 +332,7 @@ private:
 	static ID3D11Buffer* render_vertexbuffer;
 	static ID3D11Buffer* vertextex_vertexbuffer_tex;
 	static ID3D11Buffer* vertextex_vertexbuffer_bill;
+	static ID3D11Buffer* vertextex_indexbuffer;
 
 public:
 	static void Init(Graphics* g);
@@ -367,6 +368,8 @@ private:
 
 	void _render(Graphics* g, int part_size, int p_index);
 	void _createIndexBuffer(Graphics* g, int psize, int p_index);
+	void _sendinfoToVertexTextureTex(Graphics* g, TEXTURE_VTEX_STRUCT_TEX* v, int size);
+	void _sendinfoToVertexTextureBill(Graphics* g, TEXTURE_VTEX_STRUCT_BILL* b, int size);
 public:
 	Texture(MyTextureLoader* l) {
 		loader = l;

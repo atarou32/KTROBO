@@ -1,4 +1,6 @@
 #include "KTRoboTexture.h"
+#include "memory.h"
+
 using namespace KTROBO;
 
 int Texture::getTexture(char* tex_name, int index_count) {
@@ -414,6 +416,25 @@ void Texture::deleteAll() {
 
 }
 
+void Texture::_sendinfoToVertexTextureTex(Graphics* g, TEXTURE_VTEX_STRUCT_TEX* v, int size) {
+	CS::instance()->enter(CS_DEVICECON_CS, "sendinfotex");
+
+
+
+	CS::instance()->leave(CS_DEVICECON_CS, "sendinfotex");
+}
+
+
+void Texture::_sendinfoToVertexTextureBill(Graphics* g, TEXTURE_VTEX_STRUCT_BILL* b, int size) {
+	CS::instance()->enter(CS_DEVICECON_CS, "sendinfobill");
+
+
+
+
+	CS::instance()->leave(CS_DEVICECON_CS, "sendinfobill");
+}
+
+
 void Texture::_render(Graphics* g, int part_size, int p_index) {
 
 
@@ -492,9 +513,123 @@ void Texture::render(Graphics* g) {
 void Texture::sendinfoToVertexTexture(Graphics* g) {
 	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
 
-	
-	
-	
+	// RENDERDATA を細切れにロックしてテクスおよびビルボードのデータを頂点テクスチャに格納する
+
+	TEXTURE_VTEX_STRUCT_TEX str_tex[KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE];
+	TEXTURE_VTEX_STRUCT_BILL str_bill[KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE];
+	memset(str_tex,0,sizeof(TEXTURE_VTEX_STRUCT_TEX)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE);
+	memset(str_bill,0,sizeof(TEXTURE_VTEX_STRUCT_BILL)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE);
+	int tex_size = 0;
+	int bill_size = 0;
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "sendinfotovt");
+	int tsize = this->render_texs.size();
+	for (int t = 0;t < tsize;t++) {
+		RenderTex* tex = render_texs[t];
+		if (tex->is_use) {
+			if (tex->is_need_load) {
+				unsigned int input[] = {
+					tex->color,
+					(tex->x << 8) + tex->y,
+					(tex->width <<8) + tex->height,
+					(tex->tex_x << 8)+tex->tex_y,
+					(tex->tex_width << 8) + tex->tex_height,
+				};
+				for (int i=0;i<5;i++) {
+					str_tex[tex_size].id = (unsigned short)tex->id;
+					str_tex[tex_size].offset = (unsigned short)i;
+					str_tex[tex_size].value = input[i];
+					tex_size++;
+					if (tex_size >= KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE) {
+						// 転送
+						CS::instance()->leave(CS_RENDERDATA_CS, "sendinfotovt");
+						_sendinfoToVertexTextureTex(g, str_tex, tex_size);
+						tex_size = 0;
+						memset(str_tex,0,sizeof(TEXTURE_VTEX_STRUCT_TEX)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE);
+						CS::instance()->enter(CS_RENDERDATA_CS, "sendinfotovt");
+					}
+				}
+			}
+		}
+	}
+
+	if (tex_size > 0 ) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "sendinfotovt");
+		_sendinfoToVertexTextureTex(g, str_tex, tex_size);
+		tex_size = 0;
+		memset(str_tex,0,sizeof(TEXTURE_VTEX_STRUCT_TEX)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE);
+	} else {
+		CS::instance()->leave(CS_RENDERDATA_CS, "sendinfotovt");
+	}
+
+
+// color x y width height tex_x tex_y tex_width tex_height
+// 4   2   2  2     2       2      2     2       2  = 20 5テクセル
+// color world width height tex_x tex_y tex_width tex_height
+// 4    4* 16    4     4      2     2    2          2  = 84  21 テクセル必要
+	CS::instance()->enter(CS_RENDERDATA_CS, "sendinfotovt");
+	int bsize = this->bill_boards.size();
+	for (int b = 0;b < bsize;b++) {
+		RenderBillBoard* bil = bill_boards[b];
+		if (bil->is_use) {
+			if (bil->is_need_load) {
+				unsigned int input[] = {
+					bil->color,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,
+					(bil->tex_x << 8)+bil->tex_y,
+					(bil->tex_width << 8) + bil->tex_height,
+				};
+				float input2[] = {
+					0.0f,
+					bil->world._11,bil->world._12,bil->world._13, bil->world._14,
+					bil->world._21,bil->world._22,bil->world._23, bil->world._24,
+					bil->world._31,bil->world._32,bil->world._33, bil->world._34,
+					bil->world._41,bil->world._42,bil->world._43, bil->world._44,
+					bil->width,bil->height,
+					0.0f,0.0f,
+				};
+				unsigned int input3[] = {// 1ならばunsigned int
+					1,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,0,0,
+					0,0,
+					1,1
+				};
+
+
+				for (int i=0;i<21;i++) {
+					str_bill[bill_size].id = (unsigned short)bil->id;
+					str_bill[bill_size].flag_with_offset = (unsigned short)(i+ (input3[i] << 8));
+					str_bill[bill_size].value_int = input[i];
+					str_bill[bill_size].value_float = input2[i];
+					bill_size++;
+					if (bill_size >= KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE) {
+						// 転送
+						CS::instance()->leave(CS_RENDERDATA_CS, "sendinfotovt");
+						_sendinfoToVertexTextureBill(g, str_bill, bill_size);
+						bill_size = 0;
+						memset(str_bill,0,sizeof(TEXTURE_VTEX_STRUCT_BILL)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE);
+						CS::instance()->enter(CS_RENDERDATA_CS, "sendinfotovt");
+					}
+				}
+			}
+		}
+	}
+
+	if (bill_size > 0 ) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "sendinfotovt");
+		_sendinfoToVertexTextureBill(g, str_bill, bill_size);
+		bill_size = 0;
+		memset(str_bill,0,sizeof(TEXTURE_VTEX_STRUCT_BILL)*KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE);
+	} else {
+		CS::instance()->leave(CS_RENDERDATA_CS, "sendinfotovt");
+	}
 	
 }
 void Texture::updateIndexBuffer(Graphics* g) {
@@ -810,7 +945,7 @@ void Texture::deletedayo(){
 ID3D11Buffer* Texture::render_vertexbuffer = 0;
 ID3D11Buffer* Texture::vertextex_vertexbuffer_tex=0;
 ID3D11Buffer* Texture::vertextex_vertexbuffer_bill=0;
-
+ID3D11Buffer* Texture::vertextex_indexbuffer = 0;
 
 
 MYSHADERSTRUCT Texture::mss_for_render_tex;
@@ -878,7 +1013,44 @@ void Texture::Init(Graphics* g) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
 	}
 
+	// indexbufferを作る
 
+	D3D11_BUFFER_DESC hBufferDesc;
+	hBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	int index_count_max;
+
+	if (KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE > KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE) {
+		index_count_max = KTROBO_TEXTURE_VTEX_VERTEXBUFFER_TEX_SIZE;
+	} else {
+		index_count_max = KTROBO_TEXTURE_VTEX_VERTEXBUFFER_BILL_SIZE;
+	}
+	hBufferDesc.ByteWidth = sizeof(unsigned short) * index_count_max*3;
+	hBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	hBufferDesc.CPUAccessFlags = 0;
+	hBufferDesc.MiscFlags = 0;
+	hBufferDesc.StructureByteStride = 0;
+	D3D11_SUBRESOURCE_DATA hSubResourceData;
+
+	unsigned short* indexs = new unsigned short[index_count_max*3];
+	memset(indexs, 0, sizeof(unsigned short)*index_count_max*3);
+	
+	for (int i=0; i <index_count_max; i++) {
+		indexs[3*i] = i;
+		indexs[3*i+1] = i;
+		indexs[3*i+2] = i;
+	}
+	
+	hSubResourceData.pSysMem = indexs;
+	hSubResourceData.SysMemPitch = 0;
+	hSubResourceData.SysMemSlicePitch = 0;
+	HRESULT hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &vertextex_indexbuffer);
+	if( FAILED( hr ) ) {
+	  delete[] indexs;
+	  CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
+	  throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "index buffer make error");
+    }
+
+	delete[] indexs;
 
 
 
@@ -942,6 +1114,11 @@ void Texture::Del() {
 	if (render_vertexbuffer) {
 		render_vertexbuffer->Release();
 		render_vertexbuffer = 0;
+	}
+
+	if (vertextex_indexbuffer) {
+		vertextex_indexbuffer->Release();
+		vertextex_indexbuffer = 0;
 	}
 }
 
