@@ -4,6 +4,8 @@
 #pragma once
 #include "MyButukari.h"
 #include "KTRoboInput.h"
+#include "KTRoboTexture.h"
+
 #include "vector"
 using namespace std;
 namespace KTROBO {
@@ -33,8 +35,8 @@ protected:
 class GUI_BUTTON : public INPUTSHORICLASS, public GUI_PART
 {
 private:
-	RENDEREFFECT_Object* render_effect; // たとえばボタンが押されたときにエフェクト？を発生させるときに使用する？
-	RENDERTEX_Object* render_obj;
+//	RENDEREFFECT_Object* render_effect; // たとえばボタンが押されたときにエフェクト？を発生させるときに使用する？
+//	RENDERTEX_Object* render_obj;
 public:
 		
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
@@ -45,9 +47,9 @@ public:
 class GUI_INPUTTEXT : public INPUTSHORICLASS, public GUI_PART
 {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_frame;
-	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_frame;
+//	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
 
 public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
@@ -59,9 +61,9 @@ public:
 class GUI_TEXT : public INPUTSHORICLASS, public GUI_PART
 {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_frame;
-	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_frame;
+//	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
 public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
@@ -71,8 +73,8 @@ public:
 class GUI_TEX : public INPUTSHORICLASS , public GUI_PART // GUIのテクスチャ
 {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_obj;
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_obj;
 public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
@@ -82,8 +84,8 @@ public:
 class GUI_WINDOW : public INPUTSHORICLASS, public GUI_PART
 {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_obj;
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_obj;
 	GUI_BUTTON* close_button;
 	GUI_TEXT* title;
 	bool has_button_and_title;
@@ -98,8 +100,8 @@ public:
 class GUI_TAB : public INPUTSHORICLASS, public GUI_PART
 {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_obj;
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_obj;
 	int tab_index;
 	GUI_PART* child_window;
 public:
@@ -110,8 +112,8 @@ public:
 
 class GUI_SLIDERV : public INPUTSHORICLASS, public GUI_PART {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_obj;
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_obj;
 	MYRECT zentai_box;
 public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
@@ -121,8 +123,8 @@ public:
 
 class GUI_SLIDERH : public INPUTSHORICLASS, public GUI_PART {
 private:
-	RENDEREFFECT_Object* render_effect;
-	RENDERTEX_Object* render_obj;
+//	RENDEREFFECT_Object* render_effect;
+//	RENDERTEX_Object* render_obj;
 	MYRECT zentai_box;
 public:
 	bool handleMessage(int msg, void* data, DWORD time) { return true;};

@@ -1,7 +1,7 @@
 #include "KTRoboTexture.h"
 using namespace KTROBO;
 
-int Texture::getTexture(char* tex_name, int index_count=KTROBO_TEXTURE_INDEXBUFFER_DEFAULT) {
+int Texture::getTexture(char* tex_name, int index_count) {
 	// すでにロードされていた場合はロードは行われない
 	CS::instance()->enter(CS_RENDERDATA_CS, "gettex");
 	if (this->texturepart_index.find(tex_name) != texturepart_index.end()) {
@@ -414,10 +414,78 @@ void Texture::deleteAll() {
 
 }
 
+void Texture::_render(Graphics* g, int part_size, int p_index) {
 
+
+	CS::instance()->enter(CS_DEVICECON_CS, "texture render");
+	CS::instance()->enter(CS_RENDERDATA_CS, "texture render");
+	int psize = parts.size();
+	if (psize != part_size) {
+		// ちょうど変更が入ったタイミング
+		// この場合はどうするか
+		if (psize > part_size) {
+			// 増えただけなので気にしないでまわす
+		} else {
+			// 減ったので狂うのでリターンする　これで描画されないタイミングがでてくるけどしょうがない
+
+			CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+			CS::instance()->leave(CS_DEVICECON_CS, "texture render");
+			return;
+		}
+	}
+	TexturePart* p = parts[p_index];
+	if (p->getIsUse()) {
+		if (p->getIsIndexLoad()) {
+			// need loadがtruefalseにかかわらず描画する
+		
+			// texの描画
+			g->getDeviceContext()->OMSetBlendState();
+			g->getDeviceContext()->OMSetRenderTargets();
+			g->getDeviceContext()->IASetIndexBuffer();
+			g->getDeviceContext()->VSSetShader();
+			g->getDeviceContext()->GSSetShader();
+			g->getDeviceContext()->PSSetShader();
+			g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
+			g->getDeviceContext()->VSSetShaderResources(0,1,&this->vtex_tex->view);
+			g->getDeviceContext()->VSSetConstantBuffers(0,1,&this->cbuf_1);
+
+			g->getDeviceContext()->DrawIndexed();
+
+
+			// billの描画
+			g->getDeviceContext()->OMSetBlendState();
+			g->getDeviceContext()->OMSetRenderTargets();
+			g->getDeviceContext()->IASetIndexBuffer();
+			g->getDeviceContext()->VSSetShader();
+			g->getDeviceContext()->GSSetShader();
+			g->getDeviceContext()->PSSetShader();
+			g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
+			g->getDeviceContext()->VSSetShaderResources(0,1,&this->vtex_tex->view);
+			g->getDeviceContext()->VSSetConstantBuffers(0,1,&this->cbuf_1);
+
+			g->getDeviceContext()->DrawIndexed();
+
+			// unset
+
+
+
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+	CS::instance()->leave(CS_DEVICECON_CS, "texture render");
+
+
+}
 void Texture::render(Graphics* g) {
 	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
-
+	// texごとにレンダーを呼ぶ
+	CS::instance()->enter(CS_RENDERDATA_CS, "texture render");
+	// texture情報を取得してから描画にしようするまでロックは外せないがとりあえず取得する
+	int psize = parts.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+	for (int i=0;i<psize;i++) {
+		_render(g, psize, i);
+	}
 }	
 	
 	
