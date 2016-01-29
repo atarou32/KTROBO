@@ -499,12 +499,65 @@ void Texture::sendinfoToVertexTexture(Graphics* g) {
 }
 void Texture::updateIndexBuffer(Graphics* g) {
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "createIndexBuffer");
+	int p = parts.size();
+	for (int i=0;i<p;i++) {
+		TexturePart* tex_part = parts[i];
+		if (tex_part->getIsUse()) {
+			if(tex_part->getIsIndexLoad()) {
+				if (tex_part->getIsNeedLoad()) {
+					// ロードする
+					int in = tex_part->getIndexCount()*3;
+					if (in) {
+						
+						unsigned short* indexs = new unsigned short[in];
+						memset(indexs,0,sizeof(unsigned short)*in);
+						int temp_count = 0;
+						set<int>::iterator it = tex_part->render_tex_ids.begin();
+	
+						while (it != tex_part->render_tex_ids.end()) {
+							int now_id = *it;
+							indexs[3*temp_count] = (unsigned short)now_id;
+							indexs[3*temp_count+1] = (unsigned short)now_id;
+							indexs[3*temp_count+2] = (unsigned short)now_id;
+							temp_count++;
+							it++;
+							if (temp_count*3 >= in) {
+								// break;
+								break;
+							}
+						}
+						tex_part->index_count_tex = temp_count*3;
+
+						g->getDeviceContext()->UpdateSubresource(tex_part->indexbuffer_tex, 0, 0, (void*)indexs, 0, 0);
 
 
+						temp_count = 0;
+						memset(indexs,0,sizeof(unsigned short)*in);
+						it = tex_part->bill_board_ids.begin();
+		
+						while (it != tex_part->bill_board_ids.end()) {
+							int now_id = *it;
+							indexs[3*temp_count] = (unsigned short)now_id;
+							indexs[3*temp_count+1] = (unsigned short)now_id;
+							indexs[3*temp_count+2] = (unsigned short)now_id;
+							temp_count++;
+							it++;
+							if (temp_count*3 >= in) {
+								// break;
+								break;
+							}
+						}
+						tex_part->index_count_bill = temp_count*3;
 
-
-
-
+						g->getDeviceContext()->UpdateSubresource(tex_part->indexbuffer_bill, 0,0, (void*)indexs, 0, 0);
+						delete[] indexs;
+					}
+				}
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "createIndexBuffer");
 }
 
 void Texture::_createIndexBuffer(Graphics* g, int psize, int p_index) {
@@ -533,7 +586,7 @@ void TexturePart::createIndexBuffer(Graphics* g) {
 
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "createindex");
-	if (!this->is_index_load) {
+	if (!this->is_index_load && !this->indexbuffer_tex && !this->indexbuffer_tex) {
 		// クリエイトする
 		
 		D3D11_BUFFER_DESC hBufferDesc;
@@ -546,12 +599,23 @@ void TexturePart::createIndexBuffer(Graphics* g) {
 	    D3D11_SUBRESOURCE_DATA hSubResourceData;
 
 		unsigned short* indexs = new unsigned short[index_count_max*3];
-
-		for (int i=0;i<index_count_max;i++) {
-			indexs[3*i] = i;
-			indexs[3*i+1] = i;
-			indexs[3*i+2] = i;
+		memset(indexs, 0, sizeof(unsigned short)*index_count_max*3);
+	
+		set<int>::iterator it = this->render_tex_ids.begin();
+		int temp_count = 0;
+		while (it != render_tex_ids.end()) {
+			int now_id = *it;
+			indexs[3*temp_count] = (unsigned short)now_id;
+			indexs[3*temp_count+1] = (unsigned short)now_id;
+			indexs[3*temp_count+2] = (unsigned short)now_id;
+			temp_count++;
+			it++;
+			if (temp_count >= index_count_max) {
+				// break;
+				break;
+			}
 		}
+		this->index_count_tex = temp_count*3;
 	    hSubResourceData.pSysMem = indexs;
 	    hSubResourceData.SysMemPitch = 0;
 	    hSubResourceData.SysMemSlicePitch = 0;
@@ -575,19 +639,30 @@ void TexturePart::createIndexBuffer(Graphics* g) {
 	    hSubResourceData;
 
 		indexs = new unsigned short[index_count_max*3];
-
-		for (int i=0;i<index_count_max;i++) {
-			indexs[3*i] = i;
-			indexs[3*i+1] = i;
-			indexs[3*i+2] = i;
+		memset(indexs,0,sizeof(unsigned short)*index_count_max*3);
+		it = this->bill_board_ids.begin();
+		temp_count = 0;
+		while (it != bill_board_ids.end()) {
+			int now_id = *it;
+			indexs[3*temp_count] = (unsigned short)now_id;
+			indexs[3*temp_count+1] = (unsigned short)now_id;
+			indexs[3*temp_count+2] = (unsigned short)now_id;
+			temp_count++;
+			it++;
+			if (temp_count >= index_count_max) {
+				// break;
+				break;
+			}
 		}
+		this->index_count_bill = temp_count*3;
+
 	    hSubResourceData.pSysMem = indexs;
 	    hSubResourceData.SysMemPitch = 0;
 	    hSubResourceData.SysMemSlicePitch = 0;
 		hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &this->indexbuffer_bill );
 	    if( FAILED( hr ) ) {
 	       delete[] indexs;
-		   	CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
+		   CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
 		   throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "index buffer make error");
 		}
 
@@ -729,4 +804,232 @@ void Texture::deletedayo(Graphics* g){
 
 		CS::instance()->leave(CS_RENDERDATA_CS, "deleteall");
 	}
+}
+
+MYSHADERSTRUCT Texture::mss_for_render_tex;
+MYSHADERSTRUCT Texture::mss_for_render_bill;
+MYSHADERSTRUCT Texture::mss_for_vertextex;
+ID3D11Buffer* Texture::vertexbuffer = 0;
+
+
+void Texture::Init(Graphics* g) {
+	// renderのためのvertexbufferを作る
+
+	// viewを作る
+
+	// vertextextureのためのvertexbufferを作る
+
+	// viewを作る
+
+	// 各種shaderstructのロード
+
+
+
+}
+void Texture::Del() {
+
+	mss_for_render_bill.Del();
+	mss_for_render_tex.Del();
+	mss_for_vertextex.Del();
+
+}
+
+
+void Texture::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
+								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
+								D3D11_INPUT_ELEMENT_DESC* layout, int numoflayout, bool blend_enable) {
+
+	HRESULT hr = S_OK;
+	ID3DBlob* pblob = 0;
+	memset(s, 0, sizeof(MYSHADERSTRUCT));
+
+	try {
+		CompileShaderFromFile(shader_filename, vs_func_name, "vs_4_0", &pblob);
+		hr = g->getDevice()->CreateVertexShader(pblob->GetBufferPointer(),
+			pblob->GetBufferSize(),
+			NULL,
+			&s->vs);
+		if (FAILED(hr)) {
+			pblob->Release();
+			pblob = 0;
+			s->vs = 0;
+			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vs make error");;
+		}
+
+		// 入力レイアウトの定義
+		
+		
+		unsigned int num = numoflayout;//sizeoflayout/ sizeof(layout[0]);
+			
+		hr = g->getDevice()->CreateInputLayout(
+			layout,num,pblob->GetBufferPointer(),
+			pblob->GetBufferSize(),
+			&s->vertexlayout);
+		if (FAILED(hr)) {
+			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "layout make error");;
+		}
+		if (pblob) {
+			pblob->Release();
+			pblob = 0;
+		}
+		 // Set the input layout
+		
+		CompileShaderFromFile(shader_filename, gs_func_name, "gs_4_0", &pblob);
+		hr = g->getDevice()->CreateGeometryShader(pblob->GetBufferPointer(),
+			pblob->GetBufferSize(), NULL, &s->gs);
+		if (FAILED(hr)) {
+			pblob->Release();
+			pblob = 0;
+			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "gs make error");;
+		}
+		if (pblob) {
+			pblob->Release();
+			pblob = 0;
+		}
+
+		CompileShaderFromFile(shader_filename, ps_func_name, "ps_4_0", &pblob);
+		hr = g->getDevice()->CreatePixelShader(pblob->GetBufferPointer(),
+			pblob->GetBufferSize(),
+			NULL,&s->ps);
+		if (FAILED(hr)) {
+			pblob->Release();
+			pblob = 0;
+			s->ps = 0;
+			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "ps make error");;
+		}
+
+		if (pblob) {
+			pblob->Release();
+			pblob = 0;
+		}
+
+		D3D11_BLEND_DESC BlendDesc;
+		memset(&BlendDesc, 0, sizeof(BlendDesc));
+		BlendDesc.AlphaToCoverageEnable = blend_enable;
+		BlendDesc.IndependentBlendEnable = blend_enable;
+		BlendDesc.RenderTarget[0].BlendEnable = blend_enable;
+		BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;//SRC_ALPHA;
+		BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;//INV_SRC_ALPHA;
+		BlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		BlendDesc.RenderTarget[0].SrcBlendAlpha =D3D11_BLEND_ONE;
+		BlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		BlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		BlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		HRESULT hr = g->getDevice()->CreateBlendState(&BlendDesc,&s->blendstate);
+		if (FAILED(hr)) {
+			throw new GameError(KTROBO::FATAL_ERROR, "failed in blend state create");
+		}
+		/*
+		 BlendDesc.IndependentBlendEnable = FALSE;
+   // アルファブレンドを無効
+   BlendDesc.RenderTarget[0].BlendEnable = FALSE;
+   BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+   BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+   BlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+   BlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+   BlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+   BlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+   BlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+   hr = pD3DDevice->CreateBlendState( &BlendDesc, &m_Step01.pBlendState );
+   if( FAILED( hr ) )
+   */
+	
+	} catch (KTROBO::GameError* e) {
+		if (pblob) {
+			pblob->Release();
+			pblob = 0;
+		}
+
+		Del();
+
+		
+		MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
+		throw e;
+	}
+
+
+	D3D11_RASTERIZER_DESC _rasterDesc;
+	_rasterDesc.AntialiasedLineEnable = true; // changed to true
+	_rasterDesc.CullMode = D3D11_CULL_NONE;
+	_rasterDesc.DepthBias = 0;
+	_rasterDesc.DepthBiasClamp = 0.0f;
+	_rasterDesc.DepthClipEnable = false;
+	_rasterDesc.FillMode = D3D11_FILL_SOLID;
+	_rasterDesc.FrontCounterClockwise = false;
+	_rasterDesc.MultisampleEnable = true; // changed to true
+	_rasterDesc.ScissorEnable = false;
+	_rasterDesc.SlopeScaledDepthBias = 0.0f;
+	hr  = g->getDevice()->CreateRasterizerState( &_rasterDesc, &s->rasterstate );
+	if( FAILED( hr ) ) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "raster make error");;
+	}
+
+/*
+	D3D11_BUFFER_DESC des;
+	des.ByteWidth = sizeof(TelopTextsCBuf1);
+	des.Usage = D3D11_USAGE_DEFAULT;
+	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	des.CPUAccessFlags = 0;
+	des.MiscFlags = 0;
+	des.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA idat;
+	idat.pSysMem = &this->cbuf1;
+	idat.SysMemPitch = 0;
+	idat.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer(&des, &idat, &cbuf1_buffer);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
+
+	des.ByteWidth = sizeof(TelopTextsCBuf2);
+	des.Usage = D3D11_USAGE_DEFAULT;
+	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	des.CPUAccessFlags = 0;
+	des.MiscFlags = 0;
+	des.StructureByteStride = 0;
+
+//	D3D11_SUBRESOURCE_DATA idat;
+	idat.pSysMem = &this->cbuf2;
+	idat.SysMemPitch = 0;
+	idat.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer(&des, &idat, &cbuf2_buffer);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
+*/
+
+	D3D11_TEXTURE2D_DESC descDepth;
+	ZeroMemory( &descDepth, sizeof(descDepth) );
+	descDepth.Width = ds_width; descDepth.Height = ds_height;
+	descDepth.MipLevels = 1;
+	descDepth.ArraySize = 1;
+	descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	descDepth.SampleDesc.Count = 1; descDepth.SampleDesc.Quality = 0;
+	descDepth.Usage = D3D11_USAGE_DEFAULT;
+	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+ 
+	//ID3D11Texture2D* pDepthStencil = 0;
+	hr = g->getDevice()->CreateTexture2D( &descDepth, NULL, &s->depthstencil );
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "depth stencil make error");
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDepthStencilView;
+	ZeroMemory( &descDepthStencilView, sizeof(descDepthStencilView) );
+	descDepthStencilView.Format = descDepth.Format;
+	descDepthStencilView.ViewDimension =  D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDepthStencilView.Texture2D.MipSlice = 0;
+	//ID3D11DepthStencilView* pDepthStencilView = 0;
+	hr = g->getDevice()->CreateDepthStencilView( s->depthstencil, &descDepthStencilView, &s->depthstencilview );
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "depth stencil make error");
+	}
+
+
 }
