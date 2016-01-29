@@ -806,11 +806,13 @@ void Texture::deletedayo(Graphics* g){
 	}
 }
 
+
+ID3D11Buffer* Texture::render_vertexbuffer = 0;
+ID3D11Buffer* Texture::vertextex_vertexbuffer = 0;
 MYSHADERSTRUCT Texture::mss_for_render_tex;
 MYSHADERSTRUCT Texture::mss_for_render_bill;
-MYSHADERSTRUCT Texture::mss_for_vertextex;
-ID3D11Buffer* Texture::vertexbuffer = 0;
-
+MYSHADERSTRUCT Texture::mss_for_vertextex_tex;
+MYSHADERSTRUCT Texture::mss_for_vertextex_bill;
 
 void Texture::Init(Graphics* g) {
 	// render‚Ì‚½‚ß‚Ìvertexbuffer‚ðì‚é
@@ -823,15 +825,58 @@ void Texture::Init(Graphics* g) {
 
 	// ŠeŽíshaderstruct‚Ìƒ[ƒh
 
+	D3D11_INPUT_ELEMENT_DESC layout[] = {
+		{"INDEXSDAYO", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0},
+	};
+	
+	loadShader(g, &mss_for_render_bill, KTROBO_TEXTURE_SHADER_FILENAME_RENDER_BILL, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
+		KTROBO_TEXTURE_SHADER_PS, g->getScreenWidth(), g->getScreenHeight(),
+								layout, 1, true);
 
+	D3D11_INPUT_ELEMENT_DESC layout2[] = {
+		{"INDEXSDAYO", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0},
+	};
+	
+	loadShader(g, &mss_for_render_tex, KTROBO_TEXTURE_SHADER_FILENAME_RENDER_TEX, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
+		KTROBO_TEXTURE_SHADER_PS, g->getScreenWidth(), g->getScreenHeight(),
+								layout2, 1, true);
+
+
+	D3D11_INPUT_ELEMENT_DESC layout3[] = {
+		{"INDEXSDAYO", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0},
+	};
+	
+	loadShader(g, &mss_for_vertextex_tex, KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_TEX, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
+		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout3, 1, false);
+
+
+	D3D11_INPUT_ELEMENT_DESC layout4[] = {
+		{"INDEXSDAYO", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0},
+	};
+	
+	loadShader(g, &mss_for_vertextex_bill, KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_BILL, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
+		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout4, 1, false);
 
 }
+
+
+
 void Texture::Del() {
 
 	mss_for_render_bill.Del();
 	mss_for_render_tex.Del();
-	mss_for_vertextex.Del();
+	mss_for_vertextex_tex.Del();
+	mss_for_vertextex_bill.Del();
 
+	if (vertextex_vertexbuffer) {
+		vertextex_vertexbuffer->Release();
+		vertextex_vertexbuffer = 0;
+	}
+
+	if (render_vertexbuffer) {
+		render_vertexbuffer->Release();
+		render_vertexbuffer = 0;
+	}
 }
 
 

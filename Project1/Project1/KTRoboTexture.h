@@ -130,13 +130,35 @@ public:
 #define KTROBO_TEXTURE_INDEXBUFFER_DEFAULT 128*3 // è≠Ç»Ç¢Ç©Ç‡
 #define KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT 512
 
+
+
+#define KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_TEX "resrc/shader/simpletexture_vertex_tex.fx"
+#define KTROBO_TEXTURE_SHADER_FILENAME_RENDER_TEX "resrc/shader/simpletexture_render_tex.fx"
+#define KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_BILL "resrc/shader/simpletexture_vertex_tex.fx"
+#define KTROBO_TEXTURE_SHADER_FILENAME_RENDER_BILL "resrc/shader/simpletexture_render_tex.fx"
+
+
+#define KTROBO_TEXTURE_SHADER_VS "VSFunc"
+#define KTROBO_TEXTURE_SHADER_GS "GSFunc"
+#define KTROBO_TEXTURE_SHADER_PS "PSFunc"
+
+
+
+
+
+
+
+
 class Texture
 {
 private:
 	static MYSHADERSTRUCT mss_for_render_tex;
 	static MYSHADERSTRUCT mss_for_render_bill;
-	static MYSHADERSTRUCT mss_for_vertextex;
-	static ID3D11Buffer* vertexbuffer;
+	static MYSHADERSTRUCT mss_for_vertextex_tex;
+	static MYSHADERSTRUCT mss_for_vertextex_bill;
+
+	static ID3D11Buffer* render_vertexbuffer;
+	static ID3D11Buffer* vertextex_vertexbuffer;
 
 public:
 	static void Init(Graphics* g);

@@ -370,7 +370,7 @@ void MeshInstanceds::loadColorToTexture(Graphics* g) {
 }
 
 void MeshInstanceds::loadShaderForColor(Graphics* g) {
-		D3D11_INPUT_ELEMENT_DESC layout[] = {
+	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{"INDEXSDAYO", 0, DXGI_FORMAT_R32G32B32A32_UINT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
 		{"MCOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
 		};
