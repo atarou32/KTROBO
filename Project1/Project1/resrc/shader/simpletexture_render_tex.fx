@@ -1,0 +1,315 @@
+struct VSInput {
+uint tex_id: TEX_ID;
+};
+
+struct GSPSInput {
+float4 Position: SV_POSITION;
+float4 WHS: NORMAL;
+float2 TexCoord: TEXCOORD0;
+};
+
+sampler texSmp {
+	Filter = MIN_MAG_MIP_LINEAR;
+  	AddressU = WRAP;
+  	AddressV = WRAP;
+  	AddressW = WRAP;
+  	ComparisonFunc = NEVER;
+  	MinLOD = 0;
+  	MaxLOD = FLOAT32_MAX;
+};
+sampler decalSmp {
+  	Filter = MIN_MAG_MAP_POINT;//MIN_MAG_MIP_LINEAR;
+  	AddressU = WRAP;
+  	AddressV = WRAP;
+  	AddressW = WRAP;
+  	ComparisonFunc = NEVER;
+  	MinLOD = 0;
+  	MaxLOD = FLOAT32_MAX;
+};
+
+
+float getFValueFromTexColor(float4 color) {
+    float ans = 0;
+    float code = 0.1 * 1/255.0f;
+
+    uint r = floor((color.x + code)*255);
+    uint g = floor((color.y + code)*255);
+    uint b = floor((color.z + code)*255);
+    uint a = floor((color.w + code)*255);
+    uint gu = a + (b << 8) + (g << 16) + (r <<24);
+    ans = asfloat(gu);
+    return ans;
+}
+
+uint getIValueFromTexColor(float4 color) {
+  	uint ans = 0;
+    float code = 0.1 * 1/255.0f;
+
+    uint r = floor((color.x + code)*255);
+    uint g = floor((color.y + code)*255);
+    uint b = floor((color.z + code)*255);
+    uint a = floor((color.w + code)*255);
+    uint gu = a + (b << 8) + (g << 16) + (r <<24);
+    ans = gu;
+    return ans;
+}
+
+column_major float4x4 MyMatrixIdentity() {
+	column_major float4x4 t;
+	t = 0;
+	t._11 = 1;t._22 = 1;t._33 =1; t._44 = 1;
+	return t;
+}
+
+column_major float4x4 MyMatrixTranslation(float x, float y, float z) {
+	column_major float4x4 ans = MyMatrixIdentity();
+	ans._41 = x;
+	ans._42 = y;
+	ans._43 = z;
+	return ans;
+}
+
+
+
+
+
+column_major float4x4 MyMatrixRotationX(float a) {
+column_major float4x4 ans=(float4x4)0;
+ans._11 = 1;
+ans._44 = 1;
+ans._22 = cos(a);
+ans._32 = -sin(a);
+ans._23 = sin(a);
+ans._33 = cos(a);
+return ans;
+}
+
+column_major float4x4 MyMatrixTranspose(float4x4 test) {
+float4x4 a = test;
+float4x4 ans;
+ans._11 = a._11;
+ans._12 = a._21;
+ans._13 = a._31;
+ans._14 = a._41;
+ans._21 = a._21;
+ans._22 = a._22;
+ans._23 = a._32;
+ans._24 = a._42;
+ans._31 = a._13;
+ans._32 = a._23;
+ans._33 = a._33;
+ans._34 = a._43;
+ans._41 = a._14;
+ans._42 = a._24;
+ans._43 = a._34;
+ans._44 = a._44;
+return ans;
+}
+
+
+
+
+
+
+
+
+
+float getMatrixValueFromTex(uint offset, Texture2D tex, float2 texcoord, int tex_width, int tex_height) {
+
+float xcode = 0.5f/(float)tex_width;
+float ycode = 0.5f/(float)tex_height;
+
+
+float4 col = tex.SampleLevel(decalSmp, float2(texcoord.x + xcode + xcode*2*offset, texcoord.y + ycode),0);
+float val = getValueFromTexColor(col);
+return val;
+
+}
+
+column_major float4x4 getMatrixFromTex(Texture2D tex, float2 texcoord, int tex_width, int tex_height) {
+
+column_major float4x4 mat = (float4x4)0;
+
+mat._11 = getMatrixValueFromTex(0,tex,texcoord,tex_width,tex_height);
+mat._21 = getMatrixValueFromTex(1,tex,texcoord,tex_width,tex_height);
+mat._31 = getMatrixValueFromTex(2,tex,texcoord,tex_width,tex_height);
+mat._41 = getMatrixValueFromTex(3,tex,texcoord,tex_width,tex_height);
+mat._12 = getMatrixValueFromTex(4,tex,texcoord,tex_width,tex_height);
+mat._22 = getMatrixValueFromTex(5,tex,texcoord,tex_width,tex_height);
+mat._32 = getMatrixValueFromTex(6,tex,texcoord,tex_width,tex_height);
+mat._42 = getMatrixValueFromTex(7,tex,texcoord,tex_width,tex_height);
+mat._13 = getMatrixValueFromTex(8,tex,texcoord,tex_width,tex_height);
+mat._23 = getMatrixValueFromTex(9,tex,texcoord,tex_width,tex_height);
+mat._33 = getMatrixValueFromTex(10,tex,texcoord,tex_width,tex_height);
+mat._43 = getMatrixValueFromTex(11,tex,texcoord,tex_width,tex_height);
+mat._14 = getMatrixValueFromTex(12,tex,texcoord,tex_width,tex_height);
+mat._24 = getMatrixValueFromTex(13,tex,texcoord,tex_width,tex_height);
+mat._34 = getMatrixValueFromTex(14,tex,texcoord,tex_width,tex_height);
+mat._44 = getMatrixValueFromTex(15,tex,texcoord,tex_width,tex_height);
+
+
+/*
+mat._11 = getMatrixValueFromTex(0,tex,texcoord,tex_width,tex_height);
+mat._12 = getMatrixValueFromTex(1,tex,texcoord,tex_width,tex_height);
+mat._13 = getMatrixValueFromTex(2,tex,texcoord,tex_width,tex_height);
+mat._14 = getMatrixValueFromTex(3,tex,texcoord,tex_width,tex_height);
+mat._21 = getMatrixValueFromTex(4,tex,texcoord,tex_width,tex_height);
+mat._22 = getMatrixValueFromTex(5,tex,texcoord,tex_width,tex_height);
+mat._23 = getMatrixValueFromTex(6,tex,texcoord,tex_width,tex_height);
+mat._24 = getMatrixValueFromTex(7,tex,texcoord,tex_width,tex_height);
+mat._31 = getMatrixValueFromTex(8,tex,texcoord,tex_width,tex_height);
+mat._32 = getMatrixValueFromTex(9,tex,texcoord,tex_width,tex_height);
+mat._33 = getMatrixValueFromTex(10,tex,texcoord,tex_width,tex_height);
+mat._34 = getMatrixValueFromTex(11,tex,texcoord,tex_width,tex_height);
+mat._41 = getMatrixValueFromTex(12,tex,texcoord,tex_width,tex_height);
+mat._42 = getMatrixValueFromTex(13,tex,texcoord,tex_width,tex_height);
+mat._43 = getMatrixValueFromTex(14,tex,texcoord,tex_width,tex_height);
+mat._44 = getMatrixValueFromTex(15,tex,texcoord,tex_width,tex_height);
+*/
+
+return mat;
+}
+
+
+
+Texture2D texDiffuse : register(t0);
+Texture2D vertexTex : register(t1);
+
+cbuffer c0dayo :register(c0){
+uint screen_width;
+uint screen_height;
+uint tex_width;
+uint tex_height;
+};
+
+#define KTROBO_TEXTURE_COLOR_OFFSET 0
+#define KTROBO_TEXTURE_XY_OFFSET 1
+#define KTROBO_TEXTURE_WH_OFFSET 2
+#define KTROBO_TEXTURE_TEXXY_OFFSET 3
+#define KTROBO_TEXTURE_TEXWH_OFFSET 4
+
+uint getColorFromTex(uint tex_id) {
+
+
+
+
+
+}
+
+uint getXYFromTex(uint tex_id) {
+
+
+
+}
+
+uint getWHFromTex(uint tex_id) {
+
+
+
+
+}
+
+uint getTexXYFromTex(uint tex_id) {
+
+
+}
+
+uint getTexWHFromTex(uint tex_id) {
+
+
+
+}
+
+GSPSInput VSFunc(VSInput input){
+GSPSInput output;// (GSPSInput)0;
+
+uint tex_id = input.tex_id;
+uint color = getColorFromTex(tex_id);
+uint xy = getXYFromTex(tex_id);
+uint wh = getWHFromTex(tex_id);
+uint tex_xy = getTexXYFromTex(tex_id);
+uint tex_wh = getTexWHFromTex(tex_id);
+uint x = (xy >>8);
+uint y = xy - (x << 8);
+uint w = (wh >> 8);
+uint h = wh - (w << 8);
+uint tex_x = tex_xy >> 8;
+uint tex_y = tex_xy - (tex_x << 8);
+uint tex_width = tex_wh  >> 8;
+uint tex_height = tex_wh - (tex_wh << 8);
+
+output.Position.x = -1 + 2 *  x / (float)screen_width;
+output.Position.y = 1 - 2 * y / (float)screen_height;
+output.Position.z = 0.0f;
+output.Position.w = 1.0f;
+output.TexCoord.x = tex_x / (float)tex_width;
+output.TexCoord.y = tex_y / (float)tex_height;
+output.WHS.x = w/(float)screen_width;
+output.WHS.y = h/(float)screen_height;
+output.WHS.z = tex_width/(float)tex_width;
+output.WHS.w = tex_height/(float)tex_height;
+
+return output;
+}
+
+
+[maxvertexcount(6)]
+void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream) {
+GSPSInput Out;
+
+Out.WHS = In[0].WHS;
+
+float base_x = In[0].Position.x;
+float base_y = In[0].Position.y;
+float xoffset = In[0].WHS.x*2;
+float yoffset = In[0].WHS.y*2;
+float base_texx = In[0].TexCoord.x;
+float base_texy = In[0].TexCoord.y;
+float tex_xoffset = In[0].WHS.z;
+float tex_yoffset = In[0].WHS.w;
+
+uint mat_index = 0;
+uint i = mat_index;
+
+Out.Position = float4(base_x + xoffset*i, base_y, 0.0f,1.0f);
+Out.TexCoord = float2(base_texx,base_texy);   
+gsstream.Append(Out);
+
+Out.Position = float4(base_x + xoffset*i, base_y - yoffset, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
+
+gsstream.Append(Out);
+
+Out.Position = float4(base_x+xoffset*i + xoffset, base_y, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
+
+gsstream.Append(Out);
+
+
+Out.Position = float4(base_x + xoffset+xoffset*i, base_y, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
+
+
+gsstream.Append(Out);
+
+Out.Position = float4(base_x+xoffset*i, base_y - yoffset, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
+
+gsstream.Append(Out);
+Out.Position = float4(base_x+xoffset+xoffset*i, base_y - yoffset , 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx + tex_xoffset, base_texy + tex_yoffset);
+
+gsstream.Append(Out);    
+
+gsstream.RestartStrip();
+
+
+}
+
+
+
+float4 PSFunc(GSPSInput input ) : SV_Target {
+
+float4 test = texDiffuse.Sample( texSmp, float2(input.TexCoord.x , input.TexCoord.y) );
+return test; // * float4(diffuse);
+}
