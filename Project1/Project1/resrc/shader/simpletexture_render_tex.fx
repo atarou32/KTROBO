@@ -34,6 +34,13 @@ uint screen_width;
 uint screen_height;
 uint tex_width;
 uint tex_height;
+uint vtex_width;
+uint vtex_height;
+uint offset;
+uint offset2;
+
+
+
 };
 
 
@@ -139,12 +146,12 @@ Texture2D tex : register(t1);
 
 uint getColorFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_COLOR_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -154,12 +161,12 @@ return val;
 
 uint getXYFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_XY_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode, y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode, y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -171,12 +178,12 @@ return val;
 uint getWHFromTex(uint tex_id) {
 
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_WH_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width+ xcode , y / (float)tex_height+ycode);
+float2 texcoord = float2(x/ (float)vtex_width+ xcode , y / (float)vtex_height+ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -188,12 +195,12 @@ return val;
 
 uint getTexXYFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_TEXXY_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width+xcode , y / (float)tex_height+ycode);
+float2 texcoord = float2(x/ (float)vtex_width+xcode , y / (float)vtex_height+ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -204,12 +211,12 @@ return val;
 
 uint getTexWHFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_TEXWH_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width+xcode , y / (float)tex_height+ycode);
+float2 texcoord = float2(x/ (float)vtex_width+xcode , y / (float)vtex_height+ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -244,8 +251,8 @@ uint w = (wh >> 8);
 uint h = wh - (w << 8);
 uint tex_x = tex_xy >> 8;
 uint tex_y = tex_xy - (tex_x << 8);
-uint tex_width = tex_wh  >> 8;
-uint tex_height = tex_wh - (tex_wh << 8);
+uint tex_w = tex_wh  >> 8;
+uint tex_h = tex_wh - (tex_w << 8);
 
 output.Position.x = -1 + 2 *  x / (float)screen_width;
 output.Position.y = 1 - 2 * y / (float)screen_height;
@@ -255,8 +262,8 @@ output.TexCoord.x = tex_x / (float)tex_width;
 output.TexCoord.y = tex_y / (float)tex_height;
 output.WHS.x = w/(float)screen_width;
 output.WHS.y = h/(float)screen_height;
-output.WHS.z = tex_width/(float)tex_width;
-output.WHS.w = tex_height/(float)tex_height;
+output.WHS.z = tex_w/(float)tex_width;
+output.WHS.w = tex_h/(float)tex_height;
 output.Color = getColorFromUINT(color);
 return output;
 }

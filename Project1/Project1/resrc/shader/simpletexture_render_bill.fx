@@ -36,6 +36,10 @@ uint screen_width;
 uint screen_height;
 uint tex_width;
 uint tex_height;
+uint vtex_width;
+uint vtex_height;
+uint offset;
+uint offset2;
 };
 
 cbuffer c1dayo :register(c1){
@@ -152,12 +156,12 @@ return float4(r/255.0f,g/255.0f,b/255.0f,a/255.0f);
 
 uint getColorFromBillId(uint bill_id) {
 uint place = KTROBO_TEXTURE_BILL_OFFSET_MAX * bill_id + KTROBO_TEXTURE_BILL_COLOR_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -167,12 +171,12 @@ return val;
 
 float getMatrixValueFromBillId(uint bill_id, uint offset) {
 uint place = KTROBO_TEXTURE_BILL_OFFSET_MAX * bill_id + KTROBO_TEXTURE_BILL_WORLD_OFFSET+offset;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 float val = getFValueFromTexColor(col);
@@ -205,12 +209,12 @@ return ans;
 
 float getWidthFromBillId(uint bill_id) {
 uint place = KTROBO_TEXTURE_BILL_OFFSET_MAX * bill_id + KTROBO_TEXTURE_BILL_W_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 float val = getFValueFromTexColor(col);
@@ -219,12 +223,12 @@ return val;
 
 float getHeightFromBillId(uint bill_id) {
 uint place = KTROBO_TEXTURE_BILL_OFFSET_MAX * bill_id + KTROBO_TEXTURE_BILL_H_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 float val = getFValueFromTexColor(col);
@@ -233,12 +237,12 @@ return val;
 
 uint getTexXYFromBillId(uint bill_id) {
 uint place = KTROBO_TEXTURE_BILL_OFFSET_MAX * bill_id + KTROBO_TEXTURE_BILL_TEXXY_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -247,12 +251,12 @@ return val;
 
 uint getTexWHFromBillId(uint bill_id) {
 uint place = KTROBO_TEXTURE_BILL_OFFSET_MAX * bill_id + KTROBO_TEXTURE_BILL_TEXWH_OFFSET;
-uint x = place % tex_width;
-uint y = place / tex_width;
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
+uint x = place % vtex_width;
+uint y = place / vtex_width;
+float xcode = 0.5f/(float)vtex_width;
+float ycode = 0.5f/(float)vtex_height;
 
-float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
+float2 texcoord = float2(x/ (float)vtex_width + xcode , y / (float)vtex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);

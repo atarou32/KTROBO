@@ -157,6 +157,11 @@ struct TEXTURE_TEX_CBUF {
 	unsigned int screen_height;
 	unsigned int tex_width;
 	unsigned int tex_height;
+	unsigned int vtex_width;
+	unsigned int vtex_height;
+	unsigned int offset;
+	unsigned int offset2;
+
 };
 
 struct TEXTURE_BILL_CBUF {
@@ -353,6 +358,7 @@ private:
 	static ID3D11Buffer* cbuf1_buffer;
 	static TEXTURE_BILL_CBUF cbuf2;
 	static ID3D11Buffer* cbuf2_buffer;
+	void updateCBuf1(Graphics* g, TexturePart* part);
 
 public:
 	static void Init(Graphics* g);

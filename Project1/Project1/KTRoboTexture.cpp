@@ -577,6 +577,7 @@ void Texture::_renderTex(Graphics* g, TexturePart* p) {
 	float ccc[] = {
 		0.2f,0.2f,0.8f,0.7f};
 	ID3D11RenderTargetView* v = g->getRenderTargetView();
+	this->updateCBuf1(g,p);
 	g->getDeviceContext()->OMSetRenderTargets(1, &v, mss_for_render_tex.depthstencilview);
 	g->getDeviceContext()->RSSetViewports(1, &vp);
 	g->getDeviceContext()->ClearDepthStencilView(mss_for_render_tex.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
@@ -1151,6 +1152,20 @@ MYSHADERSTRUCT Texture::mss_for_render_bill;
 MYSHADERSTRUCT Texture::mss_for_vertextex_tex;
 MYSHADERSTRUCT Texture::mss_for_vertextex_bill;
 
+
+
+
+void Texture::updateCBuf1(Graphics* g, TexturePart* part) {
+
+	cbuf1.tex_height = part->getClass()->height;
+	cbuf1.tex_width = part->getClass()->width;
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "updatecbuf1");
+	g->getDeviceContext()->UpdateSubresource(cbuf1_buffer,0,0,(void*)&cbuf1,0,0);
+	CS::instance()->leave(CS_RENDERDATA_CS, "updatecbuf1");
+}
+
+
 void Texture::Init(Graphics* g) {
 
 	// render‚Ì‚½‚ß‚Ìvertexbuffer‚ðì‚é
@@ -1319,9 +1334,12 @@ void Texture::Init(Graphics* g) {
 	memset(&cbuf1, 0, sizeof(TEXTURE_TEX_CBUF));
 	cbuf1.screen_height = g->getScreenHeight();
 	cbuf1.screen_width = g->getScreenWidth();
-	cbuf1.tex_width = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
+	cbuf1.vtex_width = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
+	cbuf1.vtex_height = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
 	cbuf1.tex_height = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
-
+	cbuf1.tex_width = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
+	cbuf1.offset = 0;
+	cbuf1.offset2 = 0;
 	idat.pSysMem = &cbuf1;
 	idat.SysMemPitch = 0;
 	idat.SysMemSlicePitch = 0;

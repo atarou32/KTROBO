@@ -347,9 +347,9 @@ bool Game::Init(HWND hwnd) {
 	Texture::Init(g);
 
 	texdayo = new Texture(demo->tex_loader);
-	int i = texdayo->getTexture("resrc/model/images.jpg");
-	int j = texdayo->getRenderTex(i,0xFFFFFFFF,0,0,100,200,0,0,512,512);
-	texdayo->setRenderTexIsRender(j,true);
+//	int i = texdayo->getTexture("resrc/model/images.jpg");
+//	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,200,200,200,50,50,100,100);
+//	texdayo->setRenderTexIsRender(j,true);
 
 
 
