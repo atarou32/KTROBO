@@ -36,7 +36,7 @@ return output;
 
 
 [maxvertexcount(6)]
-void GSFunc( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> stream) {
+void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream) {
 GSPSInput   Out=(GSPSInput)0;
 Out.TexCoord = float2(0,0);
 Out.Value = In[0].Value;

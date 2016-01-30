@@ -2,7 +2,7 @@ struct VSInput {
 uint bill_id: BILL_ID;
 uint offset: OFFSET;
 float fvalue: V_FLOAT;
-float ivalue: V_INT;
+uint ivalue: V_INT;
 };
 
 struct GSPSInput {
@@ -19,7 +19,7 @@ GSPSInput output;
 
 output.TexCoord = float2(0,0);
 
-uint is_ivalue = (input.offset >> 8)
+uint is_ivalue = (input.offset >> 8);
 uint offset = input.offset - (is_ivalue << 8);
 if (is_ivalue >0) {
   output.Value = input.ivalue;
@@ -44,7 +44,7 @@ return output;
 
 
 [maxvertexcount(6)]
-void GSFunc( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> stream) {
+void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream) {
 GSPSInput   Out=(GSPSInput)0;
 Out.TexCoord = float2(0,0);
 Out.Value = In[0].Value;

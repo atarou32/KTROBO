@@ -1067,49 +1067,7 @@ void Texture::deletedayo(){
 	if (is_all_delete) {
 		// ‘SÁ‹ˆ—‚ğŒÄ‚Ô
 
-		// billboardŠÖŒW‚ğÁ‹‚·‚é
-	
-		int bsize = bill_boards.size();
-		unuse_bill_boards.clear();
-		unuse_bill_board_ids.clear();
-		erase_bill_board_ids.clear();
-		bill_board_indexs.clear();
-		for (int i=0;i<bsize;i++) {
-			RenderBillBoard * b = bill_boards[i];
-			if (b != &dummy_billboard) {
-				delete b;
-				b = 0;
-			}
-		}
-		bill_boards.clear();
-		// billboardÁ‹Š®—¹
-
-		// rendertexŠÖŒW‚ğÁ‹‚·‚é
-		int rsize = render_texs.size();
-		unuse_render_texs.clear();
-		unuse_render_tex_ids.clear();
-		erase_render_tex_ids.clear();
-		render_tex_indexs.clear();
-		for(int i=0;i<rsize;i++) {
-			RenderTex* c = render_texs[i];
-			if (c != &dummy_rendertex) {
-				delete c;
-				c = 0;
-			}
-		}
-		render_texs.clear();
-
-		// textureŠÖŒW‚ğÁ‹‚·‚é
-		int psize = parts.size();
-		for (int i=0;i<psize;i++) {
-			TexturePart* pp = parts[i];
-			pp->del();
-			delete pp;
-			pp = 0;
-		}
-		parts.clear();
-		texturepart_index.clear();
-		//‚±‚ê‚Å‚¨‚‹
+		Release();
 		CS::instance()->leave(CS_RENDERDATA_CS, "deleteall");
 		return;
 	} 
@@ -1176,8 +1134,13 @@ ID3D11Buffer* Texture::render_vertexbuffer = 0;
 ID3D11Buffer* Texture::vertextex_vertexbuffer_tex=0;
 ID3D11Buffer* Texture::vertextex_vertexbuffer_bill=0;
 ID3D11Buffer* Texture::vertextex_indexbuffer = 0;
-ID3D11Buffer* cbuf1_buffer = 0;
-ID3D11Buffer* cbuf2_buffer = 0;
+ID3D11Buffer* Texture::cbuf1_buffer = 0;
+ID3D11Buffer* Texture::cbuf2_buffer = 0;
+TEXTURE_BILL_CBUF Texture::cbuf2;
+TEXTURE_TEX_CBUF Texture::cbuf1;
+
+
+
 
 MYSHADERSTRUCT Texture::mss_for_render_tex;
 MYSHADERSTRUCT Texture::mss_for_render_bill;
@@ -1205,7 +1168,7 @@ void Texture::Init(Graphics* g) {
 	hSubResourceData.pSysMem = indexs;
 	hSubResourceData.SysMemPitch = 0;
     hSubResourceData.SysMemSlicePitch = 0;
-	HRESULT hr = g->getDevice()->CreateBuffer(&bd, &hSubResourceData ,&(vertextex_vertexbuffer_tex));
+	HRESULT hr = g->getDevice()->CreateBuffer(&bd, &hSubResourceData ,&(render_vertexbuffer));
 	if (FAILED(hr)) {
 		delete[] indexs;
 		Del();
@@ -1482,6 +1445,7 @@ void Texture::Del() {
 		cbuf2_buffer->Release();
 		cbuf2_buffer =0; 
 	}
+
 }
 
 

@@ -153,10 +153,10 @@ public:
 
 
 struct TEXTURE_TEX_CBUF {
-	unsigned short screen_width;
-	unsigned short screen_height;
-	unsigned short tex_width;
-	unsigned short tex_height;
+	unsigned int screen_width;
+	unsigned int screen_height;
+	unsigned int tex_width;
+	unsigned int tex_height;
 };
 
 struct TEXTURE_BILL_CBUF {
@@ -400,10 +400,52 @@ public:
 		vtex_tex = loader->makeClass(KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT);
 		vtex_bill = loader->makeClass(KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT);
 	}
+	void Release() {
+				// billboard関係を消去する
+	
+		int bsize = bill_boards.size();
+		unuse_bill_boards.clear();
+		unuse_bill_board_ids.clear();
+		erase_bill_board_ids.clear();
+		bill_board_indexs.clear();
+		for (int i=0;i<bsize;i++) {
+			RenderBillBoard * b = bill_boards[i];
+			if (b != &dummy_billboard) {
+				delete b;
+				b = 0;
+			}
+		}
+		bill_boards.clear();
+		// billboard消去完了
 
+		// rendertex関係を消去する
+		int rsize = render_texs.size();
+		unuse_render_texs.clear();
+		unuse_render_tex_ids.clear();
+		erase_render_tex_ids.clear();
+		render_tex_indexs.clear();
+		for(int i=0;i<rsize;i++) {
+			RenderTex* c = render_texs[i];
+			if (c != &dummy_rendertex) {
+				delete c;
+				c = 0;
+			}
+		}
+		render_texs.clear();
+
+		// texture関係を消去する
+		int psize = parts.size();
+		for (int i=0;i<psize;i++) {
+			TexturePart* pp = parts[i];
+			pp->del();
+			delete pp;
+			pp = 0;
+		}
+		parts.clear();
+		texturepart_index.clear();
+	}
 	~Texture(void){
-		deleteAll();
-		deletedayo();
+		Release();
 	};
 	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
 	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ

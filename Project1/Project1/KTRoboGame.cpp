@@ -65,6 +65,7 @@ Game::Game(void)
 
 	mesh_instanceds = 0;
 	cltf=0;
+	texdayo = 0;
 }
 
 
@@ -353,6 +354,10 @@ bool Game::Init(HWND hwnd) {
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 
+	Texture::Init(g);
+
+	texdayo = new Texture(demo->tex_loader);
+	
 	return true;
 }
 void Game::Del() {
@@ -407,6 +412,11 @@ void Game::Del() {
 		 cltf= 0;
 	 }
 
+	 if (texdayo) {
+		delete texdayo;
+		texdayo = 0;
+	}
+
 	KTROBO::CS::instance()->Del();
 
 	KTROBO::DebugTexts::instance()->Del();
@@ -440,6 +450,13 @@ void Game::Del() {
 	MyTokenAnalyzer::Del();
 	Mesh::Del();
 
+
+	
+
+	Texture::Del();
+	
+
+
 	if (g) {
 		g->Release();
 		delete g;
@@ -468,6 +485,8 @@ void Game::Del() {
 		mesh3[i] = 0;
 		}
 	}
+
+
 }
 
 

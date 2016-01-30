@@ -48,7 +48,7 @@ column_major float4x4 mym;
 
 
 Texture2D texDiffuse : register(t0);
-Texture2D vtex : register(t1);
+Texture2D tex : register(t1);
 
 float getFValueFromTexColor(float4 color) {
     float ans = 0;
@@ -161,6 +161,7 @@ float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + y
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
+return val;
 }
 
 
@@ -305,7 +306,7 @@ return output;
 
 
 [maxvertexcount(6)]
-void GSFunc( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> stream) {
+void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream) {
 
 GSPSInput Out;
 Out.PosWH = float2(0,0);

@@ -127,7 +127,7 @@ return ans;
 
 
 Texture2D texDiffuse : register(t0);
-Texture2D vertexTex : register(t1);
+Texture2D tex : register(t1);
 
 
 #define KTROBO_TEXTURE_TEX_COLOR_OFFSET 0

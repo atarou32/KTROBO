@@ -22,7 +22,7 @@
 #include "KTRoboLuaCMesh.h"
 #include "KTRoboTextFromLua.h"
 //#include "tolua_glue/tolua_glue.h"
-
+#include "KTRoboTexture.h"
 
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
@@ -69,6 +69,7 @@ private:
 	MyTestForVertexTexture* mytest_for_vt;
 	TextFromLuas* cltf;
 	CMeshs* cmeshs;
+	Texture* texdayo;
 public:
 	Game(void);
 	~Game(void);
