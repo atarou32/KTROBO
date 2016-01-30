@@ -166,7 +166,7 @@ void KTRoboDemoRender::Init(Graphics* g) {
 		Release();
 
 		
-		MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
+	//	MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
 		throw e;
 	}
 	float de = 1/(float)4;//512.0/2049;//*512/4096.0f;

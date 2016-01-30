@@ -779,6 +779,7 @@ void Texture::sendinfoToVertexTexture(Graphics* g) {
 						CS::instance()->enter(CS_RENDERDATA_CS, "sendinfotovt");
 					}
 				}
+				tex->is_need_load = false;
 			}
 		}
 	}
@@ -848,6 +849,7 @@ void Texture::sendinfoToVertexTexture(Graphics* g) {
 						CS::instance()->enter(CS_RENDERDATA_CS, "sendinfotovt");
 					}
 				}
+				bil->is_need_load = false;
 			}
 		}
 	}
@@ -918,6 +920,7 @@ void Texture::updateIndexBuffer(Graphics* g) {
 						g->getDeviceContext()->UpdateSubresource(tex_part->indexbuffer_bill, 0,0, (void*)indexs, 0, 0);
 						delete[] indexs;
 					}
+					tex_part->setIsNeedLoad(false);
 				}
 			}
 		}
@@ -1034,6 +1037,7 @@ void TexturePart::createIndexBuffer(Graphics* g) {
 		delete[] indexs;
 
 		is_index_load = true;
+		is_need_load = true;
 
 	} 
 	CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
@@ -1557,7 +1561,7 @@ void Texture::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, 
 		Del();
 
 		
-		MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
+	//	MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
 		throw e;
 	}
 

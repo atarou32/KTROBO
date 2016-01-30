@@ -108,7 +108,7 @@ void LOADMESHTCB(TCB* thisTCB) {
 	//	m->setIsLoad(false);
 	}catch (GameError* err) {
 		
-		MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
 		delete err;
 	}
     if (error) {
@@ -343,6 +343,20 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
 	
+
+	Texture::Init(g);
+
+	texdayo = new Texture(demo->tex_loader);
+	int i = texdayo->getTexture("resrc/model/images.jpg");
+	int j = texdayo->getRenderTex(i,0xFFFFFFFF,0,0,100,200,0,0,512,512);
+	texdayo->setRenderTexIsRender(j,true);
+
+
+
+
+
+
+
 	//long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
 	work[1] = (long)g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
@@ -354,9 +368,6 @@ bool Game::Init(HWND hwnd) {
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 
-	Texture::Init(g);
-
-	texdayo = new Texture(demo->tex_loader);
 	
 	return true;
 }
@@ -637,6 +648,16 @@ void Game::Run() {
 	mesh_i->setWorld(&temp_world);
 	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(1,1,-10,1));
 
+
+
+
+
+
+
+
+
+
+
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 
 	
@@ -681,6 +702,11 @@ void Game::Run() {
 	KTROBO::DebugTexts::instance()->render(g);
 	telop_texts->render(g);
 
+
+	texdayo->createIndexBuffer(g);
+	texdayo->updateIndexBuffer(g);
+	texdayo->sendinfoToVertexTexture(g);
+	texdayo->render(g);
 
 	for (int i = 0 ; i < 4; i++) {
 		ID3D11CommandList* pd3dCommandList=0;

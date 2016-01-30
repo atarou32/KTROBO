@@ -314,7 +314,7 @@ void DebugTexts::Init(Graphics* g, Font* f) {
 		Del();
 
 		
-		MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
+	//	MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
 		throw e;
 	}
 

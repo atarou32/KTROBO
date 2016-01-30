@@ -40,8 +40,8 @@ void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream)
 GSPSInput   Out=(GSPSInput)0;
 Out.TexCoord = float2(0,0);
 Out.Value = In[0].Value;
-float base_x = In[0].Position.x;
-float base_y = In[0].Position.y;
+float base_x = -1 + In[0].Position.x* 2 / (float)KTROBO_TEXTURE_SHADER_VALUE_TEX_WIDTH_HEIGHT;
+float base_y = 1 - 2 * In[0].Position.y / (float)KTROBO_TEXTURE_SHADER_VALUE_TEX_WIDTH_HEIGHT;
 float xoffset =  2/(float)KTROBO_TEXTURE_SHADER_VALUE_TEX_WIDTH_HEIGHT;
 float yoffset =  2/(float)KTROBO_TEXTURE_SHADER_VALUE_TEX_WIDTH_HEIGHT;
 uint mat_index = 0;

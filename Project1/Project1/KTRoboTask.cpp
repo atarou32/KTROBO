@@ -48,10 +48,10 @@ void KTROBO::Task::exec() {
 	} while(execTCB->prio != TASK_HEAD_PRIO);
 	} catch (GameError* err) {
 		mylog::writelog(err->getErrorCode(),err->getMessage());
-		MessageBoxA(hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
+	//	MessageBoxA(hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
 		if (err->getErrorCode() == KTROBO::FATAL_ERROR) {
 			// 終了させる
-			MessageBoxA(hWnd,"タスクスレッドを終了させます","FATAL",MB_OK);
+	//		MessageBoxA(hWnd,"タスクスレッドを終了させます","FATAL",MB_OK);
 			is_exec_task = false;
 			delete err;
 			return;

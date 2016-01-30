@@ -122,7 +122,7 @@ void Mesh::Init(Graphics* g) {
 		Del();
 
 		
-		MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
+	//	MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
 		throw e;
 	}
 

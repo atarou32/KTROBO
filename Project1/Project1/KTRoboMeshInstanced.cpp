@@ -176,7 +176,7 @@ void MeshInstanceds::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_fil
 		Del();
 
 		
-		MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
+	//	MessageBoxA(NULL,e->getMessage(), "shader compile error", MB_OK);
 		throw e;
 	}
 
