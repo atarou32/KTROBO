@@ -417,7 +417,71 @@ void Texture::deleteAll() {
 }
 
 void Texture::_sendinfoToVertexTextureTex(Graphics* g, TEXTURE_VTEX_STRUCT_TEX* v, int size) {
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	unsigned int stride = sizeof(TEXTURE_VTEX_STRUCT_TEX);
+	unsigned int offset = 0;
+
 	CS::instance()->enter(CS_DEVICECON_CS, "sendinfotex");
+	// set
+	g->getDeviceContext()->Map(Texture::vertextex_vertexbuffer_tex,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy(subresource.pData, v, sizeof(TEXTURE_VTEX_STRUCT_TEX)*size);//KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE);
+	g->getDeviceContext()->Unmap(Texture::vertextex_vertexbuffer_tex,0);
+
+	D3D11_VIEWPORT vp;
+	
+	vp.Height = this->vtex_tex->height;
+	vp.Width = this->vtex_tex->width;
+	vp.MaxDepth = 1.0f;
+	vp.MinDepth = 0.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+
+
+	float ccc[] = {
+		0.2f,0.2f,0.8f,0.7f};
+
+	g->getDeviceContext()->OMSetRenderTargets(1, &vtex_tex->target_view, mss_for_vertextex_tex.depthstencilview);
+	g->getDeviceContext()->RSSetViewports(1, &vp);
+	g->getDeviceContext()->ClearDepthStencilView(mss_for_vertextex_tex.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
+	//g->getDeviceContext()->ClearRenderTargetView(combined_matrix_texture->target_view, ccc);
+
+	g->getDeviceContext()->IASetInputLayout(mss_for_vertextex_tex.vertexlayout );
+	ID3D11Buffer* tt[] = {vertextex_vertexbuffer_tex};
+	unsigned int ttt[] = { sizeof(TEXTURE_VTEX_STRUCT_TEX)};
+	unsigned int tttt[] = {0};
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+
+	//stride = sizeof(COMBINEDMATRIXCALC_CBUF);
+
+	//g->getDeviceContext()->IASetVertexBuffers( 1, 1, &combined_matrix_watasu_offsetbuffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->IASetIndexBuffer(vertextex_indexbuffer, DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->RSSetState(mss_for_vertextex_tex.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_vertextex_tex.blendstate, blendFactor,0xFFFFFFFF);
+	g->getDeviceContext()->VSSetShader(mss_for_vertextex_tex.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_vertextex_tex.gs, NULL, 0);	
+	g->getDeviceContext()->PSSetShader(mss_for_vertextex_tex.ps, NULL, 0);
+//	g->getDeviceContext()->VSSetShaderResources(0,1,&->view);
+//	g->getDeviceContext()->VSSetShaderResources(1,1,&matrix_local_texture->view);
+	g->getDeviceContext()->DrawIndexed(size*3, 0,0);
+	
+//	g->getDeviceContext()->Flush();
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+//	g->getDeviceContext()->GSSetShader(NULL, NULL,0);
+	
+	ID3D11RenderTargetView* t = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &t, NULL);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+	tt[0] = NULL;
+//	tt[1] = NULL;
+	ttt[0] =0;
+//	ttt[1] = 0;
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+	// unset
 
 
 
@@ -428,8 +492,70 @@ void Texture::_sendinfoToVertexTextureTex(Graphics* g, TEXTURE_VTEX_STRUCT_TEX* 
 void Texture::_sendinfoToVertexTextureBill(Graphics* g, TEXTURE_VTEX_STRUCT_BILL* b, int size) {
 	CS::instance()->enter(CS_DEVICECON_CS, "sendinfobill");
 
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	unsigned int stride = sizeof(TEXTURE_VTEX_STRUCT_BILL);
+	unsigned int offset = 0;
+
+	// set
+	g->getDeviceContext()->Map(Texture::vertextex_vertexbuffer_bill,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy(subresource.pData, b, sizeof(TEXTURE_VTEX_STRUCT_BILL)*size);//KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE);
+	g->getDeviceContext()->Unmap(Texture::vertextex_vertexbuffer_bill,0);
+
+	D3D11_VIEWPORT vp;
+	
+	vp.Height = this->vtex_bill->height;
+	vp.Width = this->vtex_bill->width;
+	vp.MaxDepth = 1.0f;
+	vp.MinDepth = 0.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
 
 
+	float ccc[] = {
+		0.2f,0.2f,0.8f,0.7f};
+
+	g->getDeviceContext()->OMSetRenderTargets(1, &vtex_bill->target_view, mss_for_vertextex_bill.depthstencilview);
+	g->getDeviceContext()->RSSetViewports(1, &vp);
+	g->getDeviceContext()->ClearDepthStencilView(mss_for_vertextex_bill.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
+	//g->getDeviceContext()->ClearRenderTargetView(combined_matrix_texture->target_view, ccc);
+
+	g->getDeviceContext()->IASetInputLayout(mss_for_vertextex_bill.vertexlayout );
+	ID3D11Buffer* tt[] = {vertextex_vertexbuffer_bill};
+	unsigned int ttt[] = { sizeof(TEXTURE_VTEX_STRUCT_TEX)};
+	unsigned int tttt[] = {0};
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+
+	//stride = sizeof(COMBINEDMATRIXCALC_CBUF);
+
+	//g->getDeviceContext()->IASetVertexBuffers( 1, 1, &combined_matrix_watasu_offsetbuffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->IASetIndexBuffer(vertextex_indexbuffer, DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->RSSetState(mss_for_vertextex_bill.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_vertextex_bill.blendstate, blendFactor,0xFFFFFFFF);
+	g->getDeviceContext()->VSSetShader(mss_for_vertextex_bill.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_vertextex_bill.gs, NULL, 0);	
+	g->getDeviceContext()->PSSetShader(mss_for_vertextex_bill.ps, NULL, 0);
+//	g->getDeviceContext()->VSSetShaderResources(0,1,&->view);
+//	g->getDeviceContext()->VSSetShaderResources(1,1,&matrix_local_texture->view);
+	g->getDeviceContext()->DrawIndexed(size*3, 0,0);
+	
+//	g->getDeviceContext()->Flush();
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+//	g->getDeviceContext()->GSSetShader(NULL, NULL,0);
+	
+	ID3D11RenderTargetView* t = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &t, NULL);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+	tt[0] = NULL;
+//	tt[1] = NULL;
+	ttt[0] =0;
+//	ttt[1] = 0;
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+	// unset
 
 	CS::instance()->leave(CS_DEVICECON_CS, "sendinfobill");
 }
@@ -1029,8 +1155,8 @@ void Texture::Init(Graphics* g) {
 	hBufferDesc.CPUAccessFlags = 0;
 	hBufferDesc.MiscFlags = 0;
 	hBufferDesc.StructureByteStride = 0;
-	D3D11_SUBRESOURCE_DATA hSubResourceData;
-
+	hSubResourceData;
+	{
 	unsigned short* indexs = new unsigned short[index_count_max*3];
 	memset(indexs, 0, sizeof(unsigned short)*index_count_max*3);
 	
@@ -1043,7 +1169,7 @@ void Texture::Init(Graphics* g) {
 	hSubResourceData.pSysMem = indexs;
 	hSubResourceData.SysMemPitch = 0;
 	hSubResourceData.SysMemSlicePitch = 0;
-	HRESULT hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &vertextex_indexbuffer);
+	hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &vertextex_indexbuffer);
 	if( FAILED( hr ) ) {
 	  delete[] indexs;
 	  CS::instance()->leave(CS_RENDERDATA_CS, "createindex");
@@ -1051,7 +1177,7 @@ void Texture::Init(Graphics* g) {
     }
 
 	delete[] indexs;
-
+	}
 
 
 	// 各種shaderstructのロード
@@ -1073,20 +1199,39 @@ void Texture::Init(Graphics* g) {
 								layout2, 1, true);
 
 
+
+	/*
+	unsigned short id;
+	unsigned short offset;
+	unsigned int value;
+	*/
 	D3D11_INPUT_ELEMENT_DESC layout3[] = {
-		{"INDEXSDAYO", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"TEX_ID", 0, DXGI_FORMAT_R16_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"OFFSET", 0, DXGI_FORMAT_R16_UINT, 0, 2, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"VALUE", 0, DXGI_FORMAT_R32_UINT, 0, 4, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 	
 	loadShader(g, &mss_for_vertextex_tex, KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_TEX, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
-		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout3, 1, false);
+		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout3, 3, false);
 
+	/*
 
+	unsigned short id;
+	unsigned short flag_with_offset; // 上位8ビットでvalue_floatかvalue_intかの判定を行う
+	float value_float;
+	unsigned int value_int;
+	// ifが必要になる
+
+	*/
 	D3D11_INPUT_ELEMENT_DESC layout4[] = {
-		{"INDEXSDAYO", 0, DXGI_FORMAT_R32_UINT,0,4,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"BILL_ID", 0, DXGI_FORMAT_R16_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"OFFSET", 0, DXGI_FORMAT_R16_UINT, 0, 2, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"V_FLOAT", 0, DXGI_FORMAT_R32_FLOAT, 0, 4, D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"V_INT", 0, DXGI_FORMAT_R32_UINT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 	
 	loadShader(g, &mss_for_vertextex_bill, KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_BILL, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
-		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout4, 1, false);
+		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout4, 4, false);
 
 }
 
