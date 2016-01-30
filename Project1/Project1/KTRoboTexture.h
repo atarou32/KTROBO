@@ -162,6 +162,7 @@ struct TEXTURE_TEX_CBUF {
 struct TEXTURE_BILL_CBUF {
 	MYMATRIX view;
 	MYMATRIX proj;
+	MYMATRIX mym;
 };
 
 

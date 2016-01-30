@@ -6,6 +6,7 @@ struct GSPSInput {
 float4 Position: SV_POSITION;
 float4 WHS: NORMAL;
 float2 TexCoord: TEXCOORD0;
+float4 Color: COLOR;
 };
 
 sampler texSmp {
@@ -122,61 +123,6 @@ return ans;
 
 
 
-float getMatrixValueFromTex(uint offset, Texture2D tex, float2 texcoord, int tex_width, int tex_height) {
-
-float xcode = 0.5f/(float)tex_width;
-float ycode = 0.5f/(float)tex_height;
-
-
-float4 col = tex.SampleLevel(decalSmp, float2(texcoord.x + xcode + xcode*2*offset, texcoord.y + ycode),0);
-float val = getFValueFromTexColor(col);
-return val;
-
-}
-
-column_major float4x4 getMatrixFromTex(Texture2D tex, float2 texcoord, int tex_width, int tex_height) {
-
-column_major float4x4 mat = (float4x4)0;
-
-mat._11 = getMatrixValueFromTex(0,tex,texcoord,tex_width,tex_height);
-mat._21 = getMatrixValueFromTex(1,tex,texcoord,tex_width,tex_height);
-mat._31 = getMatrixValueFromTex(2,tex,texcoord,tex_width,tex_height);
-mat._41 = getMatrixValueFromTex(3,tex,texcoord,tex_width,tex_height);
-mat._12 = getMatrixValueFromTex(4,tex,texcoord,tex_width,tex_height);
-mat._22 = getMatrixValueFromTex(5,tex,texcoord,tex_width,tex_height);
-mat._32 = getMatrixValueFromTex(6,tex,texcoord,tex_width,tex_height);
-mat._42 = getMatrixValueFromTex(7,tex,texcoord,tex_width,tex_height);
-mat._13 = getMatrixValueFromTex(8,tex,texcoord,tex_width,tex_height);
-mat._23 = getMatrixValueFromTex(9,tex,texcoord,tex_width,tex_height);
-mat._33 = getMatrixValueFromTex(10,tex,texcoord,tex_width,tex_height);
-mat._43 = getMatrixValueFromTex(11,tex,texcoord,tex_width,tex_height);
-mat._14 = getMatrixValueFromTex(12,tex,texcoord,tex_width,tex_height);
-mat._24 = getMatrixValueFromTex(13,tex,texcoord,tex_width,tex_height);
-mat._34 = getMatrixValueFromTex(14,tex,texcoord,tex_width,tex_height);
-mat._44 = getMatrixValueFromTex(15,tex,texcoord,tex_width,tex_height);
-
-
-/*
-mat._11 = getMatrixValueFromTex(0,tex,texcoord,tex_width,tex_height);
-mat._12 = getMatrixValueFromTex(1,tex,texcoord,tex_width,tex_height);
-mat._13 = getMatrixValueFromTex(2,tex,texcoord,tex_width,tex_height);
-mat._14 = getMatrixValueFromTex(3,tex,texcoord,tex_width,tex_height);
-mat._21 = getMatrixValueFromTex(4,tex,texcoord,tex_width,tex_height);
-mat._22 = getMatrixValueFromTex(5,tex,texcoord,tex_width,tex_height);
-mat._23 = getMatrixValueFromTex(6,tex,texcoord,tex_width,tex_height);
-mat._24 = getMatrixValueFromTex(7,tex,texcoord,tex_width,tex_height);
-mat._31 = getMatrixValueFromTex(8,tex,texcoord,tex_width,tex_height);
-mat._32 = getMatrixValueFromTex(9,tex,texcoord,tex_width,tex_height);
-mat._33 = getMatrixValueFromTex(10,tex,texcoord,tex_width,tex_height);
-mat._34 = getMatrixValueFromTex(11,tex,texcoord,tex_width,tex_height);
-mat._41 = getMatrixValueFromTex(12,tex,texcoord,tex_width,tex_height);
-mat._42 = getMatrixValueFromTex(13,tex,texcoord,tex_width,tex_height);
-mat._43 = getMatrixValueFromTex(14,tex,texcoord,tex_width,tex_height);
-mat._44 = getMatrixValueFromTex(15,tex,texcoord,tex_width,tex_height);
-*/
-
-return mat;
-}
 
 
 
@@ -195,8 +141,10 @@ uint getColorFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_COLOR_OFFSET;
 uint x = place % tex_width;
 uint y = place / tex_width;
+float xcode = 0.5f/(float)tex_width;
+float ycode = 0.5f/(float)tex_height;
 
-float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+float2 texcoord = float2(x/ (float)tex_width + xcode , y / (float)tex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -208,8 +156,10 @@ uint getXYFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_XY_OFFSET;
 uint x = place % tex_width;
 uint y = place / tex_width;
+float xcode = 0.5f/(float)tex_width;
+float ycode = 0.5f/(float)tex_height;
 
-float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+float2 texcoord = float2(x/ (float)tex_width + xcode, y / (float)tex_height + ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -223,8 +173,10 @@ uint getWHFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_WH_OFFSET;
 uint x = place % tex_width;
 uint y = place / tex_width;
+float xcode = 0.5f/(float)tex_width;
+float ycode = 0.5f/(float)tex_height;
 
-float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+float2 texcoord = float2(x/ (float)tex_width+ xcode , y / (float)tex_height+ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -238,8 +190,10 @@ uint getTexXYFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_TEXXY_OFFSET;
 uint x = place % tex_width;
 uint y = place / tex_width;
+float xcode = 0.5f/(float)tex_width;
+float ycode = 0.5f/(float)tex_height;
 
-float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+float2 texcoord = float2(x/ (float)tex_width+xcode , y / (float)tex_height+ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -252,8 +206,10 @@ uint getTexWHFromTex(uint tex_id) {
 uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_TEXWH_OFFSET;
 uint x = place % tex_width;
 uint y = place / tex_width;
+float xcode = 0.5f/(float)tex_width;
+float ycode = 0.5f/(float)tex_height;
 
-float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+float2 texcoord = float2(x/ (float)tex_width+xcode , y / (float)tex_height+ycode);
 
 float4 col = tex.SampleLevel(decalSmp, texcoord,0);
 uint val = getIValueFromTexColor(col);
@@ -261,6 +217,16 @@ uint val = getIValueFromTexColor(col);
 return val;
 
 
+}
+
+
+float4 getColorFromUINT(uint c) {
+uint gu = asuint(c);
+uint r = (gu >> 24);
+uint g = (gu >> 16) - (r << 8);
+uint b = (gu >> 8) - (g << 8) - (r << 16);
+uint a = gu - (b <<8) - (g << 16) - (r << 24);
+return float4(r/255.0f,g/255.0f,b/255.0f,a/255.0f);
 }
 
 GSPSInput VSFunc(VSInput input){
@@ -291,7 +257,7 @@ output.WHS.x = w/(float)screen_width;
 output.WHS.y = h/(float)screen_height;
 output.WHS.z = tex_width/(float)tex_width;
 output.WHS.w = tex_height/(float)tex_height;
-
+output.Color = getColorFromUINT(color);
 return output;
 }
 
@@ -301,7 +267,7 @@ void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream)
 GSPSInput Out;
 
 Out.WHS = In[0].WHS;
-
+Out.Color = In[0].Color;
 float base_x = In[0].Position.x;
 float base_y = In[0].Position.y;
 float xoffset = In[0].WHS.x*2;
@@ -354,5 +320,5 @@ gsstream.RestartStrip();
 float4 PSFunc(GSPSInput input ) : SV_Target {
 
 float4 test = texDiffuse.Sample( texSmp, float2(input.TexCoord.x , input.TexCoord.y) );
-return test; // * float4(diffuse);
+return test*input.Color; // * float4(diffuse);
 }
