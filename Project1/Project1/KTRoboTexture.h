@@ -151,6 +151,21 @@ public:
 // color world width height tex_x tex_y tex_width tex_height
 // 4    4* 16    4     4      2     2    2          2  = 84  21 テクセル必要
 
+
+struct TEXTURE_TEX_CBUF {
+	unsigned short screen_width;
+	unsigned short screen_height;
+	unsigned short tex_width;
+	unsigned short tex_height;
+};
+
+struct TEXTURE_BILL_CBUF {
+	MYMATRIX view;
+	MYMATRIX proj;
+};
+
+
+
 struct TEXTURE_VTEX_STRUCT_TEX {
 	unsigned short id;
 	unsigned short offset;
@@ -333,6 +348,10 @@ private:
 	static ID3D11Buffer* vertextex_vertexbuffer_tex;
 	static ID3D11Buffer* vertextex_vertexbuffer_bill;
 	static ID3D11Buffer* vertextex_indexbuffer;
+	static TEXTURE_TEX_CBUF cbuf1;
+	static ID3D11Buffer* cbuf1_buffer;
+	static TEXTURE_BILL_CBUF cbuf2;
+	static ID3D11Buffer* cbuf2_buffer;
 
 public:
 	static void Init(Graphics* g);
@@ -341,7 +360,7 @@ public:
 								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
 								D3D11_INPUT_ELEMENT_DESC* layout, int numoflayout, bool blend_enable);
 
-
+	void setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 private:
 	RenderTex dummy_rendertex; // vectorのインデックスを崩さないためにこれをしようする
 	RenderBillBoard dummy_billboard;
@@ -367,6 +386,9 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* vtex_bill;
 
 	void _render(Graphics* g, int part_size, int p_index);
+	void _renderTex(Graphics* g, TexturePart* p);
+	void _renderBill(Graphics* g, TexturePart* p);
+
 	void _createIndexBuffer(Graphics* g, int psize, int p_index);
 	void _sendinfoToVertexTextureTex(Graphics* g, TEXTURE_VTEX_STRUCT_TEX* v, int size);
 	void _sendinfoToVertexTextureBill(Graphics* g, TEXTURE_VTEX_STRUCT_BILL* b, int size);

@@ -1,5 +1,6 @@
 #include "KTRoboTexture.h"
 #include "memory.h"
+#include "KTRoboMesh.h"
 
 using namespace KTROBO;
 
@@ -560,6 +561,139 @@ void Texture::_sendinfoToVertexTextureBill(Graphics* g, TEXTURE_VTEX_STRUCT_BILL
 	CS::instance()->leave(CS_DEVICECON_CS, "sendinfobill");
 }
 
+void Texture::_renderTex(Graphics* g, TexturePart* p) {
+
+
+	D3D11_VIEWPORT vp;
+	
+	vp.Height = g->getScreenHeight();
+	vp.Width = g->getScreenWidth();
+	vp.MaxDepth = 1.0f;
+	vp.MinDepth = 0.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+
+
+	float ccc[] = {
+		0.2f,0.2f,0.8f,0.7f};
+	ID3D11RenderTargetView* v = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &v, mss_for_render_tex.depthstencilview);
+	g->getDeviceContext()->RSSetViewports(1, &vp);
+	g->getDeviceContext()->ClearDepthStencilView(mss_for_render_tex.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
+	//g->getDeviceContext()->ClearRenderTargetView(combined_matrix_texture->target_view, ccc);
+	g->getDeviceContext()->VSSetConstantBuffers(0,1,&cbuf1_buffer);
+
+	g->getDeviceContext()->VSSetShaderResources(0,1,&p->getClass()->view);
+	g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
+	g->getDeviceContext()->VSSetShaderResources(1,1,&vtex_tex->view);
+	g->getDeviceContext()->IASetInputLayout(mss_for_render_tex.vertexlayout );
+	ID3D11Buffer* tt[] = {render_vertexbuffer};
+	unsigned int ttt[] = { sizeof(TEXTURE_RENDER_STRUCT)};
+	unsigned int tttt[] = {0};
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+
+	//stride = sizeof(COMBINEDMATRIXCALC_CBUF);
+
+	//g->getDeviceContext()->IASetVertexBuffers( 1, 1, &combined_matrix_watasu_offsetbuffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->IASetIndexBuffer(p->indexbuffer_tex, DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->RSSetState(mss_for_render_tex.rasterstate);
+		
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_render_tex.blendstate, blendFactor,0xFFFFFFFF);
+	g->getDeviceContext()->VSSetShader(mss_for_render_tex.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_render_tex.gs, NULL, 0);	
+	g->getDeviceContext()->PSSetShader(mss_for_render_tex.ps, NULL, 0);
+	//	g->getDeviceContext()->VSSetShaderResources(0,1,&->view);
+	//	g->getDeviceContext()->VSSetShaderResources(1,1,&matrix_local_texture->view);
+	g->getDeviceContext()->DrawIndexed(p->index_count_tex, 0,0);
+
+	//	g->getDeviceContext()->Flush();
+	//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+	//	g->getDeviceContext()->GSSetShader(NULL, NULL,0);
+
+	ID3D11RenderTargetView* t = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &t, NULL);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+		tt[0] = NULL;
+	//	tt[1] = NULL;
+		ttt[0] =0;
+	//	ttt[1] = 0;
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+	// unset
+
+}
+
+void Texture::_renderBill(Graphics* g, TexturePart* p) {
+
+	D3D11_VIEWPORT vp;
+	
+	vp.Height = g->getScreenHeight();
+	vp.Width = g->getScreenWidth();
+	vp.MaxDepth = 1.0f;
+	vp.MinDepth = 0.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+
+
+	float ccc[] = {
+		0.2f,0.2f,0.8f,0.7f};
+	ID3D11RenderTargetView* v = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
+	g->getDeviceContext()->RSSetViewports(1, &vp);
+//	g->getDeviceContext()->ClearDepthStencilView(mss_for_render_tex.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
+	//g->getDeviceContext()->ClearRenderTargetView(combined_matrix_texture->target_view, ccc);
+	g->getDeviceContext()->VSSetConstantBuffers(0,1,&cbuf1_buffer);
+	g->getDeviceContext()->VSSetConstantBuffers(1,1,&cbuf2_buffer);
+	g->getDeviceContext()->VSSetShaderResources(0,1,&p->getClass()->view);
+	g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
+	g->getDeviceContext()->VSSetShaderResources(1,1,&vtex_bill->view);
+	g->getDeviceContext()->IASetInputLayout(mss_for_render_bill.vertexlayout );
+	ID3D11Buffer* tt[] = {render_vertexbuffer};
+	unsigned int ttt[] = { sizeof(TEXTURE_RENDER_STRUCT)};
+	unsigned int tttt[] = {0};
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+
+	//stride = sizeof(COMBINEDMATRIXCALC_CBUF);
+
+	//g->getDeviceContext()->IASetVertexBuffers( 1, 1, &combined_matrix_watasu_offsetbuffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->IASetIndexBuffer(p->indexbuffer_bill, DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->RSSetState(mss_for_render_bill.rasterstate);
+		
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_render_bill.blendstate, blendFactor,0xFFFFFFFF);
+	g->getDeviceContext()->VSSetShader(mss_for_render_bill.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_render_bill.gs, NULL, 0);	
+	g->getDeviceContext()->PSSetShader(mss_for_render_bill.ps, NULL, 0);
+	//	g->getDeviceContext()->VSSetShaderResources(0,1,&->view);
+	//	g->getDeviceContext()->VSSetShaderResources(1,1,&matrix_local_texture->view);
+	g->getDeviceContext()->DrawIndexed(p->index_count_bill, 0,0);
+
+	//	g->getDeviceContext()->Flush();
+	//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+	//	g->getDeviceContext()->GSSetShader(NULL, NULL,0);
+
+	ID3D11RenderTargetView* t = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &t, NULL);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
+		tt[0] = NULL;
+	//	tt[1] = NULL;
+		ttt[0] =0;
+	//	ttt[1] = 0;
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
+	// unset
+
+
+
+
+
+}
+
 
 void Texture::_render(Graphics* g, int part_size, int p_index) {
 
@@ -583,39 +717,9 @@ void Texture::_render(Graphics* g, int part_size, int p_index) {
 	TexturePart* p = parts[p_index];
 	if (p->getIsUse()) {
 		if (p->getIsIndexLoad()) {
-			// need load‚ªtruefalse‚É‚©‚©‚í‚ç‚¸•`‰æ‚·‚é
-		/*
-			// tex‚Ì•`‰æ
-			g->getDeviceContext()->OMSetBlendState();
-			g->getDeviceContext()->OMSetRenderTargets();
-			g->getDeviceContext()->IASetIndexBuffer();
-			g->getDeviceContext()->VSSetShader();
-			g->getDeviceContext()->GSSetShader();
-			g->getDeviceContext()->PSSetShader();
-			g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
-			g->getDeviceContext()->VSSetShaderResources(0,1,&this->vtex_tex->view);
-			g->getDeviceContext()->VSSetConstantBuffers(0,1,&this->cbuf_1);
-
-			g->getDeviceContext()->DrawIndexed();
-
-
-			// bill‚Ì•`‰æ
-			g->getDeviceContext()->OMSetBlendState();
-			g->getDeviceContext()->OMSetRenderTargets();
-			g->getDeviceContext()->IASetIndexBuffer();
-			g->getDeviceContext()->VSSetShader();
-			g->getDeviceContext()->GSSetShader();
-			g->getDeviceContext()->PSSetShader();
-			g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
-			g->getDeviceContext()->VSSetShaderResources(0,1,&this->vtex_tex->view);
-			g->getDeviceContext()->VSSetConstantBuffers(0,1,&this->cbuf_1);
-
-			g->getDeviceContext()->DrawIndexed();
-			*/
-			// unset
-
-
-
+			// need load‚ªtruefalse‚É‚©‚©‚í‚ç‚¸•`‰æ‚·‚é		
+			_renderTex(g, p);
+			_renderBill(g,p);
 		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
@@ -1072,7 +1176,8 @@ ID3D11Buffer* Texture::render_vertexbuffer = 0;
 ID3D11Buffer* Texture::vertextex_vertexbuffer_tex=0;
 ID3D11Buffer* Texture::vertextex_vertexbuffer_bill=0;
 ID3D11Buffer* Texture::vertextex_indexbuffer = 0;
-
+ID3D11Buffer* cbuf1_buffer = 0;
+ID3D11Buffer* cbuf2_buffer = 0;
 
 MYSHADERSTRUCT Texture::mss_for_render_tex;
 MYSHADERSTRUCT Texture::mss_for_render_bill;
@@ -1233,8 +1338,67 @@ void Texture::Init(Graphics* g) {
 	loadShader(g, &mss_for_vertextex_bill, KTROBO_TEXTURE_SHADER_FILENAME_VERTEXTEXTURE_BILL, KTROBO_TEXTURE_SHADER_VS, KTROBO_TEXTURE_SHADER_GS,
 		KTROBO_TEXTURE_SHADER_PS, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, layout4, 4, false);
 
+	// ƒRƒ“ƒXƒ^ƒ“ƒgƒoƒbƒtƒ@‚Ìì¬
+
+	D3D11_BUFFER_DESC des;
+	des.ByteWidth = sizeof(TEXTURE_TEX_CBUF);
+	des.Usage = D3D11_USAGE_DEFAULT;
+	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	des.CPUAccessFlags = 0;//D3D11_CPU_ACCESS_WRITE;
+	des.MiscFlags = 0;
+	des.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA idat;
+	memset(&cbuf1, 0, sizeof(TEXTURE_TEX_CBUF));
+	cbuf1.screen_height = g->getScreenHeight();
+	cbuf1.screen_width = g->getScreenWidth();
+	cbuf1.tex_width = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
+	cbuf1.tex_height = KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT;
+
+	idat.pSysMem = &cbuf1;
+	idat.SysMemPitch = 0;
+	idat.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer(&des, &idat, &cbuf1_buffer);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
+
+	des;
+	des.ByteWidth = sizeof(TEXTURE_BILL_CBUF);
+	des.Usage = D3D11_USAGE_DYNAMIC;
+	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	des.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	des.MiscFlags = 0;
+	des.StructureByteStride = 0;
+
+	idat;
+	memset(&cbuf2, 0, sizeof(TEXTURE_BILL_CBUF));
+	MyMatrixIdentity(cbuf2.view);
+	MyMatrixIdentity(cbuf2.proj);
+	idat.pSysMem = &cbuf2;
+	idat.SysMemPitch = 0;
+	idat.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer(&des, &idat, &cbuf2_buffer);
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
+
 }
 
+void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+
+	cbuf2.proj = *proj;
+	cbuf2.view = *view;
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
+	g->getDeviceContext()->Map(cbuf2_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	memcpy( subresource.pData, &cbuf2, sizeof(TEXTURE_BILL_CBUF) );
+	g->getDeviceContext()->Unmap(cbuf2_buffer, 0);
+	//g->getDeviceContext()->UpdateSubresource(cbuf2_buffer,0,NULL,&cbuf2,0,0);
+	CS::instance()->leave(CS_DEVICECON_CS, "setviewproj");
+}
 
 
 void Texture::Del() {
@@ -1264,6 +1428,16 @@ void Texture::Del() {
 	if (vertextex_indexbuffer) {
 		vertextex_indexbuffer->Release();
 		vertextex_indexbuffer = 0;
+	}
+
+	if (cbuf1_buffer) {
+		cbuf1_buffer->Release();
+		cbuf1_buffer = 0;
+	}
+
+	if (cbuf2_buffer) {
+		cbuf2_buffer->Release();
+		cbuf2_buffer =0; 
 	}
 }
 
