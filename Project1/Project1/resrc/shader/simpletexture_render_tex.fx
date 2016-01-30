@@ -28,6 +28,14 @@ sampler decalSmp {
 };
 
 
+cbuffer c0dayo :register(c0){
+uint screen_width;
+uint screen_height;
+uint tex_width;
+uint tex_height;
+};
+
+
 float getFValueFromTexColor(float4 color) {
     float ans = 0;
     float code = 0.1 * 1/255.0f;
@@ -121,7 +129,7 @@ float ycode = 0.5f/(float)tex_height;
 
 
 float4 col = tex.SampleLevel(decalSmp, float2(texcoord.x + xcode + xcode*2*offset, texcoord.y + ycode),0);
-float val = getValueFromTexColor(col);
+float val = getFValueFromTexColor(col);
 return val;
 
 }
@@ -175,47 +183,82 @@ return mat;
 Texture2D texDiffuse : register(t0);
 Texture2D vertexTex : register(t1);
 
-cbuffer c0dayo :register(c0){
-uint screen_width;
-uint screen_height;
-uint tex_width;
-uint tex_height;
-};
 
-#define KTROBO_TEXTURE_COLOR_OFFSET 0
-#define KTROBO_TEXTURE_XY_OFFSET 1
-#define KTROBO_TEXTURE_WH_OFFSET 2
-#define KTROBO_TEXTURE_TEXXY_OFFSET 3
-#define KTROBO_TEXTURE_TEXWH_OFFSET 4
+#define KTROBO_TEXTURE_TEX_COLOR_OFFSET 0
+#define KTROBO_TEXTURE_TEX_XY_OFFSET 1
+#define KTROBO_TEXTURE_TEX_WH_OFFSET 2
+#define KTROBO_TEXTURE_TEX_TEXXY_OFFSET 3
+#define KTROBO_TEXTURE_TEX_TEXWH_OFFSET 4
+#define KTROBO_TEXTURE_TEX_OFFSET_MAX 5
 
 uint getColorFromTex(uint tex_id) {
+uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_COLOR_OFFSET;
+uint x = place % tex_width;
+uint y = place / tex_width;
 
+float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
 
+float4 col = tex.SampleLevel(decalSmp, texcoord,0);
+uint val = getIValueFromTexColor(col);
 
-
-
+return val;
 }
 
 uint getXYFromTex(uint tex_id) {
+uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_XY_OFFSET;
+uint x = place % tex_width;
+uint y = place / tex_width;
 
+float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
 
+float4 col = tex.SampleLevel(decalSmp, texcoord,0);
+uint val = getIValueFromTexColor(col);
+
+return val;
 
 }
 
 uint getWHFromTex(uint tex_id) {
 
+uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_WH_OFFSET;
+uint x = place % tex_width;
+uint y = place / tex_width;
 
+float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+
+float4 col = tex.SampleLevel(decalSmp, texcoord,0);
+uint val = getIValueFromTexColor(col);
+
+return val;
 
 
 }
 
 uint getTexXYFromTex(uint tex_id) {
+uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_TEXXY_OFFSET;
+uint x = place % tex_width;
+uint y = place / tex_width;
 
+float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+
+float4 col = tex.SampleLevel(decalSmp, texcoord,0);
+uint val = getIValueFromTexColor(col);
+
+return val;
 
 }
 
 uint getTexWHFromTex(uint tex_id) {
+uint place = KTROBO_TEXTURE_TEX_OFFSET_MAX * tex_id + KTROBO_TEXTURE_TEX_TEXWH_OFFSET;
+uint x = place % tex_width;
+uint y = place / tex_width;
 
+float2 texcoord = float2(x/ (float)tex_width , y / (float)tex_height);
+
+float4 col = tex.SampleLevel(decalSmp, texcoord,0);
+uint val = getIValueFromTexColor(col);
+
+return val;
 
 
 }
