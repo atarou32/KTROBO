@@ -1387,101 +1387,53 @@ void Texture::Init(Graphics* g) {
 
 }
 
-void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* from, MYVECTOR3* at) {
 
 
 
 	DWORD color = 0xFFFFFFFF;
 
-	/*
-	float left = this->butukari.left/(float)tex_c->width;
-	float right = this->butukari.right / (float)tex_c->width;
-	float top = this->butukari.top/(float)tex_c->height;
-	float bottom = this->butukari.bottom/(float)tex_c->height;
 
-	CUSTOMVERTEX v[] = {
-		{-width/2,0,-height/2,color,left,top},
-		{width/2,0,-height/2,color,right,top},
-		{width/2,0,height/2,color,right,bottom},
-		{-width/2,0,-height/2,color,left,top},
-		
-		{width/2,0,height/2,color,right,bottom},
-		{-width/2,0,height/2,color,left,bottom}
-	};
-	*//*
-	dev->BeginScene();
-	dev->SetRenderState(D3DRS_LIGHTING, false);
-	dev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	*/
-	D3DXMATRIXA16 ma;
-	D3DXMATRIXA16 ma2;
-	D3DXVECTOR3 vec;
-	D3DXVECTOR3 yvec(0,-1,0);
-	D3DXVECTOR3 axis;
-	D3DXVec3Normalize(&vec, &(*from - *at));
-	vec.z = 0;
-	D3DXVec3Normalize(&vec,&vec);
-	D3DXVec3Cross(&axis, &yvec, &vec);
+	MYVECTOR3 vec;
+	MYVECTOR3 yvec(0,-1,0);
+	MYVECTOR3 temp_vec;
+	MYVECTOR3 axis;
+	MYMATRIX ma;
+	MYMATRIX ma2;
+
+	temp_vec = *from - *at;
+
+	MyVec3Normalize(vec,temp_vec);
+	vec.float3.z = 0;
+	MyVec3Normalize(vec,vec);
+	MyVec3Cross(axis, yvec, vec);
 	float th;
-	th = acos(D3DXVec3Dot(&vec,&yvec));
-	D3DXMatrixRotationAxis(&ma,&axis,th);
-	
-	D3DXVec3Normalize(&vec, &(*from - *at));
-	float len = D3DXVec3Length(&vec);
+	th = acos(MyVec3Dot(vec,yvec));
+	MyMatrixRotationAxis(ma,axis,th);
+	MyVec3Normalize(vec,temp_vec);
+	float len = MyVec3Length(vec);
 
 
 	bool is_z_p=true;
-	if (vec.z >=0) {
+	if (vec.float3.z >=0) {
 		is_z_p = false;
 	}else {
 	}
-	vec.z = 0;
-	D3DXVec3Cross(&axis, &vec,&D3DXVECTOR3(0,0,-1));
-	float len2 = D3DXVec3Length(&vec);
+	vec.float3.z = 0;
+	MYVECTOR3 dup(0,0,-1);
+	MyVec3Cross(axis,vec,dup);
+	float len2 = MyVec3Length(vec);
 	float the = asin(len2/len);
 	if (is_z_p) {
-	D3DXMatrixRotationAxis(&ma2,&axis, 3.14+1.57-the);
+		MyMatrixRotationAxis(ma2, axis, 3.14+1.57-the);
 	}else {
-		D3DXMatrixRotationAxis(&ma2,&axis, 1.57+the);
+		MyMatrixRotationAxis(ma2, axis, 1.57+the);
 	}
-/*
-	float the = acos(D3DXVec3Dot(&axis,&D3DXVECTOR3(0,0,1)));
-	D3DXVec3Cross(&axis, &axis, &D3DXVECTOR3(0,0,1));
-	D3DXMatrixRotationAxis(&ma2, &axis, -the);
-*/	/*
-	yvec.x = 0;
-	yvec.y = 0;
-	yvec.z = 1;
-	D3DXVec3TransformNormal(&vec,&yvec,view);
-	D3DXVec3Cross(&axis, &vec, &yvec);
-	D3DXMatrixRotationAxis(&ma2,&axis,acos(D3DXVec3Dot(&vec,&yvec)));
-*/	D3DXMatrixMultiply(&ma, &ma, &ma2);
-	
-	D3DXMatrixMultiply(&ma, &ma, world);
-	D3DXMatrixMultiply(&ma, &ma, view);
-	dev->SetTransform(D3DTS_PROJECTION,proj);
-	dev->SetTransform(D3DTS_VIEW, &(ma));
-		D3DXMatrixIdentity(&ma);
-    dev->SetTransform(D3DTS_WORLD,&ma);
-	MyTextureLoader::SetNowSetTexture(tex_c->tex, 0, NULL);
-	dev->SetFVF(FVF_CUSTOM);
-	dev->DrawPrimitiveUP(D3DPT_TRIANGLELIST,2,(void*)v,sizeof(CUSTOMVERTEX));
-	dev->EndScene();
-	dev->SetRenderState(D3DRS_LIGHTING, true);
 
-
-
-
-
-
-
-
-
-
-
-
+	MyMatrixMultiply(ma,ma,ma2);
 	cbuf2.proj = *proj;
 	cbuf2.view = *view;
+	cbuf2.mym = ma;
 	D3D11_MAPPED_SUBRESOURCE subresource;
 	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
 	g->getDeviceContext()->Map(cbuf2_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);

@@ -361,7 +361,7 @@ public:
 								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
 								D3D11_INPUT_ELEMENT_DESC* layout, int numoflayout, bool blend_enable);
 
-	void setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	void setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* from, MYVECTOR3* at);
 private:
 	RenderTex dummy_rendertex; // vectorのインデックスを崩さないためにこれをしようする
 	RenderBillBoard dummy_billboard;

@@ -281,58 +281,97 @@ uint tex_h = tex_wh - (tex_w << 8);
 // 中心の点のSV_POSITIONを計算して　Positionに入れる
 
 
-
-
-float4 worldPos = mul( input.world, localPos );
+float4 localPos = float4(-w/2,0,-h/2,1);
+float4 mymPos = mul(mym, localPos);
+float4 worldPos = mul(mat, mymPos );
 float4 viewPos  = mul( view, worldPos );
 float4 projPos  = mul( proj, viewPos );
-output.Position = projPos;
 
-output.TexCoord = input.TexCoord.xy;
+float4 localPos2 = float4(w/2,0,h/2,1);
+float4 mymPos2 = mul(mym, localPos2);
+float4 worldPos2 = mul(mat, mymPos2 );
+float4 viewPos2 = mul( view, worldPos2 );
+float4 projPos2  = mul( proj, viewPos2 );
+
+float4 pPos = float4((projPos.x + projPos2.x)/2, (projPos.y + projPos2.y)/2, 0.0f, 1.0f);
+output.Position = pPos;
+output.Color = getColorFromUINT(color);
+output.TexCoord = float2(tex_x / (float)tex_width, tex_y / (float)tex_height);
+output.TexWH = float2(tex_w / (float)tex_width, tex_h / (float)tex_height);
+output.PosWH = float2(projPos2.x - projPos.x, projPos2.y - projPos.y);
 
 return output;
 }
 
 
-#define KTROBO_SHADER_VALUE_COLORTEX_WIDTH_HEIGHT 512
-
-
-float4 getColorFromTex(uint instance_id, uint cid) {
-float4 c = float4(1,1,0,1);//(float4)0;
-float offsetx =  1/(float)KTROBO_SHADER_VALUE_COLORTEX_WIDTH_HEIGHT;
-float offsety =  1/(float)KTROBO_SHADER_VALUE_COLORTEX_WIDTH_HEIGHT;
-
-float base_x =  cid * offsetx;
-float base_y =  instance_id * offsety;
-c = texColor.Sample( decalSmp, float2(base_x + offsetx/2 , base_y + offsety/2) );
-return c;
-
-
-}
-
-
-
-[maxvertexcount(3)]
+[maxvertexcount(6)]
 void GSFunc( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> stream) {
-stream.Append(input[2]);
-stream.Append(input[1]);
-stream.Append(input[0]);
-stream.RestartStrip();
+
+GSPSInput Out;
+Out.PosWH = float2(0,0);
+Out.TexWH = float2(0,0);
+Out.Color = In[0].Color;
+
+float xoffset = In[0].PosWH.x;
+float yoffset = In[0].PosWH.y;
+float base_x = In[0].Position.x - xoffset/2;
+float base_y = In[0].Position.y + yoffset/2;
+
+float base_texx = In[0].TexCoord.x;
+float base_texy = In[0].TexCoord.y;
+float tex_xoffset = In[0].TexWH.x;
+float tex_yoffset = In[0].TexWH.y;
+
+uint mat_index = 0;
+uint i = mat_index;
+
+Out.Position = float4(base_x + xoffset*i, base_y, 0.0f,1.0f);
+Out.TexCoord = float2(base_texx,base_texy);   
+gsstream.Append(Out);
+
+Out.Position = float4(base_x + xoffset*i, base_y - yoffset, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
+
+gsstream.Append(Out);
+
+Out.Position = float4(base_x+xoffset*i + xoffset, base_y, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
+
+gsstream.Append(Out);
+
+
+Out.Position = float4(base_x + xoffset+xoffset*i, base_y, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
+
+
+gsstream.Append(Out);
+
+Out.Position = float4(base_x+xoffset*i, base_y - yoffset, 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
+
+gsstream.Append(Out);
+Out.Position = float4(base_x+xoffset+xoffset*i, base_y - yoffset , 0.0f, 1.0f);
+Out.TexCoord = float2(base_texx + tex_xoffset, base_texy + tex_yoffset);
+
+gsstream.Append(Out);    
+
+gsstream.RestartStrip();
+
 }
 
 
 
 float4 PSFunc(GSPSInput input ) : SV_Target {
-float3 L = -normalize(float4(1,1,-10,1));//lightdir.xyz);
-float3 N = normalize(input.Normal);
+//float3 L = -normalize(float4(1,1,-10,1));//lightdir.xyz);
+//float3 N = normalize(input.Normal);
 //float3 E = normalize(viewdir);
 //float3 H = normalize(L+E);
 //float4 cc = float4(1,1,1,1);
-float4 diffuse;
-float4 color = getColorFromTex(input.instance_id, color_id);
- diffuse = color * max(dot( L, N ), 0.25 );
-diffuse.a = color.a;
+//float4 diffuse;
+//float4 color = getColorFromTex(input.instance_id, color_id);
+ //diffuse = color * max(dot( L, N ), 0.25 );
+//diffuse.a = color.a;
 
 float4 test = texDiffuse.Sample( texSmp, float2(input.TexCoord.x , input.TexCoord.y) );
-return test * float4(diffuse);
+return test * input.Color;//float4(diffuse);
 }
