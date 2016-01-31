@@ -790,6 +790,12 @@ void Game::Run() {
 	h += 0.01f;
 	MYMATRIX wor;
 	MyMatrixRotationZ(wor,h);
+	MYMATRIX r1;
+	MyMatrixTranslation(r1,0,0,h/100.0f);
+	if ( h > 100) {
+		 h=  1;
+	}
+	MyMatrixMultiply(wor,wor,r1);
 	texdayo->setRenderBillBoardPos(0,&wor);
 
 	texdayo->createIndexBuffer(g);

@@ -166,6 +166,7 @@ MyTextureLoader::MY_TEXTURE_CLASS* MyTextureLoader::_makeClass(int width, int he
 }
 
 MyTextureLoader::MY_TEXTURE_CLASS* MyTextureLoader::loadClass(char* filename) {
+	
 	MYTEXTURE te = load(filename);
 	if (te == NULL) {
 		return NULL;
@@ -203,9 +204,11 @@ MYTEXTURE MyTextureLoader::load(char* filename) {
 		ID3D11Resource* texture = NULL;
 		stringconverter sc;
 		WCHAR a[512];
+		memset(a,0,sizeof(WCHAR)*512);
 		sc.charToWCHAR(filename,a);
-
+		
 		HRESULT hr = D3DX11CreateTextureFromFileW(g->getDevice(), a, NULL,NULL, &texture, NULL);
+
 		if (FAILED(hr)) {
 			char buf[1024];
 			memset(buf,0,1024);
@@ -214,11 +217,13 @@ MYTEXTURE MyTextureLoader::load(char* filename) {
 		}
 
 		D3D11_TEXTURE2D_DESC texDesc;
+		
 		ID3D11Texture2D* texture2d; 
+		
 		texture2d = static_cast<ID3D11Texture2D*>(texture);
-
+		
 		texture2d->GetDesc(&texDesc);
-
+			
 		MY_TEXTURE_CLASS* c = new MY_TEXTURE_CLASS();
 		c->height = texDesc.Height;
 		c->width = texDesc.Width;
@@ -227,6 +232,7 @@ MYTEXTURE MyTextureLoader::load(char* filename) {
 		strcpy_s(c->tex_filename, 512, filename);
 		c->tex_filename[511] = '\0';
 		c->target_view = 0;
+	
 		// view を作成する
 		D3D11_SHADER_RESOURCE_VIEW_DESC srcDesc;
 		memset(&srcDesc,0,sizeof(srcDesc));
@@ -242,11 +248,12 @@ MYTEXTURE MyTextureLoader::load(char* filename) {
 			sprintf_s(buf,512,"%s のテクスチャ読み込みに失敗", filename);
 			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, buf);
 		}
-
+	
 		tex_classnames_index[filename] = tex_classes.size();
 		texturenames_index[filename] = textures.size();
 		tex_classes.push_back(c);
 		textures.push_back(texture2d);
+		
 		return texture2d;
 	} else {
 		return textures[texturenames_index[filename]];
