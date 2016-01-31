@@ -31,7 +31,7 @@ WCHAR* stringconverter::charTowchar(const char* filename) {
 void stringconverter::charToWCHAR(const char* filename, WCHAR* ans) {
 
 	WCHAR ans2[512];
-	memset(ans2,0,sizeof(WCHAR)*512);
+	memset(ans2,0,sizeof(WCHAR)*511);
 	size_t wLen = 0;
 	errno_t err = 0;
 	setlocale(LC_ALL,"japanese");
@@ -41,12 +41,12 @@ void stringconverter::charToWCHAR(const char* filename, WCHAR* ans) {
 		return;
 	}
 
-	wcscpy_s(ans,512,ans2);
+	wcscpy_s(ans,511,ans2);
 	return;
 }
 char* stringconverter::wcharTochar(const WCHAR* filename) {
 	static char ans[512];
-	memset(ans,0,512);
+	memset(ans,0,511);
 	size_t wLen = 0;
 	errno_t err = 0;
 	setlocale(LC_ALL,"japanese");

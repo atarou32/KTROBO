@@ -5,12 +5,15 @@
 using namespace KTROBO;
 
 int Texture::getTexture(char* tex_name, int index_count) {
+	
 	// すでにロードされていた場合はロードは行われない
 	CS::instance()->enter(CS_RENDERDATA_CS, "gettex");
 	if (this->texturepart_index.find(tex_name) != texturepart_index.end()) {
 		CS::instance()->leave(CS_RENDERDATA_CS, "gettex");
 		return texturepart_index[tex_name];
 	}
+
+	
 	// ないので作る
 	TexturePart* p = new TexturePart(index_count);
 	try {
@@ -21,8 +24,12 @@ int Texture::getTexture(char* tex_name, int index_count) {
 		throw err;
 	}
 	int size = this->parts.size();
-	texturepart_index.insert(pair<string,int>(string(tex_name), size));
+
+
+	
 	parts.push_back(p); // まだpはindexbufferが作られていないことに注意
+	texturepart_index.insert(pair<string,int>(string(tex_name), size));
+	
 	CS::instance()->leave(CS_RENDERDATA_CS, "gettex");
 	return size;
 }
@@ -522,7 +529,7 @@ void Texture::_sendinfoToVertexTextureBill(Graphics* g, TEXTURE_VTEX_STRUCT_BILL
 
 	g->getDeviceContext()->IASetInputLayout(mss_for_vertextex_bill.vertexlayout );
 	ID3D11Buffer* tt[] = {vertextex_vertexbuffer_bill};
-	unsigned int ttt[] = { sizeof(TEXTURE_VTEX_STRUCT_TEX)};
+	unsigned int ttt[] = { sizeof(TEXTURE_VTEX_STRUCT_BILL)};
 	unsigned int tttt[] = {0};
 	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
 
@@ -761,10 +768,10 @@ void Texture::sendinfoToVertexTexture(Graphics* g) {
 			if (tex->is_need_load) {
 				unsigned int input[] = {
 					tex->color,
-					(tex->x << 8) + tex->y,
-					(tex->width <<8) + tex->height,
-					(tex->tex_x << 8)+tex->tex_y,
-					(tex->tex_width << 8) + tex->tex_height,
+					(tex->x << 16) + tex->y,
+					(tex->width <<16) + tex->height,
+					(tex->tex_x << 16)+tex->tex_y,
+					(tex->tex_width << 16) + tex->tex_height,
 				};
 				for (int i=0;i<5;i++) {
 					str_tex[tex_size].id = (unsigned short)tex->id;
@@ -812,8 +819,8 @@ void Texture::sendinfoToVertexTexture(Graphics* g) {
 					0,0,0,0,
 					0,0,0,0,
 					0,0,
-					(bil->tex_x << 8)+bil->tex_y,
-					(bil->tex_width << 8) + bil->tex_height,
+					(bil->tex_x << 16)+bil->tex_y,
+					(bil->tex_width << 16) + bil->tex_height,
 				};
 				float input2[] = {
 					0.0f,
@@ -1169,6 +1176,7 @@ void Texture::updateCBuf1(Graphics* g, TexturePart* part) {
 void Texture::Init(Graphics* g) {
 
 	// renderのためのvertexbufferを作る
+
 	D3D11_BUFFER_DESC bd;
 	memset(&bd,0,sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -1198,6 +1206,7 @@ void Texture::Init(Graphics* g) {
 
 	// vertextextureのためのvertexbufferを作る
 
+	
 	bd;
 	memset(&bd,0,sizeof(bd));
 	bd.Usage = D3D11_USAGE_DYNAMIC;
@@ -1211,7 +1220,8 @@ void Texture::Init(Graphics* g) {
 		Del();
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
 	}
-
+	
+	
 	bd;
 	memset(&bd,0,sizeof(bd));
 	bd.Usage = D3D11_USAGE_DYNAMIC;
@@ -1392,13 +1402,23 @@ void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3
 	vec.float3.z = 0;
 	MyVec3Normalize(vec,vec);
 	MyVec3Cross(axis, yvec, vec);
+	if ((abs(axis.float3.x) < 0.00001f) && (abs(axis.float3.y) <0.00001f) &&( abs(axis.float3.z) <0.00001f)) {
+		axis = MYVECTOR3(0,0,1);
+	}
 	float th;
+	MyVec3Normalize(axis,axis);
+
 	th = acos(MyVec3Dot(vec,yvec));
 	MyMatrixRotationAxis(ma,axis,th);
+
+
+
+
+
 	MyVec3Normalize(vec,temp_vec);
 	float len = MyVec3Length(vec);
 
-
+	/*
 	bool is_z_p=true;
 	if (vec.float3.z >=0) {
 		is_z_p = false;
@@ -1407,19 +1427,50 @@ void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3
 	vec.float3.z = 0;
 	MYVECTOR3 dup(0,0,-1);
 	MyVec3Cross(axis,vec,dup);
-	float len2 = MyVec3Length(vec);
-	float the = asin(len2/len);
+	if ((abs(axis.float3.x) < 0.00001f) && (abs(axis.float3.y) <0.00001f) &&( abs(axis.float3.z) <0.00001f)) {
+		axis = MYVECTOR3(0,1,0);
+	}
+	*/
+	MYVECTOR3 temp_yvec = vec;
+	temp_yvec.float3.z = 0;
+	float len2 = MyVec3Length(temp_yvec);
+	float the = acos(len2/len);
+	MyVec3Cross(axis, temp_yvec,vec);
+	MyVec3Normalize(axis,axis);
+	if ((abs(axis.float3.x) < 0.00001f) && (abs(axis.float3.y) <0.00001f) &&( abs(axis.float3.z) <0.00001f)) {
+		axis = MYVECTOR3(1,0,0);
+	}
+	MyMatrixRotationAxis(ma2,axis,the);
+
+
+
+
+	/*
 	if (is_z_p) {
 		MyMatrixRotationAxis(ma2, axis, 3.14+1.57-the);
 	}else {
 		MyMatrixRotationAxis(ma2, axis, 1.57+the);
 	}
+	*/
+
 
 	MyMatrixMultiply(ma,ma,ma2);
+//	MyMatrixMultiply(ma,ma,*view);
 	cbuf2.proj = *proj;
 	cbuf2.view = *view;
 	cbuf2.mym = ma;
+	MYVECTOR3 test(1,0,1);
+	MYVECTOR3 test2(-1,0,-1);
+	MyVec3TransformCoord(test,test,ma);
+	MyVec3TransformCoord(test,test,*view);
+	MyVec3TransformCoord(test,test,*proj);
+	MyVec3TransformCoord(test2,test2,ma);
+	MyVec3TransformCoord(test2,test2,*view);
+	MyVec3TransformCoord(test2,test2,*proj);
+
+
 	D3D11_MAPPED_SUBRESOURCE subresource;
+
 	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
 	g->getDeviceContext()->Map(cbuf2_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 	memcpy( subresource.pData, &cbuf2, sizeof(TEXTURE_BILL_CBUF) );

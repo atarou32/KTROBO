@@ -51,15 +51,28 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 
 	Input* input = new Input();
+	MSG msg = {0};
+	try {
 	if(FAILED( InitWindow(hInstance, nCmdShow, input))){
 		return 0;
 	}
-
-
+	} catch (KTROBO::GameError* err) {
+		KTROBO::mylog::writelog(KTROBO::FATAL_ERROR, "init device failure");
+		KTROBO::mylog::writelog(err->getErrorCode(),err->getMessage());
+	//	MessageBoxA(g_hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
+		delete err;
+	
+		goto ktrobo_error;
+	} catch (...) {
+		goto ktrobo_error;
+	}
+	
+	
 
 	game = new KTROBO::Game();
-	MSG msg = {0};
+	
 	try {
+	
 		game->Init(g_hWnd);
 	} catch (KTROBO::GameError* err) {
 
@@ -77,8 +90,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	// Main message loop
 	//MSG msg = {0};
 	try {
-		InputMessageDispatcher::Init();
-		Input::Init(g_hWnd);
+		
+	
 	while( WM_QUIT != msg.message ){
 		if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) ){
 			TranslateMessage( &msg );
@@ -136,17 +149,20 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow, Input* input )
 	g_hWnd = CreateWindow( CLASS_NAME, CLASS_NAME, WS_OVERLAPPEDWINDOW,
 						CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
 						NULL, NULL, hInstance, NULL);
+	
+
 	if (!g_hWnd){
 		return E_FAIL;
 	}
-
+	Input::Init(g_hWnd);
+	InputMessageDispatcher::Init();
 	ShowWindow(g_hWnd, nCmdShow);
 	UpdateWindow(g_hWnd);
 
     return S_OK;
 }
 
-/*
+
 LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
     PAINTSTRUCT ps;
@@ -169,5 +185,5 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam 
 
     return 0;
 }
-*/
+
 

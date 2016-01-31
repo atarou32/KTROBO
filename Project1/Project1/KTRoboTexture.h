@@ -197,7 +197,7 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class;
 	bool is_need_load;
 	bool is_index_load;// indexbufferがクリエイトされているかどうか
-	
+
 	int index_count_max; // 最大インデックス数 buffer はこれの3倍
 public:
 	int index_count_tex; // 現在のインデックス数
@@ -375,6 +375,7 @@ private:
 private:
 	vector<RenderBillBoard*> bill_boards;
 	vector<RenderTex*> render_texs;
+	
 private:
 	vector<TexturePart*> parts;
 	map<string, int> texturepart_index;
@@ -405,6 +406,7 @@ public:
 		is_all_delete = false;
 		vtex_tex = loader->makeClass(KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT);
 		vtex_bill = loader->makeClass(KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT, KTROBO_TEXTURE_VTEX_WIDTH_HEIGHT);
+	
 	}
 	void Release() {
 				// billboard関係を消去する
@@ -449,6 +451,8 @@ public:
 		}
 		parts.clear();
 		texturepart_index.clear();
+
+
 	}
 	~Texture(void){
 		Release();

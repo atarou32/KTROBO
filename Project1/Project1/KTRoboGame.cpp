@@ -66,6 +66,8 @@ Game::Game(void)
 	mesh_instanceds = 0;
 	cltf=0;
 	texdayo = 0;
+	mytest_for_vt = 0;
+	cmeshs = 0;
 }
 
 
@@ -74,6 +76,7 @@ Game::~Game(void)
 }
 
 void RENDERTCB(TCB* thisTCB) {
+	
 	Game* g = (Game*)(thisTCB->data);
 
 	g->Run();
@@ -81,6 +84,7 @@ void RENDERTCB(TCB* thisTCB) {
 
 
 void CALCCOMBINEDTCB(TCB* thisTCB) {
+	
 	MeshInstanceds* mis = (MeshInstanceds*)thisTCB->data;
 	Graphics* g = (Graphics*)thisTCB->Work[0];
 
@@ -90,16 +94,21 @@ void CALCCOMBINEDTCB(TCB* thisTCB) {
 		mis->loadMatrixLocalToTexture(g);
 		mis->calcCombinedMatrixToTexture(g);
 		mis->loadColorToTexture(g);
+
 	//}
 }
 
 
 
 void LOADMESHTCB(TCB* thisTCB) {
+	
+
+	
 	lua_State* L = (lua_State*)thisTCB->data;
 	Task* t = (Task*)thisTCB->Work[0];
 	Graphics* g = (Graphics*)thisTCB->Work[1];
 	MeshInstanceds* m = (MeshInstanceds*)thisTCB->Work[2];
+	
 
 	char buff[] = "resrc/script/sample.lua.txt";
 	int error;
@@ -316,21 +325,22 @@ bool Game::Init(HWND hwnd) {
 
 
 
-	mytest_for_vt = new MyTestForVertexTexture();
-	mytest_for_vt->Init(g);
-	mytest_for_vt->readVertexTexture(g,mesh_instanceds->combined_matrix_texture);//anime_matrix_basis_texture);//matrix_local_texture);
+//	mytest_for_vt = new MyTestForVertexTexture();
+//	mytest_for_vt->Init(g);
+//	mytest_for_vt->readVertexTexture(g,mesh_instanceds->combined_matrix_texture);//anime_matrix_basis_texture);//matrix_local_texture);
 
 
-	mytest_for_vt->writeInfo(g);
+//	mytest_for_vt->writeInfo(g);
 
+	
 
 	long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
 	work[0] = (long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
 
 	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
-
-
+	
+	
 
     int error;
 	//Sleep(1000);
@@ -343,20 +353,48 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
 	
+	
 
 	Texture::Init(g);
-
+	
 	texdayo = new Texture(demo->tex_loader);
-//	int i = texdayo->getTexture("resrc/model/images.jpg");
-//	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,200,200,200,50,50,100,100);
-//	texdayo->setRenderTexIsRender(j,true);
-
-
-
-
-
-
-
+	
+	int i = texdayo->getTexture("resrc/model/images.png");
+	
+	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,50,50,100,100);
+	
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,150,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,250,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,350,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,450,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,550,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,650,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getRenderTex(i,0xFFFFFFFF,750,700,200,200,50,50,100,100);
+	texdayo->setRenderTexIsRender(j,true);
+	MYMATRIX world;
+	MYMATRIX view;
+	MYMATRIX proj;
+	MYVECTOR3 from(0,-1,0);
+//	MYVECTOR3 from(8,-16,12);
+	MYVECTOR3 at(0,0,0);
+	MYVECTOR3 up(0,0,1);
+	MyMatrixIdentity(world);
+//	MyMatrixTranslation(world,0,0.05,0.0);
+//	MyMatrixRotationZ(world, 0.5f);
+	MyMatrixLookAtRH(view,from,at,up);
+	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
+	j = texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,0.2,0.1,0,0,200,200);
+	texdayo->setRenderBillBoardIsRender(j,true);
+	texdayo->setViewProj(g,&view,&proj,&from, &at);
+	
+	
 	//long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
 	work[1] = (long)g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
@@ -364,6 +402,7 @@ bool Game::Init(HWND hwnd) {
 	work[2] = (long)mesh_instanceds;
 
 	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,L,work,0x0000FFFF);
+
 
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
@@ -408,9 +447,9 @@ void Game::Del() {
 
 	
 
-
+if (L) {
 	lua_close(L);
-	
+}
 
 	 if (cmeshs) {
 		 delete cmeshs;
@@ -703,10 +742,7 @@ void Game::Run() {
 	telop_texts->render(g);
 
 
-	texdayo->createIndexBuffer(g);
-	texdayo->updateIndexBuffer(g);
-	texdayo->sendinfoToVertexTexture(g);
-	texdayo->render(g);
+	
 
 	for (int i = 0 ; i < 4; i++) {
 		ID3D11CommandList* pd3dCommandList=0;
@@ -749,6 +785,20 @@ void Game::Run() {
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
+
+	static float h = 0.0f;
+	h += 0.01f;
+	MYMATRIX wor;
+	MyMatrixRotationZ(wor,h);
+	texdayo->setRenderBillBoardPos(0,&wor);
+
+	texdayo->createIndexBuffer(g);
+	texdayo->updateIndexBuffer(g);
+	texdayo->sendinfoToVertexTexture(g);
+	texdayo->render(g);
+
+
+
 
 	g->getSwapChain()->Present(0,0);
 

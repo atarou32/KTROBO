@@ -58,7 +58,13 @@ struct MYXMFLOAT3 {
 	}
 
 	MYXMFLOAT3 operator = (MYXMFLOAT3& t) {
-		return MYXMFLOAT3(t.float3.x, t.float3.y, t.float3.z);
+		
+		this->float3.x = t.float3.x;
+		this->float3.y = t.float3.y;
+		this->float3.z = t.float3.z;
+		return *this;
+
+		//return MYXMFLOAT3(t.float3.x, t.float3.y, t.float3.z);
 	}
 
 	float operator[](int i) {
@@ -89,7 +95,7 @@ static XMVECTOR tempvec;
 #define MyMatrixRotationZ(out, f) (MyMatrix4x4Store(out, XMMatrixRotationZ((f))))
 #define MyMatrixTranslation(out, x,y,z) (MyMatrix4x4Store(out, XMMatrixTranslation((x),(y),(z))))
 #define MyMatrixScaling(out,x,y,z) (MyMatrix4x4Store(out, XMMatrixScaling((x),(y),(z))))
-#define MyMatrixRotationAxis(out, vec,angle) (MyMatrix4x4Store(out, XMMatrixRotationAxis((XMLoadFloat3(vec)),(angle))))
+#define MyMatrixRotationAxis(out, vec,angle) (MyMatrix4x4Store(out, XMMatrixRotationAxis((XMLoadFloat3(&vec.float3)),(angle))))
 #define MyMatrixLookAtRH(out,from,at,up) (MyMatrix4x4Store(out, XMMatrixLookAtRH((XMLoadFloat3(&from.float3)),(XMLoadFloat3(&at.float3)),(XMLoadFloat3(&up.float3)))))
 #define MyMatrixLookAtLH(out,from,at,up) (MyMatrix4x4Store(out, XMMatrixLookAtLH((XMLoadFloat3(&from.float3)),(XMLoadFloat3(&at.float3)),(XMLoadFloat3(&up.float3)))))
 #define MyMatrixIdentity(out) (MyMatrix4x4Store(out, XMMatrixIdentity()))
@@ -99,7 +105,7 @@ static XMVECTOR tempvec;
 
 #define MyVec3Subtract(out,in1, in2) (MyVec3Store(out, XMVectorSubtract(XMLoadFloat3(&in1.float3), XMLoadFloat3(&in2.float3))))
 #define MyVec3Length(in) (XMVectorGetX(XMVector3Length((XMLoadFloat3(&in.float3)))))
-#define MyVec3Normalize(out,in) (MyVec3Store(out,XMVector3Normalize((&in.float3))))
+#define MyVec3Normalize(out,in) (MyVec3Store(out,XMVector3Normalize(XMLoadFloat3(&in.float3))))
 #define MyVec3Dot(in1,in2) (XMVectorGetX(XMVector3Dot((XMLoadFloat3(&in1.float3)),(XMLoadFloat3(&in2.float3)))))
 #define MyVec3Cross(out, in1, in2) (MyVec3Store(out, XMVector3Cross(XMLoadFloat3(&in1.float3),(XMLoadFloat3(&in2.float3)))))
 #define MyVec3TransformCoord(out, invec,inmat) (MyVec3Store(out, XMVector3TransformCoord((XMLoadFloat3(&invec.float3)),(XMLoadFloat4x4((&inmat))))))

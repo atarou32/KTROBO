@@ -410,6 +410,8 @@ void InputMessageDispatcher::messageMake() {
 	// 複数スレッドのロックはこの関数では必要ない
 	// MESSAGE_CS でロックする
 
+	return;
+
 	CS::instance()->enter(CS_MESSAGE_CS, "enter message make");
 
 	DWORD n_time = timeGetTime();
