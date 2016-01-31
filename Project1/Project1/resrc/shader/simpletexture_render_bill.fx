@@ -5,7 +5,7 @@ uint bill_id: BILL_ID;
 
 struct GSPSInput {
 float4 Position: SV_POSITION;
-float2 PosWH: TEXCOORD2; // SV_POSITIONにしたときの長さ分
+float4 PosWH: TEXCOORD2; // SV_POSITIONにしたときの長さ分
 float2 TexCoord: TEXCOORD0;
 float2 TexWH: TEXCOORD1;
 float4 Color: COLOR;
@@ -202,7 +202,7 @@ ans._41 = getMatrixValueFromBillId(bill_id,12);
 ans._42 = getMatrixValueFromBillId(bill_id,13);
 ans._43 = getMatrixValueFromBillId(bill_id,14);
 ans._44 = getMatrixValueFromBillId(bill_id,15);
-return ans;
+return MyMatrixTranspose(ans);
 }
 
 
@@ -276,10 +276,10 @@ float w = getWidthFromBillId(bill_id);
 float h = getHeightFromBillId(bill_id);
 uint tex_xy = getTexXYFromBillId(bill_id);
 uint tex_wh = getTexWHFromBillId(bill_id);
-uint tex_x = tex_xy >> 8;
-uint tex_y = tex_xy - (tex_x <<8);
-uint tex_w = tex_wh >> 8;
-uint tex_h = tex_wh - (tex_w << 8);
+uint tex_x = tex_xy >> 16;
+uint tex_y = tex_xy - (tex_x <<16);
+uint tex_w = tex_wh >> 16;
+uint tex_h = tex_wh - (tex_w << 16);
 
 // 左上　と　右下の点のSV_POSITIONを計算して xy の差をposwhに入れる
 // 中点が中心の点となるはずなので下は計算しなくても大丈夫
@@ -291,19 +291,29 @@ float4 mymPos = mul(mym, localPos);
 float4 worldPos = mul(mat, mymPos );
 float4 viewPos  = mul( view, worldPos );
 float4 projPos  = mul( proj, viewPos );
+//float4 projPos = float4(-w/2,-h/2,0,1);
 
 float4 localPos2 = float4(w/2,0,h/2,1);
+
 float4 mymPos2 = mul(mym, localPos2);
 float4 worldPos2 = mul(mat, mymPos2 );
 float4 viewPos2 = mul( view, worldPos2 );
 float4 projPos2  = mul( proj, viewPos2 );
 
+float4 localPos3 = float4(w/2,0,-h/2,1);
+float4 mymPos3 = mul(mym, localPos3);
+float4 worldPos3 = mul(mat, mymPos3 );
+float4 viewPos3 = mul( view, worldPos3 );
+float4 projPos3  = mul( proj, viewPos3 );
+
+
+//float4 projPos2 = (w/2,h/2,0,1);
 float4 pPos = float4((projPos.x + projPos2.x)/2, (projPos.y + projPos2.y)/2, 0.0f, 1.0f);
 output.Position = pPos;
 output.Color = getColorFromUINT(color);
 output.TexCoord = float2(tex_x / (float)tex_width, tex_y / (float)tex_height);
 output.TexWH = float2(tex_w / (float)tex_width, tex_h / (float)tex_height);
-output.PosWH = float2(projPos2.x - projPos.x, projPos2.y - projPos.y);
+output.PosWH = float4(projPos2.x - projPos.x, projPos2.y - projPos.y, projPos3.x, projPos3.y);
 
 return output;
 }
@@ -313,14 +323,17 @@ return output;
 void GSFunc( triangle GSPSInput In[3], inout TriangleStream<GSPSInput> gsstream) {
 
 GSPSInput Out;
-Out.PosWH = float2(0,0);
+Out.PosWH = float4(0,0,0,0);
 Out.TexWH = float2(0,0);
 Out.Color = In[0].Color;
 
-float xoffset = In[0].PosWH.x;
-float yoffset = In[0].PosWH.y;
-float base_x = In[0].Position.x - xoffset/2;
-float base_y = In[0].Position.y + yoffset/2;
+float xoffset = In[0].PosWH.x/2;
+float yoffset = In[0].PosWH.y/2;
+
+float xoffset2 = In[0].PosWH.z - In[0].Position.x;
+float yoffset2 =  -In[0].PosWH.w + In[0].Position.y;
+float base_x = In[0].Position.x;
+float base_y = In[0].Position.y;
 
 float base_texx = In[0].TexCoord.x;
 float base_texy = In[0].TexCoord.y;
@@ -330,32 +343,32 @@ float tex_yoffset = In[0].TexWH.y;
 uint mat_index = 0;
 uint i = mat_index;
 
-Out.Position = float4(base_x + xoffset*i, base_y, 0.0f,1.0f);
+Out.Position = float4(base_x-xoffset, base_y+yoffset, 0.0f,1.0f);
 Out.TexCoord = float2(base_texx,base_texy);   
 gsstream.Append(Out);
 
-Out.Position = float4(base_x + xoffset*i, base_y - yoffset, 0.0f, 1.0f);
+Out.Position = float4(base_x - xoffset2, base_y - yoffset2, 0.0f, 1.0f);
 Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
 
 gsstream.Append(Out);
 
-Out.Position = float4(base_x+xoffset*i + xoffset, base_y, 0.0f, 1.0f);
+Out.Position = float4(base_x + xoffset2, base_y + yoffset2 , 0.0f, 1.0f);
 Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
 
 gsstream.Append(Out);
 
 
-Out.Position = float4(base_x + xoffset+xoffset*i, base_y, 0.0f, 1.0f);
+Out.Position = float4(base_x + xoffset2, base_y + yoffset2, 0.0f, 1.0f);
 Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
 
 
 gsstream.Append(Out);
 
-Out.Position = float4(base_x+xoffset*i, base_y - yoffset, 0.0f, 1.0f);
+Out.Position = float4(base_x-xoffset2, base_y  - yoffset2, 0.0f, 1.0f);
 Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
 
 gsstream.Append(Out);
-Out.Position = float4(base_x+xoffset+xoffset*i, base_y - yoffset , 0.0f, 1.0f);
+Out.Position = float4(base_x+xoffset, base_y - yoffset , 0.0f, 1.0f);
 Out.TexCoord = float2(base_texx + tex_xoffset, base_texy + tex_yoffset);
 
 gsstream.Append(Out);    
