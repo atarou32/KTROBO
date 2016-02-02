@@ -49,6 +49,7 @@ void Mesh::Init(Graphics* g) {
 			pblob->Release();
 			pblob = 0;
 			vs = 0;
+			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vs make error");;
 		}
 
 		// 入力レイアウトの定義
@@ -1052,10 +1053,11 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 //		MyMatrixMultiply(bone->combined_matrix, bone->matrix_local, bone->offset_matrix);
 //	MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, mat_inv);
 
-		
+
 		
 		MyMatrixMultiply(bone->combined_matrix, bone->offset_matrix, bone->matrix_local);
 		MyMatrixMultiply(bone->combined_matrix, mat_inv, bone->combined_matrix);
+	
 		//MyMatrixTranslation(bone->combined_matrix, 0,0,1);
 	//MyMatrixTranslation(bone->combined_matrix, 0,0,0);
 	//	MyMatrixIdentity(bone->combined_matrix);

@@ -5,9 +5,9 @@ uint bill_id: BILL_ID;
 
 struct GSPSInput {
 float4 Position: SV_POSITION;
-float4 PosWH: TEXCOORD2; // SV_POSITIONにしたときの長さ分
+float4 PosWH: NORMAL0;// SV_POSITIONにしたときの長さ分
 float2 TexCoord: TEXCOORD0;
-float2 TexWH: TEXCOORD1;
+float2 TexWH : NORMAL1;
 float4 Color: COLOR;
 };
 
@@ -17,7 +17,7 @@ sampler texSmp {
   	AddressV = WRAP;
   	AddressW = WRAP;
   	ComparisonFunc = NEVER;
-  	MinLOD = 0;
+  	MinLOD = FLOAT32_MIN;
   	MaxLOD = FLOAT32_MAX;
 };
 sampler decalSmp {
@@ -26,12 +26,12 @@ sampler decalSmp {
   	AddressV = WRAP;
   	AddressW = WRAP;
   	ComparisonFunc = NEVER;
-  	MinLOD = 0;
+  	MinLOD = FLOAT32_MIN;
   	MaxLOD = FLOAT32_MAX;
 };
 
 
-cbuffer c0dayo :register(c0){
+cbuffer dayo2 :register(b0){
 uint screen_width;
 uint screen_height;
 uint tex_width;
@@ -42,10 +42,10 @@ uint offset;
 uint offset2;
 };
 
-cbuffer c1dayo :register(c1){
-column_major float4x4 view;
-column_major float4x4 proj;
-column_major float4x4 mym;
+cbuffer dayo1 :register(b1){
+column_major float4x4 view : packoffset(c0);
+column_major float4x4 proj : packoffset(c4);
+column_major float4x4 mym  : packoffset(c8);
 
 };
 
@@ -184,25 +184,25 @@ return val;
 }
 
 
-float4x4 getMatrixFromBillId(uint bill_id) {
-float4x4 ans;
+column_major float4x4 getMatrixFromBillId(uint bill_id) {
+column_major float4x4 ans;
 ans._11 = getMatrixValueFromBillId(bill_id, 0);
-ans._12 = getMatrixValueFromBillId(bill_id, 1);
-ans._13 = getMatrixValueFromBillId(bill_id, 2);
-ans._14 = getMatrixValueFromBillId(bill_id, 3);
-ans._21 = getMatrixValueFromBillId(bill_id, 4);
+ans._21 = getMatrixValueFromBillId(bill_id, 1);
+ans._31 = getMatrixValueFromBillId(bill_id, 2);
+ans._41 = getMatrixValueFromBillId(bill_id, 3);
+ans._12 = getMatrixValueFromBillId(bill_id, 4);
 ans._22 = getMatrixValueFromBillId(bill_id, 5);
-ans._23 = getMatrixValueFromBillId(bill_id, 6);
-ans._24 = getMatrixValueFromBillId(bill_id, 7);
-ans._31 = getMatrixValueFromBillId(bill_id, 8);
-ans._32 = getMatrixValueFromBillId(bill_id, 9);
+ans._32 = getMatrixValueFromBillId(bill_id, 6);
+ans._42 = getMatrixValueFromBillId(bill_id, 7);
+ans._13 = getMatrixValueFromBillId(bill_id, 8);
+ans._23 = getMatrixValueFromBillId(bill_id, 9);
 ans._33 = getMatrixValueFromBillId(bill_id,10);
-ans._34 = getMatrixValueFromBillId(bill_id,11);
-ans._41 = getMatrixValueFromBillId(bill_id,12);
-ans._42 = getMatrixValueFromBillId(bill_id,13);
-ans._43 = getMatrixValueFromBillId(bill_id,14);
+ans._43 = getMatrixValueFromBillId(bill_id,11);
+ans._14 = getMatrixValueFromBillId(bill_id,12);
+ans._24 = getMatrixValueFromBillId(bill_id,13);
+ans._34 = getMatrixValueFromBillId(bill_id,14);
 ans._44 = getMatrixValueFromBillId(bill_id,15);
-return MyMatrixTranspose(ans);
+return  ans;//MyMatrixTranspose(ans);
 }
 
 
@@ -271,7 +271,7 @@ GSPSInput output;// (GSPSInput)0;
 
 uint bill_id = input.bill_id;
 uint color = getColorFromBillId(bill_id);
-float4x4 mat = getMatrixFromBillId(bill_id);
+column_major float4x4 mat = getMatrixFromBillId(bill_id);
 float w = getWidthFromBillId(bill_id);
 float h = getHeightFromBillId(bill_id);
 uint tex_xy = getTexXYFromBillId(bill_id);
@@ -286,34 +286,41 @@ uint tex_h = tex_wh - (tex_w << 16);
 // 中心の点のSV_POSITIONを計算して　Positionに入れる
 
 
-float4 localPos = float4(-w/2,0,-h/2,1);
-float4 mymPos = mul(mym, localPos);
-float4 worldPos = mul(mat, mymPos );
-float4 viewPos  = mul( view, worldPos );
-float4 projPos  = mul( proj, viewPos );
-//float4 projPos = float4(-w/2,-h/2,0,1);
+column_major float4x4 tview = view;
+
+
+column_major float4x4 tproj = proj;
+
+float4 localPos = float4(0,0,0,1);
+float4 mymPos = float4(mul(mym, localPos).xyzw);
+float4 worldPos = float4(mul(mat,mymPos ));
+float4 viewPos  = float4(mul(  tview,worldPos ).xyzw);
+float4 projPos  = float4(mul(  tproj,viewPos ).xyzw);
+
 
 float4 localPos2 = float4(w/2,0,h/2,1);
 
-float4 mymPos2 = mul(mym, localPos2);
-float4 worldPos2 = mul(mat, mymPos2 );
-float4 viewPos2 = mul( view, worldPos2 );
-float4 projPos2  = mul( proj, viewPos2 );
+float4 mymPos2 = float4(mul(mym, localPos2).xyz,1);
+float4 worldPos2 = float4(mul(mat,mymPos2 ));
+float4 viewPos2 = float4(mul( tview, worldPos2 ).xyzw);
+float4 projPos2  = float4(mul( tproj, viewPos2 ).xyzw);
+
 
 float4 localPos3 = float4(w/2,0,-h/2,1);
-float4 mymPos3 = mul(mym, localPos3);
-float4 worldPos3 = mul(mat, mymPos3 );
-float4 viewPos3 = mul( view, worldPos3 );
-float4 projPos3  = mul( proj, viewPos3 );
+float4 mymPos3 = float4(mul(mym, localPos3).xyzw);
+float4 worldPos3 = float4(mul(mat,mymPos3 ));
+float4 viewPos3 = float4(mul( tview, worldPos3 ).xyzw);
+float4 projPos3  = float4(mul( tproj, viewPos3 ).xyzw);
 
-
-//float4 projPos2 = (w/2,h/2,0,1);
-float4 pPos = float4((projPos.x + projPos2.x)/2, (projPos.y + projPos2.y)/2, 0.0f, 1.0f);
-output.Position = pPos;
+output.Position = float4(projPos.x,projPos.y,projPos.z,projPos.w);
 output.Color = getColorFromUINT(color);
 output.TexCoord = float2(tex_x / (float)tex_width, tex_y / (float)tex_height);
 output.TexWH = float2(tex_w / (float)tex_width, tex_h / (float)tex_height);
-output.PosWH = float4(projPos2.x - projPos.x, projPos2.y - projPos.y, projPos3.x, projPos3.y);
+output.PosWH = float4((projPos2.x - projPos.x)*2, (projPos2.y - projPos.y)*2, projPos3.x, projPos3.y);
+
+
+
+
 
 return output;
 }
@@ -327,11 +334,11 @@ Out.PosWH = float4(0,0,0,0);
 Out.TexWH = float2(0,0);
 Out.Color = In[0].Color;
 
-float xoffset = In[0].PosWH.x/2;
-float yoffset = In[0].PosWH.y/2;
+float xoffset = In[0].PosWH.z - In[0].Position.x;  
+float yoffset =  -In[0].PosWH.w + In[0].Position.y;
 
-float xoffset2 = In[0].PosWH.z - In[0].Position.x;
-float yoffset2 =  -In[0].PosWH.w + In[0].Position.y;
+float xoffset2 =  In[0].PosWH.x/2;
+float yoffset2 =  In[0].PosWH.y/2;
 float base_x = In[0].Position.x;
 float base_y = In[0].Position.y;
 
@@ -343,32 +350,32 @@ float tex_yoffset = In[0].TexWH.y;
 uint mat_index = 0;
 uint i = mat_index;
 
-Out.Position = float4(base_x-xoffset, base_y+yoffset, 0.0f,1.0f);
+Out.Position = float4(base_x-xoffset, base_y+yoffset, In[0].Position.z,In[0].Position.w);
 Out.TexCoord = float2(base_texx,base_texy);   
 gsstream.Append(Out);
 
-Out.Position = float4(base_x - xoffset2, base_y - yoffset2, 0.0f, 1.0f);
+Out.Position = float4(base_x - xoffset2, base_y - yoffset2, In[0].Position.z,In[0].Position.w);
 Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
 
 gsstream.Append(Out);
 
-Out.Position = float4(base_x + xoffset2, base_y + yoffset2 , 0.0f, 1.0f);
+Out.Position = float4(base_x + xoffset2, base_y + yoffset2, In[0].Position.z,In[0].Position.w);
 Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
 
 gsstream.Append(Out);
 
 
-Out.Position = float4(base_x + xoffset2, base_y + yoffset2, 0.0f, 1.0f);
+Out.Position = float4(base_x + xoffset2, base_y + yoffset2, In[0].Position.z,In[0].Position.w);
 Out.TexCoord = float2(base_texx + tex_xoffset, base_texy);
 
 
 gsstream.Append(Out);
 
-Out.Position = float4(base_x-xoffset2, base_y  - yoffset2, 0.0f, 1.0f);
+Out.Position = float4(base_x-xoffset2, base_y  - yoffset2, In[0].Position.z,In[0].Position.w);
 Out.TexCoord = float2(base_texx, base_texy + tex_yoffset);
 
 gsstream.Append(Out);
-Out.Position = float4(base_x+xoffset, base_y - yoffset , 0.0f, 1.0f);
+Out.Position = float4(base_x+xoffset, base_y - yoffset , In[0].Position.z,In[0].Position.w);
 Out.TexCoord = float2(base_texx + tex_xoffset, base_texy + tex_yoffset);
 
 gsstream.Append(Out);    
@@ -391,5 +398,12 @@ float4 PSFunc(GSPSInput input ) : SV_Target {
 //diffuse.a = color.a;
 
 float4 test = texDiffuse.Sample( texSmp, float2(input.TexCoord.x , input.TexCoord.y) );
-return test * input.Color;//float4(diffuse);
+
+if (test.x < 0.0001 && test.y < 0.0001 && test.z <0.0001 && test.a < 0.0001) discard;
+
+float4 test2 = test;
+// * input.Color;
+test2 *= input.Color;
+return test2;
+//float4(diffuse);
 }

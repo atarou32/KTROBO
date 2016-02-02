@@ -359,41 +359,68 @@ bool Game::Init(HWND hwnd) {
 	
 	texdayo = new Texture(demo->tex_loader);
 	
-	int i = texdayo->getTexture("resrc/model/images.png");
+	int i = texdayo->getTexture("resrc/model/ponko-niyake.png");
 	
-	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,50,50,100,100);
+/*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	
 	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,150,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,250,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,350,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,450,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,550,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,650,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
-	j = texdayo->getRenderTex(i,0xFFFFFFFF,750,700,200,200,50,50,100,100);
-	texdayo->setRenderTexIsRender(j,true);
+	*/
+	MYMATRIX jiken;
+	MeshBone* bon = mesh2->Bones[mesh2->BoneIndexes["migiArmBone"]];
+	MyMatrixMultiply(jiken,bon->combined_matrix,bon->matrix_local);
+	MYVECTOR3 ppos(0,0,0);
+	MyVec3TransformCoord(ppos,ppos,jiken);
+	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,ppos.float3.z);
+//	j = texdayo->getRenderTex(i,0xFFFFFFFF,250,200,312,312,0,0,512,512);
+//	texdayo->setRenderTexIsRender(j,true);
+//		j = texdayo->getRenderTex(i,0xFFFFFFFF,150,200,512,512,0,0,512,512);
+//	texdayo->setRenderTexColor(i,0xFFFF0022);
+//	texdayo->setRenderTexIsRender(j,true);
+//	j = texdayo->getRenderTex(i,0xFFFFFFFF,350,700,200,200,50,50,100,100);
+//	texdayo->setRenderTexIsRender(j,true);
+//	j = texdayo->getRenderTex(i,0xFFFFFFFF,450,700,200,200,50,50,100,100);
+//	texdayo->setRenderTexIsRender(j,true);
+//	j = texdayo->getRenderTex(i,0xFFFFFFFF,550,700,200,200,50,50,100,100);
+//	texdayo->setRenderTexIsRender(j,true);
+//	j = texdayo->getRenderTex(i,0xFFFFFFFF,650,700,200,200,50,50,100,100);
+//	texdayo->setRenderTexIsRender(j,true);
+//	j = texdayo->getRenderTex(i,0xFFFFFFFF,750,700,200,200,50,50,100,100);
+//	texdayo->setRenderTexIsRender(j,true);
 	MYMATRIX world;
 	MYMATRIX view;
 	MYMATRIX proj;
-	MYVECTOR3 from(0,-1,0);
-//	MYVECTOR3 from(8,-16,12);
+//	MYVECTOR3 from(0,-1,0);
+	MYVECTOR3 from(5,-5,12);
 	MYVECTOR3 at(0,0,0);
 	MYVECTOR3 up(0,0,1);
 	MyMatrixIdentity(world);
 //	MyMatrixTranslation(world,0,0.05,0.0);
+
+	
 //	MyMatrixRotationZ(world, 0.5f);
 	MyMatrixLookAtRH(view,from,at,up);
 	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
-	j = texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,0.2,0.1,0,0,200,200);
+
+	int j = texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,0.021,0.021,0,0,500,500);
 	texdayo->setRenderBillBoardIsRender(j,true);
-	texdayo->setViewProj(g,&view,&proj,&from, &at);
-	
+	MyMatrixTranslation(world,0,0,0);
+	texdayo->getRenderBillBoard(i,0xFFFF00FF,&world,0.30,0.30,100,100,250,250);
+	texdayo->setRenderBillBoardIsRender(1,true);
+
+
+	MyMatrixTranslation(world,4,0,0);
+	texdayo->getRenderBillBoard(i,0xFF0000FF,&world,3,3,100,100,250,250);
+	texdayo->setRenderBillBoardIsRender(1,true);
+
+	MyMatrixTranslation(world,0,0,4);
+	texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,13,13,100,100,250,250);
+	texdayo->setRenderBillBoardIsRender(1,true);
+
+	MyMatrixTranslation(world,0,4,0);
+	texdayo->getRenderBillBoard(i,0x0000FFFF,&world,3,3,100,100,250,250);
+	texdayo->setRenderBillBoardIsRender(1,true);
+
+//	texdayo->setViewProj(g,&view,&proj,&from, &at);
 	
 	//long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
@@ -407,7 +434,7 @@ bool Game::Init(HWND hwnd) {
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 
-	
+	InputMessageDispatcher::registerImpl(&k,NULL,NULL);
 	return true;
 }
 void Game::Del() {
@@ -551,7 +578,22 @@ double Game::stopWatch() {
 	return (timeEnd.QuadPart - timeStart.QuadPart)/(double)timeFreq.QuadPart*1000;
 }
 
+ bool kurukuru::handleMessage(int msg, void* data, DWORD time) {
 
+	 a = 0.01f;
+
+
+	 MYMATRIX s;
+	 MyMatrixRotationZ(s,a);
+
+	 MYVECTOR3 fromat = from - at;
+	 MyVec3TransformNormal(fromat,fromat,s);
+	 from = at+fromat;
+
+	 MyMatrixLookAtRH(view,from,at,up);
+
+	 return true;
+ }
 void Game::Run() {
 
 	double millisecond = stopWatch();
@@ -560,11 +602,6 @@ void Game::Run() {
 	char test2[1024];
 	memset(test2,0,sizeof(1024));
 	memset(test,0,sizeof(WCHAR)*512);
-	//sprintf_s(test2,512, "second %f", millisecond);
-	//stringconverter cs;
-	//cs.charToWCHAR(test2,test);
-	//KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);
-
 
 
 	if (millisecond > RENDERTIME_IGNORETIME) {
@@ -642,7 +679,7 @@ void Game::Run() {
 		}
 	//frame = 30.001;
 //	mesh->animate(frame, true);
-//	mesh2->animate(frame, true);
+	mesh2->animate(0, true);
 	for (int i = 0 ; i <= 6 ; i++) {
 //		mesh3[i]->animate(frame, true);
 	}
@@ -664,7 +701,8 @@ void Game::Run() {
 	MYMATRIX view;
 	MYMATRIX proj;
 	MyMatrixIdentity(world);
-	MYVECTOR3 a(8,-16,12);
+	MYVECTOR3 a(5,-5,12);
+//	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
 	MyMatrixLookAtRH(view, a, b, up);
@@ -694,7 +732,12 @@ void Game::Run() {
 
 
 
-
+	CS::instance()->enter(CS_MESSAGE_CS, "enter");
+	InputMessageDispatcher::messageDispatch();
+	view = k.view;
+	b = k.at;
+	a = k.from;
+	CS::instance()->leave(CS_MESSAGE_CS, "leave");
 
 
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
@@ -773,31 +816,59 @@ void Game::Run() {
 //	mesh3[10]->draw(g, &world, &view, &proj);
 
 	//mesh->draw(g, &world,&view,&proj);
-	//mesh2->draw(g, &world, &view, &proj);
+	static float ccc;
+	ccc += 0.01f;
+	char bbf[512];
+	sprintf_s(bbf,512,"%f,",ccc);
+	WCHAR bbc[512];
+	bbc[511] = 0;
+	stringconverter ssf;
+	ssf.charToWCHAR(bbf,bbc);
+	DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
+	MyMatrixTranslation(world,ccc,0,0);
+	mesh2->draw(g, &world, &view, &proj);
+
+	texdayo->setViewProj(g,&view,&proj,&a,&b);
+	texdayo->setRenderBillBoardPos(0,&world);
+
+
+	MyMatrixTranslation(world,4,0,0);
+	mesh2->draw(g,&world,&view,&proj);
+
+	MyMatrixTranslation(world,0,0,4);
+	mesh2->draw(g,&world,&view,&proj);
+
+
 	//float cc[] = {1.0f,1.0f,0.3f,1.0f};
 	//mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
 
 
 //	mesh_instanceds->calcCombinedMatrixToTexture(g);
 //	mesh_instanceds->loadColorToTexture(g);
-	mesh_instanceds->render(g);
+//	mesh_instanceds->render(g);
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
 
 	static float h = 0.0f;
-	h += 0.01f;
+	h += 0.001f;
 	MYMATRIX wor;
-	MyMatrixRotationZ(wor,h);
+	MyMatrixIdentity(wor);
+//	MyMatrixRotationZ(wor,h);
 	MYMATRIX r1;
 	MyMatrixTranslation(r1,0,0,h/100.0f);
 	if ( h > 100) {
 		 h=  1;
 	}
-	MyMatrixMultiply(wor,wor,r1);
-	texdayo->setRenderBillBoardPos(0,&wor);
 
+	static int coun = 0;
+	coun++;
+	
+
+	unsigned int color = 0xFF00FF00 + ((int)(coun)%256);
+/*	texdayo->setRenderTexColor(0,0xFFFFFF00+(coun)%256);
+	texdayo->setRenderBillBoardColor(0,color);*/
 	texdayo->createIndexBuffer(g);
 	texdayo->updateIndexBuffer(g);
 	texdayo->sendinfoToVertexTexture(g);
@@ -810,15 +881,6 @@ void Game::Run() {
 
 	static int s = 0;
 	if (c->getSecond() != s) {
-	/*	s = c->getSecond();
-		WCHAR test[512];
-		char test2[1024];
-		memset(test2,0,sizeof(1024));
-		memset(test,0,sizeof(WCHAR)*512);
-		sprintf_s(test2,512, "aw %f af %d al %d", animw[0], (int)animf[0], (int)animl[0]);
-		stringconverter cs;
-		cs.charToWCHAR(test2,test);
-		KTROBO::DebugTexts::instance()->setText(g, wcslen(test), test);*/
 	}
 	CS::instance()->leave(CS_DEVICECON_CS, "render game");
 	

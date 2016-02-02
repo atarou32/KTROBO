@@ -606,7 +606,8 @@ void Texture::_renderTex(Graphics* g, TexturePart* p) {
 	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	g->getDeviceContext()->IASetIndexBuffer(p->indexbuffer_tex, DXGI_FORMAT_R16_UINT,0);
 	g->getDeviceContext()->RSSetState(mss_for_render_tex.rasterstate);
-		
+	g->getDeviceContext()->VSSetSamplers(0,1,&Mesh::p_sampler);
+
 	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
 
 	g->getDeviceContext()->OMSetBlendState(mss_for_render_tex.blendstate, blendFactor,0xFFFFFFFF);
@@ -653,8 +654,10 @@ void Texture::_renderBill(Graphics* g, TexturePart* p) {
 	g->getDeviceContext()->RSSetViewports(1, &vp);
 //	g->getDeviceContext()->ClearDepthStencilView(mss_for_render_tex.depthstencilview,  D3D11_CLEAR_DEPTH/* | D3D11_CLEAR_STENCIL*/,1.0f, 0 );
 	//g->getDeviceContext()->ClearRenderTargetView(combined_matrix_texture->target_view, ccc);
-	g->getDeviceContext()->VSSetConstantBuffers(0,1,&cbuf1_buffer);
-	g->getDeviceContext()->VSSetConstantBuffers(1,1,&cbuf2_buffer);
+	ID3D11Buffer* test[] = 
+	{ cbuf1_buffer,cbuf2_buffer};
+	g->getDeviceContext()->VSSetConstantBuffers(0,2,test);
+//	g->getDeviceContext()->VSSetConstantBuffers(1,1,&cbuf1_buffer);
 	g->getDeviceContext()->VSSetShaderResources(0,1,&p->getClass()->view);
 	g->getDeviceContext()->PSSetShaderResources(0,1,&p->getClass()->view);
 	g->getDeviceContext()->VSSetShaderResources(1,1,&vtex_bill->view);
@@ -663,7 +666,7 @@ void Texture::_renderBill(Graphics* g, TexturePart* p) {
 	unsigned int ttt[] = { sizeof(TEXTURE_RENDER_STRUCT)};
 	unsigned int tttt[] = {0};
 	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
-
+	g->getDeviceContext()->VSSetSamplers(0,1,&Mesh::p_sampler);
 	//stride = sizeof(COMBINEDMATRIXCALC_CBUF);
 
 	//g->getDeviceContext()->IASetVertexBuffers( 1, 1, &combined_matrix_watasu_offsetbuffer, &stride, &offset );
@@ -681,13 +684,17 @@ void Texture::_renderBill(Graphics* g, TexturePart* p) {
 	//	g->getDeviceContext()->VSSetShaderResources(1,1,&matrix_local_texture->view);
 	g->getDeviceContext()->DrawIndexed(p->index_count_bill, 0,0);
 
-	//	g->getDeviceContext()->Flush();
+	g->getDeviceContext()->Flush();
 	//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
 	//	g->getDeviceContext()->GSSetShader(NULL, NULL,0);
 
 	ID3D11RenderTargetView* t = g->getRenderTargetView();
 	g->getDeviceContext()->OMSetRenderTargets(1, &t, NULL);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	test[0] = NULL;
+	test[1] = NULL;
+//	{ NULL,NULL};
+	g->getDeviceContext()->VSSetConstantBuffers(0,2,test);
 	//	g->getDeviceContext()->PSSetShaderResources(0,1,&testtt);
 		tt[0] = NULL;
 	//	tt[1] = NULL;
@@ -1361,9 +1368,9 @@ void Texture::Init(Graphics* g) {
 
 	des;
 	des.ByteWidth = sizeof(TEXTURE_BILL_CBUF);
-	des.Usage = D3D11_USAGE_DYNAMIC;
+	des.Usage =D3D11_USAGE_DEFAULT;// D3D11_USAGE_DYNAMIC;
 	des.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	des.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	des.CPUAccessFlags = 0;//D3D11_CPU_ACCESS_WRITE;
 	des.MiscFlags = 0;
 	des.StructureByteStride = 0;
 
@@ -1388,7 +1395,7 @@ void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3
 
 	DWORD color = 0xFFFFFFFF;
 
-
+	
 	MYVECTOR3 vec;
 	MYVECTOR3 yvec(0,-1,0);
 	MYVECTOR3 temp_vec;
@@ -1431,6 +1438,8 @@ void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3
 		axis = MYVECTOR3(0,1,0);
 	}
 	*/
+
+
 	MYVECTOR3 temp_yvec = vec;
 	temp_yvec.float3.z = 0;
 	float len2 = MyVec3Length(temp_yvec);
@@ -1456,6 +1465,8 @@ void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3
 
 	MyMatrixMultiply(ma,ma,ma2);
 //	MyMatrixMultiply(ma,ma,*view);
+//	MYMATRIX ma;
+//	MyMatrixIdentity(ma);
 	cbuf2.proj = *proj;
 	cbuf2.view = *view;
 	cbuf2.mym = ma;
@@ -1467,15 +1478,15 @@ void Texture::setViewProj(Graphics* g, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3
 	MyVec3TransformCoord(test2,test2,ma);
 	MyVec3TransformCoord(test2,test2,*view);
 	MyVec3TransformCoord(test2,test2,*proj);
-
+	
 
 	D3D11_MAPPED_SUBRESOURCE subresource;
 
 	CS::instance()->enter(CS_DEVICECON_CS, "setviewproj");
-	g->getDeviceContext()->Map(cbuf2_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
-	memcpy( subresource.pData, &cbuf2, sizeof(TEXTURE_BILL_CBUF) );
-	g->getDeviceContext()->Unmap(cbuf2_buffer, 0);
-	//g->getDeviceContext()->UpdateSubresource(cbuf2_buffer,0,NULL,&cbuf2,0,0);
+	//g->getDeviceContext()->Map(cbuf2_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	//memcpy( subresource.pData, &cbuf2, sizeof(TEXTURE_BILL_CBUF) );
+	//g->getDeviceContext()->Unmap(cbuf2_buffer, 0);
+	g->getDeviceContext()->UpdateSubresource(cbuf2_buffer,0,NULL,&cbuf2,0,0);
 	CS::instance()->leave(CS_DEVICECON_CS, "setviewproj");
 }
 
@@ -1592,11 +1603,15 @@ void Texture::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, 
 
 		D3D11_BLEND_DESC BlendDesc;
 		memset(&BlendDesc, 0, sizeof(BlendDesc));
-		BlendDesc.AlphaToCoverageEnable = blend_enable;
+		BlendDesc.AlphaToCoverageEnable =false;// blend_enable;
 		BlendDesc.IndependentBlendEnable = blend_enable;
 		BlendDesc.RenderTarget[0].BlendEnable = blend_enable;
 		BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;//SRC_ALPHA;
 		BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;//INV_SRC_ALPHA;
+		if (blend_enable) {
+			BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+			BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		}
 		BlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 		BlendDesc.RenderTarget[0].SrcBlendAlpha =D3D11_BLEND_ONE;
 		BlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;

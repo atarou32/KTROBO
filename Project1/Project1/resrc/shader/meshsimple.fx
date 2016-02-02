@@ -19,16 +19,16 @@ float3 Normal : NORMAL;
 
 
 
-cbuffer c0dayo :register(c0){
+cbuffer c0dayo :register(b0){
 column_major float4x4 view;
 column_major float4x4 proj;
 };
-cbuffer c1dayo :register(c1){
+cbuffer c1dayo :register(b1){
 column_major float4x4 world;
 column_major float4x4 combined_matrixs[32];
 };
 
-cbuffer c2dayo :register(c0) {
+cbuffer c2dayo :register(b0) {
 
 float4 color;
 float4 lightdir;

@@ -279,13 +279,14 @@ private:
 	static ID3D11PixelShader* ps;
 	static ID3D11InputLayout* p_vertexlayout;
 	static ID3D11BlendState* p_blendstate;
-	static ID3D11SamplerState* p_sampler;
+
 	static ID3D11RasterizerState* p_rasterstate;
 	static ID3D11Texture2D* pDepthStencil;
 public:
 	void calculateOffsetMatrix(MeshBone* root_bone,float frame);
 	void calculateOffsetMatrixToGetMinMaxAndWeight(MeshBone* bone, float frame, unsigned short* ans_minmax, unsigned short* ans_maxmin, float* weight);
 	static ID3D11DepthStencilView* pDepthStencilView;
+	static ID3D11SamplerState* p_sampler;
 };
 
 

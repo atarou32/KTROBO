@@ -9,6 +9,8 @@
 #include "KTRoboGameError.h"
 #include "KTRoboLog.h"
 #include "KTRoboInput.h"
+#include "MyGyouretuKeisan.h"
+
 
 HWND g_hWnd = NULL;
 
@@ -38,6 +40,33 @@ bool AnotherInstance() {
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
+
+	MyGyouretuKeisan k;
+
+	MYMATRIX mat;
+	float matf[16];
+	for (int i=0;i<16;i++) {
+		mat.m[i/4][i%4] = rand() %30 + 1;
+		matf[i] = mat.m[i/4][i%4];
+	}
+	float mat_out[16];
+	float edayo[16];
+
+	k.getMatrixInverse(matf,4,mat_out);
+	k.getMatrixMultiply(4,4,matf,4,4,mat_out, edayo);
+
+	MYMATRIX inv_mat;
+	for (int i=0;i<16;i++) {
+		inv_mat.m[i/4][i%4] = mat_out[i];
+	}
+//	MyMatrixMultiply(mat,inv_mat,mat);
+	MyMatrixInverse(mat,NULL,mat);
+
+
+
+
+
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 #ifdef _DEBUG	

@@ -23,6 +23,7 @@
 #include "KTRoboTextFromLua.h"
 //#include "tolua_glue/tolua_glue.h"
 #include "KTRoboTexture.h"
+#include "KTRoboInput.h"
 
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
@@ -34,10 +35,28 @@ namespace KTROBO {
 #define TASKTHREADS_LOADDESTRUCT 3
 #define TASKTHREADS_AIDECISION 4
 
-
+class kurukuru : public INPUTSHORICLASS{
+public:
+	MYMATRIX view;
+	MYVECTOR3 at;
+	MYVECTOR3 from;
+	MYVECTOR3 up;
+	float a;
+    bool handleMessage(int msg, void* data, DWORD time);
+	kurukuru() {
+		at.float3.x = 0;
+		at.float3.y = 0;
+		at.float3.z = 0;
+		up = MYVECTOR3(0,0,1);
+		from = MYVECTOR3(30,-30,4);
+		a = 0;
+		MyMatrixLookAtRH(view,from,at,up);
+	}
+};
 class Game
 {
 private:
+	kurukuru k;
 	Graphics* g;
 	lua_State* L;
 	KTRoboDemoRender* demo;

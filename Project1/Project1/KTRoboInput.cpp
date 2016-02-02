@@ -244,9 +244,9 @@ void InputMessageDispatcher::messageDispatch() {
 		MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[i];
 		if (s->getISUSE()) {
 			// 処理を行う
-			for (int i=0;i<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;i++) {
-				if (!InputMessageDispatcher::message_getter_structs[i].getParent() && message_getter_structs[i].getIsUse()) {					
-					_messageDispatch(s, &message_getter_structs[i], time);
+			for (int k=0;k<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;k++) {
+				if (!InputMessageDispatcher::message_getter_structs[k].getParent() && message_getter_structs[k].getIsUse()) {					
+					_messageDispatch(s, &message_getter_structs[k], time);
 				}
 			}
 
@@ -268,6 +268,10 @@ void InputMessageDispatcher::messageMakeMouseRawStateChanged(DWORD n_time) {
 	s->setKEYSTATE(Input::keystate);
 	s->setMOUSESTATE(&Input::mouse_state);
 	s->setISUSE(true);
+	Input::b_mousestate.mouse_dx = 0;
+	Input::b_mousestate.mouse_dy = 0;
+	Input::mouse_state.mouse_dx = 0;
+	Input::mouse_state.mouse_dy = 0;
 	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
 }
 
@@ -401,16 +405,22 @@ void InputMessageDispatcher::messageMakeMouseMove(DWORD n_time) {
 	s->setKEYSTATE(Input::keystate);
 	s->setMOUSESTATE(&Input::mouse_state);
 	s->setISUSE(true);
+	Input::mouse_state.mouse_dx = 0;
+	Input::mouse_state.mouse_dy = 0;
+	Input::b_mousestate.mouse_dx = 0;
+	Input::b_mousestate.mouse_dy = 0;
 	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
 
 }
 
 
+#define INPUTMESSAGE_MAKE_RAWXY_MIN 10
+
 void InputMessageDispatcher::messageMake() {
 	// 複数スレッドのロックはこの関数では必要ない
 	// MESSAGE_CS でロックする
 
-	return;
+	
 
 	CS::instance()->enter(CS_MESSAGE_CS, "enter message make");
 
@@ -483,7 +493,8 @@ void InputMessageDispatcher::messageMake() {
 		messageMakeMouseMove(n_time);
 	}
 
-	if (Input::mouse_state.mouse_rawx || Input::mouse_state.mouse_rawy || Input::mouse_state.mouse_button) {
+	if (Input::mouse_state.mouse_rawx > INPUTMESSAGE_MAKE_RAWXY_MIN  || Input::mouse_state.mouse_rawy > 
+		INPUTMESSAGE_MAKE_RAWXY_MIN  || Input::mouse_state.mouse_button) {
 		messageMakeMouseRawStateChanged(n_time);
 	}
 
