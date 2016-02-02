@@ -1,6 +1,6 @@
 #include "KTRoboDebugText.h"
 #include "KTRoboGameError.h"
-
+#include "KTRoboCS.h"
 
 
 using namespace KTROBO;
@@ -161,7 +161,7 @@ void DebugTexts::makeVertexBuffer(Graphics* g) {
 
 void DebugTexts::setText(Graphics* g, int wchar_num, WCHAR* text) {
 
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "render settext");
 	int line_num = insert_text_point % KTROBO_DEBUG_TEXT_NUM;
 	bool is_kakikae_line_num = false;
 	if (insert_text_point / KTROBO_DEBUG_TEXT_NUM > 0 ) {
@@ -169,6 +169,7 @@ void DebugTexts::setText(Graphics* g, int wchar_num, WCHAR* text) {
 		is_kakikae_line_num = true;
 	}
 
+	
 	if (is_kakikae_line_num) {
 		// ‚Ð‚Æ‚Â‚¸‚Â‚¸‚ç‚µ‚Ä‚¢‚ê‚Ä‚¢‚­
 		for (int i = 1; i < KTROBO_DEBUG_TEXT_NUM; i++) {
@@ -188,8 +189,14 @@ void DebugTexts::setText(Graphics* g, int wchar_num, WCHAR* text) {
 	
 	}
 	insert_text_point ++;
-
+	try {
 	makeVertexBuffer(g);
+	}catch (GameError* err) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "render settext");
+		throw err;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "render settext");
+
 }
 
 void DebugTexts::render(Graphics* g) {
@@ -197,7 +204,7 @@ void DebugTexts::render(Graphics* g) {
 	unsigned int offset = 0;
 	
 	//g->getDeviceContext()->IASetInputLayout(p_vertexlayout);
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "render text");
 	for (int i =0;i<MYFONT_TEXTURE_COUNT;i++) {
 		if (this->vertex_counts[i]) {
 			g->getDeviceContext()->IASetInputLayout( p_vertexlayout );
@@ -218,7 +225,7 @@ void DebugTexts::render(Graphics* g) {
 			g->getDeviceContext()->Draw(this->vertex_counts[i],0);
 		}
 	}
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "render settext");
 	//g->getSwapChain()->Present(0,0);
 }
 void DebugTexts::Init(Graphics* g, Font* f) {

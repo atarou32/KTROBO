@@ -1019,7 +1019,7 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 		MyMatrixMultiply(tem, bone->matrix_local, this->rootbone_matrix_local_kakeru);
 		MyMatrixInverse(p, NULL, tem);
 	//	p = bone->matrix_local;
-		MyMatrixInverse(pp, NULL, bone->parent_bone->matrix_local);
+//		MyMatrixInverse(pp, NULL, bone->parent_bone->matrix_local);
 		MyMatrixMultiply(bone->combined_matrix, bone->parent_bone->matrix_local, bone->parent_bone->combined_matrix);
 		MyMatrixMultiply(bone->combined_matrix, p, bone->combined_matrix);
 //		MyMatrixMultiply(bone->combined_matrix,bone->combined_matrix, bone->matrix_local);

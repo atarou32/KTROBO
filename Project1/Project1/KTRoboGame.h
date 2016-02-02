@@ -48,7 +48,7 @@ public:
 		at.float3.y = 0;
 		at.float3.z = 0;
 		up = MYVECTOR3(0,0,1);
-		from = MYVECTOR3(30,-30,4);
+		from = MYVECTOR3(3,-15,14);
 		a = 0;
 		MyMatrixLookAtRH(view,from,at,up);
 	}

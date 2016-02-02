@@ -260,7 +260,7 @@ bool Game::Init(HWND hwnd) {
 
 	float frame = 0;
 
-	//mesh->animate(frame, true);
+	mesh->animate(frame, true);
 	mesh2->animate(frame, true);
 	for (int i = 0 ; i <= 10 ; i++) {
 		mesh3[i]->animate(frame, true);
@@ -366,13 +366,24 @@ bool Game::Init(HWND hwnd) {
 	texdayo->setRenderTexIsRender(j,true);
 	*/
 	MYMATRIX jiken;
-	MeshBone* bon = mesh2->Bones[mesh2->BoneIndexes["migiArmBone"]];
-	MyMatrixMultiply(jiken,bon->combined_matrix,bon->matrix_local);
+	mesh2->animate(400,true);
+	mesh->animate(400,true);
+	MeshBone* bon = mesh2->Bones[mesh2->BoneIndexes["migiArmSitaBone"]];
+	MyMatrixRotationZ(bon->offset_matrix,1.6f);
+	mesh2->animate(400,false);
+
+//	MyMatrixInverse(jiken, NULL, bon->matrix_local);
+
+	MyMatrixMultiply(jiken,bon->matrix_local, bon->combined_matrix);
+
 	MYVECTOR3 ppos(0,0,0);
 	MyVec3TransformCoord(ppos,ppos,jiken);
 	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,ppos.float3.z);
-//	j = texdayo->getRenderTex(i,0xFFFFFFFF,250,200,312,312,0,0,512,512);
-//	texdayo->setRenderTexIsRender(j,true);
+	int j = texdayo->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
+	texdayo->setRenderTexIsRender(j,true);
+	MyMatrixTranslation(jiken,0,0,0);
+	j = texdayo->getRenderBillBoard(i,0x00FFFFFF, &jiken,2,2,0,0,512,512);
+	texdayo->setRenderTexIsRender(j,true);
 //		j = texdayo->getRenderTex(i,0xFFFFFFFF,150,200,512,512,0,0,512,512);
 //	texdayo->setRenderTexColor(i,0xFFFF0022);
 //	texdayo->setRenderTexIsRender(j,true);
@@ -400,8 +411,8 @@ bool Game::Init(HWND hwnd) {
 //	MyMatrixRotationZ(world, 0.5f);
 	MyMatrixLookAtRH(view,from,at,up);
 	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
-
-	int j = texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,0.021,0.021,0,0,500,500);
+/*
+	j = texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,0.021,0.021,0,0,500,500);
 	texdayo->setRenderBillBoardIsRender(j,true);
 	MyMatrixTranslation(world,0,0,0);
 	texdayo->getRenderBillBoard(i,0xFFFF00FF,&world,0.30,0.30,100,100,250,250);
@@ -419,7 +430,7 @@ bool Game::Init(HWND hwnd) {
 	MyMatrixTranslation(world,0,4,0);
 	texdayo->getRenderBillBoard(i,0x0000FFFF,&world,3,3,100,100,250,250);
 	texdayo->setRenderBillBoardIsRender(1,true);
-
+	*/
 //	texdayo->setViewProj(g,&view,&proj,&from, &at);
 	
 	//long work[TASK_WORK_SIZE];
@@ -679,7 +690,7 @@ void Game::Run() {
 		}
 	//frame = 30.001;
 //	mesh->animate(frame, true);
-	mesh2->animate(0, true);
+//	mesh2->animate(0, true);
 	for (int i = 0 ; i <= 6 ; i++) {
 //		mesh3[i]->animate(frame, true);
 	}
@@ -825,19 +836,19 @@ void Game::Run() {
 	stringconverter ssf;
 	ssf.charToWCHAR(bbf,bbc);
 	DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
-	MyMatrixTranslation(world,ccc,0,0);
+	MyMatrixTranslation(world,0,0,0);
 	mesh2->draw(g, &world, &view, &proj);
-
+	mesh->draw(g, &world, &view, &proj);
 	texdayo->setViewProj(g,&view,&proj,&a,&b);
-	texdayo->setRenderBillBoardPos(0,&world);
-
-
+	//texdayo->setRenderBillBoardPos(0,&world);
+	
+	/*
 	MyMatrixTranslation(world,4,0,0);
 	mesh2->draw(g,&world,&view,&proj);
 
 	MyMatrixTranslation(world,0,0,4);
 	mesh2->draw(g,&world,&view,&proj);
-
+	*/
 
 	//float cc[] = {1.0f,1.0f,0.3f,1.0f};
 	//mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
