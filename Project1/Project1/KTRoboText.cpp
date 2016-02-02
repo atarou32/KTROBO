@@ -231,9 +231,9 @@ Font* Text::fo = 0;
 void Text::Init(Graphics* g, Font* f) {
  fo = f;
  D3D11_INPUT_ELEMENT_DESC layout[] = {
-		{"POS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
-		{"TEX", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,24,D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"POS", 0, DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"TEX", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0,16,D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
  loadShader(g, &mss, MYTEXT_SHADER_FILENAME, MYTEXT_SHADER_VS, MYTEXT_SHADER_GS, MYTEXT_SHADER_PS,
@@ -268,21 +268,71 @@ void Text::Del() {
 
 ID3D11Buffer* Text::render_vertexbuffer=0;
 
-void Text::render(Graphics* g, DWORD color, float x, float y, float height) {
+void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
+	MYTEXT_RENDER_STRUCT structdayo[MYTEXT_RENDER_STRUCT_SIZE];
+	int screen_width = g->getScreenWidth();
+	int screen_height = g->getScreenHeight();
 
 	if (fo) {
-		
+		// MYFONT_TEXTURE_COUNT ÇÃêîÇæÇØÉãÅ[ÉvÇ∑ÇÈ
+		for (int fon=0; fon < MYFONT_TEXTURE_COUNT; fon++) {
+			int temp_count = 0;
+			int leng = wcslen(str);
+			for (int i=0;i<leng;i++) {
+				MYTEXT_RENDER_STRUCT* v = &structdayo[temp_count*6];
+				WCHAR* w = &str[i];
+				int texture_index = (fo->fonttexture_index)[(int)(*w)];
+				if (texture_index != fon) continue;
+				int font_code = (fo->fontindex)[(int)(*w)];
+
+				float xcode_offset = MYFONT_FONTSIZE / (float)MYFONT_TEXTURE_WIDTH;
+				float ycode_offset = MYFONT_FONTSIZE / (float)MYFONT_TEXTURE_HEIGHT;
+				float xcode = (float)(font_code % MYFONT_TEXTURE_WIDTH) / (float)MYFONT_TEXTURE_WIDTH + xcode_offset;
+				float ycode = (float)(font_code / MYFONT_TEXTURE_WIDTH) / (float)MYFONT_TEXTURE_HEIGHT;
+	
+
+				float xoffset = height/ (float)screen_width;
+				float yoffset = height/ (float)screen_height;
+
+				float x = -1 + 2* xoffset * i + sx*2 / (float)screen_width;
+				float y = 1 - 2 * sy / (float)screen_height;
+
+
+
+				v[0].pos.x = x; v[0].pos.y = y; /*v[0].pos.float3.z = 0.0f;*/
+				v[0].tex.x = xcode; v[0].tex.y = ycode; /*v[0].tex_coord_plus_tex_index.float3.z = (float)texture_index;*/
+
+				v[1].pos.x = x; v[1].pos.y = y - yoffset; /*v[1].pos.float3.z = 0.0f;*/
+				v[1].tex.x = xcode; v[1].tex.y = ycode + ycode_offset; /*v[1].tex_coord_plus_tex_index.float3.z = (float)texture_index;*/
+
+				v[2].pos.x = x+xoffset; v[2].pos.y = y;/* v[2].pos.float3.z = 0.0f;*/
+				v[2].tex.x = xcode+xcode_offset; v[2].tex.y = ycode;/* v[2].tex_coord_plus_tex_index.float3.z = (float)texture_index;*/
+
+				v[3].pos.x = x+xoffset; v[3].pos.y = y; /*v[3].pos.z = 0.0f;*/
+				v[3].tex.x = xcode+xcode_offset; v[3].tex.y = ycode; /*v[3].tex_coord_plus_tex_index.float3.z = (float)texture_index;*/
+
+				v[4].pos.x = x; v[4].pos.y = y-yoffset; //v[4].pos.z = 0.0f;
+				v[4].tex.x = xcode; v[4].tex.y = ycode+ycode_offset;/* v[4].tex_coord_plus_tex_index.float3.z = (float)texture_index;*/
+
+				v[5].pos.x = x+xoffset; v[5].pos.y = y-yoffset; //v[5].pos.z = 0.0f;
+				v[5].tex.x = xcode+xcode_offset; v[5].tex.y = ycode+ycode_offset;/* v[5].tex_coord_plus_tex_index.float3.z = (float)texture_index;*/
+				
+				for (int k=0;k<6;k++) {
+					v[k].color = color;
+				}
+				
+				
+				temp_count++;
+			}
+
+			if (temp_count > 0 ) {
+				// ï`âÊÇ∑ÇÈÇ‡ÇÃÇ™Ç†ÇÈÇÃÇ≈
+
+
+			}
+
+
+
+		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
 }
