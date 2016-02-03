@@ -357,7 +357,7 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	
-	inputtext = new GUI_INPUTTEXT(0,0,800,30,texdayo->getInstance(0), hwnd);
+	inputtext = new GUI_INPUTTEXT(0,100,800,15,texdayo->getInstance(0), hwnd);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);

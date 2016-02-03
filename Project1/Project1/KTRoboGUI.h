@@ -17,17 +17,17 @@ namespace KTROBO {
 #define KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH 128
 #define KTROBO_GUI_INPUTTEXT_NORMAL_TOP 0
 #define KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT 128
-#define KTROBO_GUI_INPUTTEXT_FOCUS_LEFT 129
+#define KTROBO_GUI_INPUTTEXT_FOCUS_LEFT 130
 #define KTROBO_GUI_INPUTTEXT_FOCUS_WIDTH 128
 #define KTROBO_GUI_INPUTTEXT_FOCUS_TOP 0
 #define KTROBO_GUI_INPUTTEXT_FOCUS_HEIGHT 128
-#define KTROBO_GUI_INPUTTEXT_PRESS_LEFT 257
+#define KTROBO_GUI_INPUTTEXT_PRESS_LEFT 260
 #define KTROBO_GUI_INPUTTEXT_PRESS_WIDTH 128
 #define KTROBO_GUI_INPUTTEXT_PRESS_TOP 0
 #define KTROBO_GUI_INPUTTEXT_PRESS_HEIGHT 128
 #define KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU IME_CMODE_ALPHANUMERIC
 #define KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU2 IME_CMODE_ROMAN
-
+#define KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA 7
 
 interface HasRenderFunc {
 	virtual void render(Graphics* g)=0;
@@ -77,8 +77,15 @@ private:
 //	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
 	Text* text;
 	Texture* texture;
-	int box_tex_id;
-
+	int box_tex_id_naka;
+	int box_tex_id_hidariue;
+	int box_tex_id_hidarinaka;
+	int box_tex_id_hidarisita;
+	int box_tex_id_migiue;
+	int box_tex_id_miginaka;
+	int box_tex_id_migisita;
+	int box_tex_id_sitanaka;
+	int box_tex_id_uenaka;
 
 
 
