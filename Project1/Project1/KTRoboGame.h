@@ -24,6 +24,7 @@
 //#include "tolua_glue/tolua_glue.h"
 #include "KTRoboTexture.h"
 #include "KTRoboInput.h"
+#include "KTRoboText.h"
 
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
@@ -56,6 +57,7 @@ public:
 class Game
 {
 private:
+	Text* te;
 	kurukuru k;
 	Graphics* g;
 	lua_State* L;

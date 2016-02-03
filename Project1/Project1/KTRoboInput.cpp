@@ -414,7 +414,7 @@ void InputMessageDispatcher::messageMakeMouseMove(DWORD n_time) {
 }
 
 
-#define INPUTMESSAGE_MAKE_RAWXY_MIN 10
+#define INPUTMESSAGE_MAKE_RAWXY_MIN 5
 
 void InputMessageDispatcher::messageMake() {
 	// 複数スレッドのロックはこの関数では必要ない

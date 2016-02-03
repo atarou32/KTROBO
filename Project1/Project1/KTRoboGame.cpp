@@ -68,6 +68,7 @@ Game::Game(void)
 	texdayo = 0;
 	mytest_for_vt = 0;
 	cmeshs = 0;
+	te = 0;
 }
 
 
@@ -446,6 +447,11 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 
 	InputMessageDispatcher::registerImpl(&k,NULL,NULL);
+
+	Text::Init(g, demo->font);
+
+	te = new Text(L"‚·‚±‚µ‚¸‚Â",5);
+	
 	return true;
 }
 void Game::Del() {
@@ -483,6 +489,12 @@ void Game::Del() {
 		}
 	}
 
+	if (te) {
+		delete te;
+		te = 0;
+	}
+
+	Text::Del();
 	
 
 if (L) {
@@ -520,6 +532,7 @@ if (L) {
 		telop_texts = 0;
 	}
 
+	
 	if (demo) {
 		demo->Release();
 		delete demo;
@@ -750,7 +763,7 @@ void Game::Run() {
 	a = k.from;
 	CS::instance()->leave(CS_MESSAGE_CS, "leave");
 
-
+	
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 
 	
@@ -795,7 +808,9 @@ void Game::Run() {
 	KTROBO::DebugTexts::instance()->render(g);
 	telop_texts->render(g);
 
-
+	if (te) {
+		te->render(g,0xFFFF00FF,300,300,30);
+	}
 	
 
 	for (int i = 0 ; i < 4; i++) {

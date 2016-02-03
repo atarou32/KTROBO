@@ -1,5 +1,6 @@
 #include "KTRoboText.h"
 #include "KTRoboCS.h"
+#include "KTRoboMesh.h"
 
 using namespace KTROBO;
 Text::Text(WCHAR* m_str, int length)
@@ -277,6 +278,7 @@ void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
 		// MYFONT_TEXTURE_COUNT ÇÃêîÇæÇØÉãÅ[ÉvÇ∑ÇÈ
 		for (int fon=0; fon < MYFONT_TEXTURE_COUNT; fon++) {
 			int temp_count = 0;
+			CS::instance()->enter(CS_RENDERDATA_CS, "render text");
 			int leng = wcslen(str);
 			for (int i=0;i<leng;i++) {
 				MYTEXT_RENDER_STRUCT* v = &structdayo[temp_count*6];
@@ -294,8 +296,8 @@ void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
 				float xoffset = height/ (float)screen_width;
 				float yoffset = height/ (float)screen_height;
 
-				float x = -1 + 2* xoffset * i + sx*2 / (float)screen_width;
-				float y = 1 - 2 * sy / (float)screen_height;
+				float x = -1 + xoffset * i + sx / (float)screen_width;
+				float y = 1 -  sy / (float)screen_height;
 
 
 
@@ -324,10 +326,46 @@ void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
 				
 				temp_count++;
 			}
-
+			CS::instance()->leave(CS_RENDERDATA_CS, "render text");
 			if (temp_count > 0 ) {
 				// ï`âÊÇ∑ÇÈÇ‡ÇÃÇ™Ç†ÇÈÇÃÇ≈
+				unsigned int stride = sizeof(MYTEXT_RENDER_STRUCT);
+				unsigned int offset = 0;
+				CS::instance()->enter(CS_DEVICECON_CS, "render exec");
+				D3D11_MAPPED_SUBRESOURCE sub;
+				sub.pData = 0;
+				sub.DepthPitch = 0;
+				sub.RowPitch = 0;
+				D3D11_VIEWPORT vp;
+				vp.Height = screen_height;
+				vp.MaxDepth = 1.0f;
+				vp.MinDepth = 0.0f;
+				vp.TopLeftX = 0;
+				vp.TopLeftY = 0;
+				vp.Width = screen_width;
+				g->getDeviceContext()->RSSetViewports(1,&vp);
+				g->getDeviceContext()->Map(render_vertexbuffer,0,D3D11_MAP_WRITE_DISCARD,0,&sub);
+				memcpy(sub.pData,structdayo, sizeof(MYTEXT_RENDER_STRUCT)*temp_count*6);
+				g->getDeviceContext()->Unmap(render_vertexbuffer,0);
 
+				g->getDeviceContext()->IASetInputLayout(mss.vertexlayout );
+				g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_vertexbuffer, &stride, &offset );
+				g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+				g->getDeviceContext()->RSSetState(mss.rasterstate);
+
+				float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+				g->getDeviceContext()->OMSetBlendState(mss.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+				g->getDeviceContext()->VSSetShader(mss.vs, NULL, 0);
+				g->getDeviceContext()->GSSetShader(NULL,NULL,0);
+				g->getDeviceContext()->PSSetShaderResources(0,1,&fo->fonttextureviews[fon]);//render_target_tex->view);
+				g->getDeviceContext()->PSSetSamplers(0,1, &Mesh::p_sampler);
+		
+				g->getDeviceContext()->PSSetShader(mss.ps, NULL, 0);
+			
+				g->getDeviceContext()->Draw(temp_count*6,0);
+
+				CS::instance()->leave(CS_DEVICECON_CS, "render exec");
 
 			}
 
