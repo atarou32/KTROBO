@@ -1,5 +1,7 @@
 #include "KTRoboGUI.h"
 #include "MyButukari.h"
+#include "MyTokenAnalyzer.h"
+#include "stringconverter.h"
 
 using namespace KTROBO;
 GUI::GUI(void)
@@ -94,3 +96,393 @@ void GUI_INPUTTEXT::setIsRender(bool t) {
 	is_render = t;
 	texture->setRenderTexIsRender(box_tex_id,t);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+void GUI_INPUTTEXT::eraseSentenceString() {
+	int sin_cursor_x = 0;
+	int ss_cursor_x = 0;
+	int sin_cursor_maxx = strlen(sentencestring);
+	unsigned char* temp = (unsigned char*)sentencestring;
+	bool mae_moji_multi = false;
+	for (sin_cursor_x = 0; sin_cursor_x < sin_cursor_maxx;) {
+		if (SJISMultiCheck(*temp)) {
+			mae_moji_multi = true;
+			temp += 2;
+			sin_cursor_x+=2;
+			ss_cursor_x += 1;
+		} else {
+			mae_moji_multi = false;
+			temp += 1;
+			sin_cursor_x+=1;
+			ss_cursor_x += 1;
+		}
+		if (ss_cursor_x >= cursor_x) {
+			break;
+		}
+	}
+	if (ss_cursor_x > 0) {
+		if (mae_moji_multi) {
+			if (sin_cursor_x > 1) {
+				for (int t = sin_cursor_x-2;t < sin_cursor_maxx-2;t++) {
+					sentencestring[t] = sentencestring[t+2];
+				}
+				sentencestring[sin_cursor_maxx-2] = '\0';
+			}
+		} else {
+			if (sin_cursor_x > 0) {
+				for (int t = sin_cursor_x-1;t<sin_cursor_maxx-1;t++) {
+					sentencestring[t] = sentencestring[t+1];
+				}
+				sentencestring[sin_cursor_maxx-1] = '\0';
+			}
+		}
+	}
+	return;
+}
+void GUI_INPUTTEXT::copyInputStringToMyText() {
+	/*if (text) {
+		text->release(true);
+		delete text;
+	}*/
+	WCHAR s[512];
+	memset(s,0,512*sizeof(WCHAR));
+	stringconverter sc;
+	char usiro_string[512];
+	memset(usiro_string,0,512);
+
+	unsigned char* temp = (unsigned char*)sentencestring;
+	int sin_cursor_x=0;
+	int ss_cursor_x=0;
+	int ss_cursor_maxx = SJISlength((unsigned char*)sentencestring);
+	int sin_cursor_maxx = strlen(sentencestring);
+	while(*temp != '\0' && ss_cursor_x < cursor_x && sin_cursor_x < sin_cursor_maxx) {
+		if (SJISMultiCheck(*temp)) {
+			sin_cursor_x += 2;
+			ss_cursor_x += 1;
+			temp += 2;
+		} else {
+			sin_cursor_x += 1;
+			ss_cursor_x += 1;
+			temp += 1;
+		}
+	}
+	if (ss_cursor_x != cursor_x) {
+		cursor_x = ss_cursor_x;
+	}
+	// inputstring の長さの分カーソルを動かす
+	temp = (unsigned char*)inputstring;
+	cursor_x += SJISlength(temp);
+	// 後ろのストリングを今のうちにコピーしておく
+	int t_x = 0;
+	for (int t=sin_cursor_x;t<sin_cursor_maxx;t++) {
+		usiro_string[t_x] = sentencestring[t];
+		t_x++;
+	}
+	// コピー完了
+
+	int inputstring_x=0;
+	int inputstring_maxx = strlen(inputstring);
+	while (sin_cursor_x < 511 && inputstring_x < inputstring_maxx) {
+		sentencestring[sin_cursor_x] = inputstring[inputstring_x];
+		sin_cursor_x++;
+		inputstring_x++;
+	}
+	
+	// 後ろの文字をコピーする
+
+	for (int t=0;t<t_x && sin_cursor_x < 511 ;t++) {
+		sentencestring[sin_cursor_x] = usiro_string[t];
+		sin_cursor_x++;
+	}
+	if (sin_cursor_x > 511) {
+		sin_cursor_x = 511;
+	}
+	sentencestring[sin_cursor_x] = '\0';
+	
+	sc.charToWCHAR(sentencestring,s);
+	//text = new MyText(s,0);
+	if (text) {
+		text->changeText(s, wcslen(s));
+	}
+
+}
+void GUI_INPUTTEXT::copyKouhoStringToMyText() {
+
+/*	if (text) {
+		text->release(true);
+		delete text;
+	}*/
+	char allstring[512];
+	memset(allstring,0,512);
+
+		WCHAR s[512];
+		memset(s,0,512*sizeof(WCHAR));
+		stringconverter sc;
+
+			char usiro_string[512];
+	memset(usiro_string,0,512);
+	strcpy_s(allstring,512,sentencestring);
+	unsigned char* temp = (unsigned char*)allstring;
+	int sin_cursor_x=0;
+	int ss_cursor_x = 0;
+	int ss_cursor_maxx = SJISlength((unsigned char*)allstring);
+	int sin_cursor_maxx = strlen(allstring);
+	while(*temp != '\0' && ss_cursor_x < cursor_x && sin_cursor_x < sin_cursor_maxx) {
+		if (SJISMultiCheck(*temp)) {
+			sin_cursor_x += 2;
+			ss_cursor_x += 1;
+			temp += 2;
+		} else {
+			sin_cursor_x += 1;
+			ss_cursor_x += 1;
+			temp += 1;
+		}
+	}
+	if (ss_cursor_x != cursor_x) {
+		cursor_x = ss_cursor_x;
+	}
+	// 後ろのストリングを今のうちにコピーしておく
+	int t_x = 0;
+	for (int t=sin_cursor_x;t<sin_cursor_maxx;t++) {
+		usiro_string[t_x] = allstring[t];
+		t_x++;
+	}
+	// コピー完了
+
+	int inputstring_x=0;
+	int inputstring_maxx = strlen(kouhostring);
+	while (sin_cursor_x < 511 && inputstring_x < inputstring_maxx) {
+		allstring[sin_cursor_x] = kouhostring[inputstring_x];
+		sin_cursor_x++;
+		inputstring_x++;
+	}
+	if (sin_cursor_x > 511) {
+		sin_cursor_x = 511;
+	}
+	allstring[sin_cursor_x] = '\0';
+	
+	// 後ろの文字をコピーする
+
+	for (int t=0;t<t_x && sin_cursor_x < 511 ;t++) {
+		allstring[sin_cursor_x] = usiro_string[t];
+		sin_cursor_x++;
+	}
+	if (sin_cursor_x > 511) {
+		sin_cursor_x = 511;
+	}
+	allstring[sin_cursor_x] = '\0';
+	
+	sc.charToWCHAR(allstring,s);
+	//text = new MyText(s,0);
+	if (text) {
+		text->changeText(s, wcslen(s));
+	}
+}
+void GUI_INPUTTEXT::copyStringFromAction(int msg_id, void* data, DWORD time) {
+
+	if (action->getActionId() == NEWGUI_MOUSEACTION_ID_KEYPRESS) {
+		NEWGUI_MOUSEACTION_KEYPRESS* k = (NEWGUI_MOUSEACTION_KEYPRESS*)action;
+		inputstring[0] = '\0';
+		strcpy_s(inputstring,255,k->getDownKeyStr());
+		if (strlen(inputstring) != 0) {
+			cursor_x++;
+		}
+		if ((k->getKeys()[DIK_BACKSPACE] & KEY_DOWN) != 0) {
+			eraseSentenceString();
+		}
+	}else {
+		inputstring[0] = '\0';
+		
+	}
+
+
+	copyInputStringToMyText();
+/*	HIMC him = ImmGetContext(hwnd);
+	ImmSetCompositionStringA(him, SCS_SETSTR, "", 0, "", 0);
+	ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+	ImmReleaseContext(hwnd, him);*/
+}
+
+void GUI_INPUTTEXT::setIME(bool t) {
+	HIMC him = ImmGetContext(hwnd);
+	ImmSetOpenStatus(him, t);
+	DWORD mode;
+	DWORD henkan;
+	if (ImmGetConversionStatus(him, &mode, &henkan)) {
+		if (now_mode != mode) {
+			// モードが変わったので
+			ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+			now_mode = mode;
+		}
+
+	}
+	if (is_focused != t) {
+		ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+		//ImmSetCompositionStringA(him, SCS_SETSTR, "", 0, "", 0);
+		is_focused = t;
+	}
+	ImmReleaseContext(hwnd, him);
+}
+void GUI_INPUTTEXT::copyIMESTRINGToInputString() {
+	HIMC him = ImmGetContext(hwnd);
+	memset(inputstring,0,256);
+	ImmGetCompositionStringA(him,GCS_RESULTSTR,(void*)inputstring,256);
+	inputstring[255] = '\0';
+	copyInputStringToMyText();
+	
+	kouhostring[0] = '\0';
+	inputstring[0] = '\0';
+	ImmSetCompositionStringA(him, SCS_SETSTR, "", 0, "", 0);
+	ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+	ImmReleaseContext(hwnd, him);
+}
+void GUI_INPUTTEXT::copyIMESTRINGToKouhoString(int msg_id, void* data, DWORD time) {
+	HIMC him = ImmGetContext(hwnd);
+	int strl = strlen(kouhostring);
+	bool mae_nagasa = false;
+	if (strl) {
+		mae_nagasa = true;
+	}
+	memset(kouhostring,0,256);
+	ImmGetCompositionStringA(him,GCS_COMPSTR,(void*)kouhostring,256);
+	kouhostring[255] = '\0';
+	if (action->getActionId() == NEWGUI_MOUSEACTION_ID_KEYPRESS) {
+		NEWGUI_MOUSEACTION_KEYPRESS* k = (NEWGUI_MOUSEACTION_KEYPRESS*)action;
+		
+		if ((k->getKeys()[DIK_BACKSPACE] & KEY_DOWN) != 0) {
+			WCHAR st[512];
+			memset(st, 0, 512*sizeof(WCHAR));
+			stringconverter sc;
+			sc.charToWCHAR(kouhostring,st);
+			// 一文字削る
+			bool has_kezuru = false;
+			int wlen = wcslen(st);
+			if (wlen > 0) {
+				st[wlen-1] = L'\0';
+				wlen = wlen -1;
+				has_kezuru = true;
+			} else {
+				if (!mae_nagasa) {
+					eraseSentenceString();
+				}
+			}
+			/*
+			strcpy_s(kouhostring,256,sc.wcharTochar(st));
+			ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+			ImmSetCompositionStringA(him, SCS_SETSTR, kouhostring, strlen(kouhostring), "", 0);
+			if (has_kezuru) {
+				cursor_x--;
+			}
+			
+		}*/	
+		}
+	}
+
+	copyKouhoStringToMyText();
+	
+	ImmReleaseContext(hwnd, him);
+
+
+
+}
+
+
+void GUI_INPUTTEXT::setCursorX(int msg_id, void* data, DWORD time) {
+	MYRECT r = *getBOX();
+	int X = action->getX();
+	if (r.bottom - r.top > 0) {
+		
+		if (text) {
+			if (text->getWidth(r.bottom-r.top) +r.bottom-r.top > X -r.left) {
+				cursor_x = (X -r.left)/ (r.bottom-r.top);
+			}
+		}
+	}
+
+}
+
+bool GUI_INPUTTEXT::send(NEWGUI_MOUSEACTION* action, NEWGUI_MOUSEACTION_SENDER* sender){
+		MYRECT r = *getBOX();
+		if (!getIsRender()) {
+			return false;
+		}
+
+		if (action->getActionId() == NEWGUI_MOUSEACTION_ID_LPRESS) {
+			unsigned int butukari = getButukariStatusPoint(action->getX(),action->getY(), &r);
+			if (butukari & BUTUKARIPOINT_IN) {
+				this->setIME(true);
+				this->setCursorX(action);
+			} else {
+				this->setIME(false);
+			}
+		}
+
+		if (action->getActionId() == NEWGUI_MOUSEACTION_ID_KEYPRESS) {
+			HIMC him = ImmGetContext(hwnd);
+			if (is_focused) {
+
+			if (ImmGetOpenStatus(him)) {
+				DWORD henkan;
+				DWORD mode;
+				if (ImmGetConversionStatus(him, &mode, &henkan)) {
+					if (now_mode != mode) {
+						// モードが変わったので
+						ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+						now_mode = mode;
+					}
+
+					if (now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU || now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU2) {
+						copyStringFromAction(action);
+					} else {
+						
+						NEWGUI_MOUSEACTION_KEYPRESS* k = (NEWGUI_MOUSEACTION_KEYPRESS*)action;
+						if ((k->getKeys()[DIK_RETURN] & KEY_DOWN) != 0) {
+							this->copyIMESTRINGToInputString();
+						} else {
+							this->copyIMESTRINGToKouhoString(action);
+						}
+					}
+				}
+			} else {
+				//if (now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU || now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU2) {
+					copyStringFromAction(action);
+				//}
+			}
+			}
+			ImmReleaseContext(hwnd, him);
+		}
+
+		
+		
+		return true;
+	}; // bool 成功　失敗
+
+	
+/*
+void GUI_INPUTTEXT::changeText(char* new_text) {
+	
+	stringconverter sc;
+	WCHAR ch[512];
+	memset(ch,0,sizeof(WCHAR)*512);
+	sc.charToWCHAR(new_text, ch);
+	if (text) {
+		text->changeText(ch, wcslen(ch));
+	}
+
+	MYRECT r = *getBOX();
+	float width = text->getWidth(r.bottom - r.top);
+	r.right = r.left + width;
+	this->changeBOX(&r);
+}
+*/

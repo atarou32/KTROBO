@@ -74,8 +74,32 @@ private:
 //	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
 	Text* text;
 	Texture* texture;
-	int cursor;
 	int box_tex_id;
+
+
+
+
+	char sentencestring[512];
+	char inputstring[256];
+	char kouhostring[256];
+	DWORD now_mode;
+	int cursor_x;
+	int string_max_x;
+	bool is_focused;
+	void setIME(bool t);
+	void copyIMESTRINGToInputString();
+	void copyIMESTRINGToKouhoString(int msg_id, void* data, DWORD time);
+	void copyStringFromAction(int msg_id, void* data, DWORD time);
+	void copyInputStringToMyText();
+	void copyKouhoStringToMyText();
+	void setCursorX(int msg_id, void* data, DWORD time);
+	void eraseSentenceString();
+	bool is_render_and_update;
+	HWND hwnd;
+
+
+
+
 
 public:
 	GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex);
