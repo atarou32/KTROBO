@@ -103,7 +103,9 @@ private:
 	ID3D11PixelShader* ps;
 	ID3D11InputLayout* p_vertexlayout;
 	ID3D11BlendState* p_blendstate;
+public:
 	ID3D11SamplerState* p_sampler;
+private:
 	ID3D11RasterizerState* p_rasterstate;
 
 public:

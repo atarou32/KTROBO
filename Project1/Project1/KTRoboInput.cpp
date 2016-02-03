@@ -772,9 +772,9 @@ void InputMessageDispatcher::unregisterImpl(INPUTSHORICLASS* cl) {
 
 
 volatile unsigned char Input::keystate[256];
-volatile MOUSE_STATE Input::mouse_state;
+MOUSE_STATE Input::mouse_state;
 volatile unsigned char Input::b_keystate[256];
-volatile MOUSE_STATE Input::b_mousestate;
+MOUSE_STATE Input::b_mousestate;
 volatile unsigned char Input::nagaosi_keycode;// 最後に押されたボタンの仮想キーコード
 volatile DWORD Input::nagaosi_time;// 押されてからたった時間 
 

@@ -1,6 +1,6 @@
 #include "KTRoboText.h"
 #include "KTRoboCS.h"
-#include "KTRoboMesh.h"
+#include "KTRoboDebugText.h"
 
 using namespace KTROBO;
 Text::Text(WCHAR* m_str, int length)
@@ -269,10 +269,10 @@ void Text::Del() {
 
 ID3D11Buffer* Text::render_vertexbuffer=0;
 
-void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
+void Text::render(Graphics* g, DWORD color, float sx, float sy, float height,float wd, float h) {
 	MYTEXT_RENDER_STRUCT structdayo[MYTEXT_RENDER_STRUCT_SIZE];
-	int screen_width = g->getScreenWidth();
-	int screen_height = g->getScreenHeight();
+	unsigned int screen_width = g->getScreenWidth();
+	unsigned int screen_height = g->getScreenHeight();
 
 	if (fo) {
 		// MYFONT_TEXTURE_COUNT ‚Ì”‚¾‚¯ƒ‹[ƒv‚·‚é
@@ -293,11 +293,11 @@ void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
 				float ycode = (float)(font_code / MYFONT_TEXTURE_WIDTH) / (float)MYFONT_TEXTURE_HEIGHT;
 	
 
-				float xoffset = height/ (float)screen_width;
-				float yoffset = height/ (float)screen_height;
+				float xoffset =  2 * height/ (float)wd;//screen_width;
+				float yoffset =  2 * height/ (float)h;//screen_height;
 
-				float x = -1 + xoffset * i + sx / (float)screen_width;
-				float y = 1 -  sy / (float)screen_height;
+				float x = -1 + xoffset * i;// + sx / (float)screen_width;
+				float y = 1;// -  sy / (float)screen_height;
 
 
 
@@ -337,12 +337,12 @@ void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
 				sub.DepthPitch = 0;
 				sub.RowPitch = 0;
 				D3D11_VIEWPORT vp;
-				vp.Height = screen_height;
+				vp.Height = h;
 				vp.MaxDepth = 1.0f;
 				vp.MinDepth = 0.0f;
-				vp.TopLeftX = 0;
-				vp.TopLeftY = 0;
-				vp.Width = screen_width;
+				vp.TopLeftX = sx;
+				vp.TopLeftY = sy;
+				vp.Width = wd;
 				g->getDeviceContext()->RSSetViewports(1,&vp);
 				g->getDeviceContext()->Map(render_vertexbuffer,0,D3D11_MAP_WRITE_DISCARD,0,&sub);
 				memcpy(sub.pData,structdayo, sizeof(MYTEXT_RENDER_STRUCT)*temp_count*6);
@@ -359,7 +359,7 @@ void Text::render(Graphics* g, DWORD color, float sx, float sy, float height) {
 				g->getDeviceContext()->VSSetShader(mss.vs, NULL, 0);
 				g->getDeviceContext()->GSSetShader(NULL,NULL,0);
 				g->getDeviceContext()->PSSetShaderResources(0,1,&fo->fonttextureviews[fon]);//render_target_tex->view);
-				g->getDeviceContext()->PSSetSamplers(0,1, &Mesh::p_sampler);
+				g->getDeviceContext()->PSSetSamplers(0,1, &(DebugTexts::instance()->p_sampler));
 		
 				g->getDeviceContext()->PSSetShader(mss.ps, NULL, 0);
 			

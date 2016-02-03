@@ -25,10 +25,13 @@ namespace KTROBO {
 #define KTROBO_GUI_INPUTTEXT_PRESS_WIDTH 128
 #define KTROBO_GUI_INPUTTEXT_PRESS_TOP 0
 #define KTROBO_GUI_INPUTTEXT_PRESS_HEIGHT 128
+#define KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU IME_CMODE_ALPHANUMERIC
+#define KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU2 IME_CMODE_ROMAN
 
 
-
-
+interface HasRenderFunc {
+	virtual void render(Graphics* g)=0;
+};
 
 class GUI
 {
@@ -66,7 +69,7 @@ public:
 	void setIsRender(bool t);
 };
 */
-class GUI_INPUTTEXT : public INPUTSHORICLASS, public GUI_PART
+class GUI_INPUTTEXT : public INPUTSHORICLASS, public GUI_PART, public HasRenderFunc
 {
 private:
 //	RENDEREFFECT_Object* render_effect;
@@ -94,6 +97,7 @@ private:
 	void copyKouhoStringToMyText();
 	void setCursorX(int msg_id, void* data, DWORD time);
 	void eraseSentenceString();
+	char* getInputStr(unsigned char* keys);
 	bool is_render_and_update;
 	HWND hwnd;
 
@@ -102,12 +106,13 @@ private:
 
 
 public:
-	GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex);
+	GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex, HWND hwnd);
 	~GUI_INPUTTEXT();
 
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
+	void render(Graphics* g);
 
 };
 

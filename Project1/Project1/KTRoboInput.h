@@ -123,7 +123,7 @@ public:
         return *this;
     }*/
 
-	volatile MOUSE_STATE& operator=(volatile MOUSE_STATE& value)volatile {
+	MOUSE_STATE& operator=(MOUSE_STATE& value) {
 		this->mouse_dx = value.mouse_dx;
 		this->mouse_dy = value.mouse_dy;
 //		this->mouse_l_button = value.mouse_l_button;
@@ -138,6 +138,22 @@ public:
 		this->mouse_r_button_pressed = value.mouse_r_button_pressed;
         return *this;
     }
+	/*
+	volatile MOUSE_STATE& operator=(volatile MOUSE_STATE& value) volatile{
+		this->mouse_dx = value.mouse_dx;
+		this->mouse_dy = value.mouse_dy;
+//		this->mouse_l_button = value.mouse_l_button;
+//		this->mouse_m_button = value.mouse_m_button;
+//		this->mouse_r_button = value.mouse_r_button;
+		this->mouse_x = value.mouse_x;
+		this->mouse_y = value.mouse_y;
+		this->mouse_rawx = value.mouse_rawx;
+		this->mouse_rawy = value.mouse_rawy;
+		this->mouse_button = value.mouse_button;
+		this->mouse_l_button_pressed = value.mouse_l_button_pressed;
+		this->mouse_r_button_pressed = value.mouse_r_button_pressed;
+        return *this;
+    }*/
 };
 
 class MYMESSAGESTRUCT;
@@ -190,8 +206,8 @@ public:
 	float Y;
 	float DX;
 	float DY;
-	volatile unsigned char keystate[256];
-	volatile MOUSE_STATE mousestate;
+	unsigned char keystate[256];
+	MOUSE_STATE mousestate;
 	MYINPUTMESSAGESTRUCT() : MYMESSAGESTRUCT() {
 		X = 0;
 		Y = 0;
@@ -207,8 +223,8 @@ public:
 	float getY() {return Y;}
 	float getDX() {return DX;}
 	float getDY() {return DY;}
-	volatile unsigned char* getKEYSTATE() {return keystate;}
-	volatile MOUSE_STATE* getMOUSESTATE() {return &mousestate;}
+	unsigned char* getKEYSTATE() {return keystate;}
+	MOUSE_STATE* getMOUSESTATE() {return &mousestate;}
 
 	void setX(float x) {X=x;}
 	void setY(float y) {Y=y;}
@@ -219,7 +235,7 @@ public:
 			keystate[i]=y[i];
 		}
 	}
-	void setMOUSESTATE(volatile MOUSE_STATE* m) {mousestate=*m;}
+	void setMOUSESTATE(MOUSE_STATE* m) {mousestate=*m;}
 
 };
 
@@ -478,9 +494,9 @@ private:
 	static Clock clock;
 public:
 	static volatile unsigned char keystate[256];
-	static volatile MOUSE_STATE mouse_state;
+	static MOUSE_STATE mouse_state;
 	static volatile unsigned char b_keystate[256];
-	static volatile MOUSE_STATE b_mousestate;
+	static MOUSE_STATE b_mousestate;
 	static volatile unsigned char nagaosi_keycode;// 最後に押されたボタンの仮想キーコード // inputtext用
 	static volatile DWORD nagaosi_start_time; // 押され始めた時間
 	static volatile DWORD nagaosi_time;// 押されてからたった時間 // inputtext用

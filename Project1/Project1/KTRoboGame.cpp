@@ -155,7 +155,7 @@ bool Game::Init(HWND hwnd) {
 
 	KTROBO::DebugTexts::instance()->Init(g, demo->font);
 	KTROBO::DebugTexts::instance()->setText(g, 14 , L"­‚È‚­‚Æ‚àŠæ’£‚ê‚é—]’n‚Í‚ ‚é");
-
+	KTROBO::DebugTexts::instance()->setText(g, 3, L"‚„‚„‚„");
 	telop_texts = new TelopTexts();
 	telop_texts->Init(g,demo->font);
 	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
@@ -357,7 +357,7 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	
-	inputtext = new GUI_INPUTTEXT(300,0,120,120,texdayo->getInstance(0));
+	inputtext = new GUI_INPUTTEXT(0,0,800,30,texdayo->getInstance(0), hwnd);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
@@ -824,7 +824,7 @@ void Game::Run() {
 	telop_texts->render(g);
 
 	if (te) {
-		te->render(g,0xFFFF00FF,300,300,30);
+		te->render(g,0xFFFF00FF,300,300,30,150,40);
 	}
 	
 
@@ -865,7 +865,7 @@ void Game::Run() {
 	bbc[511] = 0;
 	stringconverter ssf;
 	ssf.charToWCHAR(bbf,bbc);
-	DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
+	//DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
 	MyMatrixTranslation(world,0,0,0);
 	mesh2->draw(g, &world, &view, &proj);
 	mesh->draw(g, &world, &view, &proj);
@@ -914,7 +914,7 @@ void Game::Run() {
 	texdayo->updateIndexBuffer(g);
 	texdayo->sendinfoToVertexTexture(g);
 	texdayo->render(g);
-
+	inputtext->render(g);
 
 
 

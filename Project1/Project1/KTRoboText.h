@@ -40,8 +40,10 @@ public:
 		return wcslen(str);
 	}
 	void changeText(WCHAR* new_str, int length);
-	void render(Graphics* g, DWORD color, float x, float y, float height);
-
+	void render(Graphics* g, DWORD color, float x, float y, float height,float w, float h);
+	float getWidth(float height) {
+		return height * wcslen(this->str);
+	}
 };
 
 }

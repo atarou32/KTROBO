@@ -13,7 +13,7 @@ GUI::~GUI(void)
 {
 }
 
-GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex) {
+GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex, HWND hwnd) {
 	box.left = x;
 	box.right = width + x;
 	box.top = y;
@@ -26,6 +26,13 @@ GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height, Textur
 	this->box_tex_id = tex->getRenderTex(tex_id, 0xFFFFFFFF,x,y,width,height, KTROBO_GUI_INPUTTEXT_NORMAL_LEFT, KTROBO_GUI_INPUTTEXT_NORMAL_TOP, KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH, KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT);
 
 	text = new Text(L"",0);
+	now_mode = 0;
+	cursor_x = 0;
+	string_max_x = 0;
+	this->hwnd = hwnd;
+	memset(sentencestring,0,sizeof(char)*512);
+	memset(kouhostring,0,sizeof(char)*256);
+	memset(inputstring,0,sizeof(char)*256);
 }
 
 GUI_INPUTTEXT::~GUI_INPUTTEXT() {
@@ -69,17 +76,48 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 					KTROBO_GUI_INPUTTEXT_PRESS_WIDTH,
 					KTROBO_GUI_INPUTTEXT_PRESS_HEIGHT);
 				this->setIsEffect(true);
+				this->setIME(true);
+				this->setCursorX(msg, data,time);
+
 		} else if(!(butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
 			this->setIsEffect(false);
 			// 範囲に入ってなければnormal
 			texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_INPUTTEXT_NORMAL_LEFT, KTROBO_GUI_INPUTTEXT_NORMAL_TOP, KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH,
 				KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT);
+			this->setIME(false);
 		}	
 	}
 
 	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		if (is_effect) {
-			text->changeText(L"rr",2);
+				HIMC him = ImmGetContext(hwnd);
+				if (ImmGetOpenStatus(him)) {
+					DWORD henkan;
+					DWORD mode;
+					if (ImmGetConversionStatus(him, &mode, &henkan)) {
+						if (now_mode != mode) {
+							// モードが変わったので
+							ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+							now_mode = mode;
+						}
+								
+						if (now_mode == KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU || now_mode == KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU2) {
+							copyStringFromAction(msg,data,time);
+						} else {
+						
+							if ((d->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) != 0) {
+								this->copyIMESTRINGToInputString();
+							} else {
+								this->copyIMESTRINGToKouhoString(msg, data,time);
+							}
+						}
+					}
+				} else {
+					
+					copyStringFromAction(msg,data,time);
+					
+				}
+			ImmReleaseContext(hwnd, him);
 
 		}
 	}
@@ -291,14 +329,15 @@ void GUI_INPUTTEXT::copyKouhoStringToMyText() {
 }
 void GUI_INPUTTEXT::copyStringFromAction(int msg_id, void* data, DWORD time) {
 
-	if (action->getActionId() == NEWGUI_MOUSEACTION_ID_KEYPRESS) {
-		NEWGUI_MOUSEACTION_KEYPRESS* k = (NEWGUI_MOUSEACTION_KEYPRESS*)action;
+	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+	if (msg_id == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+
 		inputstring[0] = '\0';
-		strcpy_s(inputstring,255,k->getDownKeyStr());
+		strcpy_s(inputstring,255,this->getInputStr(d->getKEYSTATE()));
 		if (strlen(inputstring) != 0) {
 			cursor_x++;
 		}
-		if ((k->getKeys()[DIK_BACKSPACE] & KEY_DOWN) != 0) {
+		if ((d->getKEYSTATE()[VK_BACK] & KTROBO_INPUT_BUTTON_DOWN) != 0) {
 			eraseSentenceString();
 		}
 	}else {
@@ -348,6 +387,9 @@ void GUI_INPUTTEXT::copyIMESTRINGToInputString() {
 	ImmReleaseContext(hwnd, him);
 }
 void GUI_INPUTTEXT::copyIMESTRINGToKouhoString(int msg_id, void* data, DWORD time) {
+
+	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+
 	HIMC him = ImmGetContext(hwnd);
 	int strl = strlen(kouhostring);
 	bool mae_nagasa = false;
@@ -357,10 +399,9 @@ void GUI_INPUTTEXT::copyIMESTRINGToKouhoString(int msg_id, void* data, DWORD tim
 	memset(kouhostring,0,256);
 	ImmGetCompositionStringA(him,GCS_COMPSTR,(void*)kouhostring,256);
 	kouhostring[255] = '\0';
-	if (action->getActionId() == NEWGUI_MOUSEACTION_ID_KEYPRESS) {
-		NEWGUI_MOUSEACTION_KEYPRESS* k = (NEWGUI_MOUSEACTION_KEYPRESS*)action;
+	if (msg_id == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		
-		if ((k->getKeys()[DIK_BACKSPACE] & KEY_DOWN) != 0) {
+		if ((d->getKEYSTATE()[VK_BACK] & KTROBO_INPUT_BUTTON_DOWN) != 0) {
 			WCHAR st[512];
 			memset(st, 0, 512*sizeof(WCHAR));
 			stringconverter sc;
@@ -399,8 +440,9 @@ void GUI_INPUTTEXT::copyIMESTRINGToKouhoString(int msg_id, void* data, DWORD tim
 
 
 void GUI_INPUTTEXT::setCursorX(int msg_id, void* data, DWORD time) {
-	MYRECT r = *getBOX();
-	int X = action->getX();
+	MYRECT r = box;
+	MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+	int X = input->getMOUSESTATE()->mouse_x;
 	if (r.bottom - r.top > 0) {
 		
 		if (text) {
@@ -412,63 +454,6 @@ void GUI_INPUTTEXT::setCursorX(int msg_id, void* data, DWORD time) {
 
 }
 
-bool GUI_INPUTTEXT::send(NEWGUI_MOUSEACTION* action, NEWGUI_MOUSEACTION_SENDER* sender){
-		MYRECT r = *getBOX();
-		if (!getIsRender()) {
-			return false;
-		}
-
-		if (action->getActionId() == NEWGUI_MOUSEACTION_ID_LPRESS) {
-			unsigned int butukari = getButukariStatusPoint(action->getX(),action->getY(), &r);
-			if (butukari & BUTUKARIPOINT_IN) {
-				this->setIME(true);
-				this->setCursorX(action);
-			} else {
-				this->setIME(false);
-			}
-		}
-
-		if (action->getActionId() == NEWGUI_MOUSEACTION_ID_KEYPRESS) {
-			HIMC him = ImmGetContext(hwnd);
-			if (is_focused) {
-
-			if (ImmGetOpenStatus(him)) {
-				DWORD henkan;
-				DWORD mode;
-				if (ImmGetConversionStatus(him, &mode, &henkan)) {
-					if (now_mode != mode) {
-						// モードが変わったので
-						ImmNotifyIME(him, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
-						now_mode = mode;
-					}
-
-					if (now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU || now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU2) {
-						copyStringFromAction(action);
-					} else {
-						
-						NEWGUI_MOUSEACTION_KEYPRESS* k = (NEWGUI_MOUSEACTION_KEYPRESS*)action;
-						if ((k->getKeys()[DIK_RETURN] & KEY_DOWN) != 0) {
-							this->copyIMESTRINGToInputString();
-						} else {
-							this->copyIMESTRINGToKouhoString(action);
-						}
-					}
-				}
-			} else {
-				//if (now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU || now_mode == NEWGUI_INPUTSENTENCE_IMM_MODE_HANKAKU2) {
-					copyStringFromAction(action);
-				//}
-			}
-			}
-			ImmReleaseContext(hwnd, him);
-		}
-
-		
-		
-		return true;
-	}; // bool 成功　失敗
-
-	
 /*
 void GUI_INPUTTEXT::changeText(char* new_text) {
 	
@@ -486,3 +471,227 @@ void GUI_INPUTTEXT::changeText(char* new_text) {
 	this->changeBOX(&r);
 }
 */
+
+char* GUI_INPUTTEXT::getInputStr(unsigned char* keys) {
+
+// is_shift
+	bool is_shift = keys[VK_RSHIFT] || keys[VK_LSHIFT];
+	int down_index = 0;
+	bool is_down = false;
+	for (int i = 0 ; i < 256; i++) {
+		if ((keys[i] & KTROBO_INPUT_BUTTON_DOWN) != 0) {
+			down_index = i;
+			is_down = true;
+		}
+	}
+	if (is_shift) {
+	switch (down_index) {
+	case '0':
+		return "";
+	case '1':
+		return "!";
+	case '2':
+		return "\"";
+	case '3':
+		return "#";
+	case '4':
+		return "$";
+	case '5':
+		return "%";
+	case '6':
+		return "&";
+	case '7':
+		return "\'";
+	case '8':
+		return "(";
+	case '9':
+		return ")";
+	case VK_OEM_1:
+		return "*";
+	case VK_OEM_PLUS:
+		return "+";
+	case VK_OEM_MINUS:
+		return "=";
+	case VK_OEM_2:
+		return "?";
+	case VK_SPACE:
+		return " ";
+	case VK_OEM_102:
+		return "_";
+	case 'Q':
+		return "Q";
+	case 'W':
+		return "W";
+	case 'E':
+		return "E";
+	case 'R':
+		return "R";
+	case 'T':
+		return "T";
+	case 'Y':
+		return "Y";
+	case 'U':
+		return "U";
+	case 'I':
+		return "I";
+	case 'O':
+		return "O";
+	case 'P':
+		return "P";
+	case 'A':
+		return "A";
+	case 'S':
+		return "S";
+	case 'D':
+		return "D";
+	case 'F':
+		return "F";
+	case 'G':
+		return "G";
+	case 'H':
+		return "H";
+	case 'J':
+		return "J";
+	case 'K':
+		return "K";
+	case 'L':
+		return "L";
+	case 'Z':
+		return "Z";
+	case 'X':
+		return "X";
+	case 'C':
+		return "C";
+	case 'V':
+		return "V";
+	case 'B':
+		return "B";
+	case 'N':
+		return "N";
+	case 'M':
+		return "M";
+	case VK_OEM_COMMA:
+		return "<";
+	case VK_OEM_PERIOD:
+		return ">";
+	case VK_OEM_4:
+		return "{";
+	case VK_OEM_5:
+		return "|";
+	case VK_OEM_6:
+		return "}";
+	case VK_OEM_7:
+		return "~";
+	}
+
+	} else {
+		switch(down_index) {
+	case '0':
+		return "0";
+	case '1':
+		return "1";
+	case '2':
+		return "2";
+	case '3':
+		return "3";
+	case '4':
+		return "4";
+	case '5':
+		return "5";
+	case '6':
+		return "6";
+	case '7':
+		return "7";
+	case '8':
+		return "8";
+	case '9':
+		return "9";
+	case VK_OEM_1:
+		return ":";
+	case VK_OEM_PLUS:
+		return ";";
+	case VK_OEM_MINUS:
+		return "-";
+	case VK_OEM_2:
+		return "/";
+	case VK_SPACE:
+		return " ";
+	
+	case 'Q':
+		return "q";
+	case 'W':
+		return "w";
+	case 'E':
+		return "e";
+	case 'R':
+		return "r";
+	case 'T':
+		return "t";
+	case 'Y':
+		return "y";
+	case 'U':
+		return "u";
+	case 'I':
+		return "i";
+	case 'O':
+		return "o";
+	case 'P':
+		return "p";
+	case 'A':
+		return "a";
+	case 'S':
+		return "s";
+	case 'D':
+		return "d";
+	case 'F':
+		return "f";
+	case 'G':
+		return "g";
+	case 'H':
+		return "h";
+	case 'J':
+		return "j";
+	case 'K':
+		return "k";
+	case 'L':
+		return "l";
+	case 'Z':
+		return "z";
+	case 'X':
+		return "x";
+	case 'C':
+		return "c";
+	case 'V':
+		return "v";
+	case 'B':
+		return "b";
+	case 'N':
+		return "n";
+	case 'M':
+		return "m";
+	case VK_OEM_COMMA:
+		return ",";
+	case VK_OEM_PERIOD:
+		return ".";
+	case VK_OEM_102:
+		return "\\";
+	case VK_OEM_3:
+		return "@";
+	case VK_OEM_4:
+		return "[";
+	case VK_OEM_5:
+		return "\\";
+	case VK_OEM_6:
+		return "]";
+	case VK_OEM_7:
+		return "^";
+		}
+	}
+	return "";
+}
+
+void GUI_INPUTTEXT::render(Graphics* g) {
+	if (text) {
+		text->render(g, 0xFFFFFFFF,box.left+5,box.top, box.bottom-box.top, box.right-box.left-5,box.bottom - box.top);
+	}
+}
