@@ -5,10 +5,31 @@
 #include "MyButukari.h"
 #include "KTRoboInput.h"
 #include "KTRoboTexture.h"
+#include "KTRoboText.h"
 
 #include "vector"
 using namespace std;
 namespace KTROBO {
+
+#define KTROBO_GUI_PNG "resrc/sample/gui.png"
+
+#define KTROBO_GUI_INPUTTEXT_NORMAL_LEFT 0
+#define KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH 128
+#define KTROBO_GUI_INPUTTEXT_NORMAL_TOP 0
+#define KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT 128
+#define KTROBO_GUI_INPUTTEXT_FOCUS_LEFT 129
+#define KTROBO_GUI_INPUTTEXT_FOCUS_WIDTH 128
+#define KTROBO_GUI_INPUTTEXT_FOCUS_TOP 0
+#define KTROBO_GUI_INPUTTEXT_FOCUS_HEIGHT 128
+#define KTROBO_GUI_INPUTTEXT_PRESS_LEFT 257
+#define KTROBO_GUI_INPUTTEXT_PRESS_WIDTH 128
+#define KTROBO_GUI_INPUTTEXT_PRESS_TOP 0
+#define KTROBO_GUI_INPUTTEXT_PRESS_HEIGHT 128
+
+
+
+
+
 class GUI
 {
 public:
@@ -17,7 +38,7 @@ public:
 };
 
 class GUI_PART {
-private:
+protected:
 	bool is_render;
 	bool is_effect;
 protected:
@@ -32,6 +53,7 @@ protected:
 	virtual void setIsEffect(bool t)=0;
 };
 
+/*
 class GUI_BUTTON : public INPUTSHORICLASS, public GUI_PART
 {
 private:
@@ -43,21 +65,30 @@ public:
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
-
+*/
 class GUI_INPUTTEXT : public INPUTSHORICLASS, public GUI_PART
 {
 private:
 //	RENDEREFFECT_Object* render_effect;
 //	RENDERTEX_Object* render_frame;
 //	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
+	Text* text;
+	Texture* texture;
+	int cursor;
+	int box_tex_id;
 
 public:
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
+	GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex);
+	~GUI_INPUTTEXT();
+
+	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 
 };
 
+
+/*
 class GUI_TEXT : public INPUTSHORICLASS, public GUI_PART
 {
 private:
@@ -131,7 +162,7 @@ public:
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
-
+*/
 
 
 }

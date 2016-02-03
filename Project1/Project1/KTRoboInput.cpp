@@ -292,6 +292,7 @@ void InputMessageDispatcher::messageMakeMouseRawStateChanged(DWORD n_time) {
 	Input::b_mousestate.mouse_dy = 0;
 	Input::mouse_state.mouse_dx = 0;
 	Input::mouse_state.mouse_dy = 0;
+	Input::mouse_state.mouse_button = 0;
 	InputMessageDispatcher::now_message_index = (InputMessageDispatcher::now_message_index +1) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
 }
 
@@ -682,7 +683,8 @@ void InputMessageDispatcher::messageMake() {
 		//Input::keystate[i] = 0;
 	}
 	Input::b_mousestate = Input::mouse_state;
-	Input::mouse_state.mouse_button =0;
+	//Input::mouse_state.mouse_button =0;
+	/*
 	Input::mouse_state.mouse_dx = 0;
 	Input::mouse_state.mouse_dy = 0;
 	Input::mouse_state.mouse_l_button_pressed = 0;
@@ -693,6 +695,7 @@ void InputMessageDispatcher::messageMake() {
 	Input::mouse_state.mouse_r_button_pressed = 0;
 	Input::mouse_state.mouse_x = 0;
 	Input::mouse_state.mouse_y = 0;
+	*/
 	CS::instance()->leave(CS_MESSAGE_CS, "leave message make");
 }
 

@@ -25,6 +25,8 @@
 #include "KTRoboTexture.h"
 #include "KTRoboInput.h"
 #include "KTRoboText.h"
+#include "KTRoboGUI.h"
+
 
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
@@ -91,6 +93,7 @@ private:
 	TextFromLuas* cltf;
 	CMeshs* cmeshs;
 	Textures* texdayo;
+	GUI_INPUTTEXT* inputtext;
 public:
 	Game(void);
 	~Game(void);
