@@ -1735,3 +1735,93 @@ void Texture::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, 
 
 
 }
+
+
+
+
+
+
+Texture* Textures::getInstance(int index) {
+	int size = texs.size();
+
+	if (size) {
+		return texs[0];
+	}
+
+	throw new GameError(KTROBO::WARNING, "no texture");
+
+
+}
+
+ITexture* Textures::getInterface(int index) {
+	int size = texs.size();
+	if (size) {
+		return texs[0];
+	}
+	throw new GameError(KTROBO::WARNING, "no texture");
+
+}
+int Textures::makeInst() {
+
+	int size = texs.size();
+	if (size) {
+		return 0;
+	}
+
+	Texture* t = new Texture(loader);
+	texs.push_back(t);
+	return 0;
+}
+
+Textures::Textures(MyTextureLoader* l) {
+	loader = l;
+	makeInst();
+}
+Textures::~Textures() {
+	int size = texs.size();
+	if (size) {
+		texs[0]->Release();
+		delete texs[0];
+		texs.clear();
+	}
+}
+
+void Textures::render(Graphics* g) {
+	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+	int size = texs.size();
+	if (size) {
+		texs[0]->render(g);
+	}
+}
+void Textures::sendinfoToVertexTexture(Graphics* g) {
+	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
+	int size = texs.size();
+	if (size) {
+		texs[0]->sendinfoToVertexTexture(g);
+	}
+}
+
+
+
+void Textures::updateIndexBuffer(Graphics* g) {
+	//描画補助スレッドで呼ぶ
+	int size= texs.size();
+	if (size) {
+		texs[0]->updateIndexBuffer(g);
+	}
+}
+
+void Textures::createIndexBuffer(Graphics* g) {
+	// ロードスレッドで呼ぶ 適正な初期値でcreateする
+	int size = texs.size();
+	if (size) {
+		texs[0]->createIndexBuffer(g);
+	}
+}
+void Textures::deletedayo() {
+	// delete処理を行う　ロードスレッドで呼ぶ 細切れにdeleteする
+	int size = texs.size();
+	if (size) {
+		texs[0]->deletedayo();
+	}
+}

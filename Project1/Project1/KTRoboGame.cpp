@@ -335,11 +335,6 @@ bool Game::Init(HWND hwnd) {
 
 	
 
-	long work[TASK_WORK_SIZE];
-	memset(work,0, sizeof(work));
-	work[0] = (long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
-
-	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
 	
 	
 
@@ -353,19 +348,32 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
-	
+
 	
 
 	Texture::Init(g);
 	
-	texdayo = new Texture(demo->tex_loader);
-	
-	int i = texdayo->getTexture("resrc/model/ponko-niyake.png");
+	texdayo = new Textures(demo->tex_loader);
+	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
+	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	
 	texdayo->setRenderTexIsRender(j,true);
 	*/
+
+
+
+	long work[TASK_WORK_SIZE];
+	memset(work,0, sizeof(work));
+	work[0] = (long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
+
+	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
+
+
+
+
+
 	MYMATRIX jiken;
 	mesh2->animate(400,true);
 	mesh->animate(400,true);
@@ -380,11 +388,11 @@ bool Game::Init(HWND hwnd) {
 	MYVECTOR3 ppos(0,0,0);
 	MyVec3TransformCoord(ppos,ppos,jiken);
 	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,ppos.float3.z);
-	int j = texdayo->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
-	texdayo->setRenderTexIsRender(j,true);
+	int j = texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
+	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 	MyMatrixTranslation(jiken,0,0,0);
-	j = texdayo->getRenderBillBoard(i,0x00FFFFFF, &jiken,2,2,0,0,512,512);
-	texdayo->setRenderTexIsRender(j,true);
+	j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,2,2,0,0,512,512);
+	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 //		j = texdayo->getRenderTex(i,0xFFFFFFFF,150,200,512,512,0,0,512,512);
 //	texdayo->setRenderTexColor(i,0xFFFF0022);
 //	texdayo->setRenderTexIsRender(j,true);
@@ -854,7 +862,7 @@ void Game::Run() {
 	MyMatrixTranslation(world,0,0,0);
 	mesh2->draw(g, &world, &view, &proj);
 	mesh->draw(g, &world, &view, &proj);
-	texdayo->setViewProj(g,&view,&proj,&a,&b);
+	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
 	//texdayo->setRenderBillBoardPos(0,&world);
 	
 	/*

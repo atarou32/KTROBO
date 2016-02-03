@@ -90,7 +90,7 @@ private:
 	MyTestForVertexTexture* mytest_for_vt;
 	TextFromLuas* cltf;
 	CMeshs* cmeshs;
-	Texture* texdayo;
+	Textures* texdayo;
 public:
 	Game(void);
 	~Game(void);

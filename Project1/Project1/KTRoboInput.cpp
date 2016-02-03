@@ -75,7 +75,8 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
    HDC hdc;
    static BYTE keys[256];
    memset(keys,0,256);
-
+   static unsigned char exclude_keys[] = {0xF0,0xF3,0xF6,0xFB};
+   static int ek_len = 4;
     switch( message )
     {
         case WM_PAINT:
@@ -143,6 +144,14 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 		case WM_KEYUP:
 			if (GetKeyboardState(keys)) {
 			for (int i=0;i<256;i++) {
+				bool e = false;
+				for (int k = 0;k<ek_len;k++) {
+					if ((unsigned char)i == exclude_keys[k]) {
+						e = true;
+					}
+				}
+				if (e) continue;
+
 				BYTE state = keys[i];
 				if ((state & 0x80)) {
 					// 押されている
@@ -154,6 +163,7 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 				}
 				if (!(state & 0x80) && (b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
 					Input::keystate[i] |= KTROBO_INPUT_BUTTON_UP;
+					Input::keystate[i] &= ~KTROBO_INPUT_BUTTON_PRESSED;
 				}
 			}
 			}
@@ -162,6 +172,14 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 		case WM_KEYDOWN:
 			if (GetKeyboardState(keys)) {
 			for (int i=0;i<256;i++) {
+				bool e = false;
+				for (int k = 0;k<ek_len;k++) {
+					if ((unsigned char)i == exclude_keys[k]) {
+						e = true;
+					}
+				}
+				if (e) continue;
+
 				BYTE state = keys[i];
 				if ((state & 0x80)) {
 					// 押されている
@@ -170,6 +188,7 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 				if ((state & 0x80) && !(b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
 					// 押された瞬間
 					Input::keystate[i] |= KTROBO_INPUT_BUTTON_DOWN;
+				
 				}
 				if (!(state & 0x80) && (b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
 					Input::keystate[i] |= KTROBO_INPUT_BUTTON_UP;
@@ -467,10 +486,15 @@ void InputMessageDispatcher::messageMake() {
 			Input::nagaosi_keycode = i;
 			Input::nagaosi_start_time = n_time;
 			Input::nagaosi_time = 0;
+			Input::keystate[i] &=~KTROBO_INPUT_BUTTON_DOWN;
 			break;
 		} else if(Input::keystate[i] & KTROBO_INPUT_BUTTON_UP) {
 			// 離された瞬間もメッセージを飛ばす
 			messageMakeButtonUp(i, n_time);
+			// keystate をクリアする
+			Input::keystate[i] &= ~KTROBO_INPUT_BUTTON_PRESSED;
+			Input::keystate[i] &= ~KTROBO_INPUT_BUTTON_UP;
+
 			if (i == Input::nagaosi_keycode) {
 				Input::nagaosi_keycode = 0;
 				Input::nagaosi_start_time = 0;
@@ -655,7 +679,7 @@ void InputMessageDispatcher::messageMake() {
 	// b_keystate にkeystateを設定する（更新）
 	for (int i=0;i<256;i++) {
 		Input::b_keystate[i] = Input::keystate[i];
-		Input::keystate[i] = 0;
+		//Input::keystate[i] = 0;
 	}
 	Input::b_mousestate = Input::mouse_state;
 	Input::mouse_state.mouse_button =0;

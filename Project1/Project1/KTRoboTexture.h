@@ -18,38 +18,38 @@ interface ITexture{
 	// lua側でコルーチンから関数呼び出しをストックしておいて、一箇所で順々に呼び出すような仕組みがlua側に必要
 
 public:
-	TO_LUA int getTexture(char* tex_name, int index_count); // すでにロードされていた場合はロードは行われない
+	TO_LUA virtual int getTexture(char* tex_name, int index_count)=0; // すでにロードされていた場合はロードは行われない
 	// 内部でRENDERDATA_CSをロックすること
-	TO_LUA int getRenderTex(int tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
-	TO_LUA int getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMATRIX* world, float width, float height, int tex_x, int tex_y, int tex_width, int tex_height);
+	TO_LUA virtual int getRenderTex(int tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height)=0;
+	TO_LUA virtual int getRenderBillBoard(int tex_index, unsigned int color, YARITORI MYMATRIX* world, float width, float height, int tex_x, int tex_y, int tex_width, int tex_height)=0;
 
-	TO_LUA void setRenderTexParam(int render_tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
-	TO_LUA void setRenderBillBoardParam(int bill_index, unsigned int color, YARITORI MYMATRIX* world, float width, float height, int tex_x, int tex_y, int tex_width, int tex_height);
+	TO_LUA virtual void setRenderTexParam(int render_tex_index, unsigned int color, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height)=0;
+	TO_LUA virtual void setRenderBillBoardParam(int bill_index, unsigned int color, YARITORI MYMATRIX* world, float width, float height, int tex_x, int tex_y, int tex_width, int tex_height)=0;
 	
-	TO_LUA void setRenderTexColor(int render_tex_index, unsigned int color);
-	TO_LUA void setRenderBillBoardColor(int bill_index, unsigned int color);
+	TO_LUA virtual void setRenderTexColor(int render_tex_index, unsigned int color)=0;
+	TO_LUA virtual void setRenderBillBoardColor(int bill_index, unsigned int color)=0;
 
-	TO_LUA void setRenderTexPos(int render_tex_index, int x, int y);
-	TO_LUA void setRenderBillBoardPos(int bill_index, YARITORI MYMATRIX* world);
+	TO_LUA virtual void setRenderTexPos(int render_tex_index, int x, int y)=0;
+	TO_LUA virtual void setRenderBillBoardPos(int bill_index, YARITORI MYMATRIX* world)=0;
 
-	TO_LUA void setRenderTexWH(int render_tex_index, int width, int height);
-	TO_LUA void setRenderBillBoardWH(int bill_index, float width, float height);
+	TO_LUA virtual void setRenderTexWH(int render_tex_index, int width, int height)=0;
+	TO_LUA virtual void setRenderBillBoardWH(int bill_index, float width, float height)=0;
 
-	TO_LUA void setRenderTexTexPos(int render_tex_index, int tex_x, int tex_y, int tex_width, int tex_height);
-	TO_LUA void setRenderBillBoardTexPos(int bill_index, int tex_x, int tex_y, int tex_width, int tex_height);
+	TO_LUA virtual void setRenderTexTexPos(int render_tex_index, int tex_x, int tex_y, int tex_width, int tex_height)=0;
+	TO_LUA virtual void setRenderBillBoardTexPos(int bill_index, int tex_x, int tex_y, int tex_width, int tex_height)=0;
 
-	TO_LUA void setRenderTexIsRender(int render_tex_index, bool t);
-	TO_LUA void setRenderBillBoardIsRender(int bill_index, bool t);
+	TO_LUA virtual void setRenderTexIsRender(int render_tex_index, bool t)=0;
+	TO_LUA virtual void setRenderBillBoardIsRender(int bill_index, bool t)=0;
 	
-	TO_LUA void setRenderTexChangeTex(int render_tex_index, int tex_index, int new_tex_index);
-	TO_LUA void setRenderBillBoardChangeTex(int bill_index, int tex_index, int new_tex_index);
+	TO_LUA virtual void setRenderTexChangeTex(int render_tex_index, int tex_index, int new_tex_index)=0;
+	TO_LUA virtual void setRenderBillBoardChangeTex(int bill_index, int tex_index, int new_tex_index)=0;
 
-	TO_LUA void deleteRenderTex(int render_tex_index); // vectorから消す　deleteは他のスレッドが動いていないことを確認したほうがいいかもしれない
-	TO_LUA void deleteRenderBillBoard(int bill_index); // vectorから消す  createはvectorの長さが変わるなら他のスレッドをとめる必要がある is_use をfalseからtrueにする場合
+	TO_LUA virtual void deleteRenderTex(int render_tex_index)=0; // vectorから消す 消さない（dummyをいれこむ)　deleteは他のスレッドが動いていないことを確認したほうがいいかもしれない
+	TO_LUA virtual void deleteRenderBillBoard(int bill_index)=0; // vectorから消す 消さない（dummyをいれこむ） createはvectorの長さが変わるなら他のスレッドをとめる必要がある is_use をfalseからtrueにする場合
 	// のときはロック時間に気をつけること（ロックしてis_useを取得してからis_useをtrueにしてからロックを切ること
-	TO_LUA void lightdeleteRenderTex(int render_tex_index); // vectorから消さない　indexバッファは更新するis_use is_render is_need_load をfalseにする texのis_need_loadをtrueにする
-	TO_LUA void lightdeleteRenderBillBoard(int bill_index); // vectorから消さない  実際のindexバッファの更新はvertextotextureの中で行う
-	TO_LUA void deleteAll();
+	TO_LUA virtual void lightdeleteRenderTex(int render_tex_index)=0; // vectorから消さない　indexバッファは更新するis_use is_render is_need_load をfalseにする texのis_need_loadをtrueにする
+	TO_LUA virtual void lightdeleteRenderBillBoard(int bill_index)=0; // vectorから消さない  実際のindexバッファの更新はvertextotextureの中で行う
+	TO_LUA virtual void deleteAll()=0;
 };
 
 
@@ -342,7 +342,7 @@ public:
 
 
 
-class Texture
+class Texture:  public ITexture
 {
 private:
 	static MYSHADERSTRUCT mss_for_render_tex;
@@ -573,10 +573,25 @@ public:
 
 
 
+class Textures {
+private:
+	vector<Texture*> texs;
+public:
+	Texture* getInstance(int index);
+	ITexture* getInterface(int index);
+	int makeInst(); // 実際のmakeはluaに渡す前にすべてやってしまうこと
+private:
+	MyTextureLoader* loader;
+public:
+	Textures(MyTextureLoader* l);
+	~Textures();
 
+	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
+	void updateIndexBuffer(Graphics* g);//描画補助スレッドで呼ぶ
+	void createIndexBuffer(Graphics* g);// ロードスレッドで呼ぶ 適正な初期値でcreateする
+	void deletedayo(); // delete処理を行う　ロードスレッドで呼ぶ 細切れにdeleteする
 
-
-
-
+};
 }
 #endif

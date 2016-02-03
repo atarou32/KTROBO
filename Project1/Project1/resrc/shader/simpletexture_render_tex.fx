@@ -330,7 +330,7 @@ float4 test = texDiffuse.Sample( texSmp, float2(input.TexCoord.x , input.TexCoor
 
 
 if (test.x < 0.0001 && test.y < 0.0001 && test.z <0.0001 && test.a < 0.0001) discard;
-
+if (test.x > 0.999 && test.y > 0.999 && test.z > 0.999 && test.a < 0.0001) discard;
 test =  test*input.Color; // * float4(diffuse);
 test.a = input.Color.a;
 return test;
