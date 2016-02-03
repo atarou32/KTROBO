@@ -173,6 +173,7 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
 				}
 				if (!(state & 0x80) && (b_keystate[i] & KTROBO_INPUT_BUTTON_PRESSED)) {
 					Input::keystate[i] |= KTROBO_INPUT_BUTTON_UP;
+					Input::keystate[i] &= ~KTROBO_INPUT_BUTTON_PRESSED;
 				}
 			}
 			}
@@ -456,9 +457,10 @@ void InputMessageDispatcher::messageMake() {
 
 	// 現在のinput_jyoutai_indexのフラグを調べる
 	for (int i=0;i<256;i++) {
-		if (Input::keystate[i] & KTROBO_INPUT_BUTTON_PRESSED) {
+		/*if (Input::keystate[i] & KTROBO_INPUT_BUTTON_PRESSED) {
 			// コマンドではなくキー自体はpressedされている場合のみでは何もおきない
-		} else if(Input::keystate[i] & KTROBO_INPUT_BUTTON_DOWN) {
+		} else */
+		if(Input::keystate[i] & KTROBO_INPUT_BUTTON_DOWN) {
 			// 押された瞬間はメッセージを飛ばす
 			messageMakeButtonDown(i, n_time);
 			// 押されたのでながおし判定を始める
@@ -653,8 +655,20 @@ void InputMessageDispatcher::messageMake() {
 	// b_keystate にkeystateを設定する（更新）
 	for (int i=0;i<256;i++) {
 		Input::b_keystate[i] = Input::keystate[i];
+		Input::keystate[i] = 0;
 	}
 	Input::b_mousestate = Input::mouse_state;
+	Input::mouse_state.mouse_button =0;
+	Input::mouse_state.mouse_dx = 0;
+	Input::mouse_state.mouse_dy = 0;
+	Input::mouse_state.mouse_l_button_pressed = 0;
+	Input::mouse_state.mouse_rawdx = 0;
+	Input::mouse_state.mouse_rawdy = 0;
+	Input::mouse_state.mouse_rawx = 0;
+	Input::mouse_state.mouse_rawy = 0;
+	Input::mouse_state.mouse_r_button_pressed = 0;
+	Input::mouse_state.mouse_x = 0;
+	Input::mouse_state.mouse_y = 0;
 	CS::instance()->leave(CS_MESSAGE_CS, "leave message make");
 }
 
