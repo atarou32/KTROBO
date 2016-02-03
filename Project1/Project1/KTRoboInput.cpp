@@ -79,6 +79,13 @@ LRESULT CALLBACK Input::myWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARA
    static int ek_len = 4;
     switch( message )
     {
+		case WM_IME_SETCONTEXT:
+		case WM_IME_STARTCOMPOSITION:
+		case WM_IME_COMPOSITION:
+		case WM_IME_ENDCOMPOSITION:
+		case WM_IME_NOTIFY:
+		lParam = 0;
+		break;
         case WM_PAINT:
             hdc = BeginPaint( hWnd, &ps );
             EndPaint( hWnd, &ps );

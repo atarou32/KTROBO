@@ -91,6 +91,7 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		if (is_effect) {
 				HIMC him = ImmGetContext(hwnd);
+				HideCaret(hwnd);
 				if (ImmGetOpenStatus(him)) {
 					DWORD henkan;
 					DWORD mode;
@@ -684,7 +685,7 @@ char* GUI_INPUTTEXT::getInputStr(unsigned char* keys) {
 	case VK_OEM_6:
 		return "]";
 	case VK_OEM_7:
-		return "^";
+		return "\^";
 		}
 	}
 	return "";
