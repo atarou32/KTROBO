@@ -23,7 +23,7 @@ struct TCB {
 	unsigned int flag;
 	unsigned int prio;
 	void *data;
-	long Work[TASK_WORK_SIZE];
+	unsigned long Work[TASK_WORK_SIZE];
 };
 
 
@@ -64,7 +64,7 @@ public:
 		throw new GameError(KTROBO::FATAL_ERROR, "too many task");
 	}
 	bool getIsExecTask() {return is_exec_task;}
-	TCB* make(void(*exec)(TCB*), void* data,  long* work,unsigned int prio);// work ‚ÍTASK_WORK_SIZE‚Ì‘å‚«‚³‚ðŠm•Û‚·‚é‚±‚Æ
+	TCB* make(void(*exec)(TCB*), void* data,  unsigned long* work,unsigned int prio);// work ‚ÍTASK_WORK_SIZE‚Ì‘å‚«‚³‚ðŠm•Û‚·‚é‚±‚Æ
 	void kill(TCB* killTCB);
 	void change(TCB* thisTCB, void(*exec)(TCB*), void* data);
 	void deleteTask();

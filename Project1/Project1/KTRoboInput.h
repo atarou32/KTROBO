@@ -24,6 +24,12 @@ public:
 	virtual bool handleMessage(int msg, void* data, DWORD time)=0;
 };
 
+class INPUTSHORINONE : public INPUTSHORICLASS {
+public:
+	bool handleMessage(int msg, void* data, DWORD time) {return true;}
+	INPUTSHORINONE(){};
+	~INPUTSHORINONE(){};
+};
 
 struct INPUTGETBYMESSAGESTRUCT {
 public:
@@ -352,7 +358,8 @@ public:
 	// ïKéEãZÇT
 	//Å@Ç≈34
 
-
+	static INPUTGETBYMESSAGESTRUCT* rootinputget;
+	static INPUTSHORINONE getinputdonone;
 	static INPUTGETBYMESSAGESTRUCT message_getter_structs[KTROBO_INPUTGETMESSAGESTRUCT_SIZE];
 	static volatile DWORD now_time;
 	static volatile DWORD before_time;
@@ -366,6 +373,8 @@ public:
 	static void Init();
 	static void messageDispatch();
 	static void messageMake();
+	static INPUTGETBYMESSAGESTRUCT* getRootInputGetStruct() {return rootinputget;}
+
 	static void messageMakeButtonDown(int i, DWORD ntime);
 	static void messageMakeButtonUp(int i, DWORD ntime);
 	static void messageMakeMouseMove(DWORD n_time);
@@ -375,7 +384,7 @@ public:
 	static bool _commandHantei(MyCommand* com, int k);
 
 	static void _messageDispatch(MYINPUTMESSAGESTRUCT* message, INPUTGETBYMESSAGESTRUCT* get_input, DWORD time);
-	static void registerImpl(INPUTSHORICLASS* cl, INPUTSHORICLASS* parent, INPUTSHORICLASS* child);
+	static INPUTGETBYMESSAGESTRUCT* registerImpl(INPUTSHORICLASS* cl, INPUTSHORICLASS* parent, INPUTSHORICLASS* child);
 	static void unregisterImpl(INPUTSHORICLASS* cl);
 	static INPUTGETBYMESSAGESTRUCT* getGetMessageStruct(INPUTSHORICLASS* cl);
 };
@@ -492,6 +501,8 @@ private:
 	static DWORD now_time;
 	static DWORD last_time;
 	static Clock clock;
+	
+
 public:
 	static volatile unsigned char keystate[256];
 	static MOUSE_STATE mouse_state;

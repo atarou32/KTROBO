@@ -32,11 +32,6 @@ namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
 #define RENDERTIME_SETTIME 33
 
-#define TASKTHREADS_UPDATEANIMEFRAMENADO 1
-#define TASKTHREADS_UPDATEMAINRENDER 2
-#define TASKTHREADS_UPDATEPOSBUTUKARI 0
-#define TASKTHREADS_LOADDESTRUCT 3
-#define TASKTHREADS_AIDECISION 4
 
 class kurukuru : public INPUTSHORICLASS{
 public:
@@ -102,6 +97,9 @@ public:
 	bool Init(HWND hwnd);
 	void Del();
 	void Run();
+	Task** getTask() {
+		return task_threads;
+	}
 };
 
 }

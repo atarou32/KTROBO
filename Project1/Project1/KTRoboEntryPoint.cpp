@@ -10,6 +10,7 @@
 #include "KTRoboLog.h"
 #include "KTRoboInput.h"
 #include "MyGyouretuKeisan.h"
+#include "KTRoboCS.h"
 
 
 HWND g_hWnd = NULL;
@@ -149,6 +150,8 @@ ktrobo_error:
 		delete game;
 		game = 0;
 	}
+	KTROBO::CS::instance()->Del();
+
 	return 0;//(int)msg.wParam;
 }
 
@@ -183,6 +186,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow, Input* input )
 	if (!g_hWnd){
 		return E_FAIL;
 	}
+	KTROBO::CS::instance()->Init();
 	Input::Init(g_hWnd);
 	InputMessageDispatcher::Init();
 	ShowWindow(g_hWnd, nCmdShow);

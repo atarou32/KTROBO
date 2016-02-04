@@ -16,7 +16,7 @@ void THREAD_TaskEXEC(void* data) {
 	while(t->getIsExecTask()) {
 		t->exec();
 	}
-	//OutputDebugStringA("shuuryousimasitayo");
+	
 }
 
 void KTROBO::Task::init() {
@@ -68,7 +68,7 @@ void KTROBO::Task::exec() {
 
 
 
-TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, long* work, unsigned int prio) {
+TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, unsigned long* work, unsigned int prio) {
 	TCB* newTCB;
 	TCB* prevTCB;
 	TCB* nextTCB;

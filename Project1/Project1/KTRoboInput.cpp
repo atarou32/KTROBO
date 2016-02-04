@@ -241,7 +241,7 @@ void InputMessageDispatcher::Init() {
 	now_time = timeGetTime();
 	before_time = now_time;
 	dt = 0;
-	
+	rootinputget = registerImpl(&getinputdonone, NULL,NULL);
 }
 
 
@@ -717,7 +717,7 @@ INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::getGetMessageStruct(INPUTSHORIC
 	}
 	return NULL;
 }
-void InputMessageDispatcher::registerImpl(INPUTSHORICLASS* cl, INPUTSHORICLASS* parent, INPUTSHORICLASS* child) {
+INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::registerImpl(INPUTSHORICLASS* cl, INPUTSHORICLASS* parent, INPUTSHORICLASS* child) {
 	
 
 	CS::instance()->enter(CS_MESSAGE_CS, "enter message make");
@@ -741,7 +741,7 @@ void InputMessageDispatcher::registerImpl(INPUTSHORICLASS* cl, INPUTSHORICLASS* 
 			message_getter_structs[i].setParam(cl,parent_struct, child_struct);
 			message_getter_structs[i].setIsUse(true);
 			CS::instance()->leave(CS_MESSAGE_CS, "leave message make");
-			return;
+			return &message_getter_structs[i];
 		}
 	}
 	CS::instance()->leave(CS_MESSAGE_CS, "leave message make");
@@ -795,3 +795,5 @@ volatile DWORD Input::nagaosi_start_time=0; // ‰Ÿ‚³‚êŽn‚ß‚½ŽžŠÔ
 
 volatile unsigned char Input::command_key[INPUTJYOUTAI_KEY_INDEX_MAX];
 MyCommand InputMessageDispatcher::command[KTROBO_INPUTCOMMAND_SIZE];
+INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::rootinputget=0;
+INPUTSHORINONE InputMessageDispatcher::getinputdonone;

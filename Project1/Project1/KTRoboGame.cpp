@@ -140,7 +140,7 @@ bool Game::Init(HWND hwnd) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "graphics init error");
 	}
 
-	KTROBO::CS::instance()->Init();
+	
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {
 		task_threads[i] = Task::factory(hwnd);
 		g_for_task_threads[i] = g->makeGraphicsOfNewDeviceContext();
@@ -357,7 +357,7 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	
-	inputtext = new GUI_INPUTTEXT(0,100,800,32,texdayo->getInstance(0), hwnd);
+	inputtext = new GUI_INPUTTEXT(0,100,800,24,texdayo->getInstance(0), hwnd);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
@@ -367,9 +367,9 @@ bool Game::Init(HWND hwnd) {
 
 
 
-	long work[TASK_WORK_SIZE];
+	unsigned long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
-	work[0] = (long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
+	work[0] = (unsigned long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
 
 	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
 
@@ -447,9 +447,9 @@ bool Game::Init(HWND hwnd) {
 	
 	//long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
-	work[1] = (long)g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
-	work[0] = (long)task_threads[TASKTHREADS_LOADDESTRUCT];
-	work[2] = (long)mesh_instanceds;
+	work[1] = (unsigned long)g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
+	work[0] = (unsigned long)task_threads[TASKTHREADS_LOADDESTRUCT];
+	work[2] = (unsigned long)mesh_instanceds;
 
 	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,L,work,0x0000FFFF);
 
@@ -532,7 +532,7 @@ if (L) {
 		texdayo = 0;
 	}
 
-	KTROBO::CS::instance()->Del();
+	
 
 	KTROBO::DebugTexts::instance()->Del();
 
