@@ -162,7 +162,7 @@ bool Game::Init(HWND hwnd) {
 
 	mesh = new Mesh();
 	mesh->readMesh(g, "resrc/model/ponko2-3/pk2skirt.MESH", demo->tex_loader);
-	mesh->readAnime("resrc/model/ponko2-3/pk2skirt.ANIME");
+	mesh->readAnime("resrc/model/ponko2-4/pk2sailordayo.ANIME");
 	mesh2 = new Mesh();
 	mesh2->readMesh(g, "resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader);
 	mesh2->readAnime("resrc/model/ponko2-4/pk2sailordayo.ANIME");
@@ -357,7 +357,7 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	
-	inputtext = new GUI_INPUTTEXT(0,100,800,15,texdayo->getInstance(0), hwnd);
+	inputtext = new GUI_INPUTTEXT(0,100,800,32,texdayo->getInstance(0), hwnd);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);

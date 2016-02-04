@@ -962,14 +962,14 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::DOUBLE:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);
-				KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d));\n", def->hikisuu[i].num_name, i+3);
+				KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d);\n", def->hikisuu[i].num_name, i+3);
 				KTROBO::mylog::writelog(filename, "%s = (double)atof(%s_temp);\n", def->hikisuu[i].num_name, def->hikisuu[i].num_name);
 
 
 			break;
 			case MyDefType::FLOAT:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);
-				KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d));\n", def->hikisuu[i].num_name, i+3);
+				KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d);\n", def->hikisuu[i].num_name, i+3);
 				KTROBO::mylog::writelog(filename, "%s = atof(%s_temp);\n", def->hikisuu[i].num_name, def->hikisuu[i].num_name);
 
 			break;
@@ -980,13 +980,13 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 			break;
 			case MyDefType::PCHAR:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);
-			KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d));\n", def->hikisuu[i].num_name, i+3);
+			KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d);\n", def->hikisuu[i].num_name, i+3);
 			KTROBO::mylog::writelog(filename, "mystrcpy(%s, %d,0, %s_temp);\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, def->hikisuu[i].num_name, i+3);
 		
 			break;
 			case MyDefType::PUCHAR:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);
-			KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d));\n", def->hikisuu[i].num_name, i+3);
+			KTROBO::mylog::writelog(filename, "const char* %s_temp = lua_tostring(L,%d);\n", def->hikisuu[i].num_name, i+3);
 			KTROBO::mylog::writelog(filename, "mystrcpy((char*)%s, %d,0, %s_temp);\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, def->hikisuu[i].num_name, i+3);
 	
 			break;

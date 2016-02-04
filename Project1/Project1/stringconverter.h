@@ -15,7 +15,7 @@ public:
 	~stringconverter(void);
 //	WCHAR* charTowchar(const char* filename);
 	void charToWCHAR(const char* filename, WCHAR* buf);
-	char* wcharTochar(const WCHAR* filename);
+	char* wcharTochar(const WCHAR* filename, char* buf);
 
 	bool Utf8ToUtf16(wchar_t *dest, size_t dest_size, const char *src, size_t src_size);
 

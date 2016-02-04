@@ -44,18 +44,19 @@ void stringconverter::charToWCHAR(const char* filename, WCHAR* ans) {
 	wcscpy_s(ans,511,ans2);
 	return;
 }
-char* stringconverter::wcharTochar(const WCHAR* filename) {
-	static char ans[512];
+char* stringconverter::wcharTochar(const WCHAR* filename, char* buf) {
+	char ans[512];
 	memset(ans,0,511);
 	size_t wLen = 0;
 	errno_t err = 0;
 	setlocale(LC_ALL,"japanese");
-	err = wcstombs_s(&wLen,ans,filename,_TRUNCATE);
+	err = wcstombs_s(&wLen, ans,filename,_TRUNCATE);
 	if (err != 0) {
 		KTROBO::mylog::writelog(KTROBO::WARNING,"%s ‚Ìchar•ÏŠ·‚ÉŽ¸”s",filename);
 		return NULL;
 	}
-	return ans;
+	memcpy(buf,ans,strlen(ans));
+	return buf;
 }
 
 bool stringconverter::Utf8ToUtf16(wchar_t *dest, size_t dest_size, const char *src, size_t src_size)
