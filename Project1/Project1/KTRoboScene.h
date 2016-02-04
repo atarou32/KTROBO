@@ -44,6 +44,7 @@ public:
 		for (int i=0;i<TASKTHREAD_NUM;i++) {
 			gs[i] = mgs[i];
 			Ls[i] = mls[i];
+
 		}
 		Scene::game = mgame; // gs ls game ‚Ì“o˜^‚ÉŽg‚¤
 	}
@@ -62,7 +63,7 @@ public:
 		}
 		
 	}
-	~Scene(void);
+	virtual ~Scene(void);
 
 	void mainrender(bool is_focused){
 		mainrenderIMPL(is_focused, gs[TASKTHREADS_UPDATEMAINRENDER], game);

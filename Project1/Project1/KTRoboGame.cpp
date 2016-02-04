@@ -143,7 +143,11 @@ bool Game::Init(HWND hwnd) {
 	
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {
 		task_threads[i] = Task::factory(hwnd);
-		g_for_task_threads[i] = g->makeGraphicsOfNewDeviceContext();
+		if (i == TASKTHREADS_UPDATEMAINRENDER ) {
+			g_for_task_threads[i] = g;
+		} else {
+			g_for_task_threads[i] = g->makeGraphicsOfNewDeviceContext();
+		}
 	}
 
 	Mesh::Init(g);
@@ -342,6 +346,7 @@ bool Game::Init(HWND hwnd) {
 	//Sleep(1000);
     L = luaL_newstate();
     luaL_openlibs(L);
+
 	cltf = new TextFromLuas(g);
 	cmeshs = new CMeshs(g, demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
@@ -349,6 +354,11 @@ bool Game::Init(HWND hwnd) {
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
 
+	for (int i=0;i<TASKTHREAD_NUM;i++) {
+		Ls[i] = luaL_newstate();
+		luaL_openlibs(Ls[i]);
+		MyLuaGlueSingleton::getInstance()->registerdayo(Ls[i]);
+	}
 	
 
 	Texture::Init(g);
@@ -463,6 +473,8 @@ bool Game::Init(HWND hwnd) {
 
 	te = new Text(L"‚·‚±‚µ‚¸‚Â",5);
 	
+	Scene::Init(g_for_task_threads,Ls,this);
+
 	return true;
 }
 void Game::Del() {
@@ -470,7 +482,19 @@ void Game::Del() {
 	
 
 
-	
+	vector<Scene*>::iterator scene_it = scenes.begin();
+	while (scene_it != scenes.end()) {
+		Scene* s = *scene_it;
+		if (s) {
+		s->leave();
+		delete s;
+		s = 0;
+		}
+		scene_it++;
+	}
+	scenes.clear();
+
+	Scene::Del();
 
 
 	if (task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
@@ -512,9 +536,13 @@ void Game::Del() {
 	Text::Del();
 	
 
-if (L) {
-	lua_close(L);
-}
+	if (L) {
+		lua_close(L);
+	}
+	
+	for (int i=0;i<TASKTHREAD_NUM;i++) {
+		lua_close(Ls[i]);
+	}
 
 	 if (cmeshs) {
 		 delete cmeshs;
@@ -572,13 +600,13 @@ if (L) {
 	Texture::Del();
 	
 
-
+	/*
 	if (g) {
 		g->Release();
 		delete g;
 		g = 0;
 	}
-
+	*/
 	
 	
 	if (c) {
@@ -828,8 +856,10 @@ void Game::Run() {
 	}
 	
 
-	for (int i = 0 ; i < 4; i++) {
+	for (int i = 0 ; i < TASKTHREAD_NUM; i++) {
 		ID3D11CommandList* pd3dCommandList=0;
+
+		if (i == TASKTHREADS_UPDATEMAINRENDER) continue;
 		HRESULT hr = g_for_task_threads[i]->getDeviceContext()->FinishCommandList(FALSE, &pd3dCommandList);
 		if (FAILED(hr)) {
 			throw new GameError(KTROBO::FATAL_ERROR, "failed in finishing list");
@@ -910,11 +940,26 @@ void Game::Run() {
 	unsigned int color = 0xFF00FF00 + ((int)(coun)%256);
 /*	texdayo->setRenderTexColor(0,0xFFFFFF00+(coun)%256);
 	texdayo->setRenderBillBoardColor(0,color);*/
+	
+	
+	int siz = scenes.size();
+	if (siz) {
+		Scene* now_scene = scenes.back();
+		for (int i=0;i<siz;i++) {
+			Scene* s = scenes[i];
+			if (now_scene != s) {
+				s->mainrender(false);
+			}
+		}
+		now_scene->mainrender(true);
+	}
+	
 	texdayo->createIndexBuffer(g);
 	texdayo->updateIndexBuffer(g);
 	texdayo->sendinfoToVertexTexture(g);
 	texdayo->render(g);
 	inputtext->render(g);
+
 
 
 

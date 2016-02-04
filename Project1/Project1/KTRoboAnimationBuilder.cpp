@@ -2,11 +2,7 @@
 
 using namespace KTROBO;
 
-AnimationBuilder::AnimationBuilder(void)
+AnimationBuilder::AnimationBuilder(char* n,int len) : Scene(n,len)
 {
 }
 
-
-AnimationBuilder::~AnimationBuilder(void)
-{
-}
