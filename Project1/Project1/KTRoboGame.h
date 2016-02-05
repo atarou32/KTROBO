@@ -92,6 +92,7 @@ private:
 	CMeshs* cmeshs;
 	Textures* texdayo;
 	GUI_INPUTTEXT* inputtext;
+	GUI_BUTTON* but;
 	vector<Scene*> scenes;
 
 public:

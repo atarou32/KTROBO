@@ -69,6 +69,8 @@ Game::Game(void)
 	mytest_for_vt = 0;
 	cmeshs = 0;
 	te = 0;
+	but = 0;
+	inputtext= 0;
 }
 
 
@@ -370,6 +372,9 @@ bool Game::Init(HWND hwnd) {
 //	GUI_INPUTTEXT::Init(hwnd, texdayo->getInstance(0));
 	inputtext = new GUI_INPUTTEXT(0,100,800,24);
 	inputtext->setIsRender(true);
+	but = new GUI_BUTTON(100,200,120,120,"",0, "Œˆ’è");
+	but->setIsRender(true);
+	InputMessageDispatcher::registerImpl(but, NULL,NULL);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
@@ -533,6 +538,11 @@ void Game::Del() {
 	if (inputtext) {
 		delete inputtext;
 		inputtext = 0;
+	}
+
+	if (but) {
+		delete but;
+		but = 0;
 	}
 
 	Text::Del();
@@ -961,7 +971,7 @@ void Game::Run() {
 	texdayo->sendinfoToVertexTexture(g);
 	texdayo->render(g);
 	inputtext->render(g);
-
+	but->render(g);
 
 
 

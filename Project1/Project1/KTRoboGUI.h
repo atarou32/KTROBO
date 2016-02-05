@@ -47,7 +47,7 @@ namespace KTROBO {
 #define KTROBO_GUI_BUTTON_PRESS_WIDTH 129
 #define KTROBO_GUI_BUTTON_PRESS_TOP 0
 #define KTROBO_GUI_BUTTON_PRESS_HEIGHT 129
-
+#define KTROBO_GUI_BUTTON_TEXT_HEIGHT 20
 
 interface HasRenderFunc {
 	virtual void render(Graphics* g)=0;
@@ -85,11 +85,12 @@ public:
 	virtual bool handleMessage(int msg, void* data, DWORD time) =0;
 };
 
-class GUI_BUTTON : public GUI_PART
+class GUI_BUTTON : public GUI_PART, public HasRenderFunc
 {
 private:
 	int box_tex_id;
 	char l_str[128]; // pressされたときによばれるLuaファイル
+	Text* button_text;
 static lua_State* L; // handlemessageが呼ばれるのは AIスレッドなのでAIスレッドのLを呼ぶ
 static Texture* texture;
 
@@ -98,10 +99,11 @@ public:
 		L = Ld;
 		texture = tex;
 	}
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
+	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
-	GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len);
+	void render(Graphics* g);
+	GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len, char* info);
 	~GUI_BUTTON();
 };
 

@@ -43,12 +43,12 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 		} else {
 
 		// 範囲に入ってなければnormal
-			if (!is_effect) {
+		//	if (!is_effect) {
 				texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_NORMAL_LEFT,
 					KTROBO_GUI_BUTTON_NORMAL_TOP,
 					KTROBO_GUI_BUTTON_NORMAL_WIDTH,
 					KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
-			}
+		//	}
 		}
 	}
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
@@ -77,6 +77,12 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 				// ボタンが実行可能になっているので実行する
 				// lua ファイル実行
 				setIsEffect(false);
+
+				// focusに戻す
+				texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_FOCUS_LEFT,
+					KTROBO_GUI_BUTTON_FOCUS_TOP,
+					KTROBO_GUI_BUTTON_FOCUS_WIDTH,
+					KTROBO_GUI_BUTTON_FOCUS_HEIGHT);
 				return true;
 			}
 		}
@@ -98,7 +104,7 @@ void GUI_BUTTON::setIsRender(bool t) {
 	is_render = t;
 	texture->setRenderTexIsRender(box_tex_id,t);
 }
-GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len) : GUI_PART() {
+GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len, char* info) : GUI_PART() {
 	box.left = x;
 	box.right = width + x;
 	box.top = y;
@@ -111,13 +117,26 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 	} else {
 		memset(l_str,0,128);
 	}
+	stringconverter sc;
+	WCHAR buf[512];
+	memset(buf,0,sizeof(WCHAR)*512);
+	sc.charToWCHAR(info,buf);
+	button_text = new Text(buf,wcslen(buf));
+	
 }
 GUI_BUTTON::~GUI_BUTTON() {
 
 	texture->lightdeleteRenderTex(box_tex_id);
+	delete button_text;
 }
 
-
+void GUI_BUTTON::render(Graphics* g) {
+	if (getIsRender()) {
+		float width = button_text->getWidth(KTROBO_GUI_BUTTON_TEXT_HEIGHT);
+		button_text->render(g,0xFFFFFFFF, (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2, KTROBO_GUI_BUTTON_TEXT_HEIGHT,
+			width,KTROBO_GUI_BUTTON_TEXT_HEIGHT);
+	}
+}
 
 GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) : GUI_PART() {
 	box.left = x;
@@ -340,32 +359,6 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 					texture->setRenderTexTexPos(box_tex_id_uenaka, KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 			}
 		}
 		
@@ -419,23 +412,6 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 
 					texture->setRenderTexTexPos(box_tex_id_uenaka, KTROBO_GUI_INPUTTEXT_PRESS_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_PRESS_TOP+KTROBO_GUI_INPUTTEXT_PRESS_HEIGHT-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_PRESS_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 				this->setIsEffect(true);
 				this->setIME(true);
