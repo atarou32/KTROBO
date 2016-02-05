@@ -134,6 +134,13 @@ void LOADMESHTCB(TCB* thisTCB) {
 	Sleep(1);
 }
 
+void MessageDispatcherTCB(TCB* thisTCB) {
+	
+	InputMessageDispatcher::messageDispatch();
+
+}
+
+
 bool Game::Init(HWND hwnd) {
 	// 順番をかえないこと cs とタスクの間に依存関係がある
 	
@@ -158,6 +165,10 @@ bool Game::Init(HWND hwnd) {
 	demo = new KTRoboDemoRender();
 	demo->Init(g);
 	c = new Clock(0,0,0);
+	Text::Init(g, demo->font);
+
+	te = new Text(L"すこしずつ",5);
+	
 
 	KTROBO::DebugTexts::instance()->Init(g, demo->font);
 	KTROBO::DebugTexts::instance()->setText(g, 14 , L"少なくとも頑張れる余地はある");
@@ -364,6 +375,7 @@ bool Game::Init(HWND hwnd) {
 	
 
 	Texture::Init(g);
+	Scene::Init(g_for_task_threads,Ls,this);
 	
 	texdayo = new Textures(demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
@@ -473,14 +485,10 @@ bool Game::Init(HWND hwnd) {
 
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
-
+	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	InputMessageDispatcher::registerImpl(&k,NULL,NULL);
 
-	Text::Init(g, demo->font);
-
-	te = new Text(L"すこしずつ",5);
 	
-	Scene::Init(g_for_task_threads,Ls,this);
 
 	return true;
 }
@@ -812,7 +820,7 @@ void Game::Run() {
 
 
 	CS::instance()->enter(CS_MESSAGE_CS, "enter");
-	InputMessageDispatcher::messageDispatch();
+	
 	view = k.view;
 	b = k.at;
 	a = k.from;
@@ -821,7 +829,7 @@ void Game::Run() {
 	
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 
-	
+
 
 	
 

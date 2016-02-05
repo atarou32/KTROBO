@@ -969,7 +969,7 @@ void TexturePart::createIndexBuffer(Graphics* g) {
 
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "createindex");
-	if (!this->is_index_load && !this->indexbuffer_tex && !this->indexbuffer_tex) {
+	if (!this->is_index_load && !this->indexbuffer_tex && !this->indexbuffer_bill) {
 		// クリエイトする
 		
 		D3D11_BUFFER_DESC hBufferDesc;

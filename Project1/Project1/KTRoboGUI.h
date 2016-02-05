@@ -53,6 +53,85 @@ namespace KTROBO {
 #define KTROBO_GUI_TAB_WIDTH 60
 #define KTROBO_GUI_TAB_HEIGHT 40
 
+
+#define KTROBO_GUI_SLIDERNOW_NORMAL_LEFT 0
+#define KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH 129
+#define KTROBO_GUI_SLIDERNOW_NORMAL_TOP 0
+#define KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT 129
+#define KTROBO_GUI_SLIDERNOW_FOCUS_LEFT 131
+#define KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH 129
+#define KTROBO_GUI_SLIDERNOW_FOCUS_TOP 0
+#define KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT 129
+#define KTROBO_GUI_SLIDERNOW_PRESS_LEFT 261
+#define KTROBO_GUI_SLIDERNOW_PRESS_WIDTH 129
+#define KTROBO_GUI_SLIDERNOW_PRESS_TOP 0
+#define KTROBO_GUI_SLIDERNOW_PRESS_HEIGHT 129
+
+
+#define KTROBO_GUI_SLIDERHMIN_NORMAL_LEFT 12
+#define KTROBO_GUI_SLIDERHMIN_NORMAL_WIDTH 113
+#define KTROBO_GUI_SLIDERHMIN_NORMAL_TOP 375
+#define KTROBO_GUI_SLIDERHMIN_NORMAL_HEIGHT 134
+
+#define KTROBO_GUI_SLIDERHMIN_FOCUS_LEFT 393
+#define KTROBO_GUI_SLIDERHMIN_FOCUS_WIDTH 113
+#define KTROBO_GUI_SLIDERHMIN_FOCUS_TOP 2
+#define KTROBO_GUI_SLIDERHMIN_FOCUS_HEIGHT 134
+
+#define KTROBO_GUI_SLIDERHMIN_PRESS_LEFT 270
+#define KTROBO_GUI_SLIDERHMIN_PRESS_WIDTH 113
+#define KTROBO_GUI_SLIDERHMIN_PRESS_TOP 377
+#define KTROBO_GUI_SLIDERHMIN_PRESS_HEIGHT 134
+
+#define KTROBO_GUI_SLIDERHMAX_NORMAL_LEFT 127
+#define KTROBO_GUI_SLIDERHMAX_NORMAL_WIDTH 113
+#define KTROBO_GUI_SLIDERHMAX_NORMAL_TOP 376
+#define KTROBO_GUI_SLIDERHMAX_NORMAL_HEIGHT 134
+
+#define KTROBO_GUI_SLIDERHMAX_FOCUS_LEFT 395
+#define KTROBO_GUI_SLIDERHMAX_FOCUS_WIDTH 113
+#define KTROBO_GUI_SLIDERHMAX_FOCUS_TOP 171
+#define KTROBO_GUI_SLIDERHMAX_FOCUS_HEIGHT 134
+
+#define KTROBO_GUI_SLIDERHMAX_PRESS_LEFT 390
+#define KTROBO_GUI_SLIDERHMAX_PRESS_WIDTH 113
+#define KTROBO_GUI_SLIDERHMAX_PRESS_TOP 375
+#define KTROBO_GUI_SLIDERHMAX_PRESS_HEIGHT 134
+
+
+#define KTROBO_GUI_SLIDERVMAX_NORMAL_LEFT 0
+#define KTROBO_GUI_SLIDERVMAX_NORMAL_WIDTH 130
+#define KTROBO_GUI_SLIDERVMAX_NORMAL_TOP 131
+#define KTROBO_GUI_SLIDERVMAX_NORMAL_HEIGHT 113
+
+#define KTROBO_GUI_SLIDERVMAX_FOCUS_LEFT 132
+#define KTROBO_GUI_SLIDERVMAX_FOCUS_WIDTH 130
+#define KTROBO_GUI_SLIDERVMAX_FOCUS_TOP 132
+#define KTROBO_GUI_SLIDERVMAX_FOCUS_HEIGHT 113
+
+#define KTROBO_GUI_SLIDERVMAX_PRESS_LEFT 264
+#define KTROBO_GUI_SLIDERVMAX_PRESS_WIDTH 130
+#define KTROBO_GUI_SLIDERVMAX_PRESS_TOP 132
+#define KTROBO_GUI_SLIDERVMAX_PRESS_HEIGHT 113
+
+
+#define KTROBO_GUI_SLIDERVMIN_NORMAL_LEFT 0
+#define KTROBO_GUI_SLIDERVMIN_NORMAL_WIDTH 130
+#define KTROBO_GUI_SLIDERVMIN_NORMAL_TOP 131+115
+#define KTROBO_GUI_SLIDERVMIN_NORMAL_HEIGHT 113
+						   
+#define KTROBO_GUI_SLIDERVMIN_FOCUS_LEFT 132
+#define KTROBO_GUI_SLIDERVMIN_FOCUS_WIDTH 130
+#define KTROBO_GUI_SLIDERVMIN_FOCUS_TOP 132+115
+#define KTROBO_GUI_SLIDERVMIN_FOCUS_HEIGHT 113
+						   
+#define KTROBO_GUI_SLIDERVMIN_PRESS_LEFT 264
+#define KTROBO_GUI_SLIDERVMIN_PRESS_WIDTH 130
+#define KTROBO_GUI_SLIDERVMIN_PRESS_TOP 132+115
+#define KTROBO_GUI_SLIDERVMIN_PRESS_HEIGHT 113
+
+#define KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT 20
+
 interface HasRenderFunc {
 	virtual void render(Graphics* g)=0;
 };
@@ -210,7 +289,7 @@ public:
 		tex = te;
 	}
 	void moveBox(int dx, int dy) {
-		moveBox(dx, dy);
+		GUI_PART::moveBox(dx, dy);
 		tex->setRenderTexPos(tex_id, box.left, box.top);
 	}
 
@@ -450,32 +529,84 @@ public:
 };
 
 class GUI_SLIDERV : public GUI_PART {
-private:
 
+private:
 	MYRECT zentai_box;
+	MYRECT min_box;
+	MYRECT max_box;
+	float max;
+	float min;
+	float now;
+	char l_str[64];
+	static lua_State* l;
 	static Texture* tex;
+	bool is_min_pressed;
+	bool is_max_pressed;
+	bool is_box_moved;
+	int tex_id_min;
+	int tex_id_max;
+	int tex_id_now;
 public:
-	static void Init(Texture* te) {
-		tex = te;
+	GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l_str);
+	~GUI_SLIDERV();
+	
+	void moveBox(int dx, int dy);
+	bool handleMessage(int msg, void* data, DWORD time);
+	void setIsEffect(bool t) {is_effect = t;}
+	void setIsRender(bool t) {
+		is_render = t;
+		tex->setRenderTexIsRender(tex_id_min,t);
+		tex->setRenderTexIsRender(tex_id_max,t);
+		tex->setRenderTexIsRender(tex_id_now,t);
 	}
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
-	void setIsEffect(bool t);
-	void setIsRender(bool t);
+
+	static void Init(Texture* te,lua_State* ls) {
+		tex = te;
+		l = ls;
+	}
 };
 
 class GUI_SLIDERH : public GUI_PART {
-private:
 
+private:
 	MYRECT zentai_box;
+	MYRECT min_box;
+	MYRECT max_box;
+	float max;
+	float min;
+	float now;
+	char l_str[64];
 	static Texture* tex;
+	static lua_State* l;
+	bool is_min_pressed;
+	bool is_max_pressed;
+	bool is_box_moved;
+	int tex_id_min;
+	int tex_id_max;
+	int tex_id_now;
 public:
-	static void Init(Texture* te) {
-		tex = te;
-	}
+	GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l_str);
+	~GUI_SLIDERH();
+	void moveBox(int dx, int dy);
+	
 
 	bool handleMessage(int msg, void* data, DWORD time) { return true;};
-	void setIsEffect(bool t);
-	void setIsRender(bool t);
+	void setIsEffect(bool t) {
+		is_effect = t;
+	}
+
+	void setIsRender(bool t) {
+		is_render = t;
+		tex->setRenderTexIsRender(tex_id_min,t);
+		tex->setRenderTexIsRender(tex_id_max,t);
+		tex->setRenderTexIsRender(tex_id_now,t);
+	}
+	static void Init(Texture* te, lua_State* ls) {
+		tex = te;
+		l = ls;
+
+	}
+
 };
 
 
@@ -488,8 +619,8 @@ public:
 
 	static void Init(HWND hw, Texture* tex, lua_State* Ld, int screen_width, int screen_height) {
 		GUI_BUTTON::Init(Ld, tex);
-		GUI_SLIDERH::Init(tex);
-		GUI_SLIDERV::Init(tex);
+		GUI_SLIDERH::Init(tex, Ld);
+		GUI_SLIDERV::Init(tex, Ld);
 		GUI_TEX::Init(tex);
 		GUI_TEXT::Init(tex);
 		GUI_WINDOW::Init(tex);

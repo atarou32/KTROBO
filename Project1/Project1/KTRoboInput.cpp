@@ -263,8 +263,10 @@ void InputMessageDispatcher::_messageDispatch(MYINPUTMESSAGESTRUCT* message, INP
 void InputMessageDispatcher::messageDispatch() {
 	// 外部で複数スレッドをロックしてこの関数を呼び出す
 	// MESSAGE_CS でロックする
+	
 	DWORD time = timeGetTime();
 	CS::instance()->enter(CS_MESSAGE_CS, "enter message dispatch");
+
 	int mes_index = (InputMessageDispatcher::now_message_index+1)% KTROBO_INPUTMESSAGESTRUCT_SIZE;
 	for (int i=0;i<KTROBO_INPUTMESSAGESTRUCT_SIZE;i++) {
 		int index = (mes_index + i) % KTROBO_INPUTMESSAGESTRUCT_SIZE;

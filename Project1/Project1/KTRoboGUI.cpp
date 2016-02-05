@@ -261,7 +261,7 @@ void GUI_INPUTTEXT::moveBox(int dx, int dy) {
 
 void GUI_BUTTON::moveBox(int dx, int dy) {
 
-	moveBox(dx, dy);
+	GUI_PART::moveBox(dx, dy);
 	texture->setRenderTexPos(box_tex_id, box.left, box.top);
 	
 }
@@ -1132,7 +1132,7 @@ MYRECT GUI_PART::max_default_box;
 
 
 
-GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, WCHAR* tex, int len) {
+GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, WCHAR* tex, int len) : GUI_PART(){
 	text = new Text(tex, len);
 	box.left = x;
 	box.top = y;
@@ -1161,7 +1161,7 @@ void GUI_TEXT::render(Graphics* g) {
 bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
 
-	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+	if ((msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) && getIsEffect()) {
 		unsigned int butukari;
 		int size = tex_rect_boxs.size();
 		for (int i=0;i<size;i++) {
@@ -1179,4 +1179,141 @@ bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 	}
 
 	return false;
+}
+
+unsigned int GUI_TAB::colors[8];
+
+
+unsigned int GUI_TAB::f_colors[8];
+
+
+
+
+
+GUI_SLIDERV::GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l_str) : GUI_PART() {
+	this->max = max;
+	this->min = min;
+	this->now = now;
+	this->zentai_box = zentai;
+	memset(this->l_str,0 ,64);
+	strcpy_s(this->l_str,l_str);
+	this->is_box_moved = false;
+	this->is_min_pressed = false;
+	this->is_max_pressed = false;
+
+	int tex_id = tex->getTexture(KTROBO_GUI_PNG);
+
+	this->tex_id_max = tex->getRenderTex(tex_id, 0xFFFFFFFF, zentai.left,zentai.top,
+		zentai.right - zentai.left, KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, KTROBO_GUI_SLIDERVMAX_NORMAL_LEFT,
+		KTROBO_GUI_SLIDERVMAX_NORMAL_TOP, KTROBO_GUI_SLIDERVMAX_NORMAL_WIDTH, KTROBO_GUI_SLIDERVMAX_NORMAL_HEIGHT);
+	this->tex_id_min = tex->getRenderTex(tex_id, 0xFFFFFFFF,zentai.left, zentai.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT,
+		zentai.right- zentai.left,
+		KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, KTROBO_GUI_SLIDERVMIN_NORMAL_LEFT, KTROBO_GUI_SLIDERVMIN_NORMAL_TOP,
+		KTROBO_GUI_SLIDERVMIN_NORMAL_WIDTH, KTROBO_GUI_SLIDERVMIN_NORMAL_HEIGHT);
+
+	float m = max - min;
+	float tex_id_now_y= zentai.bottom-KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	if (m > 0.0001f) {
+
+		tex_id_now_y= zentai.bottom - 2*KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - (zentai.bottom - zentai.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
+	}
+
+	this->tex_id_now = tex->getRenderTex(tex_id, 0xFFFFFFFF,zentai.left, tex_id_now_y, zentai.right-zentai.left, KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, 
+		KTROBO_GUI_SLIDERNOW_NORMAL_LEFT, KTROBO_GUI_SLIDERNOW_NORMAL_TOP, KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH, KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT);
+	box.left = zentai.left;
+	box.right = zentai.right;//tex_id_now_x + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	box.top = tex_id_now_y;
+	box.bottom = tex_id_now_y+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.left = zentai.left;
+	min_box.right = zentai.right;//zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.top = zentai.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.bottom = zentai.bottom;
+	max_box.left = zentai.left;// - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_box.right = zentai.right;
+	max_box.top = zentai.top;
+	max_box.bottom = zentai.top + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;//.bottom;
+
+}
+
+GUI_SLIDERV::~GUI_SLIDERV() {
+
+}
+
+	
+void GUI_SLIDERV::moveBox(int dx, int dy) {
+
+}
+bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
+
+
+
+}
+
+
+
+GUI_SLIDERH::GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l_str) : GUI_PART() {
+	this->max = max;
+	this->min = min;
+	this->now = now;
+	this->zentai_box = zentai;
+	memset(this->l_str,0 ,64);
+	strcpy_s(this->l_str,l_str);
+	this->is_box_moved = false;
+	this->is_min_pressed = false;
+	this->is_max_pressed = false;
+
+
+	int tex_id = tex->getTexture(KTROBO_GUI_PNG);
+
+	this->tex_id_max = tex->getRenderTex(tex_id, 0xFFFFFFFF,zentai.right- KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT,zentai.top,
+		KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT,zentai.bottom-zentai.top, KTROBO_GUI_SLIDERHMAX_NORMAL_LEFT,
+		KTROBO_GUI_SLIDERHMAX_NORMAL_TOP, KTROBO_GUI_SLIDERHMAX_NORMAL_WIDTH, KTROBO_GUI_SLIDERHMAX_NORMAL_HEIGHT);
+	this->tex_id_min = tex->getRenderTex(tex_id, 0xFFFFFFFF,zentai.left, zentai.top,KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT,
+		zentai.bottom - zentai.top, KTROBO_GUI_SLIDERHMIN_NORMAL_LEFT, KTROBO_GUI_SLIDERHMIN_NORMAL_TOP,
+		KTROBO_GUI_SLIDERHMIN_NORMAL_WIDTH, KTROBO_GUI_SLIDERHMIN_NORMAL_HEIGHT);
+
+	float m = max - min;
+	float tex_id_now_x = zentai.left+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	if (m > 0.0001f) {
+
+		tex_id_now_x = zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT + (zentai.right - zentai.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
+	}
+
+	this->tex_id_now = tex->getRenderTex(tex_id, 0xFFFFFFFF,tex_id_now_x,zentai.top,KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, zentai.bottom-zentai.top, 
+		KTROBO_GUI_SLIDERNOW_NORMAL_LEFT, KTROBO_GUI_SLIDERNOW_NORMAL_TOP, KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH, KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT);
+	box.left = tex_id_now_x;
+	box.right = tex_id_now_x + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	box.top = zentai.top;
+	box.bottom = zentai.bottom;
+	min_box.left = zentai.left;
+	min_box.right = zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.top = zentai.top;
+	min_box.bottom = zentai.bottom;
+	max_box.left = zentai.right - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_box.right = zentai.right;
+	max_box.top = zentai.top;
+	max_box.bottom = zentai.bottom;
+
+}
+
+
+GUI_SLIDERH::~GUI_SLIDERH() {
+
+
+
+
+}
+	
+void GUI_SLIDERH::moveBox(int dx, int dy) {
+
+
+
+
+}
+bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
+
+
+
+
+
 }
