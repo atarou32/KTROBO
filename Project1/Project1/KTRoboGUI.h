@@ -7,7 +7,7 @@
 #include "KTRoboTexture.h"
 #include "KTRoboText.h"
 #include "lua.hpp"
-
+#include "stringconverter.h"
 #include "vector"
 
 // GUI のデストラクトはテクスチャのデストラクトの前に行うこと
@@ -49,6 +49,10 @@ namespace KTROBO {
 #define KTROBO_GUI_BUTTON_PRESS_HEIGHT 129
 #define KTROBO_GUI_BUTTON_TEXT_HEIGHT 20
 
+#define KTROBO_GUI_TAB_PNG "resrc/sample/none.png"
+#define KTROBO_GUI_TAB_WIDTH 60
+#define KTROBO_GUI_TAB_HEIGHT 40
+
 interface HasRenderFunc {
 	virtual void render(Graphics* g)=0;
 };
@@ -68,20 +72,24 @@ protected:
 		is_effect = false;
 		is_move = false;
 		max_box = max_default_box;
+		box.left = 0;
+		box.right = 0;
+		box.top = 0;
+		box.bottom = 0;
 	}
 	virtual ~GUI_PART(){}
 public:
 	static void SetDefaultMaxBox(MYRECT* re) {
 		max_default_box = *re;
 	}
-	void moveBox(int dx, int dy);
+	virtual void moveBox(int dx, int dy);
 	bool getIsRender() {return is_render;}
 	bool getIsEffect() {return is_effect;}
 	bool getIsMove() {return is_move;}
 	void setIsMove(bool t) {is_move = t;}
 	virtual void setIsRender(bool t)=0;
 	virtual void setIsEffect(bool t)=0;
-	
+	MYRECT* getBox() {return &box;}
 	virtual bool handleMessage(int msg, void* data, DWORD time) =0;
 };
 
@@ -99,6 +107,7 @@ public:
 		L = Ld;
 		texture = tex;
 	}
+	void moveBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
@@ -144,7 +153,7 @@ private:
 	char* getInputStr(unsigned char* keys);
 	bool is_render_and_update;
 
-
+	void moveBox(int dx, int dy);
 
 
 	static HWND hwnd;
@@ -200,6 +209,10 @@ public:
 	static void Init(Texture* te) {
 		tex = te;
 	}
+	void moveBox(int dx, int dy) {
+		moveBox(dx, dy);
+		tex->setRenderTexPos(tex_id, box.left, box.top);
+	}
 
 	GUI_TEX(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height) {
 		int te = tex->getTexture(tex_name);
@@ -224,10 +237,17 @@ private:
 
 	static Texture* tex;
 public:
+
 	static void Init(Texture* te) {
 		tex = te;
 	}
 public:
+	GUI_WINDOW(int x, int y, int width, int height) {
+		box.left = x;
+		box.top = y;
+		box.right = x + width;
+		box.bottom = y + height;
+	}
 
 	void setBody(GUI_PART* p) {
 		bodys.push_back(p);
@@ -238,6 +258,31 @@ public:
 	
 	bool handleMessage(int msg, void* data, DWORD time) {
 		if (!is_effect) {return true;}
+
+		if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
+			if (getIsMove()) {
+				// 動かす
+				moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+				vector<GUI_PART*>::iterator it = bodys.begin();
+				while(it != bodys.end()) {
+					GUI_PART* p = *it;
+					p->moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+					it++;
+				}
+				return true;
+			}
+		}
+		if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+			if (d->getMOUSESTATE()->mousebutton & KTROBO_MOUSESTATE_R_DOWN) {
+				unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
+				if (butukari & BUTUKARIPOINT_IN) {
+					setIsMove(true);
+				}
+			}
+			if (d->getMOUSESTATE()->mousebutton & KTROBO_MOUSESTATE_R_UP) {
+				setIsMove(false);
+			}
+		}
 
 		vector<GUI_PART*>::iterator it = bodys.begin();
 		while (it != bodys.end()) {
@@ -292,27 +337,104 @@ public:
 class GUI_TAB : public GUI_PART
 {
 private:
-	vector<string> window_names;
+	int tab_index; //　ルートから何番目のタブかということ
+	vector<Text*> window_names;// デストラクタが呼ばれる
 	vector<GUI_WINDOW*> child_windows;// tabのデストラクトが呼ばれてもwindowをデストラクトはされない
-	vector<MYRECT> tex_rects;
-	vector<int> tex_id_indexs;
+	vector<int> tex_rects; 
+	vector<MYRECT> tex_rect_boxs;
+
+	int now_index; // 現在注目されているウィンドウのインデックス
 
 	static Texture* tex;
+	static unsigned int colors[8];
+
+
+	static unsigned int f_colors[8];
+
 public:
-
+	GUI_TAB(int tab_index) {
+		this->tab_index = tab_index;
+		now_index = 0;
+	}
+	~GUI_TAB() {
+		vector<Text*>::iterator it = window_names.begin();
+		while(it != window_names.end()) {
+			Text* t = *it;
+			if (t) {
+				delete t;
+				t = 0;
+			}
+			it = it + 1;
+		}
+	}
 	void setWindow(GUI_WINDOW* c, string name) {
+		c->setIsRender(false);
+		c->setIsEffect(false);
+		
 		child_windows.push_back(c);
-		window_names.push_back(name);
+		stringconverter sc;
+		WCHAR buf[512];
+		memset(buf,0,sizeof(WCHAR)*512);
+		sc.charToWCHAR(name.c_str(), buf);
+		Text* t = new Text(buf, wcslen(buf));
+		window_names.push_back(t);
+		
+		// tex_rectsにMYRECT int を入れる
+		int tsize = tex_rects.size();
+		int tex_i = tex->getTexture(KTROBO_GUI_PNG);
+		int inde = tsize % 8;
 
+		int tex_id = tex->getRenderTex(tex_i,colors[inde], KTROBO_GUI_TAB_WIDTH* tsize, KTROBO_GUI_TAB_HEIGHT*2*tab_index, KTROBO_GUI_TAB_WIDTH,
+			KTROBO_GUI_TAB_HEIGHT, 0, 0, 1 , 1);
+		MYRECT r;
+		r.left = KTROBO_GUI_TAB_WIDTH*tsize;
+		r.right = r.left + KTROBO_GUI_TAB_WIDTH;
+		r.top = KTROBO_GUI_TAB_HEIGHT*2*tab_index;
+		r.bottom = r.top + KTROBO_GUI_TAB_HEIGHT;
+		tex_rects.push_back(tex_id);
+		tex_rect_boxs.push_back(r);
 	}
 
 	static void Init(Texture* te) {
 		tex = te;
+		
+		colors[0] =	0xFFFFFF77;
+		colors[1] =	0xFFFF0077;
+		colors[2] =	0xFF00FF77;
+		colors[3] =	0x00FFFF77;
+		colors[4] =	0xFF000077;
+		colors[5] =	0x00FF0077;
+		colors[6] =	0x0000FF77;
+		colors[7] =	0x00000077;
+
+		f_colors[0] =	0xFFFFFFFF;
+		f_colors[1] =	0xFFFF00FF;
+		f_colors[2] =	0xFF00FFFF;
+		f_colors[3] =	0x00FFFFFF;
+		f_colors[4] =	0xFF0000FF;
+		f_colors[5] =	0x00FF00FF;
+		f_colors[6] =	0x0000FFFF;
+		f_colors[7] =	0x000000FF;
+		
 	}
 
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
-	void setIsEffect(bool t);
-	void setIsRender(bool t);
+	bool handleMessage(int msg, void* data, DWORD time);
+	void setIsEffect(bool t) {
+		int wsize = child_windows.size();
+		for (int i=0;i<wsize;i++) {
+			child_windows[i]->setIsEffect(false);
+			tex->setRenderTexColor(tex_rects[i], colors[i%8]);
+		}
+		child_windows[now_index]->setIsEffect(t);
+		tex->setRenderTexColor(tex_rects[now_index], f_colors[now_index%8]);
+	}
+	void setIsRender(bool t) {
+		int wsize = child_windows.size();
+		for (int i=0;i<wsize;i++) {
+			child_windows[i]->setIsRender(false);
+		}
+		child_windows[now_index]->setIsRender(t);
+	}
 };
 
 class GUI_SLIDERV : public GUI_PART {

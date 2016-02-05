@@ -27,7 +27,7 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 			
 
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
-			texture->setRenderTexPos(box_tex_id, box.left, box.top);
+		//	texture->setRenderTexPos(box_tex_id, box.left, box.top);
 		}
 
 
@@ -244,6 +244,27 @@ void GUI_PART::moveBox(int dx, int dy) {
 		box.bottom = max_box.bottom;
 	}
 }
+void GUI_INPUTTEXT::moveBox(int dx, int dy) {
+
+	GUI_PART::moveBox(dx, dy);
+
+	texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
+	texture->setRenderTexPos(box_tex_id_hidarinaka, box.left, box.top -1 + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+	texture->setRenderTexPos(box_tex_id_hidarisita, box.left, box.bottom - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY-3);
+	texture->setRenderTexPos(box_tex_id_migiue, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
+	texture->setRenderTexPos(box_tex_id_miginaka, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, -1+box.top+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+	texture->setRenderTexPos(box_tex_id_migisita, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.bottom -3- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+	texture->setRenderTexPos(box_tex_id_uenaka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
+	texture->setRenderTexPos(box_tex_id_naka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, -1+box.top + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+	texture->setRenderTexPos(box_tex_id_sitanaka, box.left +KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.bottom -3- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+}
+
+void GUI_BUTTON::moveBox(int dx, int dy) {
+
+	moveBox(dx, dy);
+	texture->setRenderTexPos(box_tex_id, box.left, box.top);
+	
+}
 
 bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 
@@ -259,7 +280,7 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 
 			this->moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 
-				texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
+			/*	texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
 				texture->setRenderTexPos(box_tex_id_hidarinaka, box.left, box.top -1 + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
 				texture->setRenderTexPos(box_tex_id_hidarisita, box.left, box.bottom - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY-3);
 				texture->setRenderTexPos(box_tex_id_migiue, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
@@ -268,7 +289,7 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 				texture->setRenderTexPos(box_tex_id_uenaka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
 				texture->setRenderTexPos(box_tex_id_naka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, -1+box.top + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
 				texture->setRenderTexPos(box_tex_id_sitanaka, box.left +KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.bottom -3- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
-
+				*/
 		}
 
 
@@ -1136,3 +1157,28 @@ void GUI_TEXT::render(Graphics* g) {
 	}
 }
 
+
+bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
+	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		unsigned int butukari;
+		int size = tex_rect_boxs.size();
+		for (int i=0;i<size;i++) {
+			MYRECT r = tex_rect_boxs[i];
+			butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &r);
+			if (butukari & BUTUKARIPOINT_IN) {
+				if (d->getMOUSESTATE()->mouse_l_button_pressed) {
+					now_index = i;
+					setIsEffect(is_effect);
+					setIsRender(is_render);
+
+
+
+
+				}
+			}
+		}
+	}
+
+}
