@@ -171,61 +171,141 @@ public:
 
 
 
-class GUI_TEXT : public GUI_PART
+class GUI_TEXT : public GUI_PART, public HasRenderFunc
 {
 private:
 	static Texture* tex;
+	Text* text;
 public:
 	static void Init(Texture* te) {
 		tex = te;
 	}
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
-	void setIsEffect(bool t);
-	void setIsRender(bool t);
+	bool handleMessage(int msg, void* data, DWORD time){return false;};
+	void setIsEffect(bool t) {is_effect = t;}
+	void setIsRender(bool t) {is_render = t;}
+
+	GUI_TEXT(float x, float y, float width, float height, WCHAR* tex, int len);
+	~GUI_TEXT();
+	void render(Graphics* g);
+
 };
 
 class GUI_TEX : public GUI_PART // GUIのテクスチャ
 {
 private:
 	static Texture* tex;
-
+	int tex_id;
 
 public:
 	static void Init(Texture* te) {
 		tex = te;
 	}
 
+	GUI_TEX(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height) {
+		int te = tex->getTexture(tex_name);
+		tex_id = tex->getRenderTex(te,0xFFFFFFFF,(int)x,(int)y,(int)width,(int)height,(int)tex_x,(int)tex_y,(int)tex_width,(int)tex_height);
+	}
+
+	~GUI_TEX() {
+		tex->lightdeleteRenderTex(tex_id);
+	}
+
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
-	void setIsEffect(bool t);
-	void setIsRender(bool t);
+	void setIsEffect(bool t) {is_effect =t;}
+	void setIsRender(bool t) {is_render =t;}
 };
 
-class GUI_WINDOW : public GUI_PART
+class GUI_WINDOW : public GUI_PART, public HasRenderFunc
 {
 private:
-	GUI_BUTTON* close_button;
-	GUI_TEXT* title;
-	bool has_button_and_title;
-	vector<GUI_PART*> bodys;
+
+	vector<GUI_PART*> bodys; // bodys renders に関してはwindowのデストラクタが呼ばれてもデストラクトしない
+	vector<HasRenderFunc*> renders;
+
 	static Texture* tex;
 public:
 	static void Init(Texture* te) {
 		tex = te;
 	}
 public:
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
-	void setIsEffect(bool t);
-	void setIsRender(bool t);
+
+	void setBody(GUI_PART* p) {
+		bodys.push_back(p);
+	}
+	void setRender(HasRenderFunc* f) {
+		renders.push_back(f);
+	}
+	
+	bool handleMessage(int msg, void* data, DWORD time) {
+		if (!is_effect) {return true;}
+
+		vector<GUI_PART*>::iterator it = bodys.begin();
+		while (it != bodys.end()) {
+
+			GUI_PART* par = *it;
+			
+			if (par->handleMessage(msg, data, time)) {
+				return true;
+			}
+
+			it = it + 1;
+		}
+		
+		return true;// 次の子のウィンドウには渡さない
+	};
+
+	void setIsEffect(bool t) {
+		is_effect =t;
+		vector<GUI_PART*>::iterator it = bodys.begin();
+		while (it != bodys.end()) {
+			GUI_PART* p = *it;
+			p->setIsEffect(t);
+			it = it+1;
+		}
+	}
+	void setIsRender(bool t) {is_render =t;
+	
+		vector<GUI_PART*>::iterator it = bodys.begin();
+		while (it != bodys.end()) {
+
+			GUI_PART* p = *it;
+			p->setIsRender(t);
+			it = it+1;
+		}
+	
+	
+	}
+	void render(Graphics* g) {
+		if (is_render) {
+			vector<HasRenderFunc*>::iterator it = renders.begin();
+			while (it != renders.end()) {
+				
+				HasRenderFunc* f = *it;
+				f->render(g);
+				it = it + 1;
+			}
+		}
+	}
 };
 
 
 class GUI_TAB : public GUI_PART
 {
 private:
-	int tab_index;
-	GUI_PART* child_window;
+	vector<string> window_names;
+	vector<GUI_WINDOW*> child_windows;// tabのデストラクトが呼ばれてもwindowをデストラクトはされない
+	vector<MYRECT> tex_rects;
+	vector<int> tex_id_indexs;
+
 	static Texture* tex;
 public:
+
+	void setWindow(GUI_WINDOW* c, string name) {
+		child_windows.push_back(c);
+		window_names.push_back(name);
+
+	}
+
 	static void Init(Texture* te) {
 		tex = te;
 	}

@@ -127,7 +127,10 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 GUI_BUTTON::~GUI_BUTTON() {
 
 	texture->lightdeleteRenderTex(box_tex_id);
-	delete button_text;
+	if (button_text) {
+		delete button_text;
+		button_text = 0;
+	}
 }
 
 void GUI_BUTTON::render(Graphics* g) {
@@ -1103,3 +1106,33 @@ Texture* GUI_TAB::tex=0;
 Texture* GUI_SLIDERH::tex =0;
 Texture* GUI_SLIDERV::tex =0;
 MYRECT GUI_PART::max_default_box;
+
+
+
+
+
+GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, WCHAR* tex, int len) {
+	text = new Text(tex, len);
+	box.left = x;
+	box.top = y;
+	box.right = x + width;
+	box.bottom = y + height;
+
+
+
+}
+
+
+GUI_TEXT::~GUI_TEXT() {
+	if (text) {
+		delete text;
+		text = 0;
+	}
+}
+
+void GUI_TEXT::render(Graphics* g) {
+	if (getIsRender()) {
+		text->render(g, 0xFFFFFFFF,box.left,box.right, box.bottom- box.top, box.right- box.left, box.bottom - box.top);
+	}
+}
+
