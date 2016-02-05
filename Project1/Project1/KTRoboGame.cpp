@@ -369,6 +369,7 @@ bool Game::Init(HWND hwnd) {
 	GUI::Init(hwnd, texdayo->getInstance(0), Ls[TASKTHREADS_AIDECISION], g->getScreenWidth(), g->getScreenHeight());
 //	GUI_INPUTTEXT::Init(hwnd, texdayo->getInstance(0));
 	inputtext = new GUI_INPUTTEXT(0,100,800,24);
+	inputtext->setIsRender(true);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);

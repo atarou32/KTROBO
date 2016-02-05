@@ -9,6 +9,8 @@
 #include "lua.hpp"
 
 #include "vector"
+
+// GUI のデストラクトはテクスチャのデストラクトの前に行うこと
 using namespace std;
 namespace KTROBO {
 
@@ -31,6 +33,22 @@ namespace KTROBO {
 #define KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA 16
 #define KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY 4
 
+
+
+#define KTROBO_GUI_BUTTON_NORMAL_LEFT 0
+#define KTROBO_GUI_BUTTON_NORMAL_WIDTH 129
+#define KTROBO_GUI_BUTTON_NORMAL_TOP 0
+#define KTROBO_GUI_BUTTON_NORMAL_HEIGHT 129
+#define KTROBO_GUI_BUTTON_FOCUS_LEFT 131
+#define KTROBO_GUI_BUTTON_FOCUS_WIDTH 129
+#define KTROBO_GUI_BUTTON_FOCUS_TOP 0
+#define KTROBO_GUI_BUTTON_FOCUS_HEIGHT 129
+#define KTROBO_GUI_BUTTON_PRESS_LEFT 261
+#define KTROBO_GUI_BUTTON_PRESS_WIDTH 129
+#define KTROBO_GUI_BUTTON_PRESS_TOP 0
+#define KTROBO_GUI_BUTTON_PRESS_HEIGHT 129
+
+
 interface HasRenderFunc {
 	virtual void render(Graphics* g)=0;
 };
@@ -46,8 +64,8 @@ protected:
 	MYRECT max_box;
 	static MYRECT max_default_box;
 	GUI_PART() {
-		is_render = true;
-		is_effect = true;
+		is_render = false;
+		is_effect = false;
 		is_move = false;
 		max_box = max_default_box;
 	}
@@ -70,7 +88,7 @@ public:
 class GUI_BUTTON : public GUI_PART
 {
 private:
-	bool is_pressed;
+	int box_tex_id;
 	char l_str[128]; // pressされたときによばれるLuaファイル
 static lua_State* L; // handlemessageが呼ばれるのは AIスレッドなのでAIスレッドのLを呼ぶ
 static Texture* texture;
@@ -83,7 +101,7 @@ public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
-	GUI_BUTTON(float x, float y, float width, float height);
+	GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len);
 	~GUI_BUTTON();
 };
 

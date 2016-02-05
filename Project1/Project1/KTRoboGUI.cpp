@@ -4,6 +4,7 @@
 #include "stringconverter.h"
 
 using namespace KTROBO;
+
 GUI::GUI(void)
 {
 }
@@ -13,7 +14,112 @@ GUI::~GUI(void)
 {
 }
 
-GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) {
+
+bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
+
+		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
+		// 範囲に入っているかつ左マウスボタンが押されていない→focus
+		// 範囲に入っているかつ左マウスボタンが押されている→press
+
+		if (getIsMove()) {
+			
+
+			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+			texture->setRenderTexPos(box_tex_id, box.left, box.top);
+		}
+
+
+		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
+		if (butukari & BUTUKARIPOINT_IN) {
+
+			
+
+			if (!is_effect) { 
+				texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_FOCUS_LEFT, KTROBO_GUI_BUTTON_FOCUS_TOP,
+					KTROBO_GUI_BUTTON_FOCUS_WIDTH,KTROBO_GUI_BUTTON_FOCUS_HEIGHT);
+			}
+		} else {
+
+		// 範囲に入ってなければnormal
+			if (!is_effect) {
+				texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_NORMAL_LEFT,
+					KTROBO_GUI_BUTTON_NORMAL_TOP,
+					KTROBO_GUI_BUTTON_NORMAL_WIDTH,
+					KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
+			}
+		}
+	}
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		// 範囲に入っているかつ左マウスボタンが押されている→press
+		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
+			this->setIsMove(true);
+		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+			texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_PRESS_LEFT,
+				KTROBO_GUI_BUTTON_PRESS_TOP, 
+				KTROBO_GUI_BUTTON_PRESS_WIDTH,
+				KTROBO_GUI_BUTTON_PRESS_HEIGHT);
+
+				this->setIsEffect(true);
+
+		}
+
+		if (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_UP) {
+			this->setIsMove(false);
+		}
+
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
+			// ボタンが離されたので
+			if (getIsEffect()) {
+				
+				// ボタンが実行可能になっているので実行する
+				// lua ファイル実行
+				setIsEffect(false);
+				return true;
+			}
+		}
+	}
+
+	
+
+	return false;// 次のストラクトに渡す
+
+
+
+
+
+}
+void GUI_BUTTON::setIsEffect(bool t) {
+	is_effect = t;
+}
+void GUI_BUTTON::setIsRender(bool t) {
+	is_render = t;
+	texture->setRenderTexIsRender(box_tex_id,t);
+}
+GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len) : GUI_PART() {
+	box.left = x;
+	box.right = width + x;
+	box.top = y;
+	box.bottom = y + height;
+	int tex_id = texture->getTexture(KTROBO_GUI_PNG);
+	this->box_tex_id = texture->getRenderTex(tex_id, 0xFFFFFFFF,x,y,width,height, KTROBO_GUI_BUTTON_NORMAL_LEFT, KTROBO_GUI_BUTTON_NORMAL_TOP,
+		KTROBO_GUI_BUTTON_NORMAL_WIDTH, KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
+	if (len < 128) {
+		memcpy(this->l_str, luaf, len);
+	} else {
+		memset(l_str,0,128);
+	}
+}
+GUI_BUTTON::~GUI_BUTTON() {
+
+	texture->lightdeleteRenderTex(box_tex_id);
+}
+
+
+
+GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) : GUI_PART() {
 	box.left = x;
 	box.right = width + x;
 	box.top = y;
@@ -129,7 +235,7 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 			
 
 
-
+			this->moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 
 				texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
 				texture->setRenderTexPos(box_tex_id_hidarinaka, box.left, box.top -1 + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
@@ -385,7 +491,7 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 			this->setIME(false);
 		}
 
-		if (d->getMOUSESTATE()->mouse_button == KTROBO_MOUSESTATE_R_UP) {
+		if (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_UP) {
 			// ボタンが離されたので
 			this->setIsMove(false);
 		}
@@ -426,7 +532,7 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 		}
 	}
 
-	return true;
+	return false;// 次のストラクトに渡す
 
 
 
