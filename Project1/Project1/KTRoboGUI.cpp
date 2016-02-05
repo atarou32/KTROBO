@@ -1172,13 +1172,11 @@ bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 					now_index = i;
 					setIsEffect(is_effect);
 					setIsRender(is_render);
-
-
-
-
+					return true;
 				}
 			}
 		}
 	}
 
+	return false;
 }

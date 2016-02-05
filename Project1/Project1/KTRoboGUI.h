@@ -257,6 +257,7 @@ public:
 	}
 	
 	bool handleMessage(int msg, void* data, DWORD time) {
+		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
 		if (!is_effect) {return true;}
 
 		if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
@@ -273,13 +274,13 @@ public:
 			}
 		}
 		if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
-			if (d->getMOUSESTATE()->mousebutton & KTROBO_MOUSESTATE_R_DOWN) {
+			if (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN) {
 				unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
 				if (butukari & BUTUKARIPOINT_IN) {
 					setIsMove(true);
 				}
 			}
-			if (d->getMOUSESTATE()->mousebutton & KTROBO_MOUSESTATE_R_UP) {
+			if (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_UP) {
 				setIsMove(false);
 			}
 		}
@@ -334,7 +335,7 @@ public:
 };
 
 
-class GUI_TAB : public GUI_PART
+class GUI_TAB : public GUI_PART, public HasRenderFunc
 {
 private:
 	int tab_index; //　ルートから何番目のタブかということ
@@ -434,6 +435,17 @@ public:
 			child_windows[i]->setIsRender(false);
 		}
 		child_windows[now_index]->setIsRender(t);
+	}
+	void render(Graphics* g) {
+		// now_indexのwindow_nameを呼ぶ
+		if (window_names.size()) {
+			Text* te = window_names[now_index];
+			MYRECT r = tex_rect_boxs[now_index];
+			if (is_render) {
+				te->render(g, 0xFFFFFFFF,r.left, r.right,r.bottom-r.top, te->getWidth(r.bottom-r.top) , r.bottom - r.top);
+						
+			}
+		}
 	}
 };
 
