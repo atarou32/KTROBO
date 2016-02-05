@@ -1350,7 +1350,7 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 			this->setIsMove(false);
 		}
 
-		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
+		if ((d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
 			// ボタンが離されたので
 			if (getIsEffect()) {
 			
@@ -1380,6 +1380,8 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 
 
 }
+lua_State* GUI_SLIDERH::l=0;
+lua_State* GUI_SLIDERV::l=0;
 
 float GUI_SLIDERH::getTexIdNowX() {
 		float m = max - min;
@@ -1625,7 +1627,7 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 			this->setIsMove(false);
 		}
 
-		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
+		if ((d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
 			// ボタンが離されたので
 			if (getIsEffect()) {
 			

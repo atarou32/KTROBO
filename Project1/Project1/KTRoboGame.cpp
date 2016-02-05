@@ -386,6 +386,14 @@ bool Game::Init(HWND hwnd) {
 	inputtext->setIsRender(true);
 	but = new GUI_BUTTON(100,200,120,120,"",0, "Œˆ’è");
 	but->setIsRender(true);
+	MYRECT zem;
+	zem.left = 0;
+	zem.right = 300;
+	zem.top = 130;
+	zem.bottom = 230;
+	slih = new GUI_SLIDERH(zem,100,0,10,"test");
+	slih->setIsRender(true);
+	InputMessageDispatcher::registerImpl(slih,NULL,NULL);
 	InputMessageDispatcher::registerImpl(but, NULL,NULL);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
@@ -546,6 +554,12 @@ void Game::Del() {
 	if (inputtext) {
 		delete inputtext;
 		inputtext = 0;
+	}
+
+
+	if (slih) {
+		delete slih;
+		slih = 0;
 	}
 
 	if (but) {

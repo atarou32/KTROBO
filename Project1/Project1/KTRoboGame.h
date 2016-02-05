@@ -93,6 +93,7 @@ private:
 	Textures* texdayo;
 	GUI_INPUTTEXT* inputtext;
 	GUI_BUTTON* but;
+	GUI_SLIDERH * slih;
 	vector<Scene*> scenes;
 
 public:
