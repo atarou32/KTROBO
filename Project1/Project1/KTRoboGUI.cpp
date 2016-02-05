@@ -13,56 +13,55 @@ GUI::~GUI(void)
 {
 }
 
-GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex, HWND hwnd) {
+GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) {
 	box.left = x;
 	box.right = width + x;
 	box.top = y;
 	box.bottom = y + height;
-	texture = tex;
-	int tex_id = tex->getTexture(KTROBO_GUI_PNG);
+	int tex_id = texture->getTexture(KTROBO_GUI_PNG);
 	// ノーマルで！
 	is_render = true;
 	is_effect = false;
-	this->box_tex_id_naka = tex->getRenderTex(tex_id, 0xFFFFFFFF,x + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,y + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	this->box_tex_id_naka = texture->getRenderTex(tex_id, 0xFFFFFFFF,x + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,y + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		width- 2* KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,height- 2 * KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_NORMAL_TOP + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH - 2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, 
 		KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT-2 *KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_hidariue = tex->getRenderTex(tex_id, 0xFFFFFFFF, x,y,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_hidariue = texture->getRenderTex(tex_id, 0xFFFFFFFF, x,y,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_NORMAL_LEFT,KTROBO_GUI_INPUTTEXT_NORMAL_TOP, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_hidarinaka  = tex->getRenderTex(tex_id, 0xFFFFFFFF, x,y+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_hidarinaka  = texture->getRenderTex(tex_id, 0xFFFFFFFF, x,y+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,height - 2 * KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_NORMAL_LEFT,KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT - 2 *KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_hidarisita = tex->getRenderTex(tex_id, 0xFFFFFFFF, x,y+height - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_hidarisita = texture->getRenderTex(tex_id, 0xFFFFFFFF, x,y+height - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_NORMAL_LEFT,KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_migiue = tex->getRenderTex(tex_id, 0xFFFFFFFF,x+width-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,y,
+	box_tex_id_migiue = texture->getRenderTex(tex_id, 0xFFFFFFFF,x+width-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,y,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH-
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_NORMAL_TOP,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_miginaka = tex->getRenderTex(tex_id, 0xFFFFFFFF, x+width-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,y+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_miginaka = texture->getRenderTex(tex_id, 0xFFFFFFFF, x+width-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,y+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,height- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY*2,
 		KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT-
 		2 * KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_migisita =  tex->getRenderTex(tex_id, 0xFFFFFFFF, x+width-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_migisita =  texture->getRenderTex(tex_id, 0xFFFFFFFF, x+width-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		y+height - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_PRESS_HEIGHT - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_sitanaka = tex->getRenderTex(tex_id, 0xFFFFFFFF, x+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_sitanaka = texture->getRenderTex(tex_id, 0xFFFFFFFF, x+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		y,width - 2 * KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_NORMAL_TOP,KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
-	box_tex_id_uenaka = tex->getRenderTex(tex_id, 0xFFFFFFFF, x+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
+	box_tex_id_uenaka = texture->getRenderTex(tex_id, 0xFFFFFFFF, x+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,
 		y+height - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY,width - 2 * KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, 
 		KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, KTROBO_GUI_INPUTTEXT_NORMAL_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 		KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
@@ -71,7 +70,6 @@ GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height, Textur
 	now_mode = 0;
 	cursor_x = 0;
 	string_max_x = 0;
-	this->hwnd = hwnd;
 	memset(sentencestring,0,sizeof(char)*512);
 	memset(kouhostring,0,sizeof(char)*256);
 	memset(inputstring,0,sizeof(char)*256);
@@ -82,6 +80,15 @@ GUI_INPUTTEXT::~GUI_INPUTTEXT() {
 		delete text;
 		text = 0;
 	}
+	texture->lightdeleteRenderTex(box_tex_id_hidarinaka);
+	texture->lightdeleteRenderTex(box_tex_id_hidarisita);
+	texture->lightdeleteRenderTex(box_tex_id_hidariue);
+	texture->lightdeleteRenderTex(box_tex_id_miginaka);
+	texture->lightdeleteRenderTex(box_tex_id_migisita);
+	texture->lightdeleteRenderTex(box_tex_id_migiue);
+	texture->lightdeleteRenderTex(box_tex_id_naka);
+	texture->lightdeleteRenderTex(box_tex_id_sitanaka);
+	texture->lightdeleteRenderTex(box_tex_id_uenaka);
 }
 
 bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
@@ -91,8 +98,32 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
 		// 範囲に入っているかつ左マウスボタンが押されていない→focus
 		// 範囲に入っているかつ左マウスボタンが押されている→press
+
+		if (getIsMove()) {
+				// 動かす
+				box.left += d->getMOUSESTATE()->mouse_dx;
+				box.right += d->getMOUSESTATE()->mouse_dx;
+				box.top += d->getMOUSESTATE()->mouse_dy;
+				box.bottom += d->getMOUSESTATE()->mouse_dy;
+
+				texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
+				texture->setRenderTexPos(box_tex_id_hidarinaka, box.left, box.top -1 + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+				texture->setRenderTexPos(box_tex_id_hidarisita, box.left, box.bottom - KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY-3);
+				texture->setRenderTexPos(box_tex_id_migiue, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
+				texture->setRenderTexPos(box_tex_id_miginaka, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, -1+box.top+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+				texture->setRenderTexPos(box_tex_id_migisita, box.right-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.bottom -3- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+				texture->setRenderTexPos(box_tex_id_uenaka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
+				texture->setRenderTexPos(box_tex_id_naka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, -1+box.top + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+				texture->setRenderTexPos(box_tex_id_sitanaka, box.left +KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.bottom -3- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+
+		}
+
+
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
 		if (butukari & BUTUKARIPOINT_IN) {
+
+			
+
 			if (!is_effect) { 
 				texture->setRenderTexTexPos(box_tex_id_naka, KTROBO_GUI_INPUTTEXT_FOCUS_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_FOCUS_TOP+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 					KTROBO_GUI_INPUTTEXT_FOCUS_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
@@ -214,7 +245,9 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
 		// 範囲に入っているかつ左マウスボタンが押されている→press
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
-		if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
+			this->setIsMove(true);
+		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
 			texture->setRenderTexTexPos(box_tex_id_naka, KTROBO_GUI_INPUTTEXT_PRESS_LEFT+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
 				KTROBO_GUI_INPUTTEXT_PRESS_TOP+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, 
 				KTROBO_GUI_INPUTTEXT_PRESS_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,
@@ -325,7 +358,12 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 
 
 			this->setIME(false);
-		}	
+		}
+
+		if (d->getMOUSESTATE()->mouse_button == KTROBO_MOUSESTATE_R_UP) {
+			// ボタンが離されたので
+			this->setIsMove(false);
+		}
 	}
 
 	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
@@ -944,3 +982,16 @@ void GUI_INPUTTEXT::render(Graphics* g) {
 		text->render(g, 0xFFFFFFFF,box.left+5,box.top+2, box.bottom-box.top-4, box.right-box.left-10,box.bottom - box.top);
 	}
 }
+
+HWND GUI_INPUTTEXT::hwnd=0;
+Texture* GUI_INPUTTEXT::texture=0;
+
+lua_State* GUI_BUTTON::L=0; // handlemessageが呼ばれるのは AIスレッドなのでAIスレッドのLを呼ぶ
+Texture* GUI_BUTTON::texture=0;
+
+Texture* GUI_TEXT::tex=0;
+Texture* GUI_TEX::tex=0;
+Texture* GUI_WINDOW::tex=0;
+Texture* GUI_TAB::tex=0;
+Texture* GUI_SLIDERH::tex =0;
+Texture* GUI_SLIDERV::tex =0;

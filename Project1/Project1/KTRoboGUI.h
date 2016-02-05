@@ -6,6 +6,7 @@
 #include "KTRoboInput.h"
 #include "KTRoboTexture.h"
 #include "KTRoboText.h"
+#include "lua.hpp"
 
 #include "vector"
 using namespace std;
@@ -29,54 +30,62 @@ namespace KTROBO {
 #define KTROBO_GUI_INPUTSENTENCE_IMM_MODE_HANKAKU2 IME_CMODE_ROMAN
 #define KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA 16
 #define KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY 4
+
 interface HasRenderFunc {
 	virtual void render(Graphics* g)=0;
 };
 
-class GUI
-{
-public:
-	GUI(void);
-	~GUI(void);
-};
 
-class GUI_PART {
+class GUI_PART : public INPUTSHORICLASS {
 protected:
 	bool is_render;
 	bool is_effect;
+	bool is_move; // マウス右ボタンをクリックしながら動かすとなんでも移動させられる
 protected:
 	MYRECT box;
 	GUI_PART() {
 		is_render = true;
 		is_effect = true;
+		is_move = false;
 	}
+	virtual ~GUI_PART(){}
 	bool getIsRender() {return is_render;}
 	bool getIsEffect() {return is_effect;}
+	bool getIsMove() {return is_move;}
+	void setIsMove(bool t) {is_move = t;}
 	virtual void setIsRender(bool t)=0;
 	virtual void setIsEffect(bool t)=0;
+	
+	virtual bool handleMessage(int msg, void* data, DWORD time) =0;
 };
 
-/*
-class GUI_BUTTON : public INPUTSHORICLASS, public GUI_PART
+class GUI_BUTTON : public GUI_PART
 {
 private:
-//	RENDEREFFECT_Object* render_effect; // たとえばボタンが押されたときにエフェクト？を発生させるときに使用する？
-//	RENDERTEX_Object* render_obj;
+	bool is_pressed;
+	char l_str[128]; // pressされたときによばれるLuaファイル
+static lua_State* L; // handlemessageが呼ばれるのは AIスレッドなのでAIスレッドのLを呼ぶ
+static Texture* texture;
+
 public:
-		
+	static void Init(lua_State* Ld, Texture* tex) {
+		L = Ld;
+		texture = tex;
+	}
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
+	GUI_BUTTON(float x, float y, float width, float height);
+	~GUI_BUTTON();
 };
-*/
-class GUI_INPUTTEXT : public INPUTSHORICLASS, public GUI_PART, public HasRenderFunc
+
+
+class GUI_INPUTTEXT : public GUI_PART, public HasRenderFunc
 {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_frame;
-//	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
+
 	Text* text;
-	Texture* texture;
+	
 	int box_tex_id_naka;
 	int box_tex_id_hidariue;
 	int box_tex_id_hidarinaka;
@@ -106,15 +115,24 @@ private:
 	void eraseSentenceString();
 	char* getInputStr(unsigned char* keys);
 	bool is_render_and_update;
-	HWND hwnd;
 
+
+
+
+	static HWND hwnd;
+	static Texture* texture;
 
 
 
 
 public:
-	GUI_INPUTTEXT(float x, float y, float width, float height, Texture* tex, HWND hwnd);
+	GUI_INPUTTEXT(float x, float y, float width, float height);
 	~GUI_INPUTTEXT();
+
+	static void Init(HWND hw, Texture* tex) {
+		hwnd = hw;
+		texture = tex;
+	}
 
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
@@ -124,39 +142,48 @@ public:
 };
 
 
-/*
-class GUI_TEXT : public INPUTSHORICLASS, public GUI_PART
+
+class GUI_TEXT : public GUI_PART
 {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_frame;
-//	RENDERTEX_CObject* render_text; // テキストはテクスチャの複数の集合なのでこうする
+	static Texture* tex;
 public:
+	static void Init(Texture* te) {
+		tex = te;
+	}
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
 
-class GUI_TEX : public INPUTSHORICLASS , public GUI_PART // GUIのテクスチャ
+class GUI_TEX : public GUI_PART // GUIのテクスチャ
 {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_obj;
+	static Texture* tex;
+
+
 public:
+	static void Init(Texture* te) {
+		tex = te;
+	}
+
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
 
-class GUI_WINDOW : public INPUTSHORICLASS, public GUI_PART
+class GUI_WINDOW : public GUI_PART
 {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_obj;
 	GUI_BUTTON* close_button;
 	GUI_TEXT* title;
 	bool has_button_and_title;
 	vector<GUI_PART*> bodys;
+	static Texture* tex;
+public:
+	static void Init(Texture* te) {
+		tex = te;
+	}
 public:
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
@@ -164,42 +191,73 @@ public:
 };
 
 
-class GUI_TAB : public INPUTSHORICLASS, public GUI_PART
+class GUI_TAB : public GUI_PART
 {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_obj;
 	int tab_index;
 	GUI_PART* child_window;
+	static Texture* tex;
 public:
+	static void Init(Texture* te) {
+		tex = te;
+	}
+
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
 
-class GUI_SLIDERV : public INPUTSHORICLASS, public GUI_PART {
+class GUI_SLIDERV : public GUI_PART {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_obj;
+
 	MYRECT zentai_box;
+	static Texture* tex;
 public:
+	static void Init(Texture* te) {
+		tex = te;
+	}
 	bool handleMessage(int msg, void* data, DWORD time){return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
 
-class GUI_SLIDERH : public INPUTSHORICLASS, public GUI_PART {
+class GUI_SLIDERH : public GUI_PART {
 private:
-//	RENDEREFFECT_Object* render_effect;
-//	RENDERTEX_Object* render_obj;
+
 	MYRECT zentai_box;
+	static Texture* tex;
 public:
+	static void Init(Texture* te) {
+		tex = te;
+	}
+
 	bool handleMessage(int msg, void* data, DWORD time) { return true;};
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 };
-*/
 
+
+
+class GUI
+{
+public:
+	GUI(void);
+	~GUI(void);
+
+	static void Init(HWND hw, Texture* tex, lua_State* Ld) {
+		GUI_BUTTON::Init(Ld, tex);
+		GUI_SLIDERH::Init(tex);
+		GUI_SLIDERV::Init(tex);
+		GUI_TEX::Init(tex);
+		GUI_TEXT::Init(tex);
+		GUI_WINDOW::Init(tex);
+		GUI_TAB::Init(tex);
+		GUI_INPUTTEXT::Init(hw, tex);
+	}
+
+
+
+};
 
 }
 
