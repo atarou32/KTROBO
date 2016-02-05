@@ -91,6 +91,32 @@ GUI_INPUTTEXT::~GUI_INPUTTEXT() {
 	texture->lightdeleteRenderTex(box_tex_id_uenaka);
 }
 
+void GUI_PART::moveBox(int dx, int dy) {
+
+
+	// 動かす
+	box.left += dx;
+	box.right += dx;
+	box.top += dy;
+	box.bottom += dy;
+	if (box.left < max_box.left) {
+		box.right += max_box.left-box.left;
+		box.left = max_box.left;
+	}
+	if (box.top < max_box.top) {
+		box.bottom += max_box.top-box.top;
+		box.top = max_box.top;
+	}
+	if (box.right > max_box.right) {
+		box.left += max_box.right - box.right;
+		box.right = max_box.right;
+	}
+	if (box.bottom > max_box.bottom) {
+		box.top += max_box.bottom - box.bottom;
+		box.bottom = max_box.bottom;
+	}
+}
+
 bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
@@ -100,11 +126,10 @@ bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 		// 範囲に入っているかつ左マウスボタンが押されている→press
 
 		if (getIsMove()) {
-				// 動かす
-				box.left += d->getMOUSESTATE()->mouse_dx;
-				box.right += d->getMOUSESTATE()->mouse_dx;
-				box.top += d->getMOUSESTATE()->mouse_dy;
-				box.bottom += d->getMOUSESTATE()->mouse_dy;
+			
+
+
+
 
 				texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
 				texture->setRenderTexPos(box_tex_id_hidarinaka, box.left, box.top -1 + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
@@ -995,3 +1020,4 @@ Texture* GUI_WINDOW::tex=0;
 Texture* GUI_TAB::tex=0;
 Texture* GUI_SLIDERH::tex =0;
 Texture* GUI_SLIDERV::tex =0;
+MYRECT GUI_PART::max_default_box;

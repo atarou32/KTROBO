@@ -181,6 +181,7 @@ public:
 	int data_int;// コマンドのIDに使う！
 	void* data;
 	bool is_use;
+	
 	DWORD time;
 	MYMESSAGESTRUCT() {
 		msg_id = 0;
@@ -189,6 +190,7 @@ public:
 		is_use = false;
 		time = 0;
 		data_int = 0;
+	
 	}
 	DWORD getTIME() {return time;}
 	int getMSGID() {return msg_id;}
@@ -203,6 +205,7 @@ public:
 	void setData(void* d) {data=d;}
 	void setDataINT(int t) {data_int = t;}
 	void setISUSE(bool i) {is_use=i;}
+
 };
 
 

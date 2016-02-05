@@ -43,12 +43,20 @@ protected:
 	bool is_move; // マウス右ボタンをクリックしながら動かすとなんでも移動させられる
 protected:
 	MYRECT box;
+	MYRECT max_box;
+	static MYRECT max_default_box;
 	GUI_PART() {
 		is_render = true;
 		is_effect = true;
 		is_move = false;
+		max_box = max_default_box;
 	}
 	virtual ~GUI_PART(){}
+public:
+	static void SetDefaultMaxBox(MYRECT* re) {
+		max_default_box = *re;
+	}
+	void moveBox(int dx, int dy);
 	bool getIsRender() {return is_render;}
 	bool getIsEffect() {return is_effect;}
 	bool getIsMove() {return is_move;}
@@ -244,7 +252,7 @@ public:
 	GUI(void);
 	~GUI(void);
 
-	static void Init(HWND hw, Texture* tex, lua_State* Ld) {
+	static void Init(HWND hw, Texture* tex, lua_State* Ld, int screen_width, int screen_height) {
 		GUI_BUTTON::Init(Ld, tex);
 		GUI_SLIDERH::Init(tex);
 		GUI_SLIDERV::Init(tex);
@@ -253,6 +261,12 @@ public:
 		GUI_WINDOW::Init(tex);
 		GUI_TAB::Init(tex);
 		GUI_INPUTTEXT::Init(hw, tex);
+		MYRECT r;
+		r.left = 0;
+		r.right = screen_width;
+		r.top = 0;
+		r.bottom = screen_height;
+		GUI_PART::SetDefaultMaxBox(&r);
 	}
 
 
