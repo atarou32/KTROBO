@@ -144,13 +144,13 @@ protected:
 	bool is_move; // マウス右ボタンをクリックしながら動かすとなんでも移動させられる
 protected:
 	MYRECT box;
-	MYRECT max_box;
+	MYRECT max_boxdayo;
 	static MYRECT max_default_box;
 	GUI_PART() {
 		is_render = false;
 		is_effect = false;
 		is_move = false;
-		max_box = max_default_box;
+		max_boxdayo = max_default_box;
 		box.left = 0;
 		box.right = 0;
 		box.top = 0;
@@ -160,6 +160,29 @@ protected:
 public:
 	static void SetDefaultMaxBox(MYRECT* re) {
 		max_default_box = *re;
+	}
+	void moveBoxSitei(MYRECT* rect, MYRECT* maxb, int dx, int dy) {
+		rect->left += dx;
+		rect->right += dx;
+		rect->top += dy;
+		rect->bottom += dy;
+
+		if (rect->left < maxb->left) {
+			rect->right += maxb->left-rect->left;
+			rect->left = maxb->left;
+		}
+		if (rect->top < maxb->top) {
+			rect->bottom += maxb->top-rect->top;
+			rect->top = maxb->top;
+		}
+		if (rect->right > maxb->right) {
+			rect->left += maxb->right - rect->right;
+			rect->right = maxb->right;
+		}
+		if (rect->bottom > maxb->bottom) {
+			rect->top += maxb->bottom - rect->bottom;
+			rect->bottom = maxb->bottom;
+		}
 	}
 	virtual void moveBox(int dx, int dy);
 	bool getIsRender() {return is_render;}
@@ -293,7 +316,7 @@ public:
 		tex->setRenderTexPos(tex_id, box.left, box.top);
 	}
 
-	GUI_TEX(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height) {
+	GUI_TEX(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height) : GUI_PART() {
 		int te = tex->getTexture(tex_name);
 		tex_id = tex->getRenderTex(te,0xFFFFFFFF,(int)x,(int)y,(int)width,(int)height,(int)tex_x,(int)tex_y,(int)tex_width,(int)tex_height);
 	}
@@ -321,7 +344,7 @@ public:
 		tex = te;
 	}
 public:
-	GUI_WINDOW(int x, int y, int width, int height) {
+	GUI_WINDOW(int x, int y, int width, int height):  GUI_PART() {
 		box.left = x;
 		box.top = y;
 		box.right = x + width;
@@ -432,7 +455,7 @@ private:
 	static unsigned int f_colors[8];
 
 public:
-	GUI_TAB(int tab_index) {
+	GUI_TAB(int tab_index) : GUI_PART() {
 		this->tab_index = tab_index;
 		now_index = 0;
 	}
@@ -546,11 +569,14 @@ private:
 	int tex_id_min;
 	int tex_id_max;
 	int tex_id_now;
+	float getTexIdNowY();
+	void setMINMAXNOWFROMZENTAI();
 public:
 	GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l_str);
 	~GUI_SLIDERV();
 	
 	void moveBox(int dx, int dy);
+	void moveAllBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t) {is_effect = t;}
 	void setIsRender(bool t) {
@@ -584,13 +610,15 @@ private:
 	int tex_id_min;
 	int tex_id_max;
 	int tex_id_now;
+	float getTexIdNowX();
+	void setMINMAXNOWFROMZENTAI();
 public:
 	GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l_str);
 	~GUI_SLIDERH();
 	void moveBox(int dx, int dy);
-	
+	void moveAllBox(int dx, int dy);
 
-	bool handleMessage(int msg, void* data, DWORD time) { return true;};
+	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t) {
 		is_effect = t;
 	}

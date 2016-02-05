@@ -227,21 +227,21 @@ void GUI_PART::moveBox(int dx, int dy) {
 	box.right += dx;
 	box.top += dy;
 	box.bottom += dy;
-	if (box.left < max_box.left) {
-		box.right += max_box.left-box.left;
-		box.left = max_box.left;
+	if (box.left < max_boxdayo.left) {
+		box.right += max_boxdayo.left-box.left;
+		box.left = max_boxdayo.left;
 	}
-	if (box.top < max_box.top) {
-		box.bottom += max_box.top-box.top;
-		box.top = max_box.top;
+	if (box.top < max_boxdayo.top) {
+		box.bottom += max_boxdayo.top-box.top;
+		box.top = max_boxdayo.top;
 	}
-	if (box.right > max_box.right) {
-		box.left += max_box.right - box.right;
-		box.right = max_box.right;
+	if (box.right > max_boxdayo.right) {
+		box.left += max_boxdayo.right - box.right;
+		box.right = max_boxdayo.right;
 	}
-	if (box.bottom > max_box.bottom) {
-		box.top += max_box.bottom - box.bottom;
-		box.bottom = max_box.bottom;
+	if (box.bottom > max_boxdayo.bottom) {
+		box.top += max_boxdayo.bottom - box.bottom;
+		box.bottom = max_boxdayo.bottom;
 	}
 }
 void GUI_INPUTTEXT::moveBox(int dx, int dy) {
@@ -1178,6 +1178,14 @@ bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 		}
 	}
 
+	int size = child_windows.size();
+	if (size) {
+		if (child_windows[now_index]->handleMessage(msg, data,time)) {
+			return true;
+		}
+	}
+
+
 	return false;
 }
 
@@ -1211,43 +1219,231 @@ GUI_SLIDERV::GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l
 		KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, KTROBO_GUI_SLIDERVMIN_NORMAL_LEFT, KTROBO_GUI_SLIDERVMIN_NORMAL_TOP,
 		KTROBO_GUI_SLIDERVMIN_NORMAL_WIDTH, KTROBO_GUI_SLIDERVMIN_NORMAL_HEIGHT);
 
-	float m = max - min;
-	float tex_id_now_y= zentai.bottom-KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	if (m > 0.0001f) {
-
-		tex_id_now_y= zentai.bottom - 2*KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - (zentai.bottom - zentai.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
-	}
+	float tex_id_now_y = getTexIdNowY();
 
 	this->tex_id_now = tex->getRenderTex(tex_id, 0xFFFFFFFF,zentai.left, tex_id_now_y, zentai.right-zentai.left, KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, 
 		KTROBO_GUI_SLIDERNOW_NORMAL_LEFT, KTROBO_GUI_SLIDERNOW_NORMAL_TOP, KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH, KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT);
-	box.left = zentai.left;
-	box.right = zentai.right;//tex_id_now_x + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	box.top = tex_id_now_y;
-	box.bottom = tex_id_now_y+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	min_box.left = zentai.left;
-	min_box.right = zentai.right;//zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	min_box.top = zentai.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	min_box.bottom = zentai.bottom;
-	max_box.left = zentai.left;// - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	max_box.right = zentai.right;
-	max_box.top = zentai.top;
-	max_box.bottom = zentai.top + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;//.bottom;
 
+	setMINMAXNOWFROMZENTAI();
+/*	max_boxdayo.left = zentai.left;// + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_boxdayo.top = zentai.top+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_boxdayo.bottom = zentai.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_boxdayo.right = zentai.right;// - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+*/
 }
 
 GUI_SLIDERV::~GUI_SLIDERV() {
+	tex->lightdeleteRenderTex(tex_id_now);
+	tex->lightdeleteRenderTex(tex_id_max);
+	tex->lightdeleteRenderTex(tex_id_min);
 
 }
 
 	
 void GUI_SLIDERV::moveBox(int dx, int dy) {
+	
+	MYRECT r;
+	r.left = zentai_box.left;
+	r.right =zentai_box.right;
+	r.top = zentai_box.top + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	r.bottom = zentai_box.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 
+	GUI_PART::moveBoxSitei(&box, &r,dx,dy);
+	// 移動した後に位置からnowを計算する
+//		tex_id_now_y= zentai_box.bottom - 2*KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - (zentai_box.bottom - zentai_box.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
+
+	now = min + (min - max ) * (box.top + 2* KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - zentai_box.bottom)/(float)(zentai_box.bottom - zentai_box.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3);
+
+	tex->setRenderTexPos(tex_id_now, box.left,box.top);
 }
 bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
+	
+	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
+		// 範囲に入っているかつ左マウスボタンが押されていない→focus
+		// 範囲に入っているかつ左マウスボタンが押されている→press
+
+		if (getIsMove()) {
+			
+
+			moveAllBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+			
+		}
+
+		if (is_min_pressed && getIsEffect()) {
+
+			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			// lua ファイル実行
+		}
+
+		if (is_max_pressed && getIsEffect()) {
+
+			moveBox(abs(d->getMOUSESTATE()->mouse_dx), abs(d->getMOUSESTATE()->mouse_dy));
+			// lua ファイル実行
+
+		}
+
+		if (is_box_moved && getIsEffect()) {
+			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+			// lua ファイル実行
+		}
+	
+
+		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
+		if (butukari & BUTUKARIPOINT_IN) {
+
+			
+
+			if (!is_effect) { 
+				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERVMIN_FOCUS_LEFT, KTROBO_GUI_SLIDERVMIN_FOCUS_TOP,
+					KTROBO_GUI_SLIDERVMIN_FOCUS_WIDTH,KTROBO_GUI_SLIDERVMIN_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERVMAX_FOCUS_LEFT, KTROBO_GUI_SLIDERVMAX_FOCUS_TOP,
+					KTROBO_GUI_SLIDERVMAX_FOCUS_WIDTH,KTROBO_GUI_SLIDERVMAX_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_FOCUS_LEFT, KTROBO_GUI_SLIDERNOW_FOCUS_TOP,
+					KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH,KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT);
+			}
+		} else {
+
+		// 範囲に入ってなければnormal
+			if (!is_effect) {
+					tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERVMIN_NORMAL_LEFT, KTROBO_GUI_SLIDERVMIN_NORMAL_TOP,
+					KTROBO_GUI_SLIDERVMIN_NORMAL_WIDTH,KTROBO_GUI_SLIDERVMIN_NORMAL_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERVMAX_NORMAL_LEFT, KTROBO_GUI_SLIDERVMAX_NORMAL_TOP,
+					KTROBO_GUI_SLIDERVMAX_NORMAL_WIDTH,KTROBO_GUI_SLIDERVMAX_NORMAL_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_NORMAL_LEFT, KTROBO_GUI_SLIDERNOW_NORMAL_TOP,
+					KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH,KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT);
+	
+			}
+		}
+	}
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		// 範囲に入っているかつ左マウスボタンが押されている→press
+		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
+			this->setIsMove(true);
+		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+			
+			unsigned int butu_max = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &max_box);
+			unsigned int butu_min = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &min_box);
+			unsigned int butu_now = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
+			if (butu_max & BUTUKARIPOINT_IN) {
+				is_max_pressed = true;
+				this->setIsEffect(true);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERVMAX_PRESS_LEFT, KTROBO_GUI_SLIDERVMAX_PRESS_TOP,
+					KTROBO_GUI_SLIDERVMAX_PRESS_WIDTH,KTROBO_GUI_SLIDERVMAX_PRESS_HEIGHT);
+			} else if (butu_min & BUTUKARIPOINT_IN) {
+				is_min_pressed = true;
+				this->setIsEffect(true);
+				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERVMIN_PRESS_LEFT, KTROBO_GUI_SLIDERVMIN_PRESS_TOP,
+					KTROBO_GUI_SLIDERVMIN_PRESS_WIDTH,KTROBO_GUI_SLIDERVMIN_PRESS_HEIGHT);
+			} else if (butu_now & BUTUKARIPOINT_IN) {
+				is_box_moved = true;
+				this->setIsEffect(true);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_PRESS_LEFT, KTROBO_GUI_SLIDERNOW_PRESS_TOP,
+					KTROBO_GUI_SLIDERNOW_PRESS_WIDTH,KTROBO_GUI_SLIDERNOW_PRESS_HEIGHT);
+			}
+
+		}
+
+		if (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_UP) {
+			this->setIsMove(false);
+		}
+
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
+			// ボタンが離されたので
+			if (getIsEffect()) {
+			
+				setIsEffect(false);
+
+				// focusに戻す
+				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERVMIN_FOCUS_LEFT, KTROBO_GUI_SLIDERVMIN_FOCUS_TOP,
+					KTROBO_GUI_SLIDERVMIN_FOCUS_WIDTH,KTROBO_GUI_SLIDERVMIN_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERVMAX_FOCUS_LEFT, KTROBO_GUI_SLIDERVMAX_FOCUS_TOP,
+					KTROBO_GUI_SLIDERVMAX_FOCUS_WIDTH,KTROBO_GUI_SLIDERVMAX_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_FOCUS_LEFT, KTROBO_GUI_SLIDERNOW_FOCUS_TOP,
+					KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH,KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT);
+				is_min_pressed = false;
+				is_max_pressed = false;
+				is_box_moved =false;
+				return true;
+			}
+		}
+	}
+
+	
+
+	return false;// 次のストラクトに渡す
+
+
 
 
 
 }
+
+float GUI_SLIDERH::getTexIdNowX() {
+		float m = max - min;
+	float tex_id_now_x = zentai_box.left+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	if (m > 0.0001f) {
+
+		tex_id_now_x = zentai_box.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT + (zentai_box.right - zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
+	}
+
+	return tex_id_now_x;
+}
+void GUI_SLIDERH::setMINMAXNOWFROMZENTAI() {
+
+	float tex_id_now_x = getTexIdNowX();
+	box.left = tex_id_now_x;
+	box.right = tex_id_now_x + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	box.top = zentai_box.top;
+	box.bottom = zentai_box.bottom;
+	min_box.left = zentai_box.left;
+	min_box.right = zentai_box.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.top = zentai_box.top;
+	min_box.bottom = zentai_box.bottom;
+	max_box.left = zentai_box.right - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_box.right = zentai_box.right;
+	max_box.top = zentai_box.top;
+	max_box.bottom = zentai_box.bottom;
+	tex->setRenderTexPos(tex_id_now, box.left,box.top);
+	tex->setRenderTexPos(tex_id_max, max_box.left, max_box.top);
+	tex->setRenderTexPos(tex_id_min, min_box.left, min_box.top);
+}
+
+
+
+
+
+float GUI_SLIDERV::getTexIdNowY() {
+		float m = max - min;
+	float tex_id_now_y= zentai_box.bottom-KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	if (m > 0.0001f) {
+
+		tex_id_now_y= zentai_box.bottom - 2*KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - (zentai_box.bottom - zentai_box.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
+	}
+
+	return tex_id_now_y;
+}
+void GUI_SLIDERV::setMINMAXNOWFROMZENTAI() {
+	float tex_id_now_y = getTexIdNowY();
+	box.left = zentai_box.left;
+	box.right = zentai_box.right;//tex_id_now_x + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	box.top = tex_id_now_y;
+	box.bottom = tex_id_now_y+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.left = zentai_box.left;
+	min_box.right = zentai_box.right;//zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.top = zentai_box.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	min_box.bottom = zentai_box.bottom;
+	max_box.left = zentai_box.left;// - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_box.right = zentai_box.right;
+	max_box.top = zentai_box.top;
+	max_box.bottom = zentai_box.top + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;//.bottom;
+	tex->setRenderTexPos(tex_id_now, box.left,box.top);
+	tex->setRenderTexPos(tex_id_max, max_box.left, max_box.top);
+	tex->setRenderTexPos(tex_id_min, min_box.left, min_box.top);
+}
+
 
 
 
@@ -1272,45 +1468,187 @@ GUI_SLIDERH::GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l
 		zentai.bottom - zentai.top, KTROBO_GUI_SLIDERHMIN_NORMAL_LEFT, KTROBO_GUI_SLIDERHMIN_NORMAL_TOP,
 		KTROBO_GUI_SLIDERHMIN_NORMAL_WIDTH, KTROBO_GUI_SLIDERHMIN_NORMAL_HEIGHT);
 
-	float m = max - min;
-	float tex_id_now_x = zentai.left+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	if (m > 0.0001f) {
-
-		tex_id_now_x = zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT + (zentai.right - zentai.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
-	}
+	float tex_id_now_x = getTexIdNowX();
 
 	this->tex_id_now = tex->getRenderTex(tex_id, 0xFFFFFFFF,tex_id_now_x,zentai.top,KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, zentai.bottom-zentai.top, 
 		KTROBO_GUI_SLIDERNOW_NORMAL_LEFT, KTROBO_GUI_SLIDERNOW_NORMAL_TOP, KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH, KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT);
-	box.left = tex_id_now_x;
-	box.right = tex_id_now_x + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	box.top = zentai.top;
-	box.bottom = zentai.bottom;
-	min_box.left = zentai.left;
-	min_box.right = zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	min_box.top = zentai.top;
-	min_box.bottom = zentai.bottom;
-	max_box.left = zentai.right - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
-	max_box.right = zentai.right;
-	max_box.top = zentai.top;
-	max_box.bottom = zentai.bottom;
-
+	
+	setMINMAXNOWFROMZENTAI();
+/*	max_boxdayo.left = zentai.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	max_boxdayo.top = zentai.top;
+	max_boxdayo.bottom = zentai.bottom;
+	max_boxdayo.right = zentai.right - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	*/
 }
 
 
 GUI_SLIDERH::~GUI_SLIDERH() {
 
+	tex->lightdeleteRenderTex(tex_id_now);
+	tex->lightdeleteRenderTex(tex_id_max);
+	tex->lightdeleteRenderTex(tex_id_min);
 
 
 
 }
 	
 void GUI_SLIDERH::moveBox(int dx, int dy) {
+	MYRECT r;
+	r.left = zentai_box.left+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	r.right =zentai_box.right- KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
+	r.top = zentai_box.top;
+	r.bottom = zentai_box.bottom;
+
+	GUI_PART::moveBoxSitei(&box, &r,dx,dy);
+	// 移動した後に位置からnowを計算する
+//			tex_id_now_x = zentai_box.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT + (zentai_box.right - zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
+	now = (box.left - zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT)*(max-min) / (float)(zentai_box.right- zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)+min;
+	tex->setRenderTexPos(tex_id_now, box.left,box.top);
+
+}
+
+
+void GUI_SLIDERH::moveAllBox(int dx, int dy) {
+
+	GUI_PART::moveBoxSitei(&zentai_box,&max_boxdayo, dx, dy);
+	// 移動したので
+	setMINMAXNOWFROMZENTAI();
+
+	
 
 
 
 
 }
+
+
+void GUI_SLIDERV::moveAllBox(int dx, int dy) {
+	GUI_PART::moveBoxSitei(&zentai_box, &max_boxdayo, dx, dy);
+	// 移動したので
+	setMINMAXNOWFROMZENTAI();
+
+
+}
+
 bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
+
+
+	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
+		// 範囲に入っているかつ左マウスボタンが押されていない→focus
+		// 範囲に入っているかつ左マウスボタンが押されている→press
+
+		if (getIsMove()) {
+			
+
+			moveAllBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+			
+		}
+
+		if (is_min_pressed && getIsEffect()) {
+
+			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			// lua ファイル実行
+		}
+
+		if (is_max_pressed && getIsEffect()) {
+
+			moveBox(abs(d->getMOUSESTATE()->mouse_dx), abs(d->getMOUSESTATE()->mouse_dy));
+			// lua ファイル実行
+
+		}
+
+		if (is_box_moved && getIsEffect()) {
+			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+			// lua ファイル実行
+		}
+	
+
+		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
+		if (butukari & BUTUKARIPOINT_IN) {
+
+			
+
+			if (!is_effect) { 
+				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_FOCUS_LEFT, KTROBO_GUI_SLIDERHMIN_FOCUS_TOP,
+					KTROBO_GUI_SLIDERHMIN_FOCUS_WIDTH,KTROBO_GUI_SLIDERHMIN_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERHMAX_FOCUS_LEFT, KTROBO_GUI_SLIDERHMAX_FOCUS_TOP,
+					KTROBO_GUI_SLIDERHMAX_FOCUS_WIDTH,KTROBO_GUI_SLIDERHMAX_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_FOCUS_LEFT, KTROBO_GUI_SLIDERNOW_FOCUS_TOP,
+					KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH,KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT);
+			}
+		} else {
+
+		// 範囲に入ってなければnormal
+			if (!is_effect) {
+					tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_NORMAL_LEFT, KTROBO_GUI_SLIDERHMIN_NORMAL_TOP,
+					KTROBO_GUI_SLIDERHMIN_NORMAL_WIDTH,KTROBO_GUI_SLIDERHMIN_NORMAL_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERHMAX_NORMAL_LEFT, KTROBO_GUI_SLIDERHMAX_NORMAL_TOP,
+					KTROBO_GUI_SLIDERHMAX_NORMAL_WIDTH,KTROBO_GUI_SLIDERHMAX_NORMAL_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_NORMAL_LEFT, KTROBO_GUI_SLIDERNOW_NORMAL_TOP,
+					KTROBO_GUI_SLIDERNOW_NORMAL_WIDTH,KTROBO_GUI_SLIDERNOW_NORMAL_HEIGHT);
+	
+			}
+		}
+	}
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		// 範囲に入っているかつ左マウスボタンが押されている→press
+		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
+			this->setIsMove(true);
+		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+			
+			unsigned int butu_max = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &max_box);
+			unsigned int butu_min = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &min_box);
+			unsigned int butu_now = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
+			if (butu_max & BUTUKARIPOINT_IN) {
+				is_max_pressed = true;
+				this->setIsEffect(true);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERHMAX_PRESS_LEFT, KTROBO_GUI_SLIDERHMAX_PRESS_TOP,
+					KTROBO_GUI_SLIDERHMAX_PRESS_WIDTH,KTROBO_GUI_SLIDERHMAX_PRESS_HEIGHT);
+			} else if (butu_min & BUTUKARIPOINT_IN) {
+				is_min_pressed = true;
+				this->setIsEffect(true);
+				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_PRESS_LEFT, KTROBO_GUI_SLIDERHMIN_PRESS_TOP,
+					KTROBO_GUI_SLIDERHMIN_PRESS_WIDTH,KTROBO_GUI_SLIDERHMIN_PRESS_HEIGHT);
+			} else if (butu_now & BUTUKARIPOINT_IN) {
+				is_box_moved = true;
+				this->setIsEffect(true);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_PRESS_LEFT, KTROBO_GUI_SLIDERNOW_PRESS_TOP,
+					KTROBO_GUI_SLIDERNOW_PRESS_WIDTH,KTROBO_GUI_SLIDERNOW_PRESS_HEIGHT);
+			}
+
+		}
+
+		if (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_UP) {
+			this->setIsMove(false);
+		}
+
+		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
+			// ボタンが離されたので
+			if (getIsEffect()) {
+			
+				setIsEffect(false);
+
+				// focusに戻す
+				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_FOCUS_LEFT, KTROBO_GUI_SLIDERHMIN_FOCUS_TOP,
+					KTROBO_GUI_SLIDERHMIN_FOCUS_WIDTH,KTROBO_GUI_SLIDERHMIN_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERHMAX_FOCUS_LEFT, KTROBO_GUI_SLIDERHMAX_FOCUS_TOP,
+					KTROBO_GUI_SLIDERHMAX_FOCUS_WIDTH,KTROBO_GUI_SLIDERHMAX_FOCUS_HEIGHT);
+				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_FOCUS_LEFT, KTROBO_GUI_SLIDERNOW_FOCUS_TOP,
+					KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH,KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT);
+				is_min_pressed = false;
+				is_max_pressed = false;
+				is_box_moved =false;
+				return true;
+			}
+		}
+	}
+
+	
+
+	return false;// 次のストラクトに渡す
 
 
 
