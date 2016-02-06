@@ -133,12 +133,9 @@ namespace KTROBO {
 
 #define KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT 20
 
-interface HasRenderFunc {
-	virtual void render(Graphics* g)=0;
-};
 
 
-class GUI_PART : public INPUTSHORICLASS, public HasRenderFunc {
+class GUI_PART : public INPUTSHORICLASS{
 protected:
 	bool is_render;
 	bool is_effect;
@@ -195,7 +192,7 @@ public:
 	virtual void setIsEffect(bool t)=0;
 	MYRECT* getBox() {return &box;}
 	virtual bool handleMessage(int msg, void* data, DWORD time) =0;
-	virtual void render(Graphics* g){};
+	
 };
 
 
@@ -231,7 +228,7 @@ class GUI_BUTTON : public GUI_PART
 private:
 	int box_tex_id;
 	char l_str[128]; // pressされたときによばれるLuaファイル
-	Text* button_text;
+	int button_text;
 static lua_State* L; // handlemessageが呼ばれるのは AIスレッドなのでAIスレッドのLを呼ぶ
 static Texture* texture;
 
@@ -244,7 +241,7 @@ public:
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
-	void render(Graphics* g);
+	
 	GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len, char* info);
 	~GUI_BUTTON();
 };
@@ -255,7 +252,8 @@ class GUI_INPUTTEXT : public GUI_PART
 private:
 
 	Text* text;
-	
+	int input_text;
+
 	int box_tex_id_naka;
 	int box_tex_id_hidariue;
 	int box_tex_id_hidarinaka;
@@ -307,7 +305,7 @@ public:
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
-	void render(Graphics* g);
+	
 	char* getStr() {
 		return text->getStr();
 	}
@@ -319,7 +317,7 @@ class GUI_TEXT : public GUI_PART
 {
 private:
 	static Texture* tex;
-	Text* text;
+	int text;
 public:
 	static void Init(Texture* te) {
 		tex = te;
@@ -330,7 +328,7 @@ public:
 
 	GUI_TEXT(float x, float y, float width, float height, char* tex);
 	~GUI_TEXT();
-	void render(Graphics* g);
+	
 
 };
 
@@ -458,6 +456,7 @@ public:
 	
 		CS::instance()->leave(CS_RENDERDATA_CS, " setisrender window");
 	}
+	/*
 	void render(Graphics* g) {
 		CS::instance()->enter(CS_RENDERDATA_CS, "render window");
 		if (is_render) {
@@ -470,7 +469,7 @@ public:
 			}
 		}
 		CS::instance()->leave(CS_RENDERDATA_CS, "render window");
-	}
+	}*/
 };
 
 
@@ -478,7 +477,7 @@ class GUI_TAB : public GUI_PART
 {
 private:
 	int tab_index; //　ルートから何番目のタブかということ
-	vector<Text*> window_names;// デストラクタが呼ばれる
+	vector<int> window_names;// デストラクタが呼ばれる
 	vector<GUI_WINDOW*> child_windows;// tabのデストラクトが呼ばれてもwindowをデストラクトはされない
 	vector<int> tex_rects; 
 	vector<MYRECT> tex_rect_boxs;
@@ -497,27 +496,24 @@ public:
 		now_index = 0;
 	}
 	~GUI_TAB() {
-		vector<Text*>::iterator it = window_names.begin();
+		vector<int>::iterator it = window_names.begin();
 		while(it != window_names.end()) {
-			Text* t = *it;
-			if (t) {
+			int t = *it;
+			/*if (t) {
 				delete t;
 				t = 0;
-			}
+			}*/
+			tex->lightdeleteRenderText(t);
 			it = it + 1;
 		}
+		window_names.clear();
 	}
 	void setWindow(GUI_WINDOW* c, string name) {
 		c->setIsRender(false);
 		c->setIsEffect(false);
 		
 		child_windows.push_back(c);
-		stringconverter sc;
-		WCHAR buf[512];
-		memset(buf,0,sizeof(WCHAR)*512);
-		sc.charToWCHAR(name.c_str(), buf);
-		Text* t = new Text(buf, wcslen(buf));
-		window_names.push_back(t);
+		
 		
 		// tex_rectsにMYRECT int を入れる
 		int tsize = tex_rects.size();
@@ -533,6 +529,12 @@ public:
 		r.bottom = r.top + KTROBO_GUI_TAB_HEIGHT;
 		tex_rects.push_back(tex_id);
 		tex_rect_boxs.push_back(r);
+
+		char namet[512];
+		strcpy_s(namet,512,name.c_str());
+		int t = tex->getRenderText(namet, r.left,r.top,r.bottom-r.top, r.right-r.left, r.bottom - r. top); 
+		window_names.push_back(t);
+		
 	}
 
 	static void Init(Texture* te) {
@@ -572,9 +574,12 @@ public:
 		int wsize = child_windows.size();
 		for (int i=0;i<wsize;i++) {
 			child_windows[i]->setIsRender(false);
+			tex->setRenderTextIsRender(window_names[i],false);
 		}
 		child_windows[now_index]->setIsRender(t);
+		tex->setRenderTextIsRender(window_names[now_index], t);
 	}
+	/*
 	void render(Graphics* g) {
 		// now_indexのwindow_nameを呼ぶ
 		if (window_names.size()) {
@@ -585,7 +590,7 @@ public:
 						
 			}
 		}
-	}
+	}*/
 };
 
 class GUI_SLIDERV : public GUI_PART {

@@ -8,6 +8,8 @@
 #include "MyTextureLoader.h"
 #include "KTRoboCS.h"
 #include <set>
+#include "KTRoboText.h"
+
 
 namespace KTROBO {
 
@@ -50,9 +52,28 @@ public:
 	TO_LUA virtual void lightdeleteRenderTex(int render_tex_index)=0; // vectorから消さない　indexバッファは更新するis_use is_render is_need_load をfalseにする texのis_need_loadをtrueにする
 	TO_LUA virtual void lightdeleteRenderBillBoard(int bill_index)=0; // vectorから消さない  実際のindexバッファの更新はvertextotextureの中で行う
 	TO_LUA virtual void deleteAll()=0;
+
+	TO_LUA virtual int getRenderText(char* t, int x, int y, int tex_h, int width, int height)=0;
+	TO_LUA virtual void setRenderTextPos(int text_id, int x, int y)=0;
+	TO_LUA virtual void setRenderTextChangeText(int text_id, char* t)=0;
+	TO_LUA virtual void setRenderTextColor(int text_id, unsigned int color)=0;
+	TO_LUA virtual void setRenderTextIsRender(int text_id, bool t)=0;
+	TO_LUA virtual void lightdeleteRenderText(int text_id)=0;
+	TO_LUA virtual float getRenderTextWidth(int text_id, int height)=0;
 };
 
-
+class RenderText {
+public:
+	Text* text;
+	unsigned int color;
+	int x;
+	int y;
+	int tex_h;
+	int width;
+	int height;
+	bool is_use;
+	bool is_render;
+};
 
 
 
@@ -361,6 +382,7 @@ private:
 	void updateCBuf1(Graphics* g, TexturePart* part);
 
 public:
+
 	static void Init(Graphics* g);
 	static void Del();
 	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
@@ -392,6 +414,10 @@ private:
 	bool is_all_delete;
 	MyTextureLoader::MY_TEXTURE_CLASS* vtex_tex;
 	MyTextureLoader::MY_TEXTURE_CLASS* vtex_bill;
+
+
+	vector<RenderText*> render_texts;
+	set<int> render_texts_erased;
 
 	void _render(Graphics* g, int part_size, int p_index);
 	void _renderTex(Graphics* g, TexturePart* p);
@@ -452,7 +478,16 @@ public:
 		parts.clear();
 		texturepart_index.clear();
 
-
+		int text_size = render_texts.size();
+		for (int i=0;i<text_size;i++) {
+			if (render_texts[i]) {
+				delete render_texts[i]->text;
+				delete render_texts[i];
+				render_texts[i] = 0;
+			}
+		}
+		render_texts.clear();
+		render_texts_erased.clear();
 	}
 	~Texture(void){
 		Release();
@@ -494,6 +529,15 @@ public:
 	void lightdeleteRenderBillBoard(int bill_id);
 
 	void deleteAll();
+
+
+	int getRenderText(char* t, int x, int y, int tex_h, int width, int height);
+	void setRenderTextColor(int text_id, unsigned int color);
+	void setRenderTextIsRender(int text_id, bool t);
+	void lightdeleteRenderText(int text_id);
+	void setRenderTextPos(int text_id, int x, int y);
+	void setRenderTextChangeText(int text_id, char* t);
+	float getRenderTextWidth(int text_id, int height);
 
 };
 

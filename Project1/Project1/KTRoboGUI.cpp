@@ -168,21 +168,21 @@ int GUI::makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, c
 }
 
 void GUI::setEffect(int gui_id, bool t) {
-	CS::instance()->enter(CS_RENDERDATA_CS, "seteffect");
+	CS::instance()->enter(CS_MESSAGE_CS, "seteffect");
 	int size = parts.size();
 	if (gui_id >=0 && size > gui_id) {
 		parts[gui_id]->setIsEffect(t);
 	}
-	CS::instance()->leave(CS_RENDERDATA_CS, "seteffect");
+	CS::instance()->leave(CS_MESSAGE_CS, "seteffect");
 }
 
 void GUI::setRender(int gui_id, bool t) {
-	CS::instance()->enter(CS_RENDERDATA_CS, "seteffect");
+	CS::instance()->enter(CS_MESSAGE_CS, "seteffect");
 	int size = parts.size();
 	if (gui_id >=0 && size > gui_id) {
 		parts[gui_id]->setIsRender(t);
 	}
-	CS::instance()->leave(CS_RENDERDATA_CS, "seteffect");
+	CS::instance()->leave(CS_MESSAGE_CS, "seteffect");
 }
 
 void GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
@@ -198,33 +198,107 @@ void GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
 
 	if (p_windows_index.find(window_gui_id) != p_windows_index.end()) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "push part to window");
+		CS::instance()->enter(CS_MESSAGE_CS, "push part to window");
 		windows[p_windows_index[window_gui_id]]->setBody(part);
-		CS::instance()->leave(CS_RENDERDATA_CS, "push part to window");
+		CS::instance()->leave(CS_MESSAGE_CS, "push part to window");
 	}
 }
 
 void GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
+	if (tab_gui_id == window_gui_id) return;
 
+	if (p_windows_index.find(window_gui_id) != p_windows_index.end()) {
+		if (p_tabs_index.find(tab_gui_id) != p_tabs_index.end()) {
+			CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
+			GUI_TAB* t = tabs[p_tabs_index[tab_gui_id]];
+			GUI_WINDOW* w = windows[p_windows_index[window_gui_id]];
+			t->setWindow(w,string(window_name));
 
+			CS::instance()->leave(CS_MESSAGE_CS, "push part to tab");
+		}
+	}
 
 }
 
 char* GUI::getStrFromInput(int gui_id) {
 
-
-
-	return 0;
+	CS::instance()->enter(CS_MESSAGE_CS, "setstr");
+	char* s;
+	int size = parts.size();
+	if (gui_id >=0 && size > gui_id) {
+		if (p_inputtexts_index.find(gui_id) != p_inputtexts_index.end()) {
+			s = inputtexts[p_inputtexts_index[gui_id]]->getStr();
+			CS::instance()->leave(CS_MESSAGE_CS, "setstr");
+			return s;
+		}
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "setstr");
+	return "none";
 }
+
 float GUI::getNowFromSlider(int gui_id) {
+	CS::instance()->enter(CS_MESSAGE_CS, "getnow");
+	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
+
+		GUI_SLIDERH* s = sliderhs[p_sliderhs_index[gui_id]];
+		float ans = s->getNow();
+		CS::instance()->leave(CS_MESSAGE_CS, "getnow");
+		return ans;
+	}
+	if (p_slidervs_index.find(gui_id) != p_slidervs_index.end()) {
+
+		GUI_SLIDERV* s = slidervs[p_slidervs_index[gui_id]];
+		float ans = s->getNow();
+		CS::instance()->leave(CS_MESSAGE_CS, "getnow");
+		return ans;
+	}
+
+
+	CS::instance()->leave(CS_MESSAGE_CS, "getnow");
 	return 0;
 
 }
 float GUI::getMaxFromSlider(int gui_id) {
+	CS::instance()->enter(CS_MESSAGE_CS, "getmax");
+	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
+
+		GUI_SLIDERH* s = sliderhs[p_sliderhs_index[gui_id]];
+		float ans = s->getMax();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmax");
+		return ans;
+	}
+	if (p_slidervs_index.find(gui_id) != p_slidervs_index.end()) {
+
+		GUI_SLIDERV* s = slidervs[p_slidervs_index[gui_id]];
+		float ans = s->getMax();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmax");
+		return ans;
+	}
+
+
+	CS::instance()->leave(CS_MESSAGE_CS, "getmax");
 	return 0;
 
 }
 float GUI::getMinFromSlider(int gui_id) {
+	CS::instance()->enter(CS_MESSAGE_CS, "getmin");
+	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
+
+		GUI_SLIDERH* s = sliderhs[p_sliderhs_index[gui_id]];
+		float ans = s->getMin();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return ans;
+	}
+	if (p_slidervs_index.find(gui_id) != p_slidervs_index.end()) {
+
+		GUI_SLIDERV* s = slidervs[p_slidervs_index[gui_id]];
+		float ans = s->getMin();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return ans;
+	}
+
+
+	CS::instance()->leave(CS_MESSAGE_CS, "getmin");
 	return 0;
 
 
@@ -234,10 +308,18 @@ float GUI::getMinFromSlider(int gui_id) {
 void GUI::setRootWindowToInputMessageDispatcher(int gui_window_id) {
 
 
+	CS::instance()->enter(CS_MESSAGE_CS, "inputmessage");
 
-
-
-
+	if (p_windows_index.find(gui_window_id) != p_windows_index.end()) {
+		GUI_WINDOW* w = windows[p_windows_index[gui_window_id]];
+		INPUTGETBYMESSAGESTRUCT* c = InputMessageDispatcher::getRootInputGetStruct();
+		INPUTGETBYMESSAGESTRUCT* cc = c;
+		while(c->getParent() && (cc != c->getParent())) {
+			c = c->getParent();
+		}
+		InputMessageDispatcher::registerImpl(w,NULL,c->impl);
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "inputmessage");
 
 }
 
@@ -363,6 +445,7 @@ void GUI_BUTTON::setIsEffect(bool t) {
 void GUI_BUTTON::setIsRender(bool t) {
 	is_render = t;
 	texture->setRenderTexIsRender(box_tex_id,t);
+	texture->setRenderTextIsRender(this->button_text,t);
 }
 GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, int len, char* info) : GUI_PART() {
 	box.left = x;
@@ -381,18 +464,20 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 	WCHAR buf[512];
 	memset(buf,0,sizeof(WCHAR)*512);
 	sc.charToWCHAR(info,buf);
-	button_text = new Text(buf,wcslen(buf));
+	float wid = wcslen(buf) * KTROBO_GUI_BUTTON_TEXT_HEIGHT;
+	button_text = texture->getRenderText(info, (box.left + box.right)/2 - wid/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2, KTROBO_GUI_BUTTON_TEXT_HEIGHT,
+			wid,KTROBO_GUI_BUTTON_TEXT_HEIGHT);
+//		button_text->render(g,0xFFFFFFFF, (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2, KTROBO_GUI_BUTTON_TEXT_HEIGHT,
+//			width,KTROBO_GUI_BUTTON_TEXT_HEIGHT);
+
 	
 }
 GUI_BUTTON::~GUI_BUTTON() {
 
 	texture->lightdeleteRenderTex(box_tex_id);
-	if (button_text) {
-		delete button_text;
-		button_text = 0;
-	}
+	texture->lightdeleteRenderText(button_text);
 }
-
+/*
 void GUI_BUTTON::render(Graphics* g) {
 	if (getIsRender()) {
 		float width = button_text->getWidth(KTROBO_GUI_BUTTON_TEXT_HEIGHT);
@@ -400,7 +485,7 @@ void GUI_BUTTON::render(Graphics* g) {
 			width,KTROBO_GUI_BUTTON_TEXT_HEIGHT);
 	}
 }
-
+*/
 GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) : GUI_PART() {
 	box.left = x;
 	box.right = width + x;
@@ -455,6 +540,11 @@ GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) : GUI_
 		KTROBO_GUI_INPUTTEXT_NORMAL_TOP+KTROBO_GUI_INPUTTEXT_NORMAL_HEIGHT-KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA,KTROBO_GUI_INPUTTEXT_NORMAL_WIDTH-2*KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA, KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA);
 
 	text = new Text(L"",0);
+	
+//	text->render(g, 0xFFFFFFFF,box.left+5,box.top+2, box.bottom-box.top-4, box.right-box.left-10,box.bottom - box.top);
+
+	input_text = texture->getRenderText("", box.left+5,box.top+2, box.bottom-box.top-4, box.right- box.left-10, box.bottom-box.top);
+
 	now_mode = 0;
 	cursor_x = 0;
 	string_max_x = 0;
@@ -477,6 +567,7 @@ GUI_INPUTTEXT::~GUI_INPUTTEXT() {
 	texture->lightdeleteRenderTex(box_tex_id_naka);
 	texture->lightdeleteRenderTex(box_tex_id_sitanaka);
 	texture->lightdeleteRenderTex(box_tex_id_uenaka);
+	texture->lightdeleteRenderText(input_text);
 }
 
 void GUI_PART::moveBox(int dx, int dy) {
@@ -517,13 +608,19 @@ void GUI_INPUTTEXT::moveBox(int dx, int dy) {
 	texture->setRenderTexPos(box_tex_id_uenaka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.top);
 	texture->setRenderTexPos(box_tex_id_naka, box.left+KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, -1+box.top + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
 	texture->setRenderTexPos(box_tex_id_sitanaka, box.left +KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY, box.bottom -3- KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
+
+	//	text->render(g, 0xFFFFFFFF,box.left+5,box.top+2, box.bottom-box.top-4, box.right-box.left-10,box.bottom - box.top);
+	texture->setRenderTextPos(input_text, box.left+5, box.top+2);
+
 }
 
 void GUI_BUTTON::moveBox(int dx, int dy) {
 
 	GUI_PART::moveBox(dx, dy);
 	texture->setRenderTexPos(box_tex_id, box.left, box.top);
-	
+	// (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2, KTROBO_GUI_BUTTON_TEXT_HEIGHT,
+	float width = texture->getRenderTextWidth(button_text, KTROBO_GUI_BUTTON_TEXT_HEIGHT);
+	texture->setRenderTextPos(this->button_text, (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2);
 }
 
 bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
@@ -811,6 +908,7 @@ void GUI_INPUTTEXT::setIsRender(bool t) {
 	texture->setRenderTexIsRender(box_tex_id_migisita, t);
 	texture->setRenderTexIsRender(box_tex_id_sitanaka,t);
 	texture->setRenderTexIsRender(box_tex_id_uenaka,t);
+	texture->setRenderTextIsRender(input_text, t);
 }
 
 
@@ -930,6 +1028,7 @@ void GUI_INPUTTEXT::copyInputStringToMyText() {
 	//text = new MyText(s,0);
 	if (text) {
 		text->changeText(s, wcslen(s));
+		texture->setRenderTextChangeText(input_text,sentencestring);
 	}
 
 }
@@ -1003,6 +1102,7 @@ void GUI_INPUTTEXT::copyKouhoStringToMyText() {
 	//text = new MyText(s,0);
 	if (text) {
 		text->changeText(s, wcslen(s));
+		texture->setRenderTextChangeText(input_text, allstring);
 	}
 }
 void GUI_INPUTTEXT::copyStringFromAction(int msg_id, void* data, DWORD time) {
@@ -1368,12 +1468,13 @@ char* GUI_INPUTTEXT::getInputStr(unsigned char* keys) {
 	return "";
 }
 
+/*
 void GUI_INPUTTEXT::render(Graphics* g) {
 	if (text) {
 		text->render(g, 0xFFFFFFFF,box.left+5,box.top+2, box.bottom-box.top-4, box.right-box.left-10,box.bottom - box.top);
 	}
 }
-
+*/
 HWND GUI_INPUTTEXT::hwnd=0;
 Texture* GUI_INPUTTEXT::texture=0;
 
@@ -1392,13 +1493,14 @@ MYRECT GUI_PART::max_default_box;
 
 
 
-GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, char* tex) : GUI_PART(){
+GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, char* texc) : GUI_PART(){
 	
 	stringconverter sc;
 	WCHAR buf[512];
 	memset(buf,0,sizeof(WCHAR)*512);
-	sc.charToWCHAR(tex,buf);
-	text = new Text(buf, wcslen(buf));
+	sc.charToWCHAR(texc,buf);
+	//text = new Text(buf, wcslen(buf));
+	text= GUI_TEXT::tex->getRenderText(texc, x, y, height, width,height);
 	box.left = x;
 	box.top = y;
 	box.right = x + width;
@@ -1410,18 +1512,20 @@ GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, char* tex) : GUI
 
 
 GUI_TEXT::~GUI_TEXT() {
-	if (text) {
+	/*if (text) {
 		delete text;
 		text = 0;
-	}
+	}*/
+	tex->lightdeleteRenderText(text);
 }
 
+/*
 void GUI_TEXT::render(Graphics* g) {
 	if (getIsRender()) {
 		text->render(g, 0xFFFFFFFF,box.left,box.right, box.bottom- box.top, box.right- box.left, box.bottom - box.top);
 	}
 }
-
+*/
 
 bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;

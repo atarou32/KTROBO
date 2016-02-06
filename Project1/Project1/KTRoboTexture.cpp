@@ -741,6 +741,7 @@ void Texture::_render(Graphics* g, int part_size, int p_index) {
 	CS::instance()->leave(CS_DEVICECON_CS, "texture render");
 
 
+
 }
 void Texture::render(Graphics* g) {
 	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
@@ -752,6 +753,23 @@ void Texture::render(Graphics* g) {
 	for (int i=0;i<psize;i++) {
 		_render(g, psize, i);
 	}
+		CS::instance()->enter(CS_DEVICECON_CS, "text_render");
+	CS::instance()->enter(CS_RENDERDATA_CS, "text_render");
+
+	vector<RenderText*>::iterator it = render_texts.begin();
+	while(it != render_texts.end()) {
+		RenderText* te = *it;
+		if (te->is_use) {
+			if (te->is_render) {
+				te->text->render(g, te->color,te->x,te->y,te->tex_h, te->width, te->height);
+			}
+		}
+		it++;
+	}
+
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "text_render");
+	CS::instance()->leave(CS_DEVICECON_CS, "text_render");
 }	
 	
 	
@@ -1824,4 +1842,102 @@ void Textures::deletedayo() {
 	if (size) {
 		texs[0]->deletedayo();
 	}
+}
+
+int Texture::getRenderText(char* t, int x, int y, int tex_h, int width, int height) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "makerenderText");
+
+	stringconverter sc;
+	WCHAR buf[512];
+	memset(buf,0,sizeof(WCHAR)*512);
+	sc.charToWCHAR(t, buf);
+
+	// 空いている場所があるか調べる
+	if (render_texts_erased.size()) {
+		int inde = *render_texts_erased.begin();
+		render_texts[inde]->is_use = true;
+		render_texts[inde]->height = height;
+		render_texts[inde]->is_render = false;
+		render_texts[inde]->color = 0xFFFFFFFF;
+		render_texts[inde]->text->changeText(buf,wcslen(buf));
+		render_texts[inde]->tex_h = tex_h;
+		render_texts[inde]->width = width;
+		render_texts[inde]->x = x;
+		render_texts[inde]->y = y;
+		render_texts_erased.erase(inde);
+		CS::instance()->leave(CS_RENDERDATA_CS, "makerendertext");	
+		return inde;
+	}
+
+	Text* te = new Text(buf, wcslen(buf));
+	RenderText* rt = new RenderText();
+	rt->color = 0xFFFFFFFF;
+	rt->is_render = false;
+	rt->is_use = true;
+	rt->text = te;
+	rt->x = x;
+	rt->y = y;
+	rt->height = height;
+	rt->width  = width;
+	rt->tex_h = tex_h;
+	int rttt = render_texts.size();
+	render_texts.push_back(rt);
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "makerenderText");
+	return rttt;
+}
+void Texture::setRenderTextColor(int text_id, unsigned int color) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text color");
+	if (render_texts.size() > text_id  && text_id >=0) {
+		render_texts[text_id]->color = color;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text color");
+}
+void Texture::setRenderTextIsRender(int text_id, bool t) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text render");
+	if (render_texts.size() > text_id  && text_id >=0) {
+		render_texts[text_id]->is_render = t;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text render");
+}
+
+void Texture::lightdeleteRenderText(int text_id) {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text light delete");
+	if (render_texts.size() > text_id  && text_id >=0) {
+		render_texts[text_id]->is_use = false;
+		render_texts_erased.insert(text_id);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text light delete");
+}
+
+void Texture::setRenderTextPos(int text_id, int x, int y) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text pos");
+	if (render_texts.size() > text_id  && text_id >=0) {
+		render_texts[text_id]->x = x;
+		render_texts[text_id]->y = y;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text pos");
+}
+void Texture::setRenderTextChangeText(int text_id, char* t) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text change");
+	if (render_texts.size() > text_id  && text_id >=0) {
+		WCHAR buf[512];
+		memset(buf,0,sizeof(WCHAR)*512);
+		stringconverter sc;
+		sc.charToWCHAR(t, buf);
+		render_texts[text_id]->text->changeText(buf, wcslen(buf));
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text change");
+}
+
+float Texture::getRenderTextWidth(int text_id, int height) {
+	float ans = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text change");
+	if (render_texts.size() > text_id  && text_id >=0) {
+		ans = render_texts[text_id]->text->getWidth((float)height);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text change");
+
+	return ans;
 }

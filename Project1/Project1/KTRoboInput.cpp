@@ -725,6 +725,11 @@ INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::registerImpl(INPUTSHORICLASS* c
 	CS::instance()->enter(CS_MESSAGE_CS, "enter message make");
 
 	for (int i=0;i<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;i++) {
+		if (InputMessageDispatcher::message_getter_structs[i].getIsUse()) {
+			if (message_getter_structs[i].impl == cl) throw new GameError(KTROBO::WARNING, "registered inputmessagedispatcher imple two times");
+		}
+	}
+	for (int i=0;i<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;i++) {
 		if (!InputMessageDispatcher::message_getter_structs[i].getIsUse()) {
 			INPUTGETBYMESSAGESTRUCT* parent_struct=NULL;
 			INPUTGETBYMESSAGESTRUCT* child_struct = NULL;

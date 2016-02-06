@@ -1004,8 +1004,8 @@ void Game::Run() {
 	texdayo->updateIndexBuffer(g);
 	texdayo->sendinfoToVertexTexture(g);
 	texdayo->render(g);
-	inputtext->render(g);
-	but->render(g);
+//	inputtext->render(g);
+//	but->render(g);
 
 
 
