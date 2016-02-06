@@ -9,8 +9,6 @@
 
 namespace KTROBO {
 
-void TCB_luaExec(TCB* thisTCB);
-
 class LuaTCBStruct {
 public:
 	char lua_filename[256];
@@ -22,10 +20,11 @@ public:
 
 #define KTROBO_LUAEXEC_STRUCT_SIZE 32
 class LuaTCBMaker {
+private:
 	static LuaTCBStruct structs[KTROBO_LUAEXEC_STRUCT_SIZE];	
 	static lua_State* ls[TASKTHREAD_NUM];
 	static Task* ts[TASKTHREAD_NUM];
-
+public:
 	static void Init(Task** t, lua_State** l);
 	static void makeTCB(int task_index, bool is_lock_sita, char* lua_filename);
 	static void makeTCBExec();

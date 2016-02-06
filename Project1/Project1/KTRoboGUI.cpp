@@ -2,6 +2,7 @@
 #include "MyButukari.h"
 #include "MyTokenAnalyzer.h"
 #include "stringconverter.h"
+#include "KTRoboLuaCollection.h"
 
 using namespace KTROBO;
 
@@ -406,6 +407,8 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 				
 				// ボタンが実行可能になっているので実行する
 				// lua ファイル実行
+				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+
 				setIsEffect(false);
 
 				// focusに戻す
@@ -455,7 +458,7 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 	int tex_id = texture->getTexture(KTROBO_GUI_PNG);
 	this->box_tex_id = texture->getRenderTex(tex_id, 0xFFFFFFFF,x,y,width,height, KTROBO_GUI_BUTTON_NORMAL_LEFT, KTROBO_GUI_BUTTON_NORMAL_TOP,
 		KTROBO_GUI_BUTTON_NORMAL_WIDTH, KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
-	if (len < 128) {
+	if (len < 128 && len > 0) {
 		memcpy(this->l_str, luaf, len);
 	} else {
 		memset(l_str,0,128);
@@ -470,7 +473,6 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 //		button_text->render(g,0xFFFFFFFF, (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2, KTROBO_GUI_BUTTON_TEXT_HEIGHT,
 //			width,KTROBO_GUI_BUTTON_TEXT_HEIGHT);
 
-	
 }
 GUI_BUTTON::~GUI_BUTTON() {
 
@@ -1921,6 +1923,7 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 
 			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
 			// lua ファイル実行
+
 		}
 
 		if (is_max_pressed && getIsEffect()) {
@@ -1933,6 +1936,7 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 		if (is_box_moved && getIsEffect()) {
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 			// lua ファイル実行
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 		}
 	
 
@@ -2001,6 +2005,7 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 			if (getIsEffect()) {
 			
 				setIsEffect(false);
+				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 
 				// focusに戻す
 				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_FOCUS_LEFT, KTROBO_GUI_SLIDERHMIN_FOCUS_TOP,

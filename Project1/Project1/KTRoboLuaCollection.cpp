@@ -100,6 +100,11 @@ void LuaTCBMaker::makeTCB(int task_index, bool is_lock_sita, char* lua_filename)
 	if (task_index >= 0 && task_index < TASKTHREAD_NUM) {
 	
 		CS::instance()->enter(CS_MESSAGE_CS, "maketcb");
+		if (strcmp(lua_filename, "test") ==0 || strlen(lua_filename) ==0) {
+			CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
+			return;
+		}
+
 		for (int i=0;i<KTROBO_LUAEXEC_STRUCT_SIZE;i++) {
 			if (!structs[i].is_use) {
 				structs[i].is_use = true;

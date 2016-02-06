@@ -142,7 +142,9 @@ void MessageDispatcherTCB(TCB* thisTCB) {
 	CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 	CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
 	*/
-	InputMessageDispatcher::messageDispatch();	
+	InputMessageDispatcher::messageDispatch();
+	LuaTCBMaker::makeTCBExec();
+
 	/*
 	CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 	CS::instance()->leave(CS_TASK_CS, "anime lock",1);
@@ -385,7 +387,7 @@ bool Game::Init(HWND hwnd) {
 		MyLuaGlueSingleton::getInstance()->registerdayo(Ls[i]);
 	}
 	
-
+	LuaTCBMaker::Init(task_threads, Ls);
 	Texture::Init(g);
 	Scene::Init(g_for_task_threads,Ls,this);
 	
