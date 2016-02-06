@@ -7,6 +7,7 @@ Text::Text(WCHAR* m_str, int length)
 {
 	memset(str,0,sizeof(WCHAR)*MYTEXT_LENGTH);
 	memcpy(str,m_str,length*sizeof(WCHAR));
+	memset(return_str,0,sizeof(char)*MYTEXT_LENGTH*2);
 }
 
 

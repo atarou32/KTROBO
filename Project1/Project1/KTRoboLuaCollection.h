@@ -4,8 +4,36 @@
 #pragma once
 #include "KTRoboCS.h"
 #include "KTRoboGameError.h"
+#include "KTRoboTask.h"
+#include "lua.hpp"
 
 namespace KTROBO {
+
+void TCB_luaExec(TCB* thisTCB);
+
+class LuaTCBStruct {
+public:
+	char lua_filename[256];
+	bool is_lock_sita;
+	int task_index;
+	bool is_use;
+	bool is_send;
+};
+
+#define KTROBO_LUAEXEC_STRUCT_SIZE 32
+class LuaTCBMaker {
+	static LuaTCBStruct structs[KTROBO_LUAEXEC_STRUCT_SIZE];	
+	static lua_State* ls[TASKTHREAD_NUM];
+	static Task* ts[TASKTHREAD_NUM];
+
+	static void Init(Task** t, lua_State** l);
+	static void makeTCB(int task_index, bool is_lock_sita, char* lua_filename);
+	static void makeTCBExec();
+	
+};
+
+
+
 // ロード処理を持つクラスで他のスレッドとの競合が発生しそうなクラスに使う
 // そのクラス内のコレクトされるクラスのコンストラクタまたはデストラクタでexecConstructOrDestruct() を呼ぶようにする
 // is_loadをfalseにするのは生成処理破棄処理スレッドのみ

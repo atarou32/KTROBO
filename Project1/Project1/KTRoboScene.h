@@ -19,6 +19,7 @@ class Game;
 // tolua‚Æ‚Í•Ê‚ÉƒVƒ“ƒOƒ‹ƒgƒ“‚ğì‚é‚Æ‚¢‚¢‚©‚à‚µ‚ê‚È‚¢
 
 
+
 class Scene
 {
 private:
