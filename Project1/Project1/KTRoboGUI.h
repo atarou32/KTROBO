@@ -9,6 +9,7 @@
 #include "lua.hpp"
 #include "stringconverter.h"
 #include "vector"
+#include "memory.h"
 
 // GUI のデストラクトはテクスチャのデストラクトの前に行うこと
 using namespace std;
@@ -156,8 +157,9 @@ protected:
 		box.top = 0;
 		box.bottom = 0;
 	}
-	virtual ~GUI_PART(){}
+	
 public:
+	virtual ~GUI_PART(){}
 	static void SetDefaultMaxBox(MYRECT* re) {
 		max_default_box = *re;
 	}
@@ -193,6 +195,34 @@ public:
 	virtual void setIsEffect(bool t)=0;
 	MYRECT* getBox() {return &box;}
 	virtual bool handleMessage(int msg, void* data, DWORD time) =0;
+};
+
+
+interface IGUI {
+public:
+	TO_LUA virtual int makeButton(float x, float y, float width, float height, char* luaf, int len, char* info)=0;
+	TO_LUA virtual int makeInputText(float x, float y, float width, float height)=0;
+	TO_LUA virtual int makeText(float x, float y,float width, float height, char* textd)=0;
+	TO_LUA virtual int makeTex(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height)=0;
+	TO_LUA virtual int makeWindow(int x, int y, int width, int height)=0;
+	TO_LUA virtual int makeTab(int tab_index)=0;
+	TO_LUA virtual int makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
+	TO_LUA virtual int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
+
+	TO_LUA virtual int setEffect(int gui_id, bool t)=0;
+	TO_LUA virtual int setRender(int gui_id, bool t)=0;
+
+	TO_LUA virtual int setPartToWindow(int window_gui_id, int part_gui_id)=0;
+	TO_LUA virtual int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
+
+	TO_LUA virtual char* getStrFromInput(int gui_id)=0;
+	TO_LUA virtual float getNowFromSlider(int gui_id)=0;
+	TO_LUA virtual float getMaxFromSlider(int gui_id)=0;
+	TO_LUA virtual float getMinFromSlider(int gui_id)=0;
+
+	TO_LUA virtual void setGUIToInputMessageDispatcher(int gui_id)=0; // 一番上につっこむ
+	TO_LUA virtual void deleteAll()=0;
+
 };
 
 class GUI_BUTTON : public GUI_PART, public HasRenderFunc
@@ -277,7 +307,9 @@ public:
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
 	void render(Graphics* g);
-
+	char* getStr() {
+		return text->getStr();
+	}
 };
 
 
@@ -295,7 +327,7 @@ public:
 	void setIsEffect(bool t) {is_effect = t;}
 	void setIsRender(bool t) {is_render = t;}
 
-	GUI_TEXT(float x, float y, float width, float height, WCHAR* tex, int len);
+	GUI_TEXT(float x, float y, float width, float height, char* tex);
 	~GUI_TEXT();
 	void render(Graphics* g);
 
@@ -325,7 +357,7 @@ public:
 		tex->lightdeleteRenderTex(tex_id);
 	}
 
-	bool handleMessage(int msg, void* data, DWORD time){return true;};
+	bool handleMessage(int msg, void* data, DWORD time){return false;};
 	void setIsEffect(bool t) {is_effect =t;}
 	void setIsRender(bool t) {is_render =t;}
 };
@@ -574,7 +606,10 @@ private:
 public:
 	GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l_str);
 	~GUI_SLIDERV();
-	
+	float getMax() {return max;}
+	float getMin() {return min;}
+	float getNow() {return now;}
+
 	void moveBox(int dx, int dy);
 	void moveAllBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time);
@@ -617,7 +652,9 @@ public:
 	~GUI_SLIDERH();
 	void moveBox(int dx, int dy);
 	void moveAllBox(int dx, int dy);
-
+	float getMax() {return max;}
+	float getMin() {return min;}
+	float getNow() {return now;}
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t) {
 		is_effect = t;
@@ -637,11 +674,57 @@ public:
 
 };
 
-
-
-class GUI
+class GUI : public IGUI
 {
+private:
+	vector<GUI_PART*> parts;
+	
+	vector<GUI_BUTTON*> buttons;
+	vector<GUI_INPUTTEXT*> inputtexts;
+	vector<GUI_SLIDERH*> sliderhs;
+	vector<GUI_SLIDERV*> slidervs;
+	vector<GUI_TEXT*> texts;
+	vector<GUI_TEX*> texs;
+	vector<GUI_WINDOW*> windows;
+	vector<GUI_TAB*> tabs;
+
+	map<int,int> p_buttons_index;
+	map<int,int> p_inputtexts_index;
+	map<int,int> p_sliderhs_index;
+	map<int,int> p_slidervs_index;
+	map<int,int> p_texts_index;
+	map<int,int> p_texs_index;
+	map<int,int> p_windows_index;
+	map<int,int> p_tabs_index;
+	
+	vector<INPUTSHORICLASS*> registered_class;
+	vector<HasRenderFunc*> render_class;
 public:
+	void Release();
+
+	int makeButton(float x, float y, float width, float height, char* luaf, int len, char* info);
+	int makeInputText(float x, float y, float width, float height);
+	int makeText(float x, float y,float width, float height, char* textd);
+	int makeTex(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
+	int makeWindow(int x, int y, int width, int height);
+	int makeTab(int tab_index);
+	int makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str);
+	int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str);
+
+	int setEffect(int gui_id, bool t);
+	int setRender(int gui_id, bool t);
+
+	int setPartToWindow(int window_gui_id, int part_gui_id);
+	int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name);
+
+	char* getStrFromInput(int gui_id);
+	float getNowFromSlider(int gui_id);
+	float getMaxFromSlider(int gui_id);
+	float getMinFromSlider(int gui_id);
+
+	void setGUIToInputMessageDispatcher(int gui_id); // 一番上につっこむ
+	void deleteAll();
+
 	GUI(void);
 	~GUI(void);
 

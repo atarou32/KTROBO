@@ -12,7 +12,257 @@ GUI::GUI(void)
 
 GUI::~GUI(void)
 {
+	Release();
 }
+
+
+void GUI::Release() {
+/*	
+	vector<GUI_BUTTON*> buttons;
+	vector<GUI_INPUTTEXT*> inputtexts;
+	vector<GUI_SLIDERH*> sliderhs;
+	vector<GUI_SLIDERV*> slidervs;
+	vector<GUI_TEXT*> texts;
+	vector<GUI_TEX*> texs;
+	vector<GUI_WINDOW*> windows;
+	vector<GUI_TAB*> tabs;
+
+	map<int,int> p_buttons_index;
+	map<int,int> p_inputtexts_index;
+	map<int,int> p_sliderhs_index;
+	map<int,int> p_slidervs_index;
+	map<int,int> p_texts_index;
+	map<int,int> p_texs_index;
+	map<int,int> p_windows_index;
+	map<int,int> p_tabs_index;
+*/
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "release renderguiclass");
+	render_class.clear();
+	CS::instance()->leave(CS_RENDERDATA_CS, "release renderguiclsass");
+
+	vector<INPUTSHORICLASS*>::iterator rit =  registered_class.begin();
+	while(rit != registered_class.end()) {
+		INPUTSHORICLASS* tt = *rit;
+		InputMessageDispatcher::unregisterImpl(tt);
+
+
+		rit++;
+	}
+	registered_class.clear();
+
+
+
+	buttons.clear();
+	inputtexts.clear();
+	sliderhs.clear();
+	slidervs.clear();
+	texts.clear();
+	texs.clear();
+	windows.clear();
+	tabs.clear();
+
+	p_buttons_index.clear();
+	p_inputtexts_index.clear();
+	p_sliderhs_index.clear();
+	p_slidervs_index.clear();
+	p_texts_index.clear();
+	p_texs_index.clear();
+	p_windows_index.clear();
+	p_tabs_index.clear();
+
+	vector<GUI_PART*>::iterator it = parts.begin();
+	while(it != parts.end()) {
+		GUI_PART* p = *it;
+		if (p) {
+		delete p;
+		p = 0;
+		}
+		it++;
+	}
+
+	parts.clear();
+
+
+
+}
+
+int GUI::makeButton(float x, float y, float width, float height, char* luaf, int len, char* info) {
+	GUI_BUTTON * but = new GUI_BUTTON(x,y,width,height,luaf,len,info);
+	int size = parts.size();
+	int bsize = buttons.size();
+	parts.push_back(but);
+	buttons.push_back(but);
+	p_buttons_index.insert(pair<int,int>(size, bsize));
+	CS::instance()->enter(CS_RENDERDATA_CS, "makeguibutton");
+	render_class.push_back(but);
+	CS::instance()->leave(CS_RENDERDATA_CS, "makeguibutton");
+	return size;
+
+}
+
+int GUI::makeInputText(float x, float y, float width, float height) {
+	GUI_INPUTTEXT * tex = new GUI_INPUTTEXT(x,y,width,height);
+	int size = parts.size();
+	int bsize = inputtexts.size();
+	parts.push_back(tex);
+	inputtexts.push_back(tex);
+	p_inputtexts_index.insert(pair<int,int>(size,bsize));
+	CS::instance()->enter(CS_RENDERDATA_CS, "makeguiinputtext");
+	render_class.push_back(tex);
+	CS::instance()->leave(CS_RENDERDATA_CS, "makeguiinputtext");
+	return size;
+}
+
+int GUI::makeText(float x, float y,float width, float height, char* textd) {
+	GUI_TEXT* tex = new GUI_TEXT(x,y,width,height,textd);
+	int size = parts.size();
+	int bsize = texts.size();
+	parts.push_back(tex);
+	texts.push_back(tex);
+	p_texts_index.insert(pair<int,int>(size,bsize));
+	CS::instance()->enter(CS_RENDERDATA_CS, "makeguitext");
+	render_class.push_back(tex);
+	CS::instance()->leave(CS_RENDERDATA_CS, "makeguitext");
+	return size;
+}
+
+
+int GUI::makeTex(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height) {
+
+	GUI_TEX* tex = new GUI_TEX(tex_name, x, y, width, height, tex_x, tex_y, tex_width, tex_height);
+	int size = parts.size();
+	int bsize = texs.size();
+	parts.push_back(tex);
+	texs.push_back(tex);
+	p_texs_index.insert(pair<int,int>(size,bsize));
+	return size;
+}
+int GUI::makeWindow(int x, int y, int width, int height) {
+	GUI_WINDOW* win = new GUI_WINDOW(x,y,width,height);
+	int size = parts.size();
+	int bsize = windows.size();
+	parts.push_back(win);
+	windows.push_back(win);
+	p_windows_index.insert(pair<int,int>(size,bsize));
+	CS::instance()->enter(CS_RENDERDATA_CS, "makeguiwindow");
+	render_class.push_back(win);
+	CS::instance()->leave(CS_RENDERDATA_CS, "makeguiwindow");
+	return size;
+}
+
+int GUI::makeTab(int tab_index) {
+	GUI_TAB* t = new GUI_TAB(tab_index);
+	int size = parts.size();
+	int bsize = tabs.size();
+	parts.push_back(t);
+	tabs.push_back(t);
+	p_tabs_index.insert(pair<int,int>(size,bsize));
+	CS::instance()->enter(CS_RENDERDATA_CS, "makeguitab");
+	render_class.push_back(t);
+	CS::instance()->leave(CS_RENDERDATA_CS, "makeguitab");
+	return size;
+
+
+}
+int GUI::makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str) {
+
+	GUI_SLIDERV* s = new GUI_SLIDERV(*zentai,max,min,now,l_str);
+	int size = parts.size();
+	int bsize = slidervs.size();
+	parts.push_back(s);
+	slidervs.push_back(s);
+	p_slidervs_index.insert(pair<int,int>(size,bsize));
+	return size;
+}
+
+int GUI::makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str) {
+	GUI_SLIDERH* s = new GUI_SLIDERH(*zentai, max,min,now,l_str);
+	int size = parts.size();
+	int bsize = sliderhs.size();
+	parts.push_back(s);
+	sliderhs.push_back(s);
+	p_sliderhs_index.insert(pair<int,int>(size,bsize));
+	return size;
+}
+
+int GUI::setEffect(int gui_id, bool t) {
+	int size = parts.size();
+	if (gui_id >=0 && size > gui_id) {
+		parts[gui_id]->setIsEffect(t);
+	}
+}
+
+int GUI::setRender(int gui_id, bool t) {
+	int size = parts.size();
+	if (gui_id >=0 && size > gui_id) {
+		parts[gui_id]->setIsRender(t);
+	}
+}
+
+int GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
+
+
+
+
+
+}
+int GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
+
+
+
+}
+
+char* GUI::getStrFromInput(int gui_id) {
+
+
+
+
+}
+float GUI::getNowFromSlider(int gui_id) {
+
+
+}
+float GUI::getMaxFromSlider(int gui_id) {
+
+
+}
+float GUI::getMinFromSlider(int gui_id) {
+
+
+
+
+}
+
+void GUI::setGUIToInputMessageDispatcher(int gui_id) {
+	// ˆê”Ôã‚É‚Â‚Á‚±‚Þ
+
+
+
+
+
+
+}
+
+
+
+void GUI::deleteAll() {
+	Release();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
@@ -48,6 +298,7 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 					KTROBO_GUI_BUTTON_NORMAL_TOP,
 					KTROBO_GUI_BUTTON_NORMAL_WIDTH,
 					KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
+				setIsEffect(false);
 		//	}
 		}
 	}
@@ -56,7 +307,7 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &box);
 		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
 			this->setIsMove(true);
-		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+		} else if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN)) {
 			texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_PRESS_LEFT,
 				KTROBO_GUI_BUTTON_PRESS_TOP, 
 				KTROBO_GUI_BUTTON_PRESS_WIDTH,
@@ -85,6 +336,18 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 					KTROBO_GUI_BUTTON_FOCUS_HEIGHT);
 				return true;
 			}
+		} else if(!(butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
+
+
+			setIsEffect(false);
+			texture->setRenderTexTexPos(box_tex_id, KTROBO_GUI_BUTTON_NORMAL_LEFT,
+					KTROBO_GUI_BUTTON_NORMAL_TOP,
+					KTROBO_GUI_BUTTON_NORMAL_WIDTH,
+					KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
+			return true;
+
+
+
 		}
 	}
 
@@ -1132,8 +1395,13 @@ MYRECT GUI_PART::max_default_box;
 
 
 
-GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, WCHAR* tex, int len) : GUI_PART(){
-	text = new Text(tex, len);
+GUI_TEXT::GUI_TEXT(float x, float y, float width, float height, char* tex) : GUI_PART(){
+	
+	stringconverter sc;
+	WCHAR buf[512];
+	memset(buf,0,sizeof(WCHAR)*512);
+	sc.charToWCHAR(tex,buf);
+	text = new Text(buf, wcslen(buf));
 	box.left = x;
 	box.top = y;
 	box.right = x + width;

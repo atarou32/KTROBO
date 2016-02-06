@@ -390,7 +390,7 @@ bool Game::Init(HWND hwnd) {
 	zem.left = 0;
 	zem.right = 300;
 	zem.top = 130;
-	zem.bottom = 230;
+	zem.bottom = 160;
 	slih = new GUI_SLIDERH(zem,100,0,10,"test");
 	slih->setIsRender(true);
 	InputMessageDispatcher::registerImpl(slih,NULL,NULL);

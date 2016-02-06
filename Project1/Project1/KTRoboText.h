@@ -33,12 +33,20 @@ private:
 public:
 	Text(WCHAR* str, int length);
 	WCHAR str[MYTEXT_LENGTH];
+	char return_str[MYTEXT_LENGTH*2];
+
 	~Text(void);
 	static void Init(Graphics* g, Font* fo);
 	static void Del();
 	int getStrlen() {
 		return wcslen(str);
 	}
+	char* getStr() {
+		stringconverter sc;
+		sc.wcharTochar(str, return_str);
+		return return_str;
+	}
+		
 	void changeText(WCHAR* new_str, int length);
 	void render(Graphics* g, DWORD color, float x, float y, float height,float w, float h);
 	float getWidth(float height) {
