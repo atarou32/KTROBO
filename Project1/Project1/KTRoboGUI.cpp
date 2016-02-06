@@ -7,6 +7,7 @@ using namespace KTROBO;
 
 GUI::GUI(void)
 {
+	registered_rootwindow = 0;
 }
 
 
@@ -37,19 +38,14 @@ void GUI::Release() {
 	map<int,int> p_tabs_index;
 */
 
-	CS::instance()->enter(CS_RENDERDATA_CS, "release renderguiclass");
-	render_class.clear();
-	CS::instance()->leave(CS_RENDERDATA_CS, "release renderguiclsass");
-
-	vector<INPUTSHORICLASS*>::iterator rit =  registered_class.begin();
-	while(rit != registered_class.end()) {
-		INPUTSHORICLASS* tt = *rit;
-		InputMessageDispatcher::unregisterImpl(tt);
-
-
-		rit++;
+	
+	if (registered_rootwindow) {
+		InputMessageDispatcher::unregisterImpl(registered_rootwindow);
 	}
-	registered_class.clear();
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "release renderguiclass");
+	registered_rootwindow = 0;
+	CS::instance()->leave(CS_RENDERDATA_CS, "release renderguiclsass");
 
 
 
@@ -94,9 +90,6 @@ int GUI::makeButton(float x, float y, float width, float height, char* luaf, int
 	parts.push_back(but);
 	buttons.push_back(but);
 	p_buttons_index.insert(pair<int,int>(size, bsize));
-	CS::instance()->enter(CS_RENDERDATA_CS, "makeguibutton");
-	render_class.push_back(but);
-	CS::instance()->leave(CS_RENDERDATA_CS, "makeguibutton");
 	return size;
 
 }
@@ -108,9 +101,6 @@ int GUI::makeInputText(float x, float y, float width, float height) {
 	parts.push_back(tex);
 	inputtexts.push_back(tex);
 	p_inputtexts_index.insert(pair<int,int>(size,bsize));
-	CS::instance()->enter(CS_RENDERDATA_CS, "makeguiinputtext");
-	render_class.push_back(tex);
-	CS::instance()->leave(CS_RENDERDATA_CS, "makeguiinputtext");
 	return size;
 }
 
@@ -121,9 +111,6 @@ int GUI::makeText(float x, float y,float width, float height, char* textd) {
 	parts.push_back(tex);
 	texts.push_back(tex);
 	p_texts_index.insert(pair<int,int>(size,bsize));
-	CS::instance()->enter(CS_RENDERDATA_CS, "makeguitext");
-	render_class.push_back(tex);
-	CS::instance()->leave(CS_RENDERDATA_CS, "makeguitext");
 	return size;
 }
 
@@ -145,9 +132,6 @@ int GUI::makeWindow(int x, int y, int width, int height) {
 	parts.push_back(win);
 	windows.push_back(win);
 	p_windows_index.insert(pair<int,int>(size,bsize));
-	CS::instance()->enter(CS_RENDERDATA_CS, "makeguiwindow");
-	render_class.push_back(win);
-	CS::instance()->leave(CS_RENDERDATA_CS, "makeguiwindow");
 	return size;
 }
 
@@ -158,9 +142,6 @@ int GUI::makeTab(int tab_index) {
 	parts.push_back(t);
 	tabs.push_back(t);
 	p_tabs_index.insert(pair<int,int>(size,bsize));
-	CS::instance()->enter(CS_RENDERDATA_CS, "makeguitab");
-	render_class.push_back(t);
-	CS::instance()->leave(CS_RENDERDATA_CS, "makeguitab");
 	return size;
 
 
@@ -186,28 +167,44 @@ int GUI::makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, c
 	return size;
 }
 
-int GUI::setEffect(int gui_id, bool t) {
+void GUI::setEffect(int gui_id, bool t) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "seteffect");
 	int size = parts.size();
 	if (gui_id >=0 && size > gui_id) {
 		parts[gui_id]->setIsEffect(t);
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "seteffect");
 }
 
-int GUI::setRender(int gui_id, bool t) {
+void GUI::setRender(int gui_id, bool t) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "seteffect");
 	int size = parts.size();
 	if (gui_id >=0 && size > gui_id) {
 		parts[gui_id]->setIsRender(t);
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "seteffect");
 }
 
-int GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
+void GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
 
+	if (window_gui_id == part_gui_id) return;
 
+	GUI_PART* part;
+	if (part_gui_id < parts.size() && part_gui_id >=0) {
+		part = parts[part_gui_id];
+	} else {
+		return;
+	}
 
-
-
+	if (p_windows_index.find(window_gui_id) != p_windows_index.end()) {
+		
+		CS::instance()->enter(CS_RENDERDATA_CS, "push part to window");
+		windows[p_windows_index[window_gui_id]]->setBody(part);
+		CS::instance()->leave(CS_RENDERDATA_CS, "push part to window");
+	}
 }
-int GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
+
+void GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
 
 
 
@@ -217,25 +214,25 @@ char* GUI::getStrFromInput(int gui_id) {
 
 
 
-
+	return 0;
 }
 float GUI::getNowFromSlider(int gui_id) {
-
+	return 0;
 
 }
 float GUI::getMaxFromSlider(int gui_id) {
-
+	return 0;
 
 }
 float GUI::getMinFromSlider(int gui_id) {
-
+	return 0;
 
 
 
 }
 
-void GUI::setGUIToInputMessageDispatcher(int gui_id) {
-	// àÍî‘è„Ç…Ç¬Ç¡Ç±Çﬁ
+void GUI::setRootWindowToInputMessageDispatcher(int gui_window_id) {
+
 
 
 

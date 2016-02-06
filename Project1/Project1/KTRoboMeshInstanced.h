@@ -522,7 +522,7 @@ public:
 			throw new GameError(KTROBO::WARNING, "error in make instanceid");
 		}
 
-		CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
+	//	CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
 		CS::instance()->enter(CS_TASK_CS, "load lock", 3);
 		CS::instance()->enter(CS_TASK_CS, "render lock",2);
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
@@ -533,7 +533,7 @@ public:
 		CS::instance()->leave(CS_TASK_CS, "anime lock",1);
 		CS::instance()->leave(CS_TASK_CS, "render lock",2);
 		CS::instance()->leave(CS_TASK_CS, "load lock", 3);
-		CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+	//	CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
 
 		return m->getInstanceIndex();
 	}

@@ -4,7 +4,7 @@
 #pragma once
 #include "KTRoboFont.h"
 #include "KTRoboGraphics.h"
-
+#include "stringconverter.h"
 
 namespace KTROBO{
 

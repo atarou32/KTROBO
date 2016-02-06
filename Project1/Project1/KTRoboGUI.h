@@ -138,7 +138,7 @@ interface HasRenderFunc {
 };
 
 
-class GUI_PART : public INPUTSHORICLASS {
+class GUI_PART : public INPUTSHORICLASS, public HasRenderFunc {
 protected:
 	bool is_render;
 	bool is_effect;
@@ -195,6 +195,7 @@ public:
 	virtual void setIsEffect(bool t)=0;
 	MYRECT* getBox() {return &box;}
 	virtual bool handleMessage(int msg, void* data, DWORD time) =0;
+	virtual void render(Graphics* g){};
 };
 
 
@@ -209,23 +210,23 @@ public:
 	TO_LUA virtual int makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
 	TO_LUA virtual int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
 
-	TO_LUA virtual int setEffect(int gui_id, bool t)=0;
-	TO_LUA virtual int setRender(int gui_id, bool t)=0;
+	TO_LUA virtual void setEffect(int gui_id, bool t)=0;
+	TO_LUA virtual void setRender(int gui_id, bool t)=0;
 
-	TO_LUA virtual int setPartToWindow(int window_gui_id, int part_gui_id)=0;
-	TO_LUA virtual int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
+	TO_LUA virtual void setPartToWindow(int window_gui_id, int part_gui_id)=0;
+	TO_LUA virtual void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
 
 	TO_LUA virtual char* getStrFromInput(int gui_id)=0;
 	TO_LUA virtual float getNowFromSlider(int gui_id)=0;
 	TO_LUA virtual float getMaxFromSlider(int gui_id)=0;
 	TO_LUA virtual float getMinFromSlider(int gui_id)=0;
 
-	TO_LUA virtual void setGUIToInputMessageDispatcher(int gui_id)=0; // 一番上につっこむ
+	TO_LUA virtual void setRootWindowToInputMessageDispatcher(int gui_window_id)=0; // 一番上につっこむ
 	TO_LUA virtual void deleteAll()=0;
 
 };
 
-class GUI_BUTTON : public GUI_PART, public HasRenderFunc
+class GUI_BUTTON : public GUI_PART
 {
 private:
 	int box_tex_id;
@@ -249,7 +250,7 @@ public:
 };
 
 
-class GUI_INPUTTEXT : public GUI_PART, public HasRenderFunc
+class GUI_INPUTTEXT : public GUI_PART
 {
 private:
 
@@ -314,7 +315,7 @@ public:
 
 
 
-class GUI_TEXT : public GUI_PART, public HasRenderFunc
+class GUI_TEXT : public GUI_PART
 {
 private:
 	static Texture* tex;
@@ -362,12 +363,11 @@ public:
 	void setIsRender(bool t) {is_render =t;}
 };
 
-class GUI_WINDOW : public GUI_PART, public HasRenderFunc
+class GUI_WINDOW : public GUI_PART
 {
 private:
 
-	vector<GUI_PART*> bodys; // bodys renders に関してはwindowのデストラクタが呼ばれてもデストラクトしない
-	vector<HasRenderFunc*> renders;
+	vector<GUI_PART*> bodys; // bodys に関してはwindowのデストラクタが呼ばれてもデストラクトしない
 
 	static Texture* tex;
 public:
@@ -386,9 +386,7 @@ public:
 	void setBody(GUI_PART* p) {
 		bodys.push_back(p);
 	}
-	void setRender(HasRenderFunc* f) {
-		renders.push_back(f);
-	}
+	
 	
 	bool handleMessage(int msg, void* data, DWORD time) {
 		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
@@ -435,6 +433,7 @@ public:
 	};
 
 	void setIsEffect(bool t) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "setiseffect window");
 		is_effect =t;
 		vector<GUI_PART*>::iterator it = bodys.begin();
 		while (it != bodys.end()) {
@@ -442,8 +441,12 @@ public:
 			p->setIsEffect(t);
 			it = it+1;
 		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "setiseffect window");
 	}
-	void setIsRender(bool t) {is_render =t;
+	void setIsRender(bool t) {
+		
+		CS::instance()->enter(CS_RENDERDATA_CS, " setisrender window");
+		is_render =t;
 	
 		vector<GUI_PART*>::iterator it = bodys.begin();
 		while (it != bodys.end()) {
@@ -453,23 +456,25 @@ public:
 			it = it+1;
 		}
 	
-	
+		CS::instance()->leave(CS_RENDERDATA_CS, " setisrender window");
 	}
 	void render(Graphics* g) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "render window");
 		if (is_render) {
-			vector<HasRenderFunc*>::iterator it = renders.begin();
-			while (it != renders.end()) {
+			vector<GUI_PART*>::iterator it = bodys.begin();
+			while (it != bodys.end()) {
 				
-				HasRenderFunc* f = *it;
+				GUI_PART* f = *it;
 				f->render(g);
 				it = it + 1;
 			}
 		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "render window");
 	}
 };
 
 
-class GUI_TAB : public GUI_PART, public HasRenderFunc
+class GUI_TAB : public GUI_PART
 {
 private:
 	int tab_index; //　ルートから何番目のタブかということ
@@ -697,8 +702,7 @@ private:
 	map<int,int> p_windows_index;
 	map<int,int> p_tabs_index;
 	
-	vector<INPUTSHORICLASS*> registered_class;
-	vector<HasRenderFunc*> render_class;
+	GUI_WINDOW* registered_rootwindow;
 public:
 	void Release();
 
@@ -711,18 +715,18 @@ public:
 	int makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str);
 	int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str);
 
-	int setEffect(int gui_id, bool t);
-	int setRender(int gui_id, bool t);
+	void setEffect(int gui_id, bool t);
+	void setRender(int gui_id, bool t);
 
-	int setPartToWindow(int window_gui_id, int part_gui_id);
-	int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name);
+	void setPartToWindow(int window_gui_id, int part_gui_id);
+	void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name);
 
 	char* getStrFromInput(int gui_id);
 	float getNowFromSlider(int gui_id);
 	float getMaxFromSlider(int gui_id);
 	float getMinFromSlider(int gui_id);
 
-	void setGUIToInputMessageDispatcher(int gui_id); // 一番上につっこむ
+	void setRootWindowToInputMessageDispatcher(int gui_window_id);
 	void deleteAll();
 
 	GUI(void);

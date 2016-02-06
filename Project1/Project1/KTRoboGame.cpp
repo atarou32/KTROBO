@@ -135,9 +135,21 @@ void LOADMESHTCB(TCB* thisTCB) {
 }
 
 void MessageDispatcherTCB(TCB* thisTCB) {
-	
-	InputMessageDispatcher::messageDispatch();
-
+	/*
+	CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
+	CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+	CS::instance()->enter(CS_TASK_CS, "render lock",2);
+	CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
+	CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
+	*/
+	InputMessageDispatcher::messageDispatch();	
+	/*
+	CS::instance()->leave(CS_TASK_CS, "atari lock",0);
+	CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+	CS::instance()->leave(CS_TASK_CS, "render lock",2);
+	CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+	CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+	*/
 }
 
 
