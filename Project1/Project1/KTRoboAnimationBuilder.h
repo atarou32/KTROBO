@@ -7,37 +7,88 @@
 
 namespace KTROBO {
 
+interface IAnimationBuilder {
+	TO_LUA virtual int createAnimationBuilderImpl(char* hon_filepath)=0;
+	TO_LUA virtual void setOnajiMesh(int impl_id, char* onaji_filepath)=0;
+	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name)=0;
+	TO_LUA virtual int getHonMeshBoneNum(int impl_id)=0;
+	TO_LUA virtual char* getHonMeshBoneName(int impl_id, int bone_index)=0;
+	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
+	TO_LUA virtual void setHonMeshBoneRotY(int impl_id, int bone_index, float roty)=0;
+	TO_LUA virtual void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz)=0;
+	TO_LUA virtual void setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t)=0; // falseにすると回転が0になりIKでも回転しなくなる
+	TO_LUA virtual void setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t)=0;
+	TO_LUA virtual void setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t)=0;
+	TO_LUA virtual void setHonMeshBoneTransX(int impl_id, int bone_index, float dx)=0;
+	TO_LUA virtual void setHonMeshBoneTransY(int impl_id, int bone_index, float dy)=0;
+	TO_LUA virtual void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz)=0;
+	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
+	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, bool is_loop)=0;
+	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int frame, float time)=0;
+	TO_LUA virtual void saveNowToFile(char* filename)=0;
+	TO_LUA virtual void loadFromFile(char* filename)=0;
+	TO_LUA virtual void saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
+	TO_LUA virtual void deleteAll()=0;
+};
 
+class AnimationMeshKakera {
+private:
+	vector<float> mesh_bone_rotx;
+	vector<float> mesh_bone_roty;
+	vector<float> mesh_bone_rotz;
+	vector<float> mesh_bone_transx;
+	vector<float> mesh_bone_transy;
+	vector<float> mesh_bone_transz;
 
-interface IABuilder {
-	int createAnimationBuilderImpl(char* hon_filepath);
-	void setOnajiMesh(int impl_id, char* onaji_filepath);
-	void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name);
-	int getHonMeshBoneNum(int impl_id);
-	char* getHonMeshBoneName(int impl_id, int bone_index);
+	string mesh_filepathname;
+	map<string,int> mesh_bone_name_index;
 
-	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
-	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
-	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
-	void setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t); // falseにすると回転が0になりIKでも回転しなくなる
-	void setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t);
-	void setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t);
+	vector<int> mesh_bone_default_anime_frame;
 
-	void setAnimePoseFrame(int impl_id, int frame);// 現在のとっている姿勢を指定したアニメフレームとして保存する
-	
-	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
-	void setFrameToExe(int impl_id, int frameexe_id, int frame, float time);
-
+	vector<MYMATRIX*> mesh_offset_matrix;
+public:
+	void setOffsetMatrixToMesh(Mesh* mesh);
+	void copy(AnimationMeshKakera* kakera_moto);// コピー元からコピーする
 
 };
 
+class AnimationMeshFrame {
+public:
+	AnimationMeshKakera* kakera;
+	int frame_index;
+	float time;
+};
+
+class AnimationMesh {
+public:
+	vector<AnimationMeshFrame*> frames;
+	string anime_name;
+	int anime_index;
+	int all_frame;
+};
 
 class AnimationBuilderMesh {
 	Mesh* mesh;
 	bool mesh_loaded;
 	char mesh_meshpath[128];
 	char mesh_animepath[128];
+public:
+	AnimationBuilderMesh(char* dmesh_meshpath, char* dmesh_animepath) {
+		mesh = new Mesh();
+		mesh_loaded = false;
+		memset(mesh_meshpath,0,128);
+		memset(mesh_animepath,0,128);
+		strcpy_s(mesh_meshpath, 128,dmesh_meshpath);
+		strcpy_s(mesh_animepath,128,dmesh_animepath);
+	}
 
+	~AnimationBuilderMesh() {
+		if (mesh) {
+			mesh->Release();
+			delete mesh;
+			mesh = 0;
+		}
+	}
 };
 
 class AnimationBuilderImpl {
@@ -45,6 +96,19 @@ class AnimationBuilderImpl {
 	vector<AnimationBuilderMesh*> onaji_mesh;
 	vector<AnimationBuilderMesh*> ko_mesh;
 
+	vector<AnimationMeshKakera*> kakeras;
+	vector<AnimationMesh*> animes;
+
+	AnimationBuilderImpl(char* hon_filepath) {
+		char hon_mesh_meshpath[128];
+		char hon_mesh_animepath[128];
+		memset(hon_mesh_meshpath,0,128);
+		memset(hon_mesh_animepath,0,128);
+		sprintf_s(hon_mesh_meshpath,128,"%s.MESH", hon_filepath);
+		sprintf_s(hon_mesh_animepath,128,"%s.ANIME", hon_filepath);
+		hon_mesh = new AnimationBuilderMesh(hon_mesh_meshpath, hon_mesh_animepath);
+	}
+		
 
 
 };
@@ -52,6 +116,8 @@ class AnimationBuilderImpl {
 class AnimationBuilder : Scene
 {
 private:
+	vector<AnimationBuilderImpl*> impls;
+	int now_index;
 
 public:
 	AnimationBuilder(char* c, int len);
@@ -71,14 +137,29 @@ public:
 	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
 	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
 
+	int createAnimationBuilderImpl(char* hon_filepath);
+	void setOnajiMesh(int impl_id, char* onaji_filepath);
+	void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name);
+	int getHonMeshBoneNum(int impl_id);
+	char* getHonMeshBoneName(int impl_id, int bone_index);
+	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
+	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
+	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
+	void setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t); // falseにすると回転が0になりIKでも回転しなくなる
+	void setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t);
+	void setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t);
+	void setHonMeshBoneTransX(int impl_id, int bone_index, float dx);
+	void setHonMeshBoneTransY(int impl_id, int bone_index, float dy);
+	void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz);
+	void setAnimePoseFrame(int impl_id, int frame);// 現在のとっている姿勢を指定したアニメフレームとして保存する
+	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
+	void setFrameToExe(int impl_id, int frameexe_id, int frame, float time);
+	void saveNowToFile(char* filename);
+	void loadFromFile(char* filename);
+	void saveAnimeAndFrameToFile(int impl_id, char* filename);
+	void deleteAll();
+
 };
-
-
 }
-
-
-
-
-
 
 #endif
