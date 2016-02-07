@@ -762,9 +762,10 @@ public:
 
 
 
-class GUIS {
+class GUIs {
+private:
 	vector<GUI*> guis;
-
+public:
 	int makeInst() {
 		GUI* g = new GUI();
 		guis.push_back(g);
@@ -785,8 +786,8 @@ class GUIS {
 		throw new GameError(KTROBO::WARNING, "no gui");
 	}
 
-	GUIS() {}
-	~GUIS() {
+	GUIs() {}
+	~GUIs() {
 		Release();
 	}
 
@@ -799,6 +800,7 @@ class GUIS {
 		}
 		guis.clear();
 	}
+};
 }
 
 #endif

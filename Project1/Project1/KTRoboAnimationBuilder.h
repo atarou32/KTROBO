@@ -6,8 +6,53 @@
 #include "KTRoboScene.h"
 
 namespace KTROBO {
+
+
+
+interface IABuilder {
+	int createAnimationBuilderImpl(char* hon_filepath);
+	void setOnajiMesh(int impl_id, char* onaji_filepath);
+	void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name);
+	int getHonMeshBoneNum(int impl_id);
+	char* getHonMeshBoneName(int impl_id, int bone_index);
+
+	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
+	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
+	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
+	void setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t); // falseにすると回転が0になりIKでも回転しなくなる
+	void setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t);
+	void setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t);
+
+	void setAnimePoseFrame(int impl_id, int frame);// 現在のとっている姿勢を指定したアニメフレームとして保存する
+	
+	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
+	void setFrameToExe(int impl_id, int frameexe_id, int frame, float time);
+
+
+};
+
+
+class AnimationBuilderMesh {
+	Mesh* mesh;
+	bool mesh_loaded;
+	char mesh_meshpath[128];
+	char mesh_animepath[128];
+
+};
+
+class AnimationBuilderImpl {
+	AnimationBuilderMesh* hon_mesh;
+	vector<AnimationBuilderMesh*> onaji_mesh;
+	vector<AnimationBuilderMesh*> ko_mesh;
+
+
+
+};
+
 class AnimationBuilder : Scene
 {
+private:
+
 public:
 	AnimationBuilder(char* c, int len);
 	virtual ~AnimationBuilder(void) {
