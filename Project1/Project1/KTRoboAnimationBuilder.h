@@ -10,7 +10,7 @@ namespace KTROBO {
 interface IAnimationBuilder {
 	TO_LUA virtual int createAnimationBuilderImpl(char* hon_filepath)=0;
 	TO_LUA virtual void setOnajiMesh(int impl_id, char* onaji_filepath)=0;
-	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name)=0;
+	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name, bool is_connect_without_material_local)=0;
 	TO_LUA virtual int getHonMeshBoneNum(int impl_id)=0;
 	TO_LUA virtual char* getHonMeshBoneName(int impl_id, int bone_index)=0;
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
@@ -24,7 +24,8 @@ interface IAnimationBuilder {
 	TO_LUA virtual void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz)=0;
 	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, bool is_loop)=0;
-	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int frame, float time)=0;
+	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int pose_id,  int frame, float time)=0;
+	TO_LUA virtual void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time)=0;
 	TO_LUA virtual void saveNowToFile(char* filename)=0;
 	TO_LUA virtual void loadFromFile(char* filename)=0;
 	TO_LUA virtual void saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
@@ -32,15 +33,19 @@ interface IAnimationBuilder {
 };
 
 class AnimationMeshKakera {
-private:
+public:
 	vector<float> mesh_bone_rotx;
 	vector<float> mesh_bone_roty;
 	vector<float> mesh_bone_rotz;
 	vector<float> mesh_bone_transx;
 	vector<float> mesh_bone_transy;
 	vector<float> mesh_bone_transz;
+	vector<bool> mesh_bone_isrotx;
+	vector<bool> mesh_bone_isroty;
+	vector<bool> mesh_bone_isrotz;
 
 	string mesh_filepathname;
+	int frame;
 	map<string,int> mesh_bone_name_index;
 
 	vector<int> mesh_bone_default_anime_frame;
@@ -49,13 +54,14 @@ private:
 public:
 	void setOffsetMatrixToMesh(Mesh* mesh);
 	void copy(AnimationMeshKakera* kakera_moto);// コピー元からコピーする
-
 };
+
 
 class AnimationMeshFrame {
 public:
 	AnimationMeshKakera* kakera;
-	int frame_index;
+	int kakera_index;
+	int frame;
 	float time;
 };
 
@@ -64,14 +70,20 @@ public:
 	vector<AnimationMeshFrame*> frames;
 	string anime_name;
 	int anime_index;
-	int all_frame;
+	int all_time;
+	bool is_loop;
 };
 
 class AnimationBuilderMesh {
+public:
 	Mesh* mesh;
 	bool mesh_loaded;
 	char mesh_meshpath[128];
 	char mesh_animepath[128];
+
+	AnimationBuilderMesh* oya_mesh;
+	bool is_connect_without_material_local;
+	char oya_mesh_bone_name[128];
 public:
 	AnimationBuilderMesh(char* dmesh_meshpath, char* dmesh_animepath) {
 		mesh = new Mesh();
@@ -80,7 +92,17 @@ public:
 		memset(mesh_animepath,0,128);
 		strcpy_s(mesh_meshpath, 128,dmesh_meshpath);
 		strcpy_s(mesh_animepath,128,dmesh_animepath);
+		oya_mesh = 0;
+		is_connect_without_material_local = true;
+		memset(oya_mesh_bone_name,0,128);
 	}
+
+	void setOyaMesh(AnimationBuilderMesh* o, char* obname, bool is_c) {
+		oya_mesh = o;
+		is_connect_without_material_local = is_c;
+		strcpy_s(oya_mesh_bone_name, 128, obname);
+	}
+
 
 	~AnimationBuilderMesh() {
 		if (mesh) {
@@ -92,12 +114,17 @@ public:
 };
 
 class AnimationBuilderImpl {
+public:
+
 	AnimationBuilderMesh* hon_mesh;
 	vector<AnimationBuilderMesh*> onaji_mesh;
 	vector<AnimationBuilderMesh*> ko_mesh;
 
 	vector<AnimationMeshKakera*> kakeras;
+	map<int,int> frame_to_kakera_index;
+
 	vector<AnimationMesh*> animes;
+	AnimationMeshKakera* now_kakera;
 
 	AnimationBuilderImpl(char* hon_filepath) {
 		char hon_mesh_meshpath[128];
@@ -107,9 +134,8 @@ class AnimationBuilderImpl {
 		sprintf_s(hon_mesh_meshpath,128,"%s.MESH", hon_filepath);
 		sprintf_s(hon_mesh_animepath,128,"%s.ANIME", hon_filepath);
 		hon_mesh = new AnimationBuilderMesh(hon_mesh_meshpath, hon_mesh_animepath);
+		now_kakera = 0;
 	}
-		
-
 
 };
 
@@ -139,7 +165,7 @@ public:
 
 	int createAnimationBuilderImpl(char* hon_filepath);
 	void setOnajiMesh(int impl_id, char* onaji_filepath);
-	void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name);
+	void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name, bool is_connect_without_material_local);
 	int getHonMeshBoneNum(int impl_id);
 	char* getHonMeshBoneName(int impl_id, int bone_index);
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
@@ -153,7 +179,8 @@ public:
 	void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz);
 	void setAnimePoseFrame(int impl_id, int frame);// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
-	void setFrameToExe(int impl_id, int frameexe_id, int frame, float time);
+	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);
+	void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time);
 	void saveNowToFile(char* filename);
 	void loadFromFile(char* filename);
 	void saveAnimeAndFrameToFile(int impl_id, char* filename);
