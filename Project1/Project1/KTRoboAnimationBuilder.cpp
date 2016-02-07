@@ -1,5 +1,8 @@
 #include "KTRoboAnimationBuilder.h"
 #include "KTRoboCS.h"
+#include "MyTokenAnalyzer.h"
+
+
 using namespace KTROBO;
 
 AnimationBuilder::AnimationBuilder(char* n,int len) : Scene(n,len)
@@ -386,7 +389,6 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "savenowtofile");
 	AnimationBuilderImpl* im = impls[i];
 	KTROBO::mylog::writelog(filename,"IMPL{\n");
-	
 
 
 	/*
@@ -761,11 +763,24 @@ bool  AnimationBuilder::saveNowToFile(char* filename) {
 
 bool AnimationBuilder::forceLoadFromFile(char* filename) {
 
+	deleteAll();
+
+	MyTokenAnalyzer a;
+	a.load(filename);
+	while(!a.enddayo()) {
+		a.GetToken();
+		if (strcmp(a.Toke(), "AB")==0) {
+			a.GetToken("{");
+			int impl_num = a.GetIntToken();
+			for (int i=0;i<impl_num;i++) {
+
+			this->createAnimationBuilderImpl(
 
 
-
-
-
+			a.GetToken("}");
+		}
+	}
+	a.deletedayo();
 }
 
 
