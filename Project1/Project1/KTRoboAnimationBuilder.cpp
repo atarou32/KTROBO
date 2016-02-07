@@ -339,6 +339,28 @@ void AnimationBuilder::setFrameToExe(int impl_id, int frameexe_id, int pose_id, 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
+void AnimationMesh::write(char* filename) {
+	KTROBO::mylog::writelog(filename, "ALL_TIME=%f;\n", this->all_time);
+	KTROBO::mylog::writelog(filename, "ANIME_INDEX=%d;\n", this->anime_index);
+	KTROBO::mylog::writelog(filename, "ANIME_NAME=\"%s\"\n", this->anime_name);
+	if (is_loop) {
+		KTROBO::mylog::writelog(filename, "IS_LOOP=1");
+	} else {
+		KTROBO::mylog::writelog(filename, "IS_LOOP=0");
+	}
+	int num = this->frames.size();
+	KTROBO::mylog::writelog(filename, "FRAME_NUM=%d\n",num);
+	for (int i=0;i<num;i++) {
+		KTROBO::mylog::writelog(filename, "FRAME{\n");
+		
+		KTROBO::mylog::writelog(filename, "FR=%d;\n",frames[i]->frame);
+		KTROBO::mylog::writelog(filename, "KI=%d;\n", frames[i]->kakera_index);
+		KTROBO::mylog::writelog(filename, "KAKERAFRAME=%d", frames[i]->kakera->frame);
+		KTROBO::mylog::writelog(filename, "TI=%f;\n", frames[i]->time);
+
+		KTROBO::mylog::writelog(filename, "}\n");
+	}
+}
 
 
 bool AnimationBuilder::force_saveNowToFile(char* filename) {
@@ -426,10 +448,43 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 	*/
 	if (im->now_kakera) {
 		KTROBO::mylog::writelog(filename, "NOW_KAKERA{\n");
-
+		im->now_kakera->write(filename);
 
 		KTROBO::mylog::writelog(filename, "}\n");
 	}
+
+	int num = im->kakeras.size();
+	if (num) {
+		KTROBO::mylog::writelog(filename, "KAKERAS{\n");
+		KTROBO::mylog::writelog(filename, "NUM=%d;\n", num);
+		for (int i=0;i<num;i++) {
+			KTROBO::mylog::writelog(filename,"KAKERA {\n");
+			im->kakeras[i]->write(filename);
+			KTROBO::mylog::writelog(filename, "}\n");
+		}
+		KTROBO::mylog::writelog(filename, "}\n");
+	}
+
+
+	num = im->animes.size();
+	if (num) {
+			KTROBO::mylog::writelog(filename, "ANIMES{\n");
+		KTROBO::mylog::writelog(filename, "NUM=%d;\n", num);
+		for (int i=0;i<num;i++) {
+			KTROBO::mylog::writelog(filename,"ANIME {\n");
+			im->animes[i]->write(filename);
+			KTROBO::mylog::writelog(filename, "}\n");
+		}
+		KTROBO::mylog::writelog(filename, "}\n");
+	}
+
+
+
+
+
+
+
+
 
 	KTROBO::mylog::writelog(filename,"}//impl\n");
 	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
@@ -634,6 +689,63 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 
 	// 書き出しはじめ
 
+	// animefile の書き込む
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (impl_id < 0 || impl_id >= impls.size()) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return false;
+	}
+	if (!impls[impl_id]->now_kakera) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return false;
+	}
+	KTROBO::mylog::writelog(animefile, "animsets{\n");
+	AnimationBuilderImpl* im = impls[impl_id];
+	int bone_num = im->now_kakera->mesh_bone_name_index.size();
+	KTROBO::mylog::writelog(animefile, "%d;\n",bone_num);
+	map<string,int>::iterator it = im->now_kakera->mesh_bone_name_index.begin();// ほかのkakeraでも変わらない
+	while (it != im->now_kakera->mesh_bone_name_index.end()) {
+		pair<string,int> p = *it;
+		KTROBO::mylog::writelog(animefile, "anim{\n");
+		KTROBO::mylog::writelog(animefile, "%s;\n",p.first);
+		KTROBO::mylog::writelog(animefile, "keys{\n");
+		int key_num = im->kakeras.size();
+		int bone_index = p.second;
+
+		for (int i=0;i<key_num;i++) {
+			AnimationMeshKakera* ka = im->kakeras[i];
+			KTROBO::mylog::writelog(animefile, "%d;\n",ka->frame);
+			KTROBO::mylog::writelog(animefile, "matrix;0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;\n");
+			KTROBO::mylog::writelog(animefile, "matrix_basis;");
+			for (int k=0;k<16;k++) {
+				KTROBO::mylog::writelog(animefile, "%f,",ka->mesh_offset_matrix[bone_index].m[k/4][k%4]);
+			}
+			KTROBO::mylog::writelog(animefile, ";\n");
+		}
+		KTROBO::mylog::writelog(animefile, "}\n");
+		KTROBO::mylog::writelog(animefile, "}\n");
+		it++;
+	}
+
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+	// akat ファイルの書き込み
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	KTROBO::mylog::writelog(akatfile, "AKATS{\n");
+	int n = im->animes.size();
+	KTROBO::mylog::writelog(akatfile, "%d;",n);
+	for (int i=0;i<n;i++) {
+		KTROBO::mylog::writelog(akatfile, "AKAT{\n");
+		im->animes[i]->write(akatfile);
+		KTROBO::mylog::writelog(akatfile, "}\n");
+	}
+	KTROBO::mylog::writelog(akatfile, "}\n");
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 bool  AnimationBuilder::saveNowToFile(char* filename) {
@@ -647,8 +759,23 @@ bool  AnimationBuilder::saveNowToFile(char* filename) {
 	return force_saveNowToFile(filename);
 }
 
+bool AnimationBuilder::forceLoadFromFile(char* filename) {
+
+
+
+
+
+
+}
+
+
 bool  AnimationBuilder::loadFromFile(char* filename) {
-	// すべての状態が保存されたファイルから
+	// すべての状態が保存されたファイルから状態を復元する現在のものは消してしまう
+	if (impls.size()) return false;
+
+	forceLoadFromFile(filename);
+	
+
 
 }
 

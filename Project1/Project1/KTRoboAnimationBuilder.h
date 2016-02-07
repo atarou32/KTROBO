@@ -28,6 +28,7 @@ interface IAnimationBuilder {
 	TO_LUA virtual void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time)=0;
 	TO_LUA virtual bool saveNowToFile(char* filename)=0;
 	TO_LUA virtual bool loadFromFile(char* filename)=0;
+	TO_LUA virtual bool forceLoadFromFile(char* filename)=0;
 	TO_LUA virtual bool saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
 	TO_LUA virtual bool force_saveNowToFile(char* filename)=0;
 	TO_LUA virtual bool force_saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
@@ -73,7 +74,7 @@ public:
 	vector<AnimationMeshFrame*> frames;
 	string anime_name;
 	int anime_index;
-	int all_time;
+	float all_time;
 	bool is_loop;
 
 	AnimationMesh() {
@@ -96,7 +97,7 @@ public:
 		}
 		frames.clear();
 	}
-
+	void write(char* filename);
 };
 
 class AnimationBuilderMesh {
@@ -274,6 +275,7 @@ public:
 	bool loadFromFile(char* filename);
 	bool saveAnimeAndFrameToFile(int impl_id, char* filename);
 	bool force_saveNowToFile(char* filename);
+	bool forceLoadFromFile(char* filename);
 	bool force_saveAnimeAndFrameToFile(int impl_id, char* filename);
 	void deleteAll();
 
