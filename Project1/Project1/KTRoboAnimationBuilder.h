@@ -57,7 +57,7 @@ public:
 public:
 	void setOffsetMatrixToMesh(Mesh* mesh);
 	void copy(AnimationMeshKakera* kakera_moto);// コピー元からコピーする
-	void write(char* filename);
+	void write(char* filename,int impl_id);
 };
 
 
@@ -97,7 +97,7 @@ public:
 		}
 		frames.clear();
 	}
-	void write(char* filename);
+	void write(char* filename, int impl_id);
 };
 
 class AnimationBuilderMesh {
@@ -132,7 +132,7 @@ public:
 		strcpy_s(oya_mesh_bone_name, 128, obname);
 	}
 
-	void write(char* filename);
+	void write(char* filename, int impl_id);
 
 	~AnimationBuilderMesh() {
 		if (mesh) {
@@ -258,6 +258,7 @@ public:
 	void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath,char* parent_bone_name, bool is_connect_without_material_local);
 	int getHonMeshBoneNum(int impl_id);
 	char* getHonMeshBoneName(int impl_id, int bone_index);
+
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
 	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
 	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
@@ -271,6 +272,7 @@ public:
 	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
 	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);
 	void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time);
+
 	bool saveNowToFile(char* filename);
 	bool loadFromFile(char* filename);
 	bool saveAnimeAndFrameToFile(int impl_id, char* filename);

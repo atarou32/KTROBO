@@ -342,7 +342,8 @@ void AnimationBuilder::setFrameToExe(int impl_id, int frameexe_id, int pose_id, 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
-void AnimationMesh::write(char* filename) {
+void AnimationMesh::write(char* filename, int impl_id) {
+	KTROBO::mylog::writelog(filename, "IMPL_ID=%d;\n",impl_id);
 	KTROBO::mylog::writelog(filename, "ALL_TIME=%f;\n", this->all_time);
 	KTROBO::mylog::writelog(filename, "ANIME_INDEX=%d;\n", this->anime_index);
 	KTROBO::mylog::writelog(filename, "ANIME_NAME=\"%s\"\n", this->anime_name);
@@ -367,7 +368,7 @@ void AnimationMesh::write(char* filename) {
 
 
 bool AnimationBuilder::force_saveNowToFile(char* filename) {
-		// Ç∑Ç◊ÇƒÇÃç°ÇÃèÛë‘Çï€ë∂Ç∑ÇÈ
+	// Ç∑Ç◊ÇƒÇÃç°ÇÃèÛë‘Çï€ë∂Ç∑ÇÈ
 	FILE* fp;
 	// Ç¢Ç¡ÇΩÇÒè¡ãéÇ∑ÇÈ
 	fopen_s(&fp, filename, "w");
@@ -390,22 +391,10 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 	AnimationBuilderImpl* im = impls[i];
 	KTROBO::mylog::writelog(filename,"IMPL{\n");
 
-
-	/*
-	AnimationBuilderMesh* hon_mesh;
-	vector<AnimationBuilderMesh*> onaji_mesh;
-	vector<AnimationBuilderMesh*> ko_mesh;
-
-	vector<AnimationMeshKakera*> kakeras;
-	map<int,int> frame_to_kakera_index;
-
-	vector<AnimationMesh*> animes;
-	AnimationMeshKakera* now_kakera;
-	*/
 	if (im->hon_mesh) {
 		KTROBO::mylog::writelog(filename, "HON_MESH{\n");
 
-		im->hon_mesh->write(filename);
+		im->hon_mesh->write(filename,i);
 
 		KTROBO::mylog::writelog(filename, "}//honmesh\n");
 	}
@@ -417,7 +406,7 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 		for (int i=0;i<s;i++) {
 			KTROBO::mylog::writelog(filename, "ONAJI_MESH{\n");
 
-			im->onaji_mesh[i]->write(filename);
+			im->onaji_mesh[i]->write(filename,i);
 
 
 			KTROBO::mylog::writelog(filename, "}//onajimesh\n");
@@ -433,7 +422,7 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 		for (int i=0;i<s;i++) {
 			KTROBO::mylog::writelog(filename, "KO_MESH{\n");
 
-			im->ko_mesh[i]->write(filename);
+			im->ko_mesh[i]->write(filename,i);
 
 
 			KTROBO::mylog::writelog(filename, "}//komesh\n");
@@ -441,16 +430,10 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 
 		KTROBO::mylog::writelog(filename, "}// komeshs\n");
 	}
-	/*
-	vector<AnimationMeshKakera*> kakeras;
-	map<int,int> frame_to_kakera_index;
-
-	vector<AnimationMesh*> animes;
-	AnimationMeshKakera* now_kakera;
-	*/
+	
 	if (im->now_kakera) {
 		KTROBO::mylog::writelog(filename, "NOW_KAKERA{\n");
-		im->now_kakera->write(filename);
+		im->now_kakera->write(filename,i);
 
 		KTROBO::mylog::writelog(filename, "}\n");
 	}
@@ -461,7 +444,7 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 		KTROBO::mylog::writelog(filename, "NUM=%d;\n", num);
 		for (int i=0;i<num;i++) {
 			KTROBO::mylog::writelog(filename,"KAKERA {\n");
-			im->kakeras[i]->write(filename);
+			im->kakeras[i]->write(filename,i);
 			KTROBO::mylog::writelog(filename, "}\n");
 		}
 		KTROBO::mylog::writelog(filename, "}\n");
@@ -474,19 +457,11 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 		KTROBO::mylog::writelog(filename, "NUM=%d;\n", num);
 		for (int i=0;i<num;i++) {
 			KTROBO::mylog::writelog(filename,"ANIME {\n");
-			im->animes[i]->write(filename);
+			im->animes[i]->write(filename,i);
 			KTROBO::mylog::writelog(filename, "}\n");
 		}
 		KTROBO::mylog::writelog(filename, "}\n");
 	}
-
-
-
-
-
-
-
-
 
 	KTROBO::mylog::writelog(filename,"}//impl\n");
 	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
@@ -517,7 +492,8 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 
 	vector<MYMATRIX> mesh_offset_matrix;
 */
-void AnimationMeshKakera::write(char* filename) {
+void AnimationMeshKakera::write(char* filename, int impl_id) {
+	KTROBO::mylog::writelog(filename, "IMPL_ID=%d;\n",impl_id);
 	KTROBO::mylog::writelog(filename, "ROTTRANSISPARAM{\n");
 	int mesh_bone_rotx_size = mesh_bone_rotx.size();
 	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotx_size);
@@ -644,18 +620,9 @@ void AnimationMeshKakera::write(char* filename) {
 
 
 
-void AnimationBuilderMesh::write(char* filename) {
-	/*
-	Mesh* mesh;
-	bool mesh_loaded;
-	char mesh_filepath[128];
-	char mesh_meshpath[128];
-	char mesh_animepath[128];
-
-	char oya_filepath[128];
-	bool is_connect_without_material_local;
-	char oya_mesh_bone_name[128];
-	*/
+void AnimationBuilderMesh::write(char* filename, int impl_id) {
+	
+	KTROBO::mylog::writelog(filename, "IMPL_ID=%d\n", impl_id);
 	KTROBO::mylog::writelog(filename, "MFILEPATH=\"%s\"\n", mesh_filepath);
 	KTROBO::mylog::writelog(filename, "OFILEPATH=\"%s\"\n", oya_filepath);
 	if (is_connect_without_material_local) {
@@ -742,7 +709,7 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 	KTROBO::mylog::writelog(akatfile, "%d;",n);
 	for (int i=0;i<n;i++) {
 		KTROBO::mylog::writelog(akatfile, "AKAT{\n");
-		im->animes[i]->write(akatfile);
+		im->animes[i]->write(akatfile,impl_id);
 		KTROBO::mylog::writelog(akatfile, "}\n");
 	}
 	KTROBO::mylog::writelog(akatfile, "}\n");
@@ -769,17 +736,78 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 	a.load(filename);
 	while(!a.enddayo()) {
 		a.GetToken();
-		if (strcmp(a.Toke(), "AB")==0) {
+		if (strcmp(a.Toke(), "HON_MESH")==0) {
 			a.GetToken("{");
-			int impl_num = a.GetIntToken();
-			for (int i=0;i<impl_num;i++) {
-
-			this->createAnimationBuilderImpl(
-
-
-			a.GetToken("}");
+			while (strcmp(a.Toke(), "}")!=0 && !a.enddayo()) {
+				a.GetToken();
+				if (strcmp(a.Toke(), "MFILEPATH")==0) {
+					a.GetToken();
+					this->createAnimationBuilderImpl(a.Toke());
+				}
+			}
 		}
 	}
+	a.resetPointer();
+	while(!a.enddayo()) {
+		a.GetToken();
+		if (strcmp(a.Toke(), "ONAJI_MESH")==0) {
+			a.GetToken("{");
+			a.GetToken("IMPL_ID");
+			int impl_id = a.GetIntToken();
+			while (strcmp(a.Toke(), "}")!=0 && !a.enddayo()) {
+				a.GetToken();
+				if (strcmp(a.Toke(), "MFILEPATH")==0) {
+					a.GetToken();
+					this->setOnajiMesh(impl_id, a.Toke());
+				}
+			}
+		}
+	}
+	a.resetPointer();
+	while(!a.enddayo()) {
+		a.GetToken();
+		if (strcmp(a.Toke(), "KO_MESH")==0) {
+			a.GetToken("{");
+			a.GetToken("IMPL_ID");
+			int impl_id = a.GetIntToken();
+			char mfilepath[128];
+			char ofilepath[128];
+			char obonename[128];
+			bool icwml=false;
+			memset(mfilepath,0,128);
+			memset(ofilepath,0,128);
+			memset(obonename,0,128);
+
+			while (strcmp(a.Toke(), "}")!=0 && !a.enddayo()) {
+				a.GetToken();
+
+				if (strcmp(a.Toke(), "MFILEPATH")==0) {
+					a.GetToken();
+					hmystrcpy(mfilepath,128,0,a.Toke());
+				}
+
+				if (strcmp(a.Toke(), "OFILEPATH")==0) {
+					a.GetToken();
+					hmystrcpy(ofilepath,128,0,a.Toke());
+				}
+
+				if (strcmp(a.Toke(), "OMBNAME")==0) {
+					a.GetToken();
+					hmystrcpy(obonename,128,0,a.Toke());
+				}
+
+				
+				if (strcmp(a.Toke(), "ICWML")==0) {
+					int b = a.GetIntToken();
+					if (b) {
+						icwml = true;
+					}
+				}
+			}
+			this->setKoMesh(impl_id, mfilepath,ofilepath,obonename, icwml);
+		}
+	}
+
 	a.deletedayo();
 }
 
