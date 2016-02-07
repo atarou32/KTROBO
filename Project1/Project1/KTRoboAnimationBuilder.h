@@ -10,7 +10,7 @@ namespace KTROBO {
 interface IAnimationBuilder {
 	TO_LUA virtual int createAnimationBuilderImpl(char* hon_filepath)=0;
 	TO_LUA virtual void setOnajiMesh(int impl_id, char* onaji_filepath)=0;
-	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name, bool is_connect_without_material_local)=0;
+	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local)=0;
 	TO_LUA virtual int getHonMeshBoneNum(int impl_id)=0;
 	TO_LUA virtual char* getHonMeshBoneName(int impl_id, int bone_index)=0;
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
@@ -56,6 +56,7 @@ public:
 public:
 	void setOffsetMatrixToMesh(Mesh* mesh);
 	void copy(AnimationMeshKakera* kakera_moto);// コピー元からコピーする
+	void write(char* filename);
 };
 
 
@@ -102,31 +103,35 @@ class AnimationBuilderMesh {
 public:
 	Mesh* mesh;
 	bool mesh_loaded;
+	char mesh_filepath[128];
 	char mesh_meshpath[128];
 	char mesh_animepath[128];
 
-	bool oya_mesh;
+	char oya_filepath[128];
 	bool is_connect_without_material_local;
 	char oya_mesh_bone_name[128];
 public:
-	AnimationBuilderMesh(char* dmesh_meshpath, char* dmesh_animepath) {
+	AnimationBuilderMesh(char* dmesh_filepath,char* dmesh_meshpath, char* dmesh_animepath) {
 		mesh = new Mesh();
 		mesh_loaded = false;
 		memset(mesh_meshpath,0,128);
 		memset(mesh_animepath,0,128);
+		memset(mesh_filepath,0,128);
+		strcpy_s(mesh_filepath,128,dmesh_filepath);
 		strcpy_s(mesh_meshpath, 128,dmesh_meshpath);
 		strcpy_s(mesh_animepath,128,dmesh_animepath);
-		oya_mesh = false;
+		memset(oya_filepath,0,128);
 		is_connect_without_material_local = true;
 		memset(oya_mesh_bone_name,0,128);
 	}
 
-	void setOyaMesh(char* obname, bool is_c) {
-		oya_mesh = true;
+	void setOyaMesh(char* doya_filepath, char* obname, bool is_c) {
+		strcpy_s(oya_filepath,128,doya_filepath);
 		is_connect_without_material_local = is_c;
 		strcpy_s(oya_mesh_bone_name, 128, obname);
 	}
 
+	void write(char* filename);
 
 	~AnimationBuilderMesh() {
 		if (mesh) {
@@ -157,7 +162,7 @@ public:
 		memset(hon_mesh_animepath,0,128);
 		sprintf_s(hon_mesh_meshpath,128,"%s.MESH", hon_filepath);
 		sprintf_s(hon_mesh_animepath,128,"%s.ANIME", hon_filepath);
-		hon_mesh = new AnimationBuilderMesh(hon_mesh_meshpath, hon_mesh_animepath);
+		hon_mesh = new AnimationBuilderMesh(hon_filepath, hon_mesh_meshpath, hon_mesh_animepath);
 		now_kakera = 0;
 	}
 	void Release() {
@@ -249,7 +254,7 @@ public:
 
 	int createAnimationBuilderImpl(char* hon_filepath);
 	void setOnajiMesh(int impl_id, char* onaji_filepath);
-	void setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name, bool is_connect_without_material_local);
+	void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath,char* parent_bone_name, bool is_connect_without_material_local);
 	int getHonMeshBoneNum(int impl_id);
 	char* getHonMeshBoneName(int impl_id, int bone_index);
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);

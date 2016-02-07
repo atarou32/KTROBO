@@ -26,7 +26,7 @@ void  AnimationBuilder::setOnajiMesh(int impl_id, char* onaji_filepath) {
 	sprintf_s(onaji_meshpath,128,"%s.MESH", onaji_filepath);
 	sprintf_s(onaji_animepath,128,"%s.ANIME", onaji_filepath);
 	if (impls.size() > impl_id && impl_id >= 0) {
-		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(onaji_meshpath,onaji_animepath);	
+		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(onaji_filepath, onaji_meshpath,onaji_animepath);	
 		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		AnimationBuilderImpl *impl = impls[impl_id];
 		impl->onaji_mesh.push_back(mesh);
@@ -34,7 +34,7 @@ void  AnimationBuilder::setOnajiMesh(int impl_id, char* onaji_filepath) {
 	}
 }
 
-void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* parent_bone_name, bool is_connect_without_material_local) {
+void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local) {
 	char ko_meshpath[128];
 	char ko_animepath[128];
 	memset(ko_meshpath,0,128);
@@ -42,10 +42,10 @@ void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* parent_b
 	sprintf_s(ko_meshpath,128,"%s.MESH", ko_filepath);
 	sprintf_s(ko_animepath, 128, "%s.ANIME", ko_filepath);
 	if (impls.size() > impl_id && impl_id >=0) {
-		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(ko_meshpath,ko_animepath);
+		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(ko_filepath, ko_meshpath,ko_animepath);
 		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		AnimationBuilderImpl *impl = impls[impl_id];
-		mesh->setOyaMesh(parent_bone_name, is_connect_without_material_local);
+		mesh->setOyaMesh(oya_filepath, parent_bone_name, is_connect_without_material_local);
 		impl->ko_mesh.push_back(mesh);
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	}
@@ -381,19 +381,233 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 	if (im->hon_mesh) {
 		KTROBO::mylog::writelog(filename, "HON_MESH{\n");
 
+		im->hon_mesh->write(filename);
+
+		KTROBO::mylog::writelog(filename, "}//honmesh\n");
+	}
+
+	if (im->onaji_mesh.size()) {
+		KTROBO::mylog::writelog(filename, "ONAJI_MESHS{\n");
+		int s = im->onaji_mesh.size();
+		KTROBO::mylog::writelog(filename, "NUM=%d;\n", s);
+		for (int i=0;i<s;i++) {
+			KTROBO::mylog::writelog(filename, "ONAJI_MESH{\n");
+
+			im->onaji_mesh[i]->write(filename);
+
+
+			KTROBO::mylog::writelog(filename, "}//onajimesh\n");
+		}
+
+		KTROBO::mylog::writelog(filename, "}// onajimeshs\n");
+	}
+
+	if (im->ko_mesh.size()) {
+		KTROBO::mylog::writelog(filename, "KO_MESHS{\n");
+		int s = im->ko_mesh.size();
+		KTROBO::mylog::writelog(filename, "NUM=%d;\n", s);
+		for (int i=0;i<s;i++) {
+			KTROBO::mylog::writelog(filename, "KO_MESH{\n");
+
+			im->ko_mesh[i]->write(filename);
+
+
+			KTROBO::mylog::writelog(filename, "}//komesh\n");
+		}
+
+		KTROBO::mylog::writelog(filename, "}// komeshs\n");
+	}
+	/*
+	vector<AnimationMeshKakera*> kakeras;
+	map<int,int> frame_to_kakera_index;
+
+	vector<AnimationMesh*> animes;
+	AnimationMeshKakera* now_kakera;
+	*/
+	if (im->now_kakera) {
+		KTROBO::mylog::writelog(filename, "NOW_KAKERA{\n");
 
 
 		KTROBO::mylog::writelog(filename, "}\n");
 	}
 
-	KTROBO::mylog::writelog(filename,"}\n");
+	KTROBO::mylog::writelog(filename,"}//impl\n");
 	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
 	}
+
+
+	KTROBO::mylog::writelog(filename, "}//file\n");
+}
+
+
+
+/*
+	vector<float> mesh_bone_rotx;
+	vector<float> mesh_bone_roty;
+	vector<float> mesh_bone_rotz;
+	vector<float> mesh_bone_transx;
+	vector<float> mesh_bone_transy;
+	vector<float> mesh_bone_transz;
+	vector<bool> mesh_bone_isrotx;
+	vector<bool> mesh_bone_isroty;
+	vector<bool> mesh_bone_isrotz;
+
+	string mesh_filepathname;
+	int frame;
+	map<string,int> mesh_bone_name_index;
+
+	vector<int> mesh_bone_default_anime_frame;
+
+	vector<MYMATRIX> mesh_offset_matrix;
+*/
+void AnimationMeshKakera::write(char* filename) {
+	KTROBO::mylog::writelog(filename, "ROTTRANSISPARAM{\n");
+	int mesh_bone_rotx_size = mesh_bone_rotx.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotx_size);
+	for (int i=0;i<mesh_bone_rotx_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",mesh_bone_rotx[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_roty_size = mesh_bone_roty.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_roty_size);
+	for (int i=0;i<mesh_bone_roty_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",mesh_bone_roty[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_rotz_size = mesh_bone_rotz.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotz_size);
+	for (int i=0;i<mesh_bone_rotz_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",mesh_bone_rotz[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_transx_size = mesh_bone_transx.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_transx_size);
+	for (int i=0;i<mesh_bone_transx_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",mesh_bone_transx[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_transy_size = mesh_bone_transy.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_transy_size);
+	for (int i=0;i<mesh_bone_transy_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",mesh_bone_transy[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_transz_size = mesh_bone_transz.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_transz_size);
+	for (int i=0;i<mesh_bone_transz_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",mesh_bone_transz[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+
+	int mesh_bone_isrotx_size = mesh_bone_isrotx.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_isrotx_size);
+	for (int i=0;i<mesh_bone_isrotx_size;i++) {
+		if (mesh_bone_isrotx[i]) {
+			KTROBO::mylog::writelog(filename, "1;");
+		} else {
+			KTROBO::mylog::writelog(filename, "0;");
+		}
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_isroty_size = mesh_bone_isroty.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_isroty_size);
+	for (int i=0;i<mesh_bone_isroty_size;i++) {
+		if (mesh_bone_isroty[i]) {
+			KTROBO::mylog::writelog(filename, "1;");
+		} else {
+			KTROBO::mylog::writelog(filename, "0;");
+		}
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_isrotz_size = mesh_bone_isrotz.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_isrotz_size);
+	for (int i=0;i<mesh_bone_isrotz_size;i++) {
+		if (mesh_bone_isrotz[i]) {
+			KTROBO::mylog::writelog(filename, "1;");
+		} else {
+			KTROBO::mylog::writelog(filename, "0;");
+		}
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+	KTROBO::mylog::writelog(filename, "}\n");
+	/*
+	string mesh_filepathname;
+	int frame;
+	map<string,int> mesh_bone_name_index;
+
+	vector<int> mesh_bone_default_anime_frame;
+
+	vector<MYMATRIX> mesh_offset_matrix;
+	*/
+
+	KTROBO::mylog::writelog(filename, "MESH_FILEPATHNAME=\"%s\";\n", mesh_filepathname.c_str());
+	KTROBO::mylog::writelog(filename, "FRAME=%d;\n", frame);
+	KTROBO::mylog::writelog(filename, "MESHBONENAMEINDEX{\n");
+	int num = mesh_bone_name_index.size();
+	KTROBO::mylog::writelog(filename, "%d;\n", num);
+	map<string,int>::iterator itt = mesh_bone_name_index.begin();
+	while( itt  != mesh_bone_name_index.end()) {
+		pair<string,int> p = *itt;
+		KTROBO::mylog::writelog(filename, "\"%s\"=%d;\n",p.first,p.second);
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
+
+	KTROBO::mylog::writelog(filename, "DEFAULTFRAMEANDMATRIX{\n");
+
+	num = mesh_bone_default_anime_frame.size();
+	KTROBO::mylog::writelog(filename, "%d;",num);
+	for (int i=0;i<num;i++) {
+		KTROBO::mylog::writelog(filename, "%d;",mesh_bone_default_anime_frame[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	num = mesh_offset_matrix.size();
+	KTROBO::mylog::writelog(filename, "%d;\n",num);
+	for (int i=0;i<num;i++) {
+		KTROBO::mylog::writelog(filename, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f;\n",
+			mesh_offset_matrix[i]._11,mesh_offset_matrix[i]._12,mesh_offset_matrix[i]._13,mesh_offset_matrix[i]._14,
+				mesh_offset_matrix[i]._21,mesh_offset_matrix[i]._22,mesh_offset_matrix[i]._23,mesh_offset_matrix[i]._24,
+					mesh_offset_matrix[i]._31,mesh_offset_matrix[i]._32,mesh_offset_matrix[i]._33,mesh_offset_matrix[i]._34,
+						mesh_offset_matrix[i]._41,mesh_offset_matrix[i]._42,mesh_offset_matrix[i]._43,mesh_offset_matrix[i]._44);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
 
 
 	KTROBO::mylog::writelog(filename, "}\n");
 }
 
+
+
+
+void AnimationBuilderMesh::write(char* filename) {
+	/*
+	Mesh* mesh;
+	bool mesh_loaded;
+	char mesh_filepath[128];
+	char mesh_meshpath[128];
+	char mesh_animepath[128];
+
+	char oya_filepath[128];
+	bool is_connect_without_material_local;
+	char oya_mesh_bone_name[128];
+	*/
+	KTROBO::mylog::writelog(filename, "MFILEPATH=\"%s\"\n", mesh_filepath);
+	KTROBO::mylog::writelog(filename, "OFILEPATH=\"%s\"\n", oya_filepath);
+	if (is_connect_without_material_local) {
+		KTROBO::mylog::writelog(filename, "ICWML=1;\n");
+	} else {
+		KTROBO::mylog::writelog(filename, "ICWML=0;\n");
+	}
+	KTROBO::mylog::writelog(filename, "OMBNAME=\"%s\"\n", oya_mesh_bone_name);
+}
 
 bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename) {
 	// .anime  ファイル　と　.akat ファイルを吐き出す
