@@ -2031,3 +2031,20 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 
 
 }
+
+
+void GUI::unregisterWindowToInputMessageDispatcher(int gui_window_id) {
+
+
+	CS::instance()->enter(CS_MESSAGE_CS, "inputmessage");
+
+	if (p_windows_index.find(gui_window_id) != p_windows_index.end()) {
+		GUI_WINDOW* w = windows[p_windows_index[gui_window_id]];
+		InputMessageDispatcher::unregisterImpl(w);
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "inputmessage");
+
+
+
+
+}

@@ -26,9 +26,11 @@ interface IAnimationBuilder {
 	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, bool is_loop)=0;
 	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int pose_id,  int frame, float time)=0;
 	TO_LUA virtual void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time)=0;
-	TO_LUA virtual void saveNowToFile(char* filename)=0;
-	TO_LUA virtual void loadFromFile(char* filename)=0;
-	TO_LUA virtual void saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
+	TO_LUA virtual bool saveNowToFile(char* filename)=0;
+	TO_LUA virtual bool loadFromFile(char* filename)=0;
+	TO_LUA virtual bool saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
+	TO_LUA virtual bool force_saveNowToFile(char* filename)=0;
+	TO_LUA virtual bool force_saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
 	TO_LUA virtual void deleteAll()=0;
 };
 
@@ -50,7 +52,7 @@ public:
 
 	vector<int> mesh_bone_default_anime_frame;
 
-	vector<MYMATRIX*> mesh_offset_matrix;
+	vector<MYMATRIX> mesh_offset_matrix;
 public:
 	void setOffsetMatrixToMesh(Mesh* mesh);
 	void copy(AnimationMeshKakera* kakera_moto);// コピー元からコピーする
@@ -72,6 +74,28 @@ public:
 	int anime_index;
 	int all_time;
 	bool is_loop;
+
+	AnimationMesh() {
+		anime_index = 0;
+		all_time = 0;
+		is_loop = 0;
+
+	}
+
+	~AnimationMesh() {
+		vector<AnimationMeshFrame*>::iterator it = frames.begin();
+		while(it != frames.end()) {
+			AnimationMeshFrame* ff = *it;
+			if (ff) {
+				delete ff;
+				ff = 0;
+			}
+
+			it++;
+		}
+		frames.clear();
+	}
+
 };
 
 class AnimationBuilderMesh {
@@ -81,7 +105,7 @@ public:
 	char mesh_meshpath[128];
 	char mesh_animepath[128];
 
-	AnimationBuilderMesh* oya_mesh;
+	bool oya_mesh;
 	bool is_connect_without_material_local;
 	char oya_mesh_bone_name[128];
 public:
@@ -92,13 +116,13 @@ public:
 		memset(mesh_animepath,0,128);
 		strcpy_s(mesh_meshpath, 128,dmesh_meshpath);
 		strcpy_s(mesh_animepath,128,dmesh_animepath);
-		oya_mesh = 0;
+		oya_mesh = false;
 		is_connect_without_material_local = true;
 		memset(oya_mesh_bone_name,0,128);
 	}
 
-	void setOyaMesh(AnimationBuilderMesh* o, char* obname, bool is_c) {
-		oya_mesh = o;
+	void setOyaMesh(char* obname, bool is_c) {
+		oya_mesh = true;
 		is_connect_without_material_local = is_c;
 		strcpy_s(oya_mesh_bone_name, 128, obname);
 	}
@@ -136,7 +160,66 @@ public:
 		hon_mesh = new AnimationBuilderMesh(hon_mesh_meshpath, hon_mesh_animepath);
 		now_kakera = 0;
 	}
+	void Release() {
 
+		if (hon_mesh) {
+			delete hon_mesh;
+			hon_mesh = 0;
+		}
+		vector<AnimationBuilderMesh*>::iterator it = onaji_mesh.begin();
+		while(it != onaji_mesh.end()) {
+			AnimationBuilderMesh* mm = *it;
+			if (mm) {
+				delete mm;
+				mm =0;
+			}
+
+			it++;
+		}
+		onaji_mesh.clear();
+
+		it = ko_mesh.begin();
+		while( it != ko_mesh.end()) {
+			AnimationBuilderMesh* mm = *it;
+			if (mm) {
+				delete mm;
+				mm = 0;
+			}
+			it++;
+		}
+		ko_mesh.clear();
+
+		// kakeraの消去
+		vector<AnimationMeshKakera*>::iterator itk = kakeras.begin();
+		while( itk != kakeras.end()) {
+			AnimationMeshKakera* kk = *itk;
+			if (kk) {
+				delete kk;
+				kk = 0;
+			}
+			itk++;
+		}
+		kakeras.clear();
+		if (now_kakera) {
+			delete now_kakera;
+			now_kakera = 0;
+		}
+		vector<AnimationMesh*>::iterator itm = animes.begin();
+		while(itm != animes.end()) {
+			AnimationMesh* mmm = *itm;
+			if (mmm) {
+				delete mmm;
+				mmm = 0;
+			}
+
+			itm++;
+		}
+		animes.clear();
+	}
+
+	~AnimationBuilderImpl(){
+		Release();
+	}
 };
 
 class AnimationBuilder : Scene
@@ -149,6 +232,7 @@ public:
 	AnimationBuilder(char* c, int len);
 	virtual ~AnimationBuilder(void) {
 		Scene::~Scene();
+		deleteAll();
 	}
 	void enter() {
 		Scene::enter();
@@ -181,9 +265,11 @@ public:
 	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
 	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);
 	void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time);
-	void saveNowToFile(char* filename);
-	void loadFromFile(char* filename);
-	void saveAnimeAndFrameToFile(int impl_id, char* filename);
+	bool saveNowToFile(char* filename);
+	bool loadFromFile(char* filename);
+	bool saveAnimeAndFrameToFile(int impl_id, char* filename);
+	bool force_saveNowToFile(char* filename);
+	bool force_saveAnimeAndFrameToFile(int impl_id, char* filename);
 	void deleteAll();
 
 };

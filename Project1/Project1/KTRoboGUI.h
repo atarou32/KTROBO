@@ -219,6 +219,7 @@ public:
 	TO_LUA virtual float getMinFromSlider(int gui_id)=0;
 
 	TO_LUA virtual void setRootWindowToInputMessageDispatcher(int gui_window_id)=0; // àÍî‘è„Ç…Ç¬Ç¡Ç±Çﬁ
+	TO_LUA virtual void unregisterWindowToInputMessageDispatcher(int gui_window_id)=0;
 	TO_LUA virtual void deleteAll()=0;
 
 };
@@ -734,6 +735,7 @@ public:
 	float getMinFromSlider(int gui_id);
 
 	void setRootWindowToInputMessageDispatcher(int gui_window_id);
+	void unregisterWindowToInputMessageDispatcher(int gui_window_id);
 	void deleteAll();
 
 	GUI(void);

@@ -45,7 +45,7 @@ void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* parent_b
 		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(ko_meshpath,ko_animepath);
 		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		AnimationBuilderImpl *impl = impls[impl_id];
-		mesh->setOyaMesh(impl->hon_mesh, parent_bone_name, is_connect_without_material_local);
+		mesh->setOyaMesh(parent_bone_name, is_connect_without_material_local);
 		impl->ko_mesh.push_back(mesh);
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	}
@@ -340,24 +340,144 @@ void AnimationBuilder::setFrameToExe(int impl_id, int frameexe_id, int pose_id, 
 }
 
 
-void  AnimationBuilder::saveNowToFile(char* filename) {
 
+bool AnimationBuilder::force_saveNowToFile(char* filename) {
+		// すべての今の状態を保存する
+	FILE* fp;
+	// いったん消去する
+	fopen_s(&fp, filename, "w");
+	if (fp != NULL) {
+		
+		return false;
+	}
+	fclose(fp);
+
+	// 書き出しはじめ
+
+	KTROBO::mylog::writelog(filename, "AB{\n");
+	CS::instance()->enter(CS_RENDERDATA_CS, "savenowtofile");
+	int num = impls.size();
+	KTROBO::mylog::writelog(filename, "IMPLNUM=%d;\n",num);
+	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
+	
+	for (int i=0;i<num;i++) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "savenowtofile");
+	AnimationBuilderImpl* im = impls[i];
+	KTROBO::mylog::writelog(filename,"IMPL{\n");
+	
+
+
+	/*
+	AnimationBuilderMesh* hon_mesh;
+	vector<AnimationBuilderMesh*> onaji_mesh;
+	vector<AnimationBuilderMesh*> ko_mesh;
+
+	vector<AnimationMeshKakera*> kakeras;
+	map<int,int> frame_to_kakera_index;
+
+	vector<AnimationMesh*> animes;
+	AnimationMeshKakera* now_kakera;
+	*/
+	if (im->hon_mesh) {
+		KTROBO::mylog::writelog(filename, "HON_MESH{\n");
+
+
+
+		KTROBO::mylog::writelog(filename, "}\n");
+	}
+
+	KTROBO::mylog::writelog(filename,"}\n");
+	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
+	}
+
+
+	KTROBO::mylog::writelog(filename, "}\n");
+}
+
+
+bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename) {
+	// .anime  ファイル　と　.akat ファイルを吐き出す
+	char animefile[128];
+	char akatfile[128];
+	memset(animefile,0,128);
+	memset(akatfile,0,128);
+	sprintf_s(animefile,128,"%s.anime",filename);
+	sprintf_s(akatfile,128,"%s.akat",filename);
+	FILE* animef;
+	FILE* akatf;
+	fopen_s(&animef,animefile, "w");
+	if (animef != NULL) {
+		//fclose(animef);
+		return false;
+	}
+	fclose(animef);
+	fopen_s(&akatf, akatfile, "w");
+	if (akatf != NULL) {
+//		fclose(animef);
+		return false;
+	}
+	fclose(akatf);
+
+	// 書き出しはじめ
 
 }
 
-void  AnimationBuilder::loadFromFile(char* filename) {
+bool  AnimationBuilder::saveNowToFile(char* filename) {
+	// すべての今の状態を保存する
+	FILE* fp;
+	fopen_s(&fp, filename, "r");
+	if (fp != NULL) {
+		fclose(fp);
+		return false;
+	}
+	return force_saveNowToFile(filename);
+}
 
+bool  AnimationBuilder::loadFromFile(char* filename) {
+	// すべての状態が保存されたファイルから
 
 }
 
-void  AnimationBuilder::saveAnimeAndFrameToFile(int impl_id, char* filename) {
+bool  AnimationBuilder::saveAnimeAndFrameToFile(int impl_id, char* filename) {
 
+	// .anime  ファイル　と　.akat ファイルを吐き出す
+	char animefile[128];
+	char akatfile[128];
+	memset(animefile,0,128);
+	memset(akatfile,0,128);
+	sprintf_s(animefile,128,"%s.anime",filename);
+	sprintf_s(akatfile,128,"%s.akat",filename);
+	FILE* animef;
+	FILE* akatf;
+	fopen_s(&animef,animefile, "r");
+	if (animef != NULL) {
+		fclose(animef);
+		return false;
+	}
+	fopen_s(&akatf, akatfile, "r");
+	if (akatf != NULL) {
+		fclose(akatf);
+		return false;
+	}
 
+	force_saveAnimeAndFrameToFile(impl_id, filename);
 
 }
 
 void  AnimationBuilder::deleteAll() {
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "renderdata");
+	vector<AnimationBuilderImpl*>::iterator it = impls.begin();
+	while(it != impls.end()) {
 
-
+		AnimationBuilderImpl* i = *it;
+		if (i) {
+			i->Release();
+			delete i;
+			i = 0;
+		}
+		it++;
+	}
+	impls.clear();
+	CS::instance()->leave(CS_RENDERDATA_CS, "renderdata");
 }
