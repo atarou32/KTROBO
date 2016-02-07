@@ -684,6 +684,8 @@ public:
 
 };
 
+
+
 class GUI : public IGUI
 {
 private:
@@ -758,6 +760,45 @@ public:
 
 };
 
+
+
+class GUIS {
+	vector<GUI*> guis;
+
+	int makeInst() {
+		GUI* g = new GUI();
+		guis.push_back(g);
+		return guis.size()-1;
+	}
+
+	GUI* getInstance(int index) {
+		if (index >= 0 && index < guis.size()) {
+			return guis[index];
+		}
+		throw new GameError(KTROBO::WARNING, "no gui");
+	}
+
+	IGUI* getInterface(int index) {
+		if (index >= 0 && index < guis.size()) {
+			return guis[index];
+		}
+		throw new GameError(KTROBO::WARNING, "no gui");
+	}
+
+	GUIS() {}
+	~GUIS() {
+		Release();
+	}
+
+	void Release() {
+		int size = guis.size();
+		for (int i= 0; i<size;i++) {
+			guis[i]->Release();
+			delete guis[i];
+			guis[i] = 0;
+		}
+		guis.clear();
+	}
 }
 
 #endif

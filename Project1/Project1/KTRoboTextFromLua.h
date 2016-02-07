@@ -12,6 +12,11 @@ interface ITextFromLua {
 public:
 	TO_LUA virtual void setDebugText(char* str)=0;
 	TO_LUA virtual int add(int a, int b)=0;
+	TO_LUA virtual void makeAILua(bool is_lock_sita, char* lua_filename)=0;
+	TO_LUA virtual void makeButukariLua(bool is_lock, char* lua_filename)=0;
+	TO_LUA virtual void makeLoadLua(bool is_lock, char* lua_filename)=0;
+	TO_LUA virtual void makeAnimeLua(bool is_lock, char* lua_filename)=0;
+	TO_LUA virtual void makeRenderLua(bool is_lock, char* lua_filename)=0;
 };
 
 class TextFromLua : public ITextFromLua
@@ -24,6 +29,14 @@ public:
 
 	void setDebugText(char* str);
 	int add(int a, int b) {return a+b;}
+	void makeAILua(bool is_lock_sita, char* lua_filename);
+	void makeButukariLua(bool is_lock, char* lua_filename);
+	void makeLoadLua(bool is_lock, char* lua_filename);
+	void makeAnimeLua(bool is_lock, char* lua_filename);
+	void makeRenderLua(bool is_lock, char* lua_filename);
+
+
+
 };
 
 

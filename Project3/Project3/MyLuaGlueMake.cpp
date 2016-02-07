@@ -910,7 +910,7 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 	switch (def->hikisuu[i].type) {
 			case MyDefType::BOOL:
 			//KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TBOOLEAN);\n", -i-2);
-					KTROBO::mylog::writelog(filename, "%s = lua_toboolean(L,%d);\n", def->hikisuu[i].num_name, i+3);
+					KTROBO::mylog::writelog(filename, "%s = (bool)lua_toboolean(L,%d);\n", def->hikisuu[i].num_name, i+3);
 			break;
 			case MyDefType::CHAR:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);

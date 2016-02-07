@@ -1,5 +1,6 @@
 #include "KTRoboTextFromLua.h"
 #include "stringconverter.h"
+#include "KTRoboLuaCollection.h"
 
 using namespace KTROBO;
 TextFromLua::TextFromLua(Graphics* gg)
@@ -22,3 +23,25 @@ void TextFromLua::setDebugText(char* str) {
 }
 
 
+void TextFromLua::makeAILua(bool is_lock_sita, char* lua_filename) {
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,is_lock_sita,lua_filename);
+}
+
+
+void TextFromLua::makeButukariLua(bool is_lock, char* lua_filename) {
+	LuaTCBMaker::makeTCB(TASKTHREADS_UPDATEPOSBUTUKARI, is_lock, lua_filename);
+}
+
+
+void TextFromLua::makeLoadLua(bool is_lock, char* lua_filename) {
+	LuaTCBMaker::makeTCB(TASKTHREADS_LOADDESTRUCT, is_lock, lua_filename);
+}
+
+void TextFromLua::makeAnimeLua(bool is_lock, char* lua_filename) {
+	LuaTCBMaker::makeTCB(TASKTHREADS_UPDATEANIMEFRAMENADO, is_lock, lua_filename);
+}
+
+
+void TextFromLua::makeRenderLua(bool is_lock, char* lua_filename) {
+	LuaTCBMaker::makeTCB(TASKTHREADS_UPDATEMAINRENDER,is_lock, lua_filename);
+}
