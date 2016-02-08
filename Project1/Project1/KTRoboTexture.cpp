@@ -1,6 +1,7 @@
 #include "KTRoboTexture.h"
 #include "memory.h"
 #include "KTRoboMesh.h"
+#include "KTRoboDebugText.h"
 
 using namespace KTROBO;
 
@@ -607,7 +608,7 @@ void Texture::_renderTex(Graphics* g, TexturePart* p) {
 	g->getDeviceContext()->IASetIndexBuffer(p->indexbuffer_tex, DXGI_FORMAT_R16_UINT,0);
 	g->getDeviceContext()->RSSetState(mss_for_render_tex.rasterstate);
 	g->getDeviceContext()->VSSetSamplers(0,1,&Mesh::p_sampler);
-
+	g->getDeviceContext()->PSSetSamplers(0,1,&DebugTexts::instance()->p_sampler);
 	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
 
 	g->getDeviceContext()->OMSetBlendState(mss_for_render_tex.blendstate, blendFactor,0xFFFFFFFF);
@@ -667,6 +668,7 @@ void Texture::_renderBill(Graphics* g, TexturePart* p) {
 	unsigned int tttt[] = {0};
 	g->getDeviceContext()->IASetVertexBuffers( 0, 1, tt, ttt, tttt );
 	g->getDeviceContext()->VSSetSamplers(0,1,&Mesh::p_sampler);
+	g->getDeviceContext()->PSSetSamplers(0,1,&DebugTexts::instance()->p_sampler);
 	//stride = sizeof(COMBINEDMATRIXCALC_CBUF);
 
 	//g->getDeviceContext()->IASetVertexBuffers( 1, 1, &combined_matrix_watasu_offsetbuffer, &stride, &offset );

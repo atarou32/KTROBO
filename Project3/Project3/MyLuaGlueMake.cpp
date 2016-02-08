@@ -218,7 +218,7 @@ int MyLuaGlueMake::setNAME(MyTokenAnalyzer* a, MyFuncDef* f) {
 int MyLuaGlueMake::setHIKISUU(MyTokenAnalyzer* a, MyFuncDef* f, int index) {
 	if (strcmp(a->Toke(), ")")==0) {
 
-		return 0;
+		return 1;
 	}
 
 
@@ -381,8 +381,9 @@ int MyLuaGlueMake::readInputs(int input_index) {
 			a.GetToken();
 			if (strcmp(a.Toke(), input->interface_name)==0) {
 				// インターフェース名まできたので関数の情報を取得する
-				a.GetToken();
+				
 				a.GetToken("{"); // {
+				a.GetToken();
 				while((strcmp(a.Toke(),"public:")!=0) && !a.enddayo()) {
 					a.GetToken();
 				}
@@ -1031,7 +1032,12 @@ void MyLuaGlueMake::kannsuuYobidasi(char* filename, MakeGlueInput* input, MyFunc
 		KTROBO::mylog::writelog(filename, "%s kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->%s(",kata, input->collection_name,def->func_name);
 	
 	} else if(def->kaeriti.type != MyDefType::VOIDDAYO) {
-	KTROBO::mylog::writelog(filename, "%s kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",kata, input->collection_name,def->func_name);
+		if (def->kaeriti.is_pointer && (def->kaeriti.type != MyDefType::CLASSDAYO)) {
+			KTROBO::mylog::writelog(filename, "%s* kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",kata, input->collection_name,def->func_name);
+
+		} else {
+			KTROBO::mylog::writelog(filename, "%s kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",kata, input->collection_name,def->func_name);
+		}
 	} else {
 		KTROBO::mylog::writelog(filename, "KTROBO::MyLuaGlueSingleton::getInstance()->getCol%s(ci)->getInterface(cci)->%s(",input->collection_name,def->func_name);
 	}

@@ -1138,7 +1138,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 
  void AnimationBuilder::enter()
 {
-	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua.txt");
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
 	Scene::enter();
 	InputMessageDispatcher::registerImpl(&kuru,NULL,NULL);
  
@@ -1149,7 +1149,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 {
 	InputMessageDispatcher::unregisterImpl(&kuru);
 	Scene::leave();
-	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_leave.lua.txt");
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_leave.lua");
 }
 
 
@@ -1283,8 +1283,9 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 					}
 
 					ii->hon_mesh->mesh_loaded = true;
-					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "AB_madeHonMeshAfter.lua");
-					
+					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_madeHonMeshAfter.lua");
+					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 				}
 			}
 

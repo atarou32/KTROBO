@@ -22,25 +22,28 @@ void TCB_luaExec(TCB* thisTCB) {
 	LuaTCBStruct* tt = (LuaTCBStruct*)thisTCB->Work[0];
 	char* lua_filename = tt->lua_filename;
 
-	lua_settop(L,1);
+	int tee =lua_gettop(L);
 	int error;
 	try {
 		error = luaL_loadfile(L, lua_filename) || lua_pcall(L, 0, 0, 0);
 
 	}catch (GameError* err) {
 		
+		lua_settop(L,tee);
 		mylog::writelog(err->getErrorCode(), err->getMessage());
 		Sleep(500);
 		//delete err;
+		
 		throw err;
 	}
+	
 	if (error) {
 		mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
 		OutputDebugStringA(lua_tostring(L,-1));
-        lua_pop(L, 1);
-		throw new GameError(KTROBO::WARNING, "error lua ");
+		lua_settop(L,tee);
+		
     } else {
-		lua_pop(L, 1);
+		lua_settop(L,tee);
 		tt->is_use = false;
 		t->kill(thisTCB);
 	}
@@ -55,6 +58,7 @@ void TCB_luaExec(TCB* thisTCB) {
 
 	if (error) {
 		Sleep(500);
+		throw new GameError(KTROBO::WARNING, "error lua ");
 	}
 }
 

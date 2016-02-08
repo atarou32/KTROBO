@@ -1146,7 +1146,7 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 	
 	//g->getDeviceContext()->IASetInputLayout(p_vertexlayout);
 
-	
+
 	g->getDeviceContext()->VSSetConstantBuffers(0,1, &cbuf1_buffer);
 	g->getDeviceContext()->VSSetConstantBuffers(1,1, &cbuf2_buffer);
 	g->getDeviceContext()->IASetInputLayout( p_vertexlayout );
@@ -1154,14 +1154,15 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	g->getDeviceContext()->IASetIndexBuffer (p_indexbuffer, DXGI_FORMAT_R32_UINT,0);
 	g->getDeviceContext()->RSSetState(p_rasterstate);
-
+	
 	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
 
 	g->getDeviceContext()->OMSetBlendState(p_blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+		
 	g->getDeviceContext()->VSSetShader(this->vs, NULL, 0);
 	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
 	g->getDeviceContext()->PSSetSamplers(0,1, &p_sampler);
-	
+		
 	g->getDeviceContext()->PSSetShader(this->ps, NULL, 0);
 	
 
@@ -1182,8 +1183,11 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 		MYVECTOR4 lightdir = MYVECTOR4(1,1,-10,1);
 		MYVECTOR4 viewdir = MYVECTOR4(0,1,0,1);
 		updateCBuf3(g, &Materials[s->MaterialIndex]->color, &lightdir, &viewdir);
+	
 		g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf3_buffer);
+		
 		g->getDeviceContext()->DrawIndexed( s->FaceCount*3, s->FaceIndex*3, 0);
+		
 	}
 
 }
