@@ -22,7 +22,7 @@ void TCB_luaExec(TCB* thisTCB) {
 	LuaTCBStruct* tt = (LuaTCBStruct*)thisTCB->Work[0];
 	char* lua_filename = tt->lua_filename;
 
-
+	lua_settop(L,1);
 	int error;
 	try {
 		error = luaL_loadfile(L, lua_filename) || lua_pcall(L, 0, 0, 0);
@@ -31,13 +31,14 @@ void TCB_luaExec(TCB* thisTCB) {
 		
 		mylog::writelog(err->getErrorCode(), err->getMessage());
 		Sleep(500);
-		delete err;
+		//delete err;
+		throw err;
 	}
 	if (error) {
 		mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
 		OutputDebugStringA(lua_tostring(L,-1));
         lua_pop(L, 1);
-		
+		throw new GameError(KTROBO::WARNING, "error lua ");
     } else {
 		lua_pop(L, 1);
 		tt->is_use = false;
@@ -89,6 +90,7 @@ void LuaTCBMaker::makeTCBExec() {
 			CS::instance()->leave(CS_MESSAGE_CS, "maketcbexec");
 			ts[task_index]->make(TCB_luaExec, ts[task_index], Work, 0x0000FFFF);
 			CS::instance()->enter(CS_MESSAGE_CS, "maketcbexec");
+			
 		}
 	}
 	CS::instance()->leave(CS_MESSAGE_CS, "maketcbexec");
@@ -112,6 +114,8 @@ void LuaTCBMaker::makeTCB(int task_index, bool is_lock_sita, char* lua_filename)
 				structs[i].is_lock_sita = is_lock_sita;
 				structs[i].task_index = task_index;
 				strcpy_s(structs[i].lua_filename,256,lua_filename);
+				CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
+				return;
 			}
 		}
 		CS::instance()->leave(CS_MESSAGE_CS, "maketcb");

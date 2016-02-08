@@ -127,6 +127,7 @@ void LOADMESHTCB(TCB* thisTCB) {
 		mylog::writelog("errtxt.txt", "%s", lua_tostring(L, -1));
 		OutputDebugStringA(lua_tostring(L,-1));
         lua_pop(L, 1);
+		throw new GameError(KTROBO::WARNING, "error in lua");
     } else {
 	
 		t->kill(thisTCB);
@@ -374,13 +375,13 @@ bool Game::Init(HWND hwnd) {
     L = luaL_newstate();
     luaL_openlibs(L);
 
-	cltf = new TextFromLuas(g, this);
+	cltf = new TextFromLuas(g_for_task_threads[TASKTHREADS_LOADDESTRUCT], this);
 	abs = new AnimationBuilders(demo->tex_loader);
 	cmeshs = new CMeshs(g, demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
-	
+	MyLuaGlueSingleton::getInstance()->setColAnimationBuilders(abs);
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
 
 	for (int i=0;i<TASKTHREAD_NUM;i++) {
@@ -504,7 +505,7 @@ bool Game::Init(HWND hwnd) {
 	work[0] = (unsigned long)task_threads[TASKTHREADS_LOADDESTRUCT];
 	work[2] = (unsigned long)mesh_instanceds;
 
-	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,L,work,0x0000FFFF);
+	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,Ls[TASKTHREADS_LOADDESTRUCT],work,0x0000FFFF);
 
 
 	memset(work,0,sizeof(work));
@@ -546,6 +547,32 @@ void Game::Del() {
 		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
 		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
 	}
+
+
+	if (task_threads[TASKTHREADS_AIDECISION]) {
+		task_threads[TASKTHREADS_AIDECISION]->deleteTask();
+		delete task_threads[TASKTHREADS_AIDECISION];
+		task_threads[TASKTHREADS_AIDECISION] = 0;
+	}
+	if(g_for_task_threads[TASKTHREADS_AIDECISION]) {
+		g_for_task_threads[TASKTHREADS_AIDECISION]->Release();
+		delete g_for_task_threads[TASKTHREADS_AIDECISION];
+		g_for_task_threads[TASKTHREADS_AIDECISION] = 0;
+	}
+
+
+	if (task_threads[TASKTHREADS_LOADDESTRUCT]) {
+		task_threads[TASKTHREADS_LOADDESTRUCT]->deleteTask();
+		delete task_threads[TASKTHREADS_LOADDESTRUCT];
+		task_threads[TASKTHREADS_LOADDESTRUCT] = 0;
+	}
+	if(g_for_task_threads[TASKTHREADS_LOADDESTRUCT]) {
+		g_for_task_threads[TASKTHREADS_LOADDESTRUCT]->Release();
+		delete g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
+		g_for_task_threads[TASKTHREADS_LOADDESTRUCT] = 0;
+	}
+
+	
 
 	// 順番を変えないこと　cs と　タスクの間に依存関係がある
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {

@@ -16,13 +16,13 @@ TextFromLua::~TextFromLua(void)
 }
 
 void TextFromLua::enterABScene(COLLECTED AnimationBuilder* a) {
-	
+	gdayo->removeScene();
 	this->gdayo->setScene(a);
 }
 
 
 void TextFromLua::enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a) {
-	gdayo->removeScene();
+	
 	gdayo->setScene(a);
 }
 
@@ -57,4 +57,30 @@ void TextFromLua::makeAnimeLua(bool is_lock, char* lua_filename) {
 
 void TextFromLua::makeRenderLua(bool is_lock, char* lua_filename) {
 	LuaTCBMaker::makeTCB(TASKTHREADS_UPDATEMAINRENDER,is_lock, lua_filename);
+}
+
+ITextFromLua* TextFromLuas::getInterface(int index) {
+	if (instances.size()) {
+		return instances[index];
+	} else {
+		makeInstance();
+		return instances[0];
+	}
+
+}
+
+TextFromLua* TextFromLuas::getInstance(int index) {
+	if (instances.size()) {	
+	return instances[index];
+	} else {
+		makeInstance();
+		return instances[0];
+	}
+}
+
+int TextFromLuas::makeInstance() {
+	TextFromLua* l = new TextFromLua(g, gdayo);
+	int ans = instances.size();
+	instances.push_back(l);
+	return ans;
 }

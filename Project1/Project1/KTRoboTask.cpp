@@ -54,9 +54,18 @@ void KTROBO::Task::exec() {
 	//		MessageBoxA(hWnd,"タスクスレッドを終了させます","FATAL",MB_OK);
 			is_exec_task = false;
 			delete err;
+			CS::instance()->leave(CS_TASK_CS,"",index);
 			return;
 		}
 		delete err;
+		err_count++;
+		if (err_count > TASK_ERR_COUNT_MAX) {
+
+
+			is_exec_task = false;
+			CS::instance()->leave(CS_TASK_CS, "", index);
+			return;
+		}
 		Sleep(1); // そのまま続行
 	}
 

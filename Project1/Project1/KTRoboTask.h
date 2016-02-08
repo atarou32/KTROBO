@@ -15,7 +15,7 @@ namespace KTROBO {
 #define TASK_HEAD_PRIO 0x0000
 
 #define TASKTHREAD_NUM 5 // DONT CHANGE IT
-
+#define TASK_ERR_COUNT_MAX 32
 struct TCB {
 	void (*Exec)(TCB*);
 	TCB* prev;
@@ -32,6 +32,7 @@ class Task {
 private:
 	HWND hWnd;
 	HANDLE hd;
+	int err_count;
 	TCB Tasks[MAX_TASK_COUNT];
 	bool is_exec_task;
 	int index;
@@ -40,6 +41,7 @@ private:
 	Task(HWND hWnd, int index) { 
 		this->hWnd = hWnd;
 		this->index = index;
+		err_count = 0;
 		memset(Tasks, 0, sizeof(TCB) * MAX_TASK_COUNT);
 		is_exec_task = false;
 		hd = 0;

@@ -9,6 +9,13 @@ using namespace KTROBO;
 AnimationBuilder::AnimationBuilder(char* n,int len, MyTextureLoader* lo) : Scene(n,len)
 {
 	loader = lo;
+	MYVECTOR3 from(-10,-10,10);
+	MYVECTOR3 at(0,0,0);
+	MYVECTOR3 up(0,0,1);
+	MyMatrixLookAtRH(view,from,at,up);
+	MyMatrixPerspectiveFovRH(proj, 1, gs[TASKTHREADS_AIDECISION]->getScreenWidth() / (float)gs[TASKTHREADS_AIDECISION]->getScreenHeight(), 1, 1000);
+	
+
 }
 
 int AnimationBuilder::createAnimationBuilderImpl(char* hon_filepath) {
@@ -1131,7 +1138,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 
  void AnimationBuilder::enter()
 {
-	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "AB_enter.lua");
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua.txt");
 	Scene::enter();
 	InputMessageDispatcher::registerImpl(&kuru,NULL,NULL);
  
@@ -1142,7 +1149,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 {
 	InputMessageDispatcher::unregisterImpl(&kuru);
 	Scene::leave();
-	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "AB_leave.lua");
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_leave.lua.txt");
 }
 
 

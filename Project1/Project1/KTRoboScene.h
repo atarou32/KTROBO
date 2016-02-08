@@ -24,6 +24,7 @@ class Scene
 {
 private:
 	char scene_name[32];
+protected:
 	static Graphics* gs[TASKTHREAD_NUM];
 	static lua_State* Ls[TASKTHREAD_NUM];
 

@@ -30,6 +30,7 @@ private:
 public:
 	TextFromLua(Graphics* gg, Game* ggg);
 	~TextFromLua(void);
+	
 
 	void setDebugText(char* str);
 	int add(int a, int b) {return a+b;}
@@ -66,20 +67,15 @@ public:
 		instances.clear();
 	}
 
-	ITextFromLua* getInterface(int index) {
-		return instances[index];
-	}
+	ITextFromLua* getInterface(int index);
+	
 
-	TextFromLua* getInstance(int index) {
-		return instances[index];
-	}
+	TextFromLua* getInstance(int index);
+	
 
-	int makeInstance() {
-		TextFromLua* l = new TextFromLua(g, gdayo);
-		int ans = instances.size();
-		instances.push_back(l);
-		return ans;
-	}
+	int makeInstance();
+	
+	
 };
 
 

@@ -115,12 +115,14 @@ public:
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
 		CS::instance()->enter(CS_MESSAGE_CS, "message lock");
+		if (scenes.size()) {
 		Scene* s = scenes.back();
 		scenes.pop_back();
 		if (s) {
 			s->leave();
 			//delete s;
 			s = 0;
+		}
 		}
 		CS::instance()->leave(CS_MESSAGE_CS, "message lock");
 		CS::instance()->leave(CS_TASK_CS, "atari lock",0);
