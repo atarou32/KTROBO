@@ -280,24 +280,46 @@ public:
 	}
 };
 
-class AnimationBuilder : Scene
+
+class kurukuru : public INPUTSHORICLASS{
+public:
+	MYMATRIX view;
+	MYVECTOR3 at;
+	MYVECTOR3 from;
+	MYVECTOR3 up;
+	float a;
+    bool handleMessage(int msg, void* data, DWORD time);
+	kurukuru() {
+		at.float3.x = 0;
+		at.float3.y = 0;
+		at.float3.z = 0;
+		up = MYVECTOR3(0,0,1);
+		from = MYVECTOR3(3,-15,14);
+		a = 0;
+		MyMatrixLookAtRH(view,from,at,up);
+	}
+};
+
+
+class AnimationBuilder : public Scene, public IAnimationBuilder
 {
 private:
 	vector<AnimationBuilderImpl*> impls;
 	int now_index;
 	MyTextureLoader* loader;
+	MYMATRIX view;
+	MYMATRIX proj;
+	kurukuru kuru;
 public:
 	AnimationBuilder(char* c, int len, MyTextureLoader* loader);
 	virtual ~AnimationBuilder(void) {
 		Scene::~Scene();
 		deleteAll();
 	}
-	void enter() {
-		Scene::enter();
-	}
-	void leave() {
-		Scene::leave();
-	}
+	void enter();
+	
+	void leave();
+	
 
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game);
 	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
@@ -335,6 +357,71 @@ public:
 	void setNowIMPLIndex(int index);
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+class AnimationBuilders {
+private:
+	vector<AnimationBuilder*> animebs;
+	MyTextureLoader* loader;
+public:
+	int makeInst() {
+		AnimationBuilder* ab = new AnimationBuilder("animeb",6,loader);
+		animebs.push_back(ab);
+		return animebs.size()-1;
+	}
+
+	AnimationBuilder* getInstance(int index) {
+		if (index >= 0 && index < animebs.size()) {
+			return animebs[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInstance(0);
+		}
+		
+		throw new GameError(KTROBO::WARNING, "no ab");
+	}
+
+	IAnimationBuilder* getInterface(int index) {
+		if (index >= 0 && index < animebs.size()) {
+			return animebs[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInterface(0);
+		}
+		throw new GameError(KTROBO::WARNING, "no ab");
+	}
+
+	AnimationBuilders(MyTextureLoader* lo) {
+	 loader = lo;
+	}
+	~AnimationBuilders() {
+		Release();
+	}
+
+	void Release() {
+		int size = animebs.size();
+		for (int i= 0; i<size;i++) {
+			delete animebs[i];
+			animebs[i] = 0;
+		}
+		animebs.clear();
+	}
+};
+
+
 }
 
 #endif

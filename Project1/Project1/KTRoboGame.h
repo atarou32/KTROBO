@@ -35,24 +35,6 @@ namespace KTROBO {
 #define RENDERTIME_SETTIME 33
 
 
-class kurukuru : public INPUTSHORICLASS{
-public:
-	MYMATRIX view;
-	MYVECTOR3 at;
-	MYVECTOR3 from;
-	MYVECTOR3 up;
-	float a;
-    bool handleMessage(int msg, void* data, DWORD time);
-	kurukuru() {
-		at.float3.x = 0;
-		at.float3.y = 0;
-		at.float3.z = 0;
-		up = MYVECTOR3(0,0,1);
-		from = MYVECTOR3(3,-15,14);
-		a = 0;
-		MyMatrixLookAtRH(view,from,at,up);
-	}
-};
 class Game
 {
 private:

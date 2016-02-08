@@ -1,7 +1,8 @@
 #include "KTRoboAnimationBuilder.h"
 #include "KTRoboCS.h"
 #include "MyTokenAnalyzer.h"
-
+#include "KTRoboLuaCollection.h"
+#include "KTRoboInput.h"
 
 using namespace KTROBO;
 
@@ -1082,7 +1083,9 @@ void AnimationMeshKakera::setOffsetMatrixToMesh(Mesh* mesh) {
 		MyMatrixMultiply(ans, ans, trans);
 		MyMatrixMultiply(ans, ans, mat3);
 		this->mesh_offset_matrix[bone_index] = ans;
+		bn->offset_matrix = mesh_offset_matrix[bone_index];
 	}
+	mesh->animate(0,false);
 }
 
 
@@ -1109,12 +1112,71 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 }
 
 
+ bool kurukuru::handleMessage(int msg, void* data, DWORD time) {
+
+	 a = 0.01f;
+
+
+	 MYMATRIX s;
+	 MyMatrixRotationZ(s,a);
+
+	 MYVECTOR3 fromat = from - at;
+	 MyVec3TransformNormal(fromat,fromat,s);
+	 from = at+fromat;
+
+	 MyMatrixLookAtRH(view,from,at,up);
+
+	 return true;
+ }
+
+ void AnimationBuilder::enter()
+{
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "AB_enter.lua");
+	Scene::enter();
+	InputMessageDispatcher::registerImpl(&kuru,NULL,NULL);
+ 
+ }
+
+
+ void AnimationBuilder::leave()
+{
+	InputMessageDispatcher::unregisterImpl(&kuru);
+	Scene::leave();
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "AB_leave.lua");
+}
+
 
 void AnimationBuilder::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
+	
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 
+	MYMATRIX world;
+	MyMatrixIdentity(world);
+	int num = impls.size();
+	if (num) {
 
+		if (impls[now_index]->hon_mesh->mesh_loaded) {
+			impls[now_index]->hon_mesh->mesh->draw(g, &world, &view, &proj);
+		}
 
+		int on = impls[now_index]->onaji_mesh.size();
+		for (int n = 0;n<on;n++) {
+			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
+			if (mm->mesh_loaded) {
+				mm->mesh->draw(g, &world, &view, &proj);
+			}
+		}
 
+		int on2 = impls[now_index]->ko_mesh.size();
+		for (int n=0;n<on2;n++) {
+			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
+			if (mm->mesh_loaded) {
+				mm->mesh->draw(g, &world, &view, &proj);
+			}
+		}
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 
@@ -1122,7 +1184,33 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 
 	// このスレッドでは
 	// アニメの更新を行う
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 
+	int num = impls.size();
+	if (num) {
+
+		if (impls[now_index]->hon_mesh->mesh_loaded) {
+			impls[now_index]->now_kakera->setOffsetMatrixToMesh(impls[now_index]->hon_mesh->mesh);
+		}
+
+		int on = impls[now_index]->onaji_mesh.size();
+		for (int n = 0;n<on;n++) {
+			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
+			if (mm->mesh_loaded) {
+				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
+			}
+		}
+
+		int on2 = impls[now_index]->ko_mesh.size();
+		for (int n=0;n<on2;n++) {
+			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
+			if (mm->mesh_loaded) {
+				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
+			}
+		}
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
 
@@ -1163,8 +1251,33 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 
 					/// TODO now_kakera を作る
+					if (!ii->now_kakera) {
+						ii->now_kakera = new AnimationMeshKakera();
+						int bone_size = ii->hon_mesh->mesh->Bones.size();
+						for (int k = 0; k < bone_size; k++) {
+							MeshBone* bn = ii->hon_mesh->mesh->Bones[i];
+							ii->now_kakera->mesh_bone_name_index.insert(pair<string,int>(bn->bone_name,k));
+							ii->now_kakera->mesh_bone_isrotx.push_back(true);
+							ii->now_kakera->mesh_bone_isroty.push_back(true);
+							ii->now_kakera->mesh_bone_isrotz.push_back(true);
+							ii->now_kakera->mesh_bone_rotx.push_back(0);
+							ii->now_kakera->mesh_bone_roty.push_back(0);
+							ii->now_kakera->mesh_bone_rotz.push_back(0);
+							ii->now_kakera->mesh_bone_transx.push_back(0);
+							ii->now_kakera->mesh_bone_transy.push_back(0);
+							ii->now_kakera->mesh_bone_transz.push_back(0);
+							ii->now_kakera->mesh_filepathname = string(ii->hon_mesh->mesh_filepath);
+							ii->now_kakera->frame=0;
+							ii->now_kakera->mesh_bone_default_anime_frame.push_back(0);
+							MYMATRIX mat;
+							MyMatrixIdentity(mat);
+							ii->now_kakera->mesh_offset_matrix.push_back(mat);
+						}
+					}
 
 					ii->hon_mesh->mesh_loaded = true;
+					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "AB_madeHonMeshAfter.lua");
+					
 				}
 			}
 

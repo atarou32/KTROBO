@@ -787,12 +787,21 @@ public:
 		if (index >= 0 && index < guis.size()) {
 			return guis[index];
 		}
+		if (index ==0) {
+			makeInst();
+			return getInstance(0);
+		}
+		
 		throw new GameError(KTROBO::WARNING, "no gui");
 	}
 
 	IGUI* getInterface(int index) {
 		if (index >= 0 && index < guis.size()) {
 			return guis[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInterface(0);
 		}
 		throw new GameError(KTROBO::WARNING, "no gui");
 	}

@@ -374,7 +374,7 @@ bool Game::Init(HWND hwnd) {
     L = luaL_newstate();
     luaL_openlibs(L);
 
-	cltf = new TextFromLuas(g);
+	cltf = new TextFromLuas(g, this);
 	cmeshs = new CMeshs(g, demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
@@ -518,7 +518,8 @@ void Game::Del() {
 
 	
 
-
+	// シーンは別の場所でデストラクトを呼ぶ
+	/*
 	vector<Scene*>::iterator scene_it = scenes.begin();
 	while (scene_it != scenes.end()) {
 		Scene* s = *scene_it;
@@ -530,6 +531,7 @@ void Game::Del() {
 		scene_it++;
 	}
 	scenes.clear();
+	*/
 
 	Scene::Del();
 
@@ -693,22 +695,6 @@ double Game::stopWatch() {
 	return (timeEnd.QuadPart - timeStart.QuadPart)/(double)timeFreq.QuadPart*1000;
 }
 
- bool kurukuru::handleMessage(int msg, void* data, DWORD time) {
-
-	 a = 0.01f;
-
-
-	 MYMATRIX s;
-	 MyMatrixRotationZ(s,a);
-
-	 MYVECTOR3 fromat = from - at;
-	 MyVec3TransformNormal(fromat,fromat,s);
-	 from = at+fromat;
-
-	 MyMatrixLookAtRH(view,from,at,up);
-
-	 return true;
- }
 void Game::Run() {
 
 	double millisecond = stopWatch();

@@ -1,16 +1,29 @@
 #include "KTRoboTextFromLua.h"
 #include "stringconverter.h"
 #include "KTRoboLuaCollection.h"
+#include "KTRoboGame.h"
 
 using namespace KTROBO;
-TextFromLua::TextFromLua(Graphics* gg)
+TextFromLua::TextFromLua(Graphics* gg, Game* ggg)
 {
 	g  = gg;
+	gdayo = ggg;
 }
 
 
 TextFromLua::~TextFromLua(void)
 {
+}
+
+void TextFromLua::enterABScene(COLLECTED AnimationBuilder* a) {
+	
+	this->gdayo->setScene(a);
+}
+
+
+void TextFromLua::enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a) {
+	gdayo->removeScene();
+	gdayo->setScene(a);
 }
 
 void TextFromLua::setDebugText(char* str) {
