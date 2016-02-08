@@ -742,7 +742,9 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 				a.GetToken();
 				if (strcmp(a.Toke(), "MFILEPATH")==0) {
 					a.GetToken();
+					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 					this->createAnimationBuilderImpl(a.Toke());
+					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 				}
 			}
 		}
@@ -758,7 +760,9 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 				a.GetToken();
 				if (strcmp(a.Toke(), "MFILEPATH")==0) {
 					a.GetToken();
+					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 					this->setOnajiMesh(impl_id, a.Toke());
+					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 				}
 			}
 		}
@@ -804,11 +808,169 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 					}
 				}
 			}
+			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 			this->setKoMesh(impl_id, mfilepath,ofilepath,obonename, icwml);
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		}
 	}
 
+	a.resetPointer();
+	while(!a.enddayo()) {
+		a.GetToken();
+		if (strcmp(a.Toke(), "KAKERA")==0) {
+			a.GetToken("{");
+			a.GetToken("IMPL_ID");
+			int impl_id = a.GetIntToken();
+			a.GetToken("ROTTRANSISPARAM");
+			a.GetToken("{");
+			int rotxsize = a.GetIntToken();
+			AnimationMeshKakera* kakera = new AnimationMeshKakera();
+			for (int i=0;i<rotxsize;i++) {
+				kakera->mesh_bone_rotx.push_back(a.GetFloatToken());
+			}
+			int rotysize = a.GetIntToken();
+			for (int i=0;i<rotysize;i++) {
+				kakera->mesh_bone_roty.push_back(a.GetFloatToken());
+			}
+			int rotzsize = a.GetIntToken();
+			for (int i=0;i<rotzsize;i++) {
+				kakera->mesh_bone_rotz.push_back(a.GetFloatToken());
+			}
+			int transxsize = a.GetIntToken();
+			for (int i=0;i<transxsize;i++) {
+				kakera->mesh_bone_transx.push_back(a.GetFloatToken());
+			}
+			int transysize = a.GetIntToken();
+			for (int i=0;i<transysize;i++) {
+				kakera->mesh_bone_transy.push_back(a.GetFloatToken());
+			}
+			int transzsize = a.GetIntToken();
+			for (int i=0; i < transzsize; i++) {
+				kakera->mesh_bone_transz.push_back(a.GetFloatToken());
+			}
+
+			int isrotxsize = a.GetIntToken();
+			for (int i=0;i<isrotxsize;i++) {
+				int t = a.GetIntToken();
+				if (t) {
+					kakera->mesh_bone_isrotx.push_back(true);
+				} else {
+					kakera->mesh_bone_isrotx.push_back(false);
+				}
+			}
+			int isrotysize = a.GetIntToken();
+			for (int i=0;i<isrotysize;i++) {
+				int t = a.GetIntToken();
+				if (t) {
+					kakera->mesh_bone_isroty.push_back(true);
+				} else {
+					kakera->mesh_bone_isroty.push_back(false);
+				}
+			}
+			int isrotzsize = a.GetIntToken();
+			for (int i=0;i<isrotzsize;i++) {
+				int t = a.GetIntToken();
+				if (t) {
+					kakera->mesh_bone_isrotz.push_back(true);
+				} else {
+					kakera->mesh_bone_isrotz.push_back(false);
+				}
+			}
+			a.GetToken("}");
+			a.GetToken("MESHFILEPATHNAME");
+			a.GetToken();
+			kakera->mesh_filepathname = string(a.Toke());
+			a.GetToken("FRAME");
+			kakera->frame = a.GetIntToken();
+			a.GetToken("MESHBONENAMEINDEX");
+			a.GetToken("{");
+			int mn = a.GetIntToken();
+			for (int i=0;i<mn;i++) {
+				a.GetToken();
+				string s = string(a.Toke());
+				int inde = a.GetIntToken();
+				kakera->mesh_bone_name_index.insert(pair<string,int>(s,inde));
+			}
+			a.GetToken("}");
+			a.GetToken("DEFAULTFRAMEANDMATRIX");
+			a.GetToken("{");
+			mn = a.GetIntToken();
+			for (int i=0;i<mn;i++) {
+				int d = a.GetIntToken();
+				kakera->mesh_bone_default_anime_frame.push_back(d);
+			}
+			mn = a.GetIntToken();
+			for (int i=0;i<mn;i++) {
+				MYMATRIX m;
+				for (int k=0;k<16;k++) {
+					
+					m.m[k/4][k%4] = a.GetFloatToken();
+				}
+				kakera->mesh_offset_matrix.push_back(m);
+			}
+			a.GetToken("}");
+			impls[impl_id]->kakeras.push_back(kakera);
+			impls[impl_id]->frame_to_kakera_index.insert(pair<int,int>(kakera->frame, impls[impl_id]->kakeras.size()-1));
+
+		}
+	}
+
+	// now_kakeraについてはhon_meshが読み込まれた後と同時にロードされるためロードファイルからは読み込まない
+	// kakeras と animesについて
+	// animesをロードする
+
+
+	a.resetPointer();
+	while(!a.enddayo()) {
+		a.GetToken();
+		if (strcmp(a.Toke(), "ANIME")==0) {
+			a.GetToken("{");
+			a.GetToken("IMPL_ID");
+			int impl_id = a.GetIntToken();
+			a.GetToken("ALLTIME");
+			AnimationMesh* am = new AnimationMesh();
+			am->all_time = a.GetFloatToken();
+			a.GetToken("ANIME_INDEX");
+			am->anime_index = a.GetIntToken();
+			a.GetToken("ANIME_NAME");
+			a.GetToken();
+			am->anime_name = string(a.Toke());
+			a.GetToken("IS_LOOP");
+			int t = a.GetIntToken();
+			if (t) {
+				am->is_loop = true;
+			} else {
+				am->is_loop = false;
+			}
+			a.GetToken("FRAME_NUM");
+			int fm = a.GetIntToken();
+			for (int k=0;k<fm;k++) {
+				AnimationMeshFrame* frame = new AnimationMeshFrame();
+				a.GetToken("FRAME");
+				a.GetToken("{");
+				a.GetToken("FR");
+				frame->frame = a.GetIntToken();
+				a.GetToken("KI");
+				frame->kakera_index = a.GetIntToken();
+				
+				a.GetToken("KAKERAFRAME");
+				int kakeraframe = a.GetIntToken();
+				frame->kakera = impls[impl_id]->kakeras[impls[impl_id]->frame_to_kakera_index[kakeraframe]];
+				a.GetToken("FI");
+				frame->time = a.GetFloatToken();
+				a.GetToken("}");
+				am->frames.push_back(frame);
+			}
+			impls[impl_id]->animes.push_back(am);
+
+		}
+	}
+
+
+
+
 	a.deletedayo();
+	return true;
 }
 
 
@@ -864,4 +1026,37 @@ void  AnimationBuilder::deleteAll() {
 	}
 	impls.clear();
 	CS::instance()->leave(CS_RENDERDATA_CS, "renderdata");
+}
+
+
+
+void AnimationMeshKakera::setOffsetMatrixToMesh(Mesh* mesh) {
+
+
+
+
+
+}
+
+
+void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
+	// コピー元からコピーする
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	clear();
+		mesh_bone_rotx = kakera_moto->mesh_bone_rotx;
+		mesh_bone_roty = kakera_moto->mesh_bone_roty;
+		mesh_bone_rotz = kakera_moto->mesh_bone_rotz;
+		mesh_bone_transx = kakera_moto->mesh_bone_transx;
+		mesh_bone_transy = kakera_moto->mesh_bone_transy;
+		mesh_bone_transz = kakera_moto->mesh_bone_transz;
+		mesh_bone_isrotx = kakera_moto->mesh_bone_isrotx;
+		mesh_bone_isroty = kakera_moto->mesh_bone_isroty;
+		mesh_bone_isrotz = kakera_moto->mesh_bone_isrotz;
+		mesh_bone_name_index = kakera_moto->mesh_bone_name_index;
+		mesh_bone_default_anime_frame = kakera_moto->mesh_bone_default_anime_frame;
+		mesh_offset_matrix = kakera_moto->mesh_offset_matrix;
+		this->mesh_filepathname = kakera_moto->mesh_filepathname;
+		this->frame = kakera_moto->frame;
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }

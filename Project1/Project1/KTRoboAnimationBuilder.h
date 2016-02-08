@@ -55,9 +55,23 @@ public:
 
 	vector<MYMATRIX> mesh_offset_matrix;
 public:
-	void setOffsetMatrixToMesh(Mesh* mesh);
+	void setOffsetMatrixToMesh(Mesh* mesh); // 現在の姿勢を計算してmesh_offset_matrixに入れ込む
 	void copy(AnimationMeshKakera* kakera_moto);// コピー元からコピーする
 	void write(char* filename,int impl_id);
+	void clear() {
+		mesh_bone_rotx.clear();
+		mesh_bone_roty.clear();
+		mesh_bone_rotz.clear();
+		mesh_bone_transx.clear();
+		mesh_bone_transy.clear();
+		mesh_bone_transz.clear();
+		mesh_bone_isrotx.clear();
+		mesh_bone_isroty.clear();
+		mesh_bone_isrotz.clear();
+		mesh_bone_name_index.clear();
+		mesh_bone_default_anime_frame.clear();
+		mesh_offset_matrix.clear();
+	}
 };
 
 

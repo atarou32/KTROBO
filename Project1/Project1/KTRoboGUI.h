@@ -212,6 +212,7 @@ public:
 
 	TO_LUA virtual void setPartToWindow(int window_gui_id, int part_gui_id)=0;
 	TO_LUA virtual void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
+	TO_LUA virtual void setTabIndex(int tab_gui_id, int index)=0;
 
 	TO_LUA virtual char* getStrFromInput(int gui_id)=0;
 	TO_LUA virtual float getNowFromSlider(int gui_id)=0;
@@ -492,6 +493,14 @@ private:
 	static unsigned int f_colors[8];
 
 public:
+	void setNowIndex(int i) {
+		if (i >=0 && i < tex_rect_boxs.size()) {
+			now_index = i;
+			setIsEffect(is_effect);
+			setIsRender(is_render);
+		}
+	}
+
 	GUI_TAB(int tab_index) : GUI_PART() {
 		this->tab_index = tab_index;
 		now_index = 0;
@@ -733,7 +742,7 @@ public:
 	float getNowFromSlider(int gui_id);
 	float getMaxFromSlider(int gui_id);
 	float getMinFromSlider(int gui_id);
-
+	void setTabIndex(int tab_gui_id, int index);
 	void setRootWindowToInputMessageDispatcher(int gui_window_id);
 	void unregisterWindowToInputMessageDispatcher(int gui_window_id);
 	void deleteAll();

@@ -189,36 +189,38 @@ void GUI::setRender(int gui_id, bool t) {
 void GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
 
 	if (window_gui_id == part_gui_id) return;
-
+	CS::instance()->enter(CS_MESSAGE_CS, "push part to window");
 	GUI_PART* part;
 	if (part_gui_id < parts.size() && part_gui_id >=0) {
 		part = parts[part_gui_id];
 	} else {
+		CS::instance()->leave(CS_MESSAGE_CS, "push part to window");
 		return;
 	}
 
 	if (p_windows_index.find(window_gui_id) != p_windows_index.end()) {
 		
-		CS::instance()->enter(CS_MESSAGE_CS, "push part to window");
+		
 		windows[p_windows_index[window_gui_id]]->setBody(part);
-		CS::instance()->leave(CS_MESSAGE_CS, "push part to window");
+	
 	}
+	CS::instance()->leave(CS_MESSAGE_CS, "push part to window");
 }
 
 void GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
 	if (tab_gui_id == window_gui_id) return;
-
+	CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
 	if (p_windows_index.find(window_gui_id) != p_windows_index.end()) {
 		if (p_tabs_index.find(tab_gui_id) != p_tabs_index.end()) {
-			CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
+		
 			GUI_TAB* t = tabs[p_tabs_index[tab_gui_id]];
 			GUI_WINDOW* w = windows[p_windows_index[window_gui_id]];
 			t->setWindow(w,string(window_name));
 
-			CS::instance()->leave(CS_MESSAGE_CS, "push part to tab");
+		
 		}
 	}
-
+	CS::instance()->leave(CS_MESSAGE_CS, "push part to tab");
 }
 
 char* GUI::getStrFromInput(int gui_id) {
@@ -1566,7 +1568,16 @@ unsigned int GUI_TAB::colors[8];
 unsigned int GUI_TAB::f_colors[8];
 
 
-
+void GUI::setTabIndex(int tab_gui_id, int index) {
+	CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
+	if (p_tabs_index.find(tab_gui_id) != p_tabs_index.end()) {
+		
+		GUI_TAB* t = tabs[p_tabs_index[tab_gui_id]];
+		t->setNowIndex(index);
+	
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "push part to tab");
+}
 
 
 GUI_SLIDERV::GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l_str) : GUI_PART() {
