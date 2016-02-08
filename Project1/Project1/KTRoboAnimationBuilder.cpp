@@ -823,7 +823,7 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 				}
 			}
 			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-			this->setKoMesh(impl_id, mfilepath,ofilepath,obonename, icwml, matrix_kakeru);
+			this->setKoMesh(impl_id, mfilepath,ofilepath,obonename, icwml, &matrix_kakeru);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		}
 	}
@@ -1092,7 +1092,7 @@ void AnimationMeshKakera::setOffsetMatrixToMesh(Mesh* mesh) {
 void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	// コピー元からコピーする
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-	clear();
+		clear();
 		mesh_bone_rotx = kakera_moto->mesh_bone_rotx;
 		mesh_bone_roty = kakera_moto->mesh_bone_roty;
 		mesh_bone_rotz = kakera_moto->mesh_bone_rotz;
@@ -1340,3 +1340,34 @@ void AnimationBuilder::setNowIMPLIndex(int index) {
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
+
+
+int AnimationBuilders::makeInst() {
+	AnimationBuilder* ab = new AnimationBuilder("animeb",6,loader);
+	animebs.push_back(ab);
+	return animebs.size()-1;
+}
+
+AnimationBuilder* AnimationBuilders::getInstance(int index) {
+		if (index >= 0 && index < animebs.size()) {
+			return animebs[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInstance(0);
+		}
+		
+		throw new GameError(KTROBO::WARNING, "no ab");
+}
+
+IAnimationBuilder* AnimationBuilders::getInterface(int index) {
+		if (index >= 0 && index < animebs.size()) {
+			return animebs[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInterface(0);
+		}
+		throw new GameError(KTROBO::WARNING, "no ab");
+}
+

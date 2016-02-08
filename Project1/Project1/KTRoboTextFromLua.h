@@ -5,7 +5,7 @@
 #include "KTRoboDebugText.h"
 #include "tolua_glue/MyLuaGlueMakeCommon.h"
 #include "KTRoboGraphics.h"
-
+#include "KTRoboAnimationBuilder.h"
 namespace KTROBO {
 
 class Game;

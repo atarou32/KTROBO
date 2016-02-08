@@ -375,10 +375,12 @@ bool Game::Init(HWND hwnd) {
     luaL_openlibs(L);
 
 	cltf = new TextFromLuas(g, this);
+	abs = new AnimationBuilders(demo->tex_loader);
 	cmeshs = new CMeshs(g, demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
+	
 	MyLuaGlueSingleton::getInstance()->registerdayo(L);
 
 	for (int i=0;i<TASKTHREAD_NUM;i++) {
@@ -510,8 +512,6 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	InputMessageDispatcher::registerImpl(&k,NULL,NULL);
 
-	
-
 	return true;
 }
 void Game::Del() {
@@ -581,6 +581,11 @@ void Game::Del() {
 	if (but) {
 		delete but;
 		but = 0;
+	}
+
+	if (abs) {
+		delete abs;
+		abs = 0;
 	}
 
 	Text::Del();

@@ -77,7 +77,7 @@ private:
 	GUI_BUTTON* but;
 	GUI_SLIDERH * slih;
 	vector<Scene*> scenes;
-
+	AnimationBuilders* abs;
 public:
 	Game(void);
 	~Game(void);
@@ -117,10 +117,11 @@ public:
 		CS::instance()->enter(CS_MESSAGE_CS, "message lock");
 		Scene* s = scenes.back();
 		scenes.pop_back();
-		s->leave();
-		delete s;
-		s = 0;
-	
+		if (s) {
+			s->leave();
+			//delete s;
+			s = 0;
+		}
 		CS::instance()->leave(CS_MESSAGE_CS, "message lock");
 		CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 		CS::instance()->leave(CS_TASK_CS, "anime lock",1);

@@ -777,34 +777,12 @@ class GUIs {
 private:
 	vector<GUI*> guis;
 public:
-	int makeInst() {
-		GUI* g = new GUI();
-		guis.push_back(g);
-		return guis.size()-1;
-	}
+	int makeInst();
+	
 
-	GUI* getInstance(int index) {
-		if (index >= 0 && index < guis.size()) {
-			return guis[index];
-		}
-		if (index ==0) {
-			makeInst();
-			return getInstance(0);
-		}
-		
-		throw new GameError(KTROBO::WARNING, "no gui");
-	}
+	GUI* getInstance(int index);
 
-	IGUI* getInterface(int index) {
-		if (index >= 0 && index < guis.size()) {
-			return guis[index];
-		}
-		if (index ==0) {
-			makeInst();
-			return getInterface(0);
-		}
-		throw new GameError(KTROBO::WARNING, "no gui");
-	}
+	IGUI* getInterface(int index);
 
 	GUIs() {}
 	~GUIs() {

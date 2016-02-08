@@ -2059,3 +2059,32 @@ void GUI::unregisterWindowToInputMessageDispatcher(int gui_window_id) {
 
 
 }
+
+int GUIs::makeInst() {
+		GUI* g = new GUI();
+		guis.push_back(g);
+		return guis.size()-1;
+	}
+
+	GUI* GUIs::getInstance(int index) {
+		if (index >= 0 && index < guis.size()) {
+			return guis[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInstance(0);
+		}
+		
+		throw new GameError(KTROBO::WARNING, "no gui");
+	}
+
+	IGUI* GUIs::getInterface(int index) {
+		if (index >= 0 && index < guis.size()) {
+			return guis[index];
+		}
+		if (index ==0) {
+			makeInst();
+			return getInterface(0);
+		}
+		throw new GameError(KTROBO::WARNING, "no gui");
+	}

@@ -4,10 +4,11 @@
 #pragma once
 #include "KTRoboMesh.h"
 #include "KTRoboScene.h"
-
+#include "KTRoboInput.h"
 namespace KTROBO {
 
 interface IAnimationBuilder {
+public:
 	TO_LUA virtual int createAnimationBuilderImpl(char* hon_filepath)=0;
 	TO_LUA virtual void setOnajiMesh(int impl_id, char* onaji_filepath)=0;
 	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru)=0;
@@ -375,34 +376,15 @@ private:
 	vector<AnimationBuilder*> animebs;
 	MyTextureLoader* loader;
 public:
-	int makeInst() {
-		AnimationBuilder* ab = new AnimationBuilder("animeb",6,loader);
-		animebs.push_back(ab);
-		return animebs.size()-1;
-	}
+	int makeInst();
+	
+	
 
-	AnimationBuilder* getInstance(int index) {
-		if (index >= 0 && index < animebs.size()) {
-			return animebs[index];
-		}
-		if (index ==0) {
-			makeInst();
-			return getInstance(0);
-		}
-		
-		throw new GameError(KTROBO::WARNING, "no ab");
-	}
+	AnimationBuilder* getInstance(int index);
+	
 
-	IAnimationBuilder* getInterface(int index) {
-		if (index >= 0 && index < animebs.size()) {
-			return animebs[index];
-		}
-		if (index ==0) {
-			makeInst();
-			return getInterface(0);
-		}
-		throw new GameError(KTROBO::WARNING, "no ab");
-	}
+	IAnimationBuilder* getInterface(int index);
+	
 
 	AnimationBuilders(MyTextureLoader* lo) {
 	 loader = lo;
