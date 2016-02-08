@@ -808,7 +808,7 @@ void Mesh::readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 
 
 
-void WAgetScaleFromMatrix(MYMATRIX* mat, MYVECTOR3* p) {
+void KTROBO::WAgetScaleFromMatrix(MYMATRIX* mat, MYVECTOR3* p) {
 	MYVECTOR3 v;
 	v.float3.x = mat->_11;
 	v.float3.y = mat->_12;
@@ -833,7 +833,7 @@ void WAgetScaleFromMatrix(MYMATRIX* mat, MYVECTOR3* p) {
 	//return &ans;
 }
 
-void WAsetScaleToMatrix(MYMATRIX* mat, MYVECTOR3* v) {
+void KTROBO::WAsetScaleToMatrix(MYMATRIX* mat, MYVECTOR3* v) {
 
 	MYVECTOR3 now;
 	WAgetScaleFromMatrix(mat,&now);
@@ -850,6 +850,37 @@ void WAsetScaleToMatrix(MYMATRIX* mat, MYVECTOR3* v) {
 	mat->_31 = mat->_31 * bairituz;
 	mat->_32 = mat->_32 * bairituz;
 	mat->_33 = mat->_33 * bairituz;
+}
+
+void Mesh::getOffsetMatrixToGetMinMaxAndWeightIndex(MeshBone* bone, float frame, unsigned short* ans_minmax_index, unsigned short* ans_maxmin_index, float* weight) {
+	// まず一番近いアニメフレームを取得する
+	float minmax = 1000000;
+	float maxmin = -1;
+	int minmaxindex = -1;
+	int maxminindex = -1;
+	int siz = bone->animes.size();
+	for (int i=0;i<siz; i++) {
+		MeshAnime* animebone = bone->animes[i];
+		if (animebone->frame <= minmax && animebone->frame >= frame) {
+			minmax = (float)animebone->frame;
+			minmaxindex = i;
+		}
+
+		if (animebone->frame >= maxmin && animebone->frame <= frame) {
+			maxmin = (float)animebone->frame;
+			maxminindex = i;
+		}
+	}
+
+
+	float r=1;
+	if (minmax != maxmin) {
+		r = (minmax - frame)/(minmax - maxmin);
+	}
+
+	*ans_minmax_index = (unsigned short)minmaxindex;
+	*ans_maxmin_index = (unsigned short)maxminindex;
+	*weight = r;
 }
 
 void Mesh::calculateOffsetMatrixToGetMinMaxAndWeight(MeshBone* bone, float frame, unsigned short* ans_minmax, unsigned short* ans_maxmin, float* weight) {

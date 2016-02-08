@@ -10,7 +10,7 @@ namespace KTROBO {
 interface IAnimationBuilder {
 	TO_LUA virtual int createAnimationBuilderImpl(char* hon_filepath)=0;
 	TO_LUA virtual void setOnajiMesh(int impl_id, char* onaji_filepath)=0;
-	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local)=0;
+	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru)=0;
 	TO_LUA virtual int getHonMeshBoneNum(int impl_id)=0;
 	TO_LUA virtual char* getHonMeshBoneName(int impl_id, int bone_index)=0;
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
@@ -33,6 +33,7 @@ interface IAnimationBuilder {
 	TO_LUA virtual bool force_saveNowToFile(char* filename)=0;
 	TO_LUA virtual bool force_saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
 	TO_LUA virtual void deleteAll()=0;
+	TO_LUA virtual void setNowIMPLIndex(int index)=0;
 };
 
 class AnimationMeshKakera {
@@ -124,8 +125,16 @@ public:
 
 	char oya_filepath[128];
 	bool is_connect_without_material_local;
+	MYMATRIX matrix_kakeru;
 	char oya_mesh_bone_name[128];
 public:
+	bool isOyaFile(char* oya_filepath) {
+		if (strlen(oya_filepath)==0) return false;
+		if(strcmp(mesh_filepath, oya_filepath)==0) {
+			return true;
+		}
+		return false;
+	}
 	AnimationBuilderMesh(char* dmesh_filepath,char* dmesh_meshpath, char* dmesh_animepath) {
 		mesh = new Mesh();
 		mesh_loaded = false;
@@ -138,11 +147,13 @@ public:
 		memset(oya_filepath,0,128);
 		is_connect_without_material_local = true;
 		memset(oya_mesh_bone_name,0,128);
+		MyMatrixIdentity(matrix_kakeru);
 	}
 
-	void setOyaMesh(char* doya_filepath, char* obname, bool is_c) {
+	void setOyaMesh(char* doya_filepath, char* obname, bool is_c, MYMATRIX* matrix_kakeru) {
 		strcpy_s(oya_filepath,128,doya_filepath);
 		is_connect_without_material_local = is_c;
+		this->matrix_kakeru = *matrix_kakeru;
 		strcpy_s(oya_mesh_bone_name, 128, obname);
 	}
 
@@ -169,6 +180,33 @@ public:
 
 	vector<AnimationMesh*> animes;
 	AnimationMeshKakera* now_kakera;
+	AnimationBuilderMesh* getOyaMesh(char* oya_filepath) {
+		if (hon_mesh) {
+			if (hon_mesh->isOyaFile(oya_filepath)) {
+				return hon_mesh;
+			}
+		}
+		int oms = onaji_mesh.size();
+		int kms = ko_mesh.size();
+		if (oms) {
+			for (int i=0;i<oms;i++) {
+			AnimationBuilderMesh* mm = onaji_mesh[i];
+			if (mm->isOyaFile(oya_filepath)) {
+				return mm;
+			}
+			}
+		}
+
+		if (kms) {
+			for (int i=0;i<kms;i++) {
+				AnimationBuilderMesh* mm = ko_mesh[i];
+				if (mm->isOyaFile(oya_filepath)) {
+					return mm;
+				}
+			}
+		}
+		return 0;
+	}
 
 	AnimationBuilderImpl(char* hon_filepath) {
 		char hon_mesh_meshpath[128];
@@ -247,9 +285,9 @@ class AnimationBuilder : Scene
 private:
 	vector<AnimationBuilderImpl*> impls;
 	int now_index;
-
+	MyTextureLoader* loader;
 public:
-	AnimationBuilder(char* c, int len);
+	AnimationBuilder(char* c, int len, MyTextureLoader* loader);
 	virtual ~AnimationBuilder(void) {
 		Scene::~Scene();
 		deleteAll();
@@ -261,15 +299,15 @@ public:
 		Scene::leave();
 	}
 
-	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
-	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
-	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
-	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
-	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
+	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game);
+	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
 
 	int createAnimationBuilderImpl(char* hon_filepath);
 	void setOnajiMesh(int impl_id, char* onaji_filepath);
-	void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath,char* parent_bone_name, bool is_connect_without_material_local);
+	void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath,char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru);
 	int getHonMeshBoneNum(int impl_id);
 	char* getHonMeshBoneName(int impl_id, int bone_index);
 
@@ -294,6 +332,7 @@ public:
 	bool forceLoadFromFile(char* filename);
 	bool force_saveAnimeAndFrameToFile(int impl_id, char* filename);
 	void deleteAll();
+	void setNowIMPLIndex(int index);
 
 };
 }

@@ -5,8 +5,9 @@
 
 using namespace KTROBO;
 
-AnimationBuilder::AnimationBuilder(char* n,int len) : Scene(n,len)
+AnimationBuilder::AnimationBuilder(char* n,int len, MyTextureLoader* lo) : Scene(n,len)
 {
+	loader = lo;
 }
 
 int AnimationBuilder::createAnimationBuilderImpl(char* hon_filepath) {
@@ -37,7 +38,7 @@ void  AnimationBuilder::setOnajiMesh(int impl_id, char* onaji_filepath) {
 	}
 }
 
-void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local) {
+void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* matrix_kakeru) {
 	char ko_meshpath[128];
 	char ko_animepath[128];
 	memset(ko_meshpath,0,128);
@@ -48,7 +49,7 @@ void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* oya_file
 		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(ko_filepath, ko_meshpath,ko_animepath);
 		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		AnimationBuilderImpl *impl = impls[impl_id];
-		mesh->setOyaMesh(oya_filepath, parent_bone_name, is_connect_without_material_local);
+		mesh->setOyaMesh(oya_filepath, parent_bone_name, is_connect_without_material_local, matrix_kakeru);
 		impl->ko_mesh.push_back(mesh);
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	}
@@ -631,6 +632,11 @@ void AnimationBuilderMesh::write(char* filename, int impl_id) {
 		KTROBO::mylog::writelog(filename, "ICWML=0;\n");
 	}
 	KTROBO::mylog::writelog(filename, "OMBNAME=\"%s\"\n", oya_mesh_bone_name);
+	KTROBO::mylog::writelog(filename, "KMATRIX=");
+	for (int i=0;i<16;i++) {
+		KTROBO::mylog::writelog(filename, "%f,",matrix_kakeru.m[i/4][i%4]);
+	}
+	KTROBO::mylog::writelog(filename, ";\n");
 }
 
 bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename) {
@@ -749,6 +755,7 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 			}
 		}
 	}
+
 	a.resetPointer();
 	while(!a.enddayo()) {
 		a.GetToken();
@@ -781,7 +788,8 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 			memset(mfilepath,0,128);
 			memset(ofilepath,0,128);
 			memset(obonename,0,128);
-
+			MYMATRIX matrix_kakeru;
+			MyMatrixIdentity(matrix_kakeru);
 			while (strcmp(a.Toke(), "}")!=0 && !a.enddayo()) {
 				a.GetToken();
 
@@ -807,9 +815,14 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 						icwml = true;
 					}
 				}
+				if (strcmp(a.Toke(), "KMATRIX")==0) {
+					for (int i=0;i<16;i++) {
+						matrix_kakeru.m[i/4][i%4] = a.GetFloatToken();
+					}
+				}
 			}
 			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-			this->setKoMesh(impl_id, mfilepath,ofilepath,obonename, icwml);
+			this->setKoMesh(impl_id, mfilepath,ofilepath,obonename, icwml, matrix_kakeru);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		}
 	}
@@ -1032,10 +1045,44 @@ void  AnimationBuilder::deleteAll() {
 
 void AnimationMeshKakera::setOffsetMatrixToMesh(Mesh* mesh) {
 
+	int bone_max = mesh->Bones.size();
+	for (int i=0;i<bone_max;i++) {
+		MeshBone* bn = mesh->Bones[i];
+		float frame = this->frame;
+		unsigned short ans_minmax;
+		unsigned short ans_maxmin;
+		float weight;
+		mesh->getOffsetMatrixToGetMinMaxAndWeightIndex(bn, frame, &ans_minmax, &ans_maxmin, &weight);
+		MYMATRIX mat1 = bn->animes[ans_minmax]->matrix_basis;
+		MYMATRIX mat2 = bn->animes[ans_maxmin]->matrix_basis;
+		MYMATRIX mat3;
+		for (int i=0;i<16;i++) {
+			mat2.m[i/4][i%4] *= weight;
+			mat1.m[i/4][i%4] *= (1-weight);
+			mat3.m[i/4][i%4] = mat2.m[i/4][i%4] + mat1.m[i/4][i%4];
+		}
+		MYVECTOR3 v(1,1,1);
+		WAsetScaleToMatrix(&mat3, &v);
 
-
-
-
+		// 現在の姿勢のoffsetmatrixは計算できたので次は変化したあとのoffsetmatrixを求める
+		// zxy の順にかける
+		int bone_index = this->mesh_bone_name_index[bn->bone_name];
+		MYMATRIX rotz;
+		MyMatrixRotationZ(rotz, this->mesh_bone_rotz[bone_index]);
+		MYMATRIX rotx;
+		MyMatrixRotationX(rotx, this->mesh_bone_rotx[bone_index]);
+		MYMATRIX roty;
+		MyMatrixRotationY(roty, this->mesh_bone_roty[bone_index]);
+		MYMATRIX trans;
+		MyMatrixTranslation(trans, this->mesh_bone_transx[bone_index],  this->mesh_bone_transy[bone_index], 
+			 this->mesh_bone_transz[bone_index] );
+		MYMATRIX ans;
+		MyMatrixMultiply(ans, rotz, rotx);
+		MyMatrixMultiply(ans, ans, roty);
+		MyMatrixMultiply(ans, ans, trans);
+		MyMatrixMultiply(ans, ans, mat3);
+		this->mesh_offset_matrix[bone_index] = ans;
+	}
 }
 
 
@@ -1058,5 +1105,125 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 		this->mesh_filepathname = kakera_moto->mesh_filepathname;
 		this->frame = kakera_moto->frame;
 
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}
+
+
+
+void AnimationBuilder::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
+
+
+
+
+}
+
+
+void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+
+	// このスレッドでは
+	// アニメの更新を行う
+
+
+}
+
+
+
+void AnimationBuilder::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+
+
+
+
+
+}
+
+
+void AnimationBuilder::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+
+
+
+
+}
+
+
+void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	int im = impls.size();
+	if (im) {
+		for (int i=0;i<im;i++) {
+			AnimationBuilderImpl* ii = impls[i];
+			if (ii->hon_mesh) {
+				if (!ii->hon_mesh->mesh_loaded) {
+					Mesh* m = ii->hon_mesh->mesh;
+					char* meshname = ii->hon_mesh->mesh_meshpath;
+					char* animename = ii->hon_mesh->mesh_animepath;
+					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+					m->readMesh(g, meshname, loader);
+					m->readAnime(animename);
+					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+
+					/// TODO now_kakera を作る
+
+					ii->hon_mesh->mesh_loaded = true;
+				}
+			}
+
+			int onaji_meshsize = ii->onaji_mesh.size();
+			if (onaji_meshsize) {
+				for (int k=0;k<onaji_meshsize;k++) {
+					AnimationBuilderMesh* mm = ii->onaji_mesh[k];
+					if (!mm->mesh_loaded) {
+
+						Mesh* m = mm->mesh;
+						char* meshname = mm->mesh_meshpath;
+						char* animename = mm->mesh_animepath;
+						CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+						m->readMesh(g, meshname, loader);
+						m->readAnime(animename);
+						CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+						mm->mesh_loaded = true;
+					}
+				}
+			}
+
+			int ko_meshsize = ii->ko_mesh.size();
+			if (ko_meshsize) {
+				for (int k=0;k<ko_meshsize;k++) {
+					AnimationBuilderMesh* mm = ii->ko_mesh[k];
+					if (!mm->mesh_loaded) {
+
+						Mesh* m = mm->mesh;
+						char* meshname = mm->mesh_meshpath;
+						char* animename = mm->mesh_animepath;
+						MYMATRIX kakeru = mm->matrix_kakeru;
+						AnimationBuilderMesh* oya_mm = ii->getOyaMesh(mm->oya_filepath);
+						if (!oya_mm->mesh_loaded) continue;
+							
+						CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+						m->readMesh(g, meshname, loader);
+						m->readAnime(animename);
+					
+						CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+						m->RootBone->parent_bone = oya_mm->mesh->Bones[oya_mm->mesh->BoneIndexes[mm->oya_mesh_bone_name]];
+						m->RootBone_connect_without_material_local = mm->is_connect_without_material_local;
+						m->rootbone_matrix_local_kakeru = kakeru;
+						mm->mesh_loaded = true;
+					}
+				}
+			}
+
+
+
+		}
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}
+
+void AnimationBuilder::setNowIMPLIndex(int index) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > index && index >=0) {
+		now_index = index;
+	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }

@@ -283,6 +283,7 @@ private:
 	static ID3D11RasterizerState* p_rasterstate;
 	static ID3D11Texture2D* pDepthStencil;
 public:
+	void Mesh::getOffsetMatrixToGetMinMaxAndWeightIndex(MeshBone* bone, float frame, unsigned short* ans_minmax_index, unsigned short* ans_maxmin_index, float* weight);
 	void calculateOffsetMatrix(MeshBone* root_bone,float frame);
 	void calculateOffsetMatrixToGetMinMaxAndWeight(MeshBone* bone, float frame, unsigned short* ans_minmax, unsigned short* ans_maxmin, float* weight);
 	static ID3D11DepthStencilView* pDepthStencilView;
@@ -347,6 +348,8 @@ public:
 
 };
 
+void WAgetScaleFromMatrix(MYMATRIX* mat, MYVECTOR3* p);
+void WAsetScaleToMatrix(MYMATRIX* mat, MYVECTOR3* v);
 
 }
 
