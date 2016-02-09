@@ -1160,32 +1160,54 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	 if (imp) {
 		 imp->setIsAnimate(false);
 	 }
+	 if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+		 unsigned char* keystate = input->getKEYSTATE();
+		 if (keystate[VK_TAB] & KTROBO_INPUT_BUTTON_DOWN) {
+			 int size = ab->getNowImpl()->hon_mesh->mesh->Bones.size();
+			 if (size) {
+				 ab->setNowBoneIndex((ab->getNowBoneIndex()+1) % size);
+				 // LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
+			 }
 
-	 if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		 }
+	 } else if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
 		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
 		 if (input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN) {
 			 // ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Ì‚Å
 			 MYMATRIX mat;
-			
+			 char bb[512];
+			 WCHAR buf[512];
+			 stringconverter sc;
+			 sprintf_s(bb,512, "%d, %d",input->getMOUSESTATE()->mouse_x, input->getMOUSESTATE()->mouse_y);
+			 sc.charToWCHAR(bb,buf);
+			 DebugTexts::instance()->setText(ab->gs[TASKTHREADS_AIDECISION],wcslen(buf), buf);
 			 MyMatrixMultiply(mat,view, ab->proj);
+			// mat = view;
 			 bool is_bone_osareta = false;
 			 for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
 				
 				 MYVECTOR3 pos;
 				 MyVec3TransformCoord(pos,this->ab->bone_poss[i],mat);
-				 float posx = 0 + (pos.float3.x+1) * this->ab->gs[0]->getScreenWidth();
-				 float posy = 0 + (pos.float3.y+1) * this->ab->gs[0]->getScreenHeight();
+				 float posx = 0 + (pos.float3.x+1) * this->ab->gs[0]->getScreenWidth()/2;
+				 float posy = this->ab->gs[0]->getScreenHeight() - (pos.float3.y+1) * this->ab->gs[0]->getScreenHeight()/2;
+				 sprintf_s(bb,512, "%f, %f",posx, posy);
+				 sc.charToWCHAR(bb,buf);
+				 if (i < 16) {
+				 DebugTexts::instance()->setText(ab->gs[TASKTHREADS_AIDECISION],wcslen(buf), buf);
+				 }
 				 if ((posx - input->getMOUSESTATE()->mouse_x)*(posx-input->getMOUSESTATE()->mouse_x) +
-					 (posy - input->getMOUSESTATE()->mouse_y)*(posy-input->getMOUSESTATE()->mouse_y) < 20*20) {
+					 (posy - input->getMOUSESTATE()->mouse_y)*(posy-input->getMOUSESTATE()->mouse_y) < 25*25) {
 						 // ‚Ú‚Ë‚¨‚³‚ê‚½
 						 ab->setNowBoneIndex(i);
 						 is_bone_osareta = true;
+						 
 				 }
 
 			 }
 			
 			 if (is_bone_osareta) {
-				 LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
+				// LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
 			 }
 		 }
 	 }
@@ -1282,12 +1304,14 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 				MyMatrixMultiply(mat, impls[now_index]->hon_mesh->mesh->Bones[i]->matrix_local,impls[now_index]->hon_mesh->mesh->Bones[i]->combined_matrix);
 				MyVec3TransformCoord(ans, po, mat);
 				MyMatrixTranslation(ansmat,ans.float3.x, ans.float3.y,ans.float3.z);
+				bone_poss[i] = ans;
 				tex->setRenderBillBoardPos(bone_bills[i],&ansmat);
 			}
 
 			for (int i =bsize; i < KTROBO_MESH_BONE_MAX;i++) {
 				MyMatrixTranslation(ansmat,0,0,100);
 				tex->setRenderBillBoardPos(bone_bills[i], &ansmat);
+				bone_poss[i] = MYVECTOR3(0,0,100);
 			}
 			CS::instance()->leave(CS_RENDERDATA_CS, "enter");
 			CS::instance()->enter(CS_DEVICECON_CS,"enter");
@@ -1441,6 +1465,13 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 }
 void AnimationBuilder::setNowBoneIndex(int index) {
 	this->bone_index = index;
+	Texture* te = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
+	te->setRenderBillBoardColor(bone_bills[i],0xFFFFFFFF);
+	}
+
+	te->setRenderBillBoardColor(bone_bills[bone_index],0xFFFF00FF);
+
 }
 
 
