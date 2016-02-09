@@ -462,6 +462,7 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 		KTROBO_GUI_BUTTON_NORMAL_WIDTH, KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
 	if (len < 128 && len > 0) {
 		memcpy(this->l_str, luaf, len);
+		l_str[len] = '\0';
 	} else {
 		memset(l_str,0,128);
 	}
@@ -1598,7 +1599,9 @@ GUI_SLIDERV::GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l
 	this->now = now;
 	this->zentai_box = zentai;
 	memset(this->l_str,0 ,64);
-	strcpy_s(this->l_str,l_str);
+	if (strlen(l_str) < 64) {
+	strcpy_s(this->l_str,64,l_str);
+	}
 	this->is_box_moved = false;
 	this->is_min_pressed = false;
 	this->is_max_pressed = false;
@@ -1849,7 +1852,9 @@ GUI_SLIDERH::GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l
 	this->now = now;
 	this->zentai_box = zentai;
 	memset(this->l_str,0 ,64);
-	strcpy_s(this->l_str,l_str);
+	if (strlen(l_str)< 64) {
+	strcpy_s(this->l_str,64,l_str);
+	}
 	this->is_box_moved = false;
 	this->is_min_pressed = false;
 	this->is_max_pressed = false;

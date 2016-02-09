@@ -546,6 +546,7 @@ public:
 
 		char namet[512];
 		strcpy_s(namet,512,name.c_str());
+		namet[strlen(name.c_str())] = '\0';
 		int t = tex->getRenderText(namet, r.left,r.top,r.bottom-r.top, r.right-r.left, r.bottom - r. top); 
 		window_names.push_back(t);
 		

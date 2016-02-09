@@ -71,6 +71,10 @@ Game::Game(void)
 	te = 0;
 	but = 0;
 	inputtext= 0;
+	slih = 0;
+	abs = 0;
+	messages = 0;
+	guis = 0;
 }
 
 
@@ -191,7 +195,7 @@ bool Game::Init(HWND hwnd) {
 	telop_texts = new TelopTexts();
 	telop_texts->Init(g,demo->font);
 	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
-
+	/*
 	mesh = new Mesh();
 	mesh->readMesh(g, "resrc/model/ponko2-3/pk2skirt.MESH", demo->tex_loader);
 	mesh->readAnime("resrc/model/ponko2-4/pk2sailordayo.ANIME");
@@ -224,7 +228,7 @@ bool Game::Init(HWND hwnd) {
 
 	mesh3[6] = new Mesh();
 	mesh3[6]->readMesh(g, "resrc/model/ponko2-3/pk2mayuge.MESH", demo->tex_loader);
-	mesh3[6]->readAnime("resrc/model/ponko2-3/pk2mayuge.ANIME");
+	mesh3[6]->readAnime("resrc/model/ponko2-3/pk2mayuge.ANIME");*/
 /*
 	mesh3[7] = new Mesh();
 	mesh3[7]->readMesh(g, "resrc/model/ponko2-3/pk2midarime.MESH", demo->tex_loader);
@@ -235,6 +239,7 @@ bool Game::Init(HWND hwnd) {
 	mesh3[8]->readMesh(g, "resrc/model/ponko2-3/pk2migimedama.MESH", demo->tex_loader);
 	mesh3[8]->readAnime("resrc/model/ponko2-3/pk2migimedama.ANIME");
 	*/
+	/*
 	mesh3[7] = new Mesh();
 	mesh3[7]->readMesh(g, "resrc/model/ponko2-4/pk2migihanddayo.MESH", demo->tex_loader);
 	mesh3[7]->readAnime("resrc/model/ponko2-4/pk2migihanddayo.ANIME");
@@ -253,18 +258,31 @@ bool Game::Init(HWND hwnd) {
 	mesh3[9] = new Mesh();
 	mesh3[9]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
 	mesh3[9]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
-//	mesh3[9]->RootBone->parent_bone = /*mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];*/mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
+//	mesh3[9]->RootBone->parent_bone = *//*mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];*///mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
 //	mesh3[9]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
 //	mesh3[9]->RootBone_connect_without_material_local = false;
-
+/*
 	mesh3[8] = new Mesh();
 	mesh3[8]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
 	mesh3[8]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
 	mesh3[8]->RootBone->parent_bone = mesh3[7]->Bones[mesh3[7]->BoneIndexes["MigiHandMotiBone"]];
 	mesh3[8]->RootBone->parent_bone_index = mesh3[7]->BoneIndexes["MigiHandMotiBone"];
 	mesh3[8]->RootBone_connect_without_material_local = false;
+*/	
+
+	MYMATRIX mat;
+	MyMatrixIdentity(mat);
+	MYMATRIX worldforg;
+		MyMatrixRotationZ(worldforg, 3.14/2);
+	MyMatrixMultiply(mat, mat, worldforg);
 	
+	MyMatrixScaling(worldforg, 1/3.0,1/3.0,1/3.0);
+	MyMatrixMultiply(mat, mat, worldforg);
 	
+	MyMatrixRotationY(worldforg, -3.14/2);
+	MyMatrixMultiply(mat, mat, worldforg);
+
+	/*
 	MYMATRIX worldforg;
 	MyMatrixRotationZ(worldforg, 3.14/2);
 	MyMatrixMultiply(mesh3[8]->rootbone_matrix_local_kakeru, mesh3[8]->rootbone_matrix_local_kakeru, worldforg);
@@ -275,7 +293,7 @@ bool Game::Init(HWND hwnd) {
 	MyMatrixRotationY(worldforg, -3.14/2);
 	MyMatrixMultiply(mesh3[8]->rootbone_matrix_local_kakeru, mesh3[8]->rootbone_matrix_local_kakeru, worldforg);
 	
-	
+	*/
 	/*
 	MyMatrixRotationX(worldforg, -3.14/4*2);
 	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
@@ -292,7 +310,7 @@ bool Game::Init(HWND hwnd) {
 
 
 	float frame = 0;
-
+	/*
 	mesh->animate(frame, true);
 	mesh2->animate(frame, true);
 	for (int i = 0 ; i <= 10 ; i++) {
@@ -301,7 +319,7 @@ bool Game::Init(HWND hwnd) {
 			mesh3[i]->animate(0,true);
 		}
 	}
-
+	*/
 
 	MeshInstanceds::Init(g);
 	mesh_instanceds = new MeshInstanceds(g, this->demo->tex_loader);
@@ -313,7 +331,7 @@ bool Game::Init(HWND hwnd) {
 	
 
 	MYMATRIX worl;
-
+	/*
 	for (int i = 0 ; i < 30;i++) {
 	
 		mesh_is[i] = mesh_instanceds->makeInstanced(mesh2,mesh2,NULL,NULL,false,&kakeru);
@@ -324,8 +342,8 @@ bool Game::Init(HWND hwnd) {
 	}
 	mesh_i = mesh_instanceds->makeInstanced(mesh2,mesh2,NULL,NULL,false,&kakeru);
 	mesh_i2 = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false, &kakeru);
-	
-	MeshInstanced* mesh_i3 = mesh_instanceds->makeInstanced(mesh3[10],mesh3[10],mesh_i,mesh2->BoneIndexes["migiArmTekubiBone"],true,&kakeru);
+	*/
+	/*MeshInstanced* mesh_i3 = mesh_instanceds->makeInstanced(mesh3[10],mesh3[10],mesh_i,mesh2->BoneIndexes["migiArmTekubiBone"],true,&kakeru);
 
 	//MYMATRIX worldforg;
 	MyMatrixRotationZ(worldforg, 3.14/2);
@@ -343,7 +361,7 @@ bool Game::Init(HWND hwnd) {
 	memset(colors,0,sizeof(colors));
 
 
-
+	*/
 /*	for (int i=0;i<KTROBO_MESH_INSTANCED_COLOR_MAX; i++) {
 		colors[i].x = 1;
 		colors[i].y = 1;
@@ -436,24 +454,25 @@ bool Game::Init(HWND hwnd) {
 
 
 	MYMATRIX jiken;
-	mesh2->animate(400,true);
-	mesh->animate(400,true);
-	MeshBone* bon = mesh2->Bones[mesh2->BoneIndexes["migiArmSitaBone"]];
-	MyMatrixRotationZ(bon->offset_matrix,1.6f);
-	mesh2->animate(400,false);
+
+	//mesh2->animate(400,true);
+	//mesh->animate(400,true);
+	//MeshBone* bon = mesh2->Bones[mesh2->BoneIndexes["migiArmSitaBone"]];
+	//MyMatrixRotationZ(bon->offset_matrix,1.6f);
+	//mesh2->animate(400,false);
 
 //	MyMatrixInverse(jiken, NULL, bon->matrix_local);
 
-	MyMatrixMultiply(jiken,bon->matrix_local, bon->combined_matrix);
+//	MyMatrixMultiply(jiken,bon->matrix_local, bon->combined_matrix);
 
 	MYVECTOR3 ppos(0,0,0);
 	MyVec3TransformCoord(ppos,ppos,jiken);
 	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,ppos.float3.z);
-	int j = texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
-	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
+	//int j = texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
+	//texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 	MyMatrixTranslation(jiken,0,0,0);
-	j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,2,2,0,0,512,512);
-	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
+	//j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,2,2,0,0,512,512);
+	//texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 //		j = texdayo->getRenderTex(i,0xFFFFFFFF,150,200,512,512,0,0,512,512);
 //	texdayo->setRenderTexColor(i,0xFFFF0022);
 //	texdayo->setRenderTexIsRender(j,true);
@@ -546,11 +565,7 @@ void Game::Del() {
 		delete task_threads[TASKTHREADS_UPDATEMAINRENDER];
 		task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
 	}
-	if(g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
-		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]->Release();
-		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
-		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
-	}
+	
 
 
 	if (task_threads[TASKTHREADS_AIDECISION]) {
@@ -593,6 +608,13 @@ void Game::Del() {
 		}
 		}
 	}
+
+	if(g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]->Release();
+		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
+	}
+
 
 	if (te) {
 		delete te;
@@ -867,8 +889,8 @@ void Game::Run() {
 
 	MYMATRIX temp_world;
 	MyMatrixTranslation(temp_world, 0,0,0);
-	mesh_i->setWorld(&temp_world);
-	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(1,1,-10,1));
+//	mesh_i->setWorld(&temp_world);
+//	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(1,1,-10,1));
 
 
 
@@ -897,24 +919,24 @@ void Game::Run() {
 	static int count = 0;
 	count++;
 
-	int bsize = mesh2->Bones.size();
+	//int bsize = mesh2->Bones.size();
 	
 	//if (count % 2 ==0) {
-	for (int i=0;i<bsize; i++) {
+	//for (int i=0;i<bsize; i++) {
 
-		MeshBone* bone = mesh2->Bones[i];
+	//	MeshBone* bone = mesh2->Bones[i];
 	//	mesh2->calculateOffsetMatrixToGetMinMaxAndWeight(bone, frame, &animl[i], &animf[i], &animw[i]);
-		animf[i] = floor(frame);////floor(frame);//count * 0.3;
-		animl[i] =ceil(frame);//count * 0.3;
-		animw[i] = animl[i]- frame;
+	//	animf[i] = floor(frame);////floor(frame);//count * 0.3;
+	//	animl[i] =ceil(frame);//count * 0.3;
+	//	animw[i] = animl[i]- frame;
 		//animw[i] = 1;//1- animw[i];
-	}
+	//}
 
-	mesh_i->setBoneIndexInfo(animf, animl, animw);
-	mesh_i2->setBoneIndexInfo(animf,animl,animw);
+//	mesh_i->setBoneIndexInfo(animf, animl, animw);
+//	mesh_i2->setBoneIndexInfo(animf,animl,animw);
 	for (int i=0;i<13;i++) {
-		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
-		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
+//		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
+//		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
 	}
 
 
@@ -957,11 +979,11 @@ void Game::Run() {
 	MyMatrixRotationZ(worldforg, frame);
 	for (int i = 0 ; i <= 6; i ++) {
 		
-		mesh3[i]->draw(g, &world, &view, &proj);
+	//	mesh3[i]->draw(g, &world, &view, &proj);
 
 	}
 	
-	mesh3[0]->draw(g, &world, &view, &proj);
+//	mesh3[0]->draw(g, &world, &view, &proj);
 //	mesh3[10]->draw(g, &world, &view, &proj);
 
 	//mesh->draw(g, &world,&view,&proj);
@@ -975,8 +997,8 @@ void Game::Run() {
 	ssf.charToWCHAR(bbf,bbc);
 	//DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
 	MyMatrixTranslation(world,0,0,0);
-	mesh2->draw(g, &world, &view, &proj);
-	mesh->draw(g, &world, &view, &proj);
+//	mesh2->draw(g, &world, &view, &proj);
+//	mesh->draw(g, &world, &view, &proj);
 	//texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
 	//texdayo->setRenderBillBoardPos(0,&world);
 	

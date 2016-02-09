@@ -8,7 +8,10 @@ void TCB_luaExec(TCB* thisTCB) {
 	
 
 	int task_index = (int)(thisTCB->Work[2]);
-	bool is_lock = (bool)(thisTCB->Work[3]);
+	bool is_lock = false;
+	if((thisTCB->Work[3])) {
+		is_lock = true;
+	}
 	
 	lua_State* L = (lua_State*)thisTCB->Work[1];
 
@@ -118,6 +121,7 @@ void LuaTCBMaker::makeTCB(int task_index, bool is_lock_sita, char* lua_filename)
 				structs[i].is_lock_sita = is_lock_sita;
 				structs[i].task_index = task_index;
 				strcpy_s(structs[i].lua_filename,256,lua_filename);
+				structs[i].lua_filename[strlen(lua_filename)] = '\0';
 				CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
 				return;
 			}

@@ -1167,7 +1167,8 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 			 int size = ab->getNowImpl()->hon_mesh->mesh->Bones.size();
 			 if (size) {
 				 ab->setNowBoneIndex((ab->getNowBoneIndex()+1) % size);
-				 // LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
+				// MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(KTROBO_MESSAGE_ID_ANIMATIONBUILDER_BONE_PUSHED, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, ab->getNowBoneIndex(),0, true);
+				 LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
 			 }
 
 		 }
@@ -1207,7 +1208,8 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 			 }
 			
 			 if (is_bone_osareta) {
-				// LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
+			//	 MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(KTROBO_MESSAGE_ID_ANIMATIONBUILDER_BONE_PUSHED, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, ab->getNowBoneIndex(),0, true);
+				 LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
 			 }
 		 }
 	 }
@@ -1245,7 +1247,13 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	}
 }
 
-
+int AnimationBuilder::getNowIMPLIndex() {
+	int index=0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	index = now_index;
+	CS::instance()->leave(CS_RENDERDATA_CS, "enter");
+	return index;
+}
 void AnimationBuilder::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
 	
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -1271,7 +1279,7 @@ void AnimationBuilder::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) 
 
 		int on2 = impls[now_index]->ko_mesh.size();
 		for (int n=0;n<on2;n++) {
-			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
+			AnimationBuilderMesh* mm = impls[now_index]->ko_mesh[n];
 			if (mm->mesh_loaded) {
 				mm->mesh->draw(g, &world, &view, &proj);
 			}
@@ -1334,9 +1342,10 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 
 		int on2 = impls[now_index]->ko_mesh.size();
 		for (int n=0;n<on2;n++) {
-			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
+			AnimationBuilderMesh* mm = impls[now_index]->ko_mesh[n];
 			if (mm->mesh_loaded && !mm->is_animated) {
-				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
+				//impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
+				mm->mesh->animate(0,true);
 				mm->is_animated = true;
 			}
 		}
@@ -1410,6 +1419,8 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 
 					ii->hon_mesh->mesh_loaded = true;
 					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+					MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(
+						KTROBO_MESSAGE_ID_ANIMATIONBUILDER_HON_MESH_AFTER,KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, this->now_index,0,true);
 					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_madeHonMeshAfter.lua");
 					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 				}

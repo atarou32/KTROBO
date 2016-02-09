@@ -35,6 +35,7 @@ public:
 	TO_LUA virtual bool force_saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
 	TO_LUA virtual void deleteAll()=0;
 	TO_LUA virtual void setNowIMPLIndex(int index)=0;
+	TO_LUA virtual int getNowIMPLIndex()=0;
 	TO_LUA virtual int getNowBoneIndex()=0;
 };
 
@@ -388,6 +389,7 @@ public:
 	void setNowIMPLIndex(int index);
 	int getNowBoneIndex();
 	void setNowBoneIndex(int index);
+	int getNowIMPLIndex();
 
 };
 
