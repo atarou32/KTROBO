@@ -3,6 +3,7 @@
 #include "MyTokenAnalyzer.h"
 #include "KTRoboLuaCollection.h"
 #include "KTRoboInput.h"
+#include "tolua_glue/tolua_glue.h"
 
 using namespace KTROBO;
 
@@ -103,6 +104,7 @@ void  AnimationBuilder::setHonMeshBoneRotX(int impl_id, int bone_index, float ro
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
 				// ロードされているので設定する
 				impl->now_kakera->mesh_bone_rotx[bone_index] = rotx;
+				impl->setIsAnimate(false);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			
 			return;
@@ -122,7 +124,7 @@ void  AnimationBuilder::setHonMeshBoneRotY(int impl_id, int bone_index, float ro
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isroty[bone_index]) {
 				// ロードされているので設定する
 				impl->now_kakera->mesh_bone_roty[bone_index] = roty;
-			
+			impl->setIsAnimate(false);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 			}
@@ -141,6 +143,7 @@ void  AnimationBuilder::setHonMeshBoneRotZ(int impl_id, int bone_index, float ro
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera&& impl->now_kakera->mesh_bone_isrotz[bone_index]) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotz[bone_index] = rotz;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
@@ -160,6 +163,7 @@ void  AnimationBuilder::setHonMeshBoneRotXIsChange(int impl_id, int bone_index, 
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotx[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transx[bone_index] = 0;
 				impl->now_kakera->mesh_bone_isrotx[bone_index] = t;
@@ -183,6 +187,7 @@ void  AnimationBuilder::setHonMeshBoneRotYIsChange(int impl_id, int bone_index, 
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_roty[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transy[bone_index] = 0;
 				impl->now_kakera->mesh_bone_isroty[bone_index] = t;
@@ -206,6 +211,7 @@ void  AnimationBuilder::setHonMeshBoneRotZIsChange(int impl_id, int bone_index, 
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotz[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transz[bone_index] = 0;
 				impl->now_kakera->mesh_bone_isrotz[bone_index] = t;
@@ -228,6 +234,7 @@ void  AnimationBuilder::setHonMeshBoneTransX(int impl_id, int bone_index, float 
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_transx[bone_index] = dx;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			
@@ -248,6 +255,7 @@ void  AnimationBuilder::setHonMeshBoneTransY(int impl_id, int bone_index, float 
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_transy[bone_index] = dy;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			
@@ -267,6 +275,7 @@ void  AnimationBuilder::setHonMeshBoneTransZ(int impl_id, int bone_index, float 
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
 				// ロードされているので設定する
+				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_transz[bone_index] = dz;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			
@@ -729,6 +738,7 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 	KTROBO::mylog::writelog(akatfile, "}\n");
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return true;
 }
 
 bool  AnimationBuilder::saveNowToFile(char* filename) {
@@ -999,9 +1009,9 @@ bool  AnimationBuilder::loadFromFile(char* filename) {
 	// すべての状態が保存されたファイルから状態を復元する現在のものは消してしまう
 	if (impls.size()) return false;
 
-	forceLoadFromFile(filename);
+	return forceLoadFromFile(filename);
 	
-
+	
 
 }
 
@@ -1027,7 +1037,7 @@ bool  AnimationBuilder::saveAnimeAndFrameToFile(int impl_id, char* filename) {
 		return false;
 	}
 
-	force_saveAnimeAndFrameToFile(impl_id, filename);
+	return force_saveAnimeAndFrameToFile(impl_id, filename);
 
 }
 
@@ -1141,7 +1151,15 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
 	Scene::enter();
 	InputMessageDispatcher::registerImpl(&kuru,NULL,NULL);
- 
+	bone_index = 0;
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	int tex_id = tex->getTexture("resrc/sample/none.png");
+	for (int i=0;i < KTROBO_MESH_BONE_MAX; i++) {
+		bone_poss[i] = MYVECTOR3(0,0,0);
+		MYMATRIX world;
+		MyMatrixIdentity(world);
+		bone_bills[i] = tex->getRenderBillBoard(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
+	}
  }
 
 
@@ -1150,6 +1168,10 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	InputMessageDispatcher::unregisterImpl(&kuru);
 	Scene::leave();
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_leave.lua");
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	for (int i=0;i < KTROBO_MESH_BONE_MAX; i++) {
+		tex->lightdeleteRenderBillBoard(bone_bills[i]);//(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
+	}
 }
 
 
@@ -1163,6 +1185,8 @@ void AnimationBuilder::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) 
 	if (num) {
 
 		if (impls[now_index]->hon_mesh->mesh_loaded) {
+			this->view = kuru.view;
+
 			impls[now_index]->hon_mesh->mesh->draw(g, &world, &view, &proj);
 		}
 
@@ -1196,14 +1220,40 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 	int num = impls.size();
 	if (num) {
 
-		if (impls[now_index]->hon_mesh->mesh_loaded) {
+		if (impls[now_index]->hon_mesh->mesh_loaded && !impls[now_index]->hon_mesh->is_animated) {
 			impls[now_index]->now_kakera->setOffsetMatrixToMesh(impls[now_index]->hon_mesh->mesh);
+
+			MYMATRIX mat;
+			MYVECTOR3 po(0,0,0);
+			MYMATRIX ansmat;
+			Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+			int bsize = impls[now_index]->hon_mesh->mesh->Bones.size();
+			for (int i=0;i<bsize; i++) {
+				MYVECTOR3 ans;
+				MyMatrixMultiply(mat, impls[now_index]->hon_mesh->mesh->Bones[i]->matrix_local,impls[now_index]->hon_mesh->mesh->Bones[i]->combined_matrix);
+				MyVec3TransformCoord(ans, po, mat);
+				MyMatrixTranslation(ansmat,ans.float3.x, ans.float3.y,ans.float3.z);
+				tex->setRenderBillBoardPos(bone_bills[i],&ansmat);
+			}
+
+			for (int i =bsize; i < KTROBO_MESH_BONE_MAX;i++) {
+				MyMatrixTranslation(ansmat,0,0,100);
+				tex->setRenderBillBoardPos(bone_bills[i], &ansmat);
+			}
+			CS::instance()->leave(CS_RENDERDATA_CS, "enter");
+			CS::instance()->enter(CS_DEVICECON_CS,"enter");
+			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+			tex->setViewProj(g,&kuru.view,&proj,&kuru.from,&kuru.at);
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			CS::instance()->leave(CS_DEVICECON_CS, "leave");
+			CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+
 		}
 
 		int on = impls[now_index]->onaji_mesh.size();
 		for (int n = 0;n<on;n++) {
 			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
-			if (mm->mesh_loaded) {
+			if (mm->mesh_loaded && !mm->is_animated) {
 				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
 			}
 		}
@@ -1211,10 +1261,11 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 		int on2 = impls[now_index]->ko_mesh.size();
 		for (int n=0;n<on2;n++) {
 			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
-			if (mm->mesh_loaded) {
+			if (mm->mesh_loaded && !mm->is_animated) {
 				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
 			}
 		}
+		impls[now_index]->setIsAnimate(true);
 	}
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
@@ -1332,9 +1383,6 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 					}
 				}
 			}
-
-
-
 		}
 	}
 
@@ -1347,6 +1395,17 @@ void AnimationBuilder::setNowIMPLIndex(int index) {
 		now_index = index;
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}
+
+
+int AnimationBuilder::getNowBoneIndex() {
+	int bonee = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size()) {
+		bonee = bone_index;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return bonee;
 }
 
 
@@ -1379,3 +1438,20 @@ IAnimationBuilder* AnimationBuilders::getInterface(int index) {
 		throw new GameError(KTROBO::WARNING, "no ab");
 }
 
+
+void AnimationBuilderImpl::setIsAnimate(bool t) {
+
+	if (hon_mesh) {
+		hon_mesh->is_animated = t;
+	}
+
+	int osize = onaji_mesh.size();
+	for (int i=0;i<osize;i++) {
+		onaji_mesh[i]->is_animated = t;
+	}
+
+	int xsize = ko_mesh.size();
+	for (int i=0;i<xsize; i++) {
+		ko_mesh[i]->is_animated = t;
+	}
+}

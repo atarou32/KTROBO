@@ -1568,6 +1568,18 @@ unsigned int GUI_TAB::colors[8];
 unsigned int GUI_TAB::f_colors[8];
 
 
+int GUI::getTabIndex(int tab_gui_id) {
+	int inde = 0;
+	CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
+	if (p_tabs_index.find(tab_gui_id) != p_tabs_index.end()) {
+		
+		GUI_TAB* t = tabs[p_tabs_index[tab_gui_id]];
+		inde = t->getNowIndex();
+	
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "push part to tab");
+	return inde;
+}
 void GUI::setTabIndex(int tab_gui_id, int index) {
 	CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
 	if (p_tabs_index.find(tab_gui_id) != p_tabs_index.end()) {

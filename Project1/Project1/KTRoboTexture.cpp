@@ -1766,6 +1766,9 @@ Texture* Textures::getInstance(int index) {
 
 	if (size) {
 		return texs[0];
+	} else {
+		makeInst();
+		return texs[0];
 	}
 
 	throw new GameError(KTROBO::WARNING, "no texture");
@@ -1776,6 +1779,9 @@ Texture* Textures::getInstance(int index) {
 ITexture* Textures::getInterface(int index) {
 	int size = texs.size();
 	if (size) {
+		return texs[0];
+	} else {
+		makeInst();
 		return texs[0];
 	}
 	throw new GameError(KTROBO::WARNING, "no texture");

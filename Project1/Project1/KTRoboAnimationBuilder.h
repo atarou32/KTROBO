@@ -35,6 +35,7 @@ public:
 	TO_LUA virtual bool force_saveAnimeAndFrameToFile(int impl_id, char* filename)=0;
 	TO_LUA virtual void deleteAll()=0;
 	TO_LUA virtual void setNowIMPLIndex(int index)=0;
+	TO_LUA virtual int getNowBoneIndex()=0;
 };
 
 class AnimationMeshKakera {
@@ -123,7 +124,7 @@ public:
 	char mesh_filepath[128];
 	char mesh_meshpath[128];
 	char mesh_animepath[128];
-
+	bool is_animated;
 	char oya_filepath[128];
 	bool is_connect_without_material_local;
 	MYMATRIX matrix_kakeru;
@@ -149,6 +150,7 @@ public:
 		is_connect_without_material_local = true;
 		memset(oya_mesh_bone_name,0,128);
 		MyMatrixIdentity(matrix_kakeru);
+		is_animated = false;
 	}
 
 	void setOyaMesh(char* doya_filepath, char* obname, bool is_c, MYMATRIX* matrix_kakeru) {
@@ -208,6 +210,8 @@ public:
 		}
 		return 0;
 	}
+
+	void setIsAnimate(bool t);
 
 	AnimationBuilderImpl(char* hon_filepath) {
 		char hon_mesh_meshpath[128];
@@ -311,6 +315,11 @@ private:
 	MYMATRIX view;
 	MYMATRIX proj;
 	kurukuru kuru;
+
+	int bone_index;
+	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
+	int bone_bills[KTROBO_MESH_BONE_MAX];
+
 public:
 	AnimationBuilder(char* c, int len, MyTextureLoader* loader);
 	virtual ~AnimationBuilder(void) {
@@ -356,6 +365,7 @@ public:
 	bool force_saveAnimeAndFrameToFile(int impl_id, char* filename);
 	void deleteAll();
 	void setNowIMPLIndex(int index);
+	int getNowBoneIndex();
 
 };
 

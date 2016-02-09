@@ -213,6 +213,7 @@ public:
 	TO_LUA virtual void setPartToWindow(int window_gui_id, int part_gui_id)=0;
 	TO_LUA virtual void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
 	TO_LUA virtual void setTabIndex(int tab_gui_id, int index)=0;
+	TO_LUA virtual int getTabIndex(int tab_gui_id)=0;
 
 	TO_LUA virtual char* getStrFromInput(int gui_id)=0;
 	TO_LUA virtual float getNowFromSlider(int gui_id)=0;
@@ -500,6 +501,9 @@ public:
 			setIsRender(is_render);
 		}
 	}
+	int getNowIndex() {
+		return now_index;
+	}
 
 	GUI_TAB(int tab_index) : GUI_PART() {
 		this->tab_index = tab_index;
@@ -737,6 +741,7 @@ public:
 
 	void setPartToWindow(int window_gui_id, int part_gui_id);
 	void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name);
+	int getTabIndex(int tab_gui_id);
 
 	char* getStrFromInput(int gui_id);
 	float getNowFromSlider(int gui_id);

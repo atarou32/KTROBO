@@ -29,6 +29,7 @@
 #include "KTRoboScene.h"
 #include "KTRoboAnimationBuilder.h"
 #include "vector"
+#include "KTRoboMessage.h"
 
 namespace KTROBO {
 #define RENDERTIME_IGNORETIME 1200
@@ -78,6 +79,8 @@ private:
 	GUI_SLIDERH * slih;
 	vector<Scene*> scenes;
 	AnimationBuilders* abs;
+	GUIs* guis;
+	Messages* messages;
 public:
 	Game(void);
 	~Game(void);

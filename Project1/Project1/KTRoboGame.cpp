@@ -374,11 +374,15 @@ bool Game::Init(HWND hwnd) {
 	//Sleep(1000);
     L = luaL_newstate();
     luaL_openlibs(L);
-
+	guis = new GUIs();
+	
 	cltf = new TextFromLuas(g_for_task_threads[TASKTHREADS_LOADDESTRUCT], this);
 	abs = new AnimationBuilders(demo->tex_loader);
 	cmeshs = new CMeshs(g, demo->tex_loader);
+	messages = new Messages();
 	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
+	MyLuaGlueSingleton::getInstance()->setColGUIs(guis);
+	MyLuaGlueSingleton::getInstance()->setColMessages(messages);
 	MyLuaGlueSingleton::getInstance()->setColTextFromLuas(cltf);
 	MyLuaGlueSingleton::getInstance()->setColMeshInstanceds(mesh_instanceds);
 	MyLuaGlueSingleton::getInstance()->setColAnimationBuilders(abs);
@@ -613,6 +617,14 @@ void Game::Del() {
 	if (abs) {
 		delete abs;
 		abs = 0;
+	}
+	if(guis) {
+		delete guis;
+		guis = 0;
+	}
+	if (messages) {
+		delete messages;
+		messages = 0;
 	}
 
 	Text::Del();
