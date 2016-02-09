@@ -286,6 +286,7 @@ public:
 };
 
 
+class AnimationBuilder;
 class kurukuru : public INPUTSHORICLASS{
 public:
 	MYMATRIX view;
@@ -293,6 +294,8 @@ public:
 	MYVECTOR3 from;
 	MYVECTOR3 up;
 	float a;
+	AnimationBuilder* ab;
+
     bool handleMessage(int msg, void* data, DWORD time);
 	kurukuru() {
 		at.float3.x = 0;
@@ -302,7 +305,12 @@ public:
 		from = MYVECTOR3(3,-15,14);
 		a = 0;
 		MyMatrixLookAtRH(view,from,at,up);
+		ab = 0;
 	}
+	void setAB(AnimationBuilder* ad) {
+		ab = ad;
+	}
+
 };
 
 
@@ -313,11 +321,15 @@ private:
 	int now_index;
 	MyTextureLoader* loader;
 	MYMATRIX view;
+public:
 	MYMATRIX proj;
-	kurukuru kuru;
+private:
+	kurukuru* kuru;
 
 	int bone_index;
+public:
 	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
+private:
 	int bone_bills[KTROBO_MESH_BONE_MAX];
 
 public:
@@ -325,11 +337,20 @@ public:
 	virtual ~AnimationBuilder(void) {
 		Scene::~Scene();
 		deleteAll();
+		if (kuru) {
+			delete kuru;
+			kuru = 0;
+		}
 	}
 	void enter();
 	
 	void leave();
-	
+	AnimationBuilderImpl* getNowImpl() {
+		if (impls.size()) {
+			return impls[now_index];
+		}
+		return NULL;
+	}
 
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game);
 	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
@@ -366,6 +387,7 @@ public:
 	void deleteAll();
 	void setNowIMPLIndex(int index);
 	int getNowBoneIndex();
+	void setNowBoneIndex(int index);
 
 };
 

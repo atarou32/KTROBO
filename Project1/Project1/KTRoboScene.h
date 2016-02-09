@@ -24,11 +24,12 @@ class Scene
 {
 private:
 	char scene_name[32];
-protected:
+public:
 	static Graphics* gs[TASKTHREAD_NUM];
 	static lua_State* Ls[TASKTHREAD_NUM];
 
 	static Game* game;
+protected:
 	TCB* looptcbs[TASKTHREAD_NUM];
 	
 public:	

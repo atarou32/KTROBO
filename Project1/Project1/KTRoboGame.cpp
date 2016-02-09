@@ -515,8 +515,8 @@ bool Game::Init(HWND hwnd) {
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
-	InputMessageDispatcher::registerImpl(&k,NULL,NULL);
-
+	//InputMessageDispatcher::registerImpl(&k,NULL,NULL);
+	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
 	return true;
 }
 void Game::Del() {
@@ -977,7 +977,7 @@ void Game::Run() {
 	MyMatrixTranslation(world,0,0,0);
 	mesh2->draw(g, &world, &view, &proj);
 	mesh->draw(g, &world, &view, &proj);
-	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
+	//texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
 	//texdayo->setRenderBillBoardPos(0,&world);
 	
 	/*

@@ -13,9 +13,19 @@ AnimationBuilder::AnimationBuilder(char* n,int len, MyTextureLoader* lo) : Scene
 	MYVECTOR3 from(-10,-10,10);
 	MYVECTOR3 at(0,0,0);
 	MYVECTOR3 up(0,0,1);
+	now_index = 0;
+	bone_index = 0;
 	MyMatrixLookAtRH(view,from,at,up);
 	MyMatrixPerspectiveFovRH(proj, 1, gs[TASKTHREADS_AIDECISION]->getScreenWidth() / (float)gs[TASKTHREADS_AIDECISION]->getScreenHeight(), 1, 1000);
 	
+	kuru = new kurukuru();
+//	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
+//	int bone_bills[KTROBO_MESH_BONE_MAX];
+
+	for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
+		bone_bills[i] = 0;
+	}
+
 
 }
 
@@ -1132,8 +1142,10 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
  bool kurukuru::handleMessage(int msg, void* data, DWORD time) {
 
 	 a = 0.01f;
-
-
+	 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	 if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
+		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+		 if (input->getMOUSESTATE()->mouse_r_button_pressed) {
 	 MYMATRIX s;
 	 MyMatrixRotationZ(s,a);
 
@@ -1142,6 +1154,42 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	 from = at+fromat;
 
 	 MyMatrixLookAtRH(view,from,at,up);
+		 }
+	 }
+	 AnimationBuilderImpl* imp = ab->getNowImpl();
+	 if (imp) {
+		 imp->setIsAnimate(false);
+	 }
+
+	 if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+		 if (input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN) {
+			 // ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Ì‚Å
+			 MYMATRIX mat;
+			
+			 MyMatrixMultiply(mat,view, ab->proj);
+			 bool is_bone_osareta = false;
+			 for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
+				
+				 MYVECTOR3 pos;
+				 MyVec3TransformCoord(pos,this->ab->bone_poss[i],mat);
+				 float posx = 0 + (pos.float3.x+1) * this->ab->gs[0]->getScreenWidth();
+				 float posy = 0 + (pos.float3.y+1) * this->ab->gs[0]->getScreenHeight();
+				 if ((posx - input->getMOUSESTATE()->mouse_x)*(posx-input->getMOUSESTATE()->mouse_x) +
+					 (posy - input->getMOUSESTATE()->mouse_y)*(posy-input->getMOUSESTATE()->mouse_y) < 20*20) {
+						 // ‚Ú‚Ë‚¨‚³‚ê‚½
+						 ab->setNowBoneIndex(i);
+						 is_bone_osareta = true;
+				 }
+
+			 }
+			
+			 if (is_bone_osareta) {
+				 LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
+			 }
+		 }
+	 }
+	 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 	 return true;
  }
@@ -1149,8 +1197,9 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
  void AnimationBuilder::enter()
 {
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
+	kuru->setAB(this);
 	Scene::enter();
-	InputMessageDispatcher::registerImpl(&kuru,NULL,NULL);
+	InputMessageDispatcher::registerImpl(kuru,NULL,NULL);
 	bone_index = 0;
 	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 	int tex_id = tex->getTexture("resrc/sample/none.png");
@@ -1165,7 +1214,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 
  void AnimationBuilder::leave()
 {
-	InputMessageDispatcher::unregisterImpl(&kuru);
+	InputMessageDispatcher::unregisterImpl(kuru);
 	Scene::leave();
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AB_leave.lua");
 	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
@@ -1185,7 +1234,7 @@ void AnimationBuilder::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) 
 	if (num) {
 
 		if (impls[now_index]->hon_mesh->mesh_loaded) {
-			this->view = kuru.view;
+			this->view = kuru->view;
 
 			impls[now_index]->hon_mesh->mesh->draw(g, &world, &view, &proj);
 		}
@@ -1219,10 +1268,10 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 
 	int num = impls.size();
 	if (num) {
-
+		
 		if (impls[now_index]->hon_mesh->mesh_loaded && !impls[now_index]->hon_mesh->is_animated) {
 			impls[now_index]->now_kakera->setOffsetMatrixToMesh(impls[now_index]->hon_mesh->mesh);
-
+			impls[now_index]->hon_mesh->is_animated = true;
 			MYMATRIX mat;
 			MYVECTOR3 po(0,0,0);
 			MYMATRIX ansmat;
@@ -1243,7 +1292,7 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 			CS::instance()->leave(CS_RENDERDATA_CS, "enter");
 			CS::instance()->enter(CS_DEVICECON_CS,"enter");
 			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-			tex->setViewProj(g,&kuru.view,&proj,&kuru.from,&kuru.at);
+			tex->setViewProj(g,&kuru->view,&proj,&kuru->from,&kuru->at);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			CS::instance()->leave(CS_DEVICECON_CS, "leave");
 			CS::instance()->enter(CS_RENDERDATA_CS,"enter");
@@ -1255,6 +1304,7 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
 			if (mm->mesh_loaded && !mm->is_animated) {
 				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
+				mm->is_animated = true;
 			}
 		}
 
@@ -1263,9 +1313,10 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 			AnimationBuilderMesh* mm = impls[now_index]->onaji_mesh[n];
 			if (mm->mesh_loaded && !mm->is_animated) {
 				impls[now_index]->now_kakera->setOffsetMatrixToMesh(mm->mesh);
+				mm->is_animated = true;
 			}
 		}
-		impls[now_index]->setIsAnimate(true);
+	//	impls[now_index]->setIsAnimate(true);
 	}
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
@@ -1388,6 +1439,10 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
+void AnimationBuilder::setNowBoneIndex(int index) {
+	this->bone_index = index;
+}
+
 
 void AnimationBuilder::setNowIMPLIndex(int index) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -1410,6 +1465,8 @@ int AnimationBuilder::getNowBoneIndex() {
 
 
 int AnimationBuilders::makeInst() {
+	if (animebs.size()) return 0;
+
 	AnimationBuilder* ab = new AnimationBuilder("animeb",6,loader);
 	animebs.push_back(ab);
 	return animebs.size()-1;
