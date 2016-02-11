@@ -418,6 +418,7 @@ bool Game::Init(HWND hwnd) {
 	
 	texdayo = new Textures(demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
+	texdayo->getInstance(0)->getTexture(KTROBO_GUI_PNG,4096);
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	GUI::Init(hwnd, texdayo->getInstance(0), Ls[TASKTHREADS_AIDECISION], g->getScreenWidth(), g->getScreenHeight());
 //	GUI_INPUTTEXT::Init(hwnd, texdayo->getInstance(0));
@@ -430,9 +431,10 @@ bool Game::Init(HWND hwnd) {
 	zem.right = 300;
 	zem.top = 130;
 	zem.bottom = 160;
-	slih = new GUI_SLIDERH(zem,100,0,10,"test");
+/*	slih = new GUI_SLIDERH(zem,100,0,10,"test");
 	slih->setIsRender(true);
-	InputMessageDispatcher::registerImpl(slih,NULL,NULL);
+	*/
+	//InputMessageDispatcher::registerImpl(slih,NULL,NULL);
 	InputMessageDispatcher::registerImpl(but, NULL,NULL);
 	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
@@ -524,11 +526,11 @@ bool Game::Init(HWND hwnd) {
 	
 	//long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
-	work[1] = (unsigned long)g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
-	work[0] = (unsigned long)task_threads[TASKTHREADS_LOADDESTRUCT];
+	work[1] = (unsigned long)g_for_task_threads[TASKTHREADS_AIDECISION];
+	work[0] = (unsigned long)task_threads[TASKTHREADS_AIDECISION];
 	work[2] = (unsigned long)mesh_instanceds;
 
-	task_threads[TASKTHREADS_LOADDESTRUCT]->make(LOADMESHTCB,Ls[TASKTHREADS_LOADDESTRUCT],work,0x0000FFFF);
+	task_threads[TASKTHREADS_AIDECISION]->make(LOADMESHTCB,Ls[TASKTHREADS_AIDECISION],work,0x0000FFFF);
 
 
 	memset(work,0,sizeof(work));

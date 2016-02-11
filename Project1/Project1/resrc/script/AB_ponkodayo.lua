@@ -1,5 +1,7 @@
 ab = AnimationBuilder:getIS(0,0)
 gu = GUI:getIS(0,0)
+
+ab:createAnimationBuilderImpl("resrc/model/ponko2-4/pk2sailordayo")
 impl_id = ab:getNowIMPLIndex()
 ab:setOnajiMesh(impl_id, "resrc/model/ponko2-3/pk2skirt")
 ab:setOnajiMesh(impl_id, "resrc/model/ponko2-3/pk2face")

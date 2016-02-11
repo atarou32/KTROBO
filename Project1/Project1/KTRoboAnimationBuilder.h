@@ -17,9 +17,9 @@ public:
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
 	TO_LUA virtual void setHonMeshBoneRotY(int impl_id, int bone_index, float roty)=0;
 	TO_LUA virtual void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz)=0;
-	TO_LUA virtual void setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t)=0; // false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
-	TO_LUA virtual void setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t)=0;
-	TO_LUA virtual void setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t)=0;
+	TO_LUA virtual void toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index)=0; // false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
+	TO_LUA virtual void toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index)=0;
+	TO_LUA virtual void toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index)=0;
 	TO_LUA virtual void setHonMeshBoneTransX(int impl_id, int bone_index, float dx)=0;
 	TO_LUA virtual void setHonMeshBoneTransY(int impl_id, int bone_index, float dy)=0;
 	TO_LUA virtual void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz)=0;
@@ -368,9 +368,9 @@ public:
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
 	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
 	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
-	void setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t); // false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
-	void setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t);
-	void setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t);
+	void toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index); // false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
+	void toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index);
+	void toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index);
 	void setHonMeshBoneTransX(int impl_id, int bone_index, float dx);
 	void setHonMeshBoneTransY(int impl_id, int bone_index, float dy);
 	void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz);

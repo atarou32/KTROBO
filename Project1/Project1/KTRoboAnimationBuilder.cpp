@@ -164,7 +164,7 @@ void  AnimationBuilder::setHonMeshBoneRotZ(int impl_id, int bone_index, float ro
 	}
 
 }
-void  AnimationBuilder::setHonMeshBoneRotXIsChange(int impl_id, int bone_index, bool t) {
+void  AnimationBuilder::toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index) {
 	// false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
 	if (impls.size() > impl_id && impl_id >=0) {
 		
@@ -176,7 +176,7 @@ void  AnimationBuilder::setHonMeshBoneRotXIsChange(int impl_id, int bone_index, 
 				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotx[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transx[bone_index] = 0;
-				impl->now_kakera->mesh_bone_isrotx[bone_index] = t;
+				impl->now_kakera->mesh_bone_isrotx[bone_index] = !impl->now_kakera->mesh_bone_isrotx[bone_index];
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 			}
@@ -188,7 +188,7 @@ void  AnimationBuilder::setHonMeshBoneRotXIsChange(int impl_id, int bone_index, 
 	
 	
 	
-void  AnimationBuilder::setHonMeshBoneRotYIsChange(int impl_id, int bone_index, bool t) {
+void  AnimationBuilder::toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index) {
 	// false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
 	if (impls.size() > impl_id && impl_id >=0) {
 		
@@ -200,7 +200,7 @@ void  AnimationBuilder::setHonMeshBoneRotYIsChange(int impl_id, int bone_index, 
 				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_roty[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transy[bone_index] = 0;
-				impl->now_kakera->mesh_bone_isroty[bone_index] = t;
+				impl->now_kakera->mesh_bone_isroty[bone_index] = !impl->now_kakera->mesh_bone_isroty[bone_index];
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 			}
@@ -212,7 +212,7 @@ void  AnimationBuilder::setHonMeshBoneRotYIsChange(int impl_id, int bone_index, 
 }
 
 
-void  AnimationBuilder::setHonMeshBoneRotZIsChange(int impl_id, int bone_index, bool t) {
+void  AnimationBuilder::toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index) {
 	// false‚É‚·‚é‚Æ‰ñ“]‚ª0‚É‚È‚èIK‚Å‚à‰ñ“]‚µ‚È‚­‚È‚é
 	if (impls.size() > impl_id && impl_id >=0) {
 		
@@ -224,7 +224,7 @@ void  AnimationBuilder::setHonMeshBoneRotZIsChange(int impl_id, int bone_index, 
 				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotz[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transz[bone_index] = 0;
-				impl->now_kakera->mesh_bone_isrotz[bone_index] = t;
+				impl->now_kakera->mesh_bone_isrotz[bone_index] = !impl->now_kakera->mesh_bone_isrotz[bone_index];
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 			}
@@ -1226,7 +1226,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	InputMessageDispatcher::registerImpl(kuru,NULL,NULL);
 	bone_index = 0;
 	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
-	int tex_id = tex->getTexture("resrc/sample/none.png");
+	int tex_id = tex->getTexture("resrc/sample/none.png",1024);
 	for (int i=0;i < KTROBO_MESH_BONE_MAX; i++) {
 		bone_poss[i] = MYVECTOR3(0,0,0);
 		MYMATRIX world;

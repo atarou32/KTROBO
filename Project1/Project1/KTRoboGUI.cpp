@@ -207,20 +207,22 @@ void GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
 	CS::instance()->leave(CS_MESSAGE_CS, "push part to window");
 }
 
-void GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
-	if (tab_gui_id == window_gui_id) return;
+int GUI::setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name) {
+	int ans=0;
+	if (tab_gui_id == window_gui_id) return 0;
 	CS::instance()->enter(CS_MESSAGE_CS, "push part to tab");
 	if (p_windows_index.find(window_gui_id) != p_windows_index.end()) {
 		if (p_tabs_index.find(tab_gui_id) != p_tabs_index.end()) {
 		
 			GUI_TAB* t = tabs[p_tabs_index[tab_gui_id]];
 			GUI_WINDOW* w = windows[p_windows_index[window_gui_id]];
-			t->setWindow(w,string(window_name));
+			ans = t->setWindow(w,string(window_name));
 
 		
 		}
 	}
 	CS::instance()->leave(CS_MESSAGE_CS, "push part to tab");
+	return ans;
 }
 
 char* GUI::getStrFromInput(int gui_id) {
@@ -428,7 +430,7 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 					KTROBO_GUI_BUTTON_NORMAL_TOP,
 					KTROBO_GUI_BUTTON_NORMAL_WIDTH,
 					KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
-			return true;
+			return false;
 
 
 
@@ -457,7 +459,7 @@ GUI_BUTTON::GUI_BUTTON(float x, float y, float width, float height, char* luaf, 
 	box.right = width + x;
 	box.top = y;
 	box.bottom = y + height;
-	int tex_id = texture->getTexture(KTROBO_GUI_PNG);
+	int tex_id = texture->getTexture(KTROBO_GUI_PNG,1024);
 	this->box_tex_id = texture->getRenderTex(tex_id, 0xFFFFFFFF,x,y,width,height, KTROBO_GUI_BUTTON_NORMAL_LEFT, KTROBO_GUI_BUTTON_NORMAL_TOP,
 		KTROBO_GUI_BUTTON_NORMAL_WIDTH, KTROBO_GUI_BUTTON_NORMAL_HEIGHT);
 	if (len < 128 && len > 0) {
@@ -496,7 +498,7 @@ GUI_INPUTTEXT::GUI_INPUTTEXT(float x, float y, float width, float height) : GUI_
 	box.right = width + x;
 	box.top = y;
 	box.bottom = y + height;
-	int tex_id = texture->getTexture(KTROBO_GUI_PNG);
+	int tex_id = texture->getTexture(KTROBO_GUI_PNG,1024);
 	// ノーマルで！
 	is_render = true;
 	is_effect = false;
@@ -575,10 +577,11 @@ GUI_INPUTTEXT::~GUI_INPUTTEXT() {
 	texture->lightdeleteRenderText(input_text);
 }
 
-void GUI_PART::moveBox(int dx, int dy) {
+bool GUI_PART::moveBox(int dx, int dy) {
 
-
+	bool ans = false;
 	// 動かす
+	MYRECT temp_box = box;
 	box.left += dx;
 	box.right += dx;
 	box.top += dy;
@@ -586,23 +589,33 @@ void GUI_PART::moveBox(int dx, int dy) {
 	if (box.left < max_boxdayo.left) {
 		box.right += max_boxdayo.left-box.left;
 		box.left = max_boxdayo.left;
+		box = temp_box;
+		ans = true;
+		return true;
 	}
 	if (box.top < max_boxdayo.top) {
 		box.bottom += max_boxdayo.top-box.top;
 		box.top = max_boxdayo.top;
+		box = temp_box;
+		return true;
 	}
 	if (box.right > max_boxdayo.right) {
 		box.left += max_boxdayo.right - box.right;
 		box.right = max_boxdayo.right;
+		box = temp_box;
+		return true;
 	}
 	if (box.bottom > max_boxdayo.bottom) {
 		box.top += max_boxdayo.bottom - box.bottom;
 		box.bottom = max_boxdayo.bottom;
+		box = temp_box;
+		return true;
 	}
+	return ans;
 }
-void GUI_INPUTTEXT::moveBox(int dx, int dy) {
+bool GUI_INPUTTEXT::moveBox(int dx, int dy) {
 
-	GUI_PART::moveBox(dx, dy);
+	bool ans = GUI_PART::moveBox(dx, dy);
 
 	texture->setRenderTexPos(box_tex_id_hidariue, box.left, box.top);
 	texture->setRenderTexPos(box_tex_id_hidarinaka, box.left, box.top -1 + KTROBO_GUI_INPUTTEXT_BOX_SOTOHABA_XY);
@@ -616,16 +629,17 @@ void GUI_INPUTTEXT::moveBox(int dx, int dy) {
 
 	//	text->render(g, 0xFFFFFFFF,box.left+5,box.top+2, box.bottom-box.top-4, box.right-box.left-10,box.bottom - box.top);
 	texture->setRenderTextPos(input_text, box.left+5, box.top+2);
-
+	return ans;
 }
 
-void GUI_BUTTON::moveBox(int dx, int dy) {
+bool GUI_BUTTON::moveBox(int dx, int dy) {
 
-	GUI_PART::moveBox(dx, dy);
+	bool ans = GUI_PART::moveBox(dx, dy);
 	texture->setRenderTexPos(box_tex_id, box.left, box.top);
 	// (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2, KTROBO_GUI_BUTTON_TEXT_HEIGHT,
 	float width = texture->getRenderTextWidth(button_text, KTROBO_GUI_BUTTON_TEXT_HEIGHT);
 	texture->setRenderTextPos(this->button_text, (box.left + box.right)/2 - width/2, (box.top+box.bottom)/2 -KTROBO_GUI_BUTTON_TEXT_HEIGHT/2);
+	return ans;
 }
 
 bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
@@ -1606,7 +1620,7 @@ GUI_SLIDERV::GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l
 	this->is_min_pressed = false;
 	this->is_max_pressed = false;
 
-	int tex_id = tex->getTexture(KTROBO_GUI_PNG);
+	int tex_id = tex->getTexture(KTROBO_GUI_PNG,1024);
 
 	this->tex_id_max = tex->getRenderTex(tex_id, 0xFFFFFFFF, zentai.left,zentai.top,
 		zentai.right - zentai.left, KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT, KTROBO_GUI_SLIDERVMAX_NORMAL_LEFT,
@@ -1637,7 +1651,7 @@ GUI_SLIDERV::~GUI_SLIDERV() {
 }
 
 	
-void GUI_SLIDERV::moveBox(int dx, int dy) {
+bool GUI_SLIDERV::moveBox(int dx, int dy) {
 	
 	MYRECT r;
 	r.left = zentai_box.left;
@@ -1645,13 +1659,14 @@ void GUI_SLIDERV::moveBox(int dx, int dy) {
 	r.top = zentai_box.top + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 	r.bottom = zentai_box.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 
-	GUI_PART::moveBoxSitei(&box, &r,dx,dy);
+	bool ans = GUI_PART::moveBoxSitei(&box, &r,dx,dy);
 	// 移動した後に位置からnowを計算する
 //		tex_id_now_y= zentai_box.bottom - 2*KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - (zentai_box.bottom - zentai_box.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
 
 	now = min + (min - max ) * (box.top + 2* KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT - zentai_box.bottom)/(float)(zentai_box.bottom - zentai_box.top - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3);
 
 	tex->setRenderTexPos(tex_id_now, box.left,box.top);
+	return ans;
 }
 bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 	
@@ -1681,7 +1696,7 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 
 		}
 
-		if (is_box_moved && getIsEffect()) {
+		if (is_box_moved && getIsEffect() && d->getMOUSESTATE()->mouse_l_button_pressed) {
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 			// lua ファイル実行
 		}
@@ -1719,7 +1734,7 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
 		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
 			this->setIsMove(true);
-		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+		} else if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN)/* d->getMOUSESTATE()->mouse_l_button_pressed*/) {
 			
 			unsigned int butu_max = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &max_box);
 			unsigned int butu_min = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &min_box);
@@ -1763,8 +1778,12 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 				is_min_pressed = false;
 				is_max_pressed = false;
 				is_box_moved =false;
-				return true;
+				return false;
 			}
+				setIsEffect(false);
+				is_min_pressed = false;
+				is_max_pressed = false;
+				is_box_moved =false;
 		}
 	}
 
@@ -1860,7 +1879,7 @@ GUI_SLIDERH::GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l
 	this->is_max_pressed = false;
 
 
-	int tex_id = tex->getTexture(KTROBO_GUI_PNG);
+	int tex_id = tex->getTexture(KTROBO_GUI_PNG,1024);
 
 	this->tex_id_max = tex->getRenderTex(tex_id, 0xFFFFFFFF,zentai.right- KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT,zentai.top,
 		KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT,zentai.bottom-zentai.top, KTROBO_GUI_SLIDERHMAX_NORMAL_LEFT,
@@ -1893,18 +1912,21 @@ GUI_SLIDERH::~GUI_SLIDERH() {
 
 }
 	
-void GUI_SLIDERH::moveBox(int dx, int dy) {
+bool GUI_SLIDERH::moveBox(int dx, int dy) {
 	MYRECT r;
 	r.left = zentai_box.left+KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 	r.right =zentai_box.right- KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 	r.top = zentai_box.top;
 	r.bottom = zentai_box.bottom;
 
-	GUI_PART::moveBoxSitei(&box, &r,dx,dy);
+	bool ans = GUI_PART::moveBoxSitei(&box, &r,dx,dy);
 	// 移動した後に位置からnowを計算する
 //			tex_id_now_x = zentai_box.left + KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT + (zentai_box.right - zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)* (now-  min)/m;
 	now = (box.left - zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT)*(max-min) / (float)(zentai_box.right- zentai_box.left - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT*3)+min;
 	tex->setRenderTexPos(tex_id_now, box.left,box.top);
+	return ans;
+
+
 
 }
 
@@ -1961,7 +1983,7 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 
 		}
 
-		if (is_box_moved && getIsEffect()) {
+		if (is_box_moved && getIsEffect() &&(d->getMOUSESTATE()->mouse_l_button_pressed)) {
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 			// lua ファイル実行
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
@@ -2000,7 +2022,7 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
 		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
 			this->setIsMove(true);
-		} else if ((butukari & BUTUKARIPOINT_IN) && d->getMOUSESTATE()->mouse_l_button_pressed) {
+		} else if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN)) {//l_button_pressed) {
 			
 			unsigned int butu_max = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &max_box);
 			unsigned int butu_min = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &min_box);
@@ -2030,10 +2052,10 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 
 		if ((d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_UP)) {
 			// ボタンが離されたので
+			
 			if (getIsEffect()) {
 			
 				setIsEffect(false);
-				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 
 				// focusに戻す
 				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_FOCUS_LEFT, KTROBO_GUI_SLIDERHMIN_FOCUS_TOP,
@@ -2042,11 +2064,21 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 					KTROBO_GUI_SLIDERHMAX_FOCUS_WIDTH,KTROBO_GUI_SLIDERHMAX_FOCUS_HEIGHT);
 				tex->setRenderTexTexPos(tex_id_now, KTROBO_GUI_SLIDERNOW_FOCUS_LEFT, KTROBO_GUI_SLIDERNOW_FOCUS_TOP,
 					KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH,KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT);
-				is_min_pressed = false;
-				is_max_pressed = false;
-				is_box_moved =false;
-				return true;
+
+
+
+				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+
+			
+			is_min_pressed = false;
+			is_max_pressed = false;
+			is_box_moved =false;
+				return false;
 			}
+			is_min_pressed = false;
+			is_max_pressed = false;
+			is_box_moved =false;
+			setIsEffect(false);
 		}
 	}
 

@@ -160,7 +160,8 @@ public:
 	static void SetDefaultMaxBox(MYRECT* re) {
 		max_default_box = *re;
 	}
-	void moveBoxSitei(MYRECT* rect, MYRECT* maxb, int dx, int dy) {
+	bool moveBoxSitei(MYRECT* rect, MYRECT* maxb, int dx, int dy) {
+		bool ans = false;
 		rect->left += dx;
 		rect->right += dx;
 		rect->top += dy;
@@ -169,25 +170,30 @@ public:
 		if (rect->left < maxb->left) {
 			rect->right += maxb->left-rect->left;
 			rect->left = maxb->left;
+			ans = true;
 		}
 		if (rect->top < maxb->top) {
 			rect->bottom += maxb->top-rect->top;
 			rect->top = maxb->top;
+			ans = true;
 		}
 		if (rect->right > maxb->right) {
 			rect->left += maxb->right - rect->right;
 			rect->right = maxb->right;
+			ans = true;
 		}
 		if (rect->bottom > maxb->bottom) {
 			rect->top += maxb->bottom - rect->bottom;
 			rect->bottom = maxb->bottom;
+			ans = true;
 		}
+		return ans;
 	}
-	virtual void moveBox(int dx, int dy);
+	virtual bool moveBox(int dx, int dy); // ‹«ŠEü‚É‚¢‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©
 	bool getIsRender() {return is_render;}
 	bool getIsEffect() {return is_effect;}
 	bool getIsMove() {return is_move;}
-	void setIsMove(bool t) {is_move = t;}
+	virtual void setIsMove(bool t) {is_move = t;}
 	virtual void setIsRender(bool t)=0;
 	virtual void setIsEffect(bool t)=0;
 	MYRECT* getBox() {return &box;}
@@ -211,7 +217,7 @@ public:
 	TO_LUA virtual void setRender(int gui_id, bool t)=0;
 
 	TO_LUA virtual void setPartToWindow(int window_gui_id, int part_gui_id)=0;
-	TO_LUA virtual void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
+	TO_LUA virtual int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
 	TO_LUA virtual void setTabIndex(int tab_gui_id, int index)=0;
 	TO_LUA virtual int getTabIndex(int tab_gui_id)=0;
 
@@ -240,7 +246,7 @@ public:
 		L = Ld;
 		texture = tex;
 	}
-	void moveBox(int dx, int dy);
+	bool moveBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t);
 	void setIsRender(bool t);
@@ -287,7 +293,7 @@ private:
 	char* getInputStr(unsigned char* keys);
 	bool is_render_and_update;
 
-	void moveBox(int dx, int dy);
+	bool moveBox(int dx, int dy);
 
 
 	static HWND hwnd;
@@ -345,13 +351,14 @@ public:
 	static void Init(Texture* te) {
 		tex = te;
 	}
-	void moveBox(int dx, int dy) {
-		GUI_PART::moveBox(dx, dy);
+	bool moveBox(int dx, int dy) {
+		bool t = GUI_PART::moveBox(dx, dy);
 		tex->setRenderTexPos(tex_id, box.left, box.top);
+		return t;
 	}
 
 	GUI_TEX(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height) : GUI_PART() {
-		int te = tex->getTexture(tex_name);
+		int te = tex->getTexture(tex_name,1024);
 		tex_id = tex->getRenderTex(te,0xFFFFFFFF,(int)x,(int)y,(int)width,(int)height,(int)tex_x,(int)tex_y,(int)tex_width,(int)tex_height);
 	}
 
@@ -391,17 +398,18 @@ public:
 	
 	bool handleMessage(int msg, void* data, DWORD time) {
 		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
-		if (!is_effect) {return true;}
+		if (!is_effect) {return false;}
 
 		if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
 			if (getIsMove()) {
 				// “®‚©‚·
-				moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
+				if (!moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy)) {
 				vector<GUI_PART*>::iterator it = bodys.begin();
 				while(it != bodys.end()) {
 					GUI_PART* p = *it;
 					p->moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 					it++;
+				}
 				}
 				return true;
 			}
@@ -497,8 +505,8 @@ public:
 	void setNowIndex(int i) {
 		if (i >=0 && i < tex_rect_boxs.size()) {
 			now_index = i;
-			setIsEffect(is_effect);
-			setIsRender(is_render);
+		//	setIsEffect(is_effect);
+		//	setIsRender(is_render);
 		}
 	}
 	int getNowIndex() {
@@ -522,24 +530,27 @@ public:
 		}
 		window_names.clear();
 	}
-	void setWindow(GUI_WINDOW* c, string name) {
-		c->setIsRender(false);
-		c->setIsEffect(false);
+	int setWindow(GUI_WINDOW* c, string name) {
+		//c->setIsRender(false);
+		//c->setIsEffect(false);
 		
 		child_windows.push_back(c);
 		
 		
 		// tex_rects‚ÉMYRECT int ‚ð“ü‚ê‚é
 		int tsize = tex_rects.size();
-		int tex_i = tex->getTexture(KTROBO_GUI_PNG);
+		int tex_i = tex->getTexture(KTROBO_GUI_PNG,4096);
 		int inde = tsize % 8;
-
-		int tex_id = tex->getRenderTex(tex_i,colors[inde], KTROBO_GUI_TAB_WIDTH* tsize, KTROBO_GUI_TAB_HEIGHT*2*tab_index, KTROBO_GUI_TAB_WIDTH,
+		int place_x_max  = tex->loader->g->getScreenWidth()/ KTROBO_GUI_TAB_WIDTH;
+		int place = tsize;
+		int place_x =  place % place_x_max;
+		int place_y = place / place_x_max;
+		int tex_id = tex->getRenderTex(tex_i,colors[inde], KTROBO_GUI_TAB_WIDTH* place_x, KTROBO_GUI_TAB_HEIGHT*2*tab_index+ place_y*KTROBO_GUI_TAB_HEIGHT, KTROBO_GUI_TAB_WIDTH,
 			KTROBO_GUI_TAB_HEIGHT, 0, 0, 1 , 1);
 		MYRECT r;
-		r.left = KTROBO_GUI_TAB_WIDTH*tsize;
+		r.left = place_x * KTROBO_GUI_TAB_WIDTH;
 		r.right = r.left + KTROBO_GUI_TAB_WIDTH;
-		r.top = KTROBO_GUI_TAB_HEIGHT*2*tab_index;
+		r.top = KTROBO_GUI_TAB_HEIGHT*2*tab_index+place_y*KTROBO_GUI_TAB_HEIGHT;
 		r.bottom = r.top + KTROBO_GUI_TAB_HEIGHT;
 		tex_rects.push_back(tex_id);
 		tex_rect_boxs.push_back(r);
@@ -549,6 +560,8 @@ public:
 		namet[strlen(name.c_str())] = '\0';
 		int t = tex->getRenderText(namet, r.left,r.top,r.bottom-r.top, r.right-r.left, r.bottom - r. top); 
 		window_names.push_back(t);
+		setNowIndex(window_names.size()-1);
+		return window_names.size()-1;
 		
 	}
 
@@ -582,17 +595,25 @@ public:
 			child_windows[i]->setIsEffect(false);
 			tex->setRenderTexColor(tex_rects[i], colors[i%8]);
 		}
+		if (wsize) {
 		child_windows[now_index]->setIsEffect(t);
 		tex->setRenderTexColor(tex_rects[now_index], f_colors[now_index%8]);
+		}
 	}
 	void setIsRender(bool t) {
 		int wsize = child_windows.size();
 		for (int i=0;i<wsize;i++) {
 			child_windows[i]->setIsRender(false);
-			tex->setRenderTextIsRender(window_names[i],false);
+			tex->setRenderTextIsRender(window_names[i],true);
 		}
+		if (wsize) {
 		child_windows[now_index]->setIsRender(t);
 		tex->setRenderTextIsRender(window_names[now_index], t);
+		int tsize = tex_rects.size();
+		for (int i=0;i<tsize;i++) {
+			tex->setRenderTexIsRender(tex_rects[i],t);
+		}
+		}
 	}
 	/*
 	void render(Graphics* g) {
@@ -635,7 +656,7 @@ public:
 	float getMin() {return min;}
 	float getNow() {return now;}
 
-	void moveBox(int dx, int dy);
+	bool moveBox(int dx, int dy);
 	void moveAllBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t) {is_effect = t;}
@@ -675,7 +696,7 @@ private:
 public:
 	GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l_str);
 	~GUI_SLIDERH();
-	void moveBox(int dx, int dy);
+	bool moveBox(int dx, int dy);
 	void moveAllBox(int dx, int dy);
 	float getMax() {return max;}
 	float getMin() {return min;}
@@ -741,7 +762,7 @@ public:
 	void setRender(int gui_id, bool t);
 
 	void setPartToWindow(int window_gui_id, int part_gui_id);
-	void setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name);
+	int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name);
 	int getTabIndex(int tab_gui_id);
 
 	char* getStrFromInput(int gui_id);

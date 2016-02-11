@@ -393,6 +393,7 @@ public:
 private:
 	RenderTex dummy_rendertex; // vectorのインデックスを崩さないためにこれをしようする
 	RenderBillBoard dummy_billboard;
+public:
 	MyTextureLoader* loader;
 private:
 	vector<RenderBillBoard*> bill_boards;

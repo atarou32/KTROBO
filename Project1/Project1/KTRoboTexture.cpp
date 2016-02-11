@@ -299,7 +299,12 @@ void Texture::setRenderTexIsRender(int render_tex_index, bool t) {
 		e->is_render = t;
 //		e->is_need_load = true;
 		p->setIsNeedLoad(true);
+	//	p->setIsIndexLoad(false);
+		if (t) {
 		p->setRenderTexId(e->id);
+		} else {
+			p->eraseRenderTexId(e->id);
+		}
 
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "setrendertexisrender");
@@ -314,7 +319,12 @@ void Texture::setRenderBillBoardIsRender(int bill_index, bool t) {
 		e->is_render = t;
 //		e->is_need_load = true;	
 		p->setIsNeedLoad(true);
+	//	p->setIsIndexLoad(false);
+		if (t) {
 		p->setBillBoardId(e->id);
+		} else {
+			p->eraseBillBoardId(e->id);
+		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "setbillboardisrender");
 }

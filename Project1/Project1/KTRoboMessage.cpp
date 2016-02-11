@@ -85,7 +85,7 @@ int Message::getMessageIndexsFromMsgId(int msg_idm, OUT_ int* get_msgs) {
 	CS::instance()->enter(CS_MESSAGE_CS, "enter");
 	for (int i=0;i<KTROBO_MESSAGE_MYMSTRUCT_SIZE && temp_count <TEMPHAIRETU_SIZE;i++) {
 	
-		if (!structs[i].is_use) {
+		if (structs[i].is_use) {
 			if (structs[i].msg_id == msg_idm) {
 				if (temp_count < TEMPHAIRETU_SIZE) {
 					get_msgs[temp_count] = i;
@@ -107,7 +107,7 @@ int Message::getMessageIndexsFromReceiverId(int receiver_id, OUT_ int* get_msgs)
 	CS::instance()->enter(CS_MESSAGE_CS, "enter");
 	for (int i=0;i<KTROBO_MESSAGE_MYMSTRUCT_SIZE;i++) {
 	
-		if (!structs[i].is_use) {
+		if (structs[i].is_use) {
 			if (structs[i].receiver_id == receiver_id) {
 				if (temp_count < TEMPHAIRETU_SIZE) {
 					get_msgs[temp_count] = i;
