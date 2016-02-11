@@ -34,24 +34,24 @@ MYTAB = MYTAB or {}
 if MYSLIDERS == nil then
   MYSLIDERS = {}
    offset = 150
-  MYSLIDERS[1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","0","0","resrc/script/AB_sliderX.lua")
-  MYSLIDERS[2] = gu:makeSliderH({500+offset,800+offset,130,150},"10","0","0","resrc/script/AB_sliderX.lua")
+  MYSLIDERS[1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","-3.14","0","resrc/script/AB_sliderX.lua")
+  MYSLIDERS[2] = gu:makeSliderH({500+offset,800+offset,130,150},"10","-10","0","resrc/script/AB_sliderX.lua")
   MYSLIDERS[3] = gu:makeButton(tostring(450+offset),"100","40","40", "resrc/script/AB_sliderXBut.lua", 30, "tog")
      TextFromLua:getIS(0,0):setDebugText("test12")
     -- roty
     -- transy
     -- is_rotybutton
     -- tab‚Ö‚Ì“o˜^
-  MYSLIDERS[4] = gu:makeSliderH({500+offset,800+offset,160,180},"3.14","0","0","resrc/script/AB_sliderY.lua")
-  MYSLIDERS[5] = gu:makeSliderH({500+offset,800+offset,190,210},"10","0","0","resrc/script/AB_sliderY.lua")
+  MYSLIDERS[4] = gu:makeSliderH({500+offset,800+offset,160,180},"3.14","-3.14","0","resrc/script/AB_sliderY.lua")
+  MYSLIDERS[5] = gu:makeSliderH({500+offset,800+offset,190,210},"10","-10","0","resrc/script/AB_sliderY.lua")
   MYSLIDERS[6] = gu:makeButton(tostring(offset+450),"160","40","40", "resrc/script/AB_sliderYBut.lua", 30, "tog")
         
     -- rotz
     -- transz
     -- is_rotzbutton
     -- tab‚Ö‚Ì“o˜^
-  MYSLIDERS[7] = gu:makeSliderH({500+offset,800+offset,220,240},"3.14","0","0","resrc/script/AB_sliderZ.lua")
-  MYSLIDERS[8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","0","0","resrc/script/AB_sliderZ.lua")
+  MYSLIDERS[7] = gu:makeSliderH({500+offset,800+offset,220,240},"3.14","-3.14","0","resrc/script/AB_sliderZ.lua")
+  MYSLIDERS[8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","-10","0","resrc/script/AB_sliderZ.lua")
   MYSLIDERS[9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
   MYSLIDERS[10] = gu:makeWindow(0,0,1000,800)
   for i=1,9 do
@@ -83,7 +83,7 @@ for i=1,msg_siz do
  -- TextFromLua:getIS(0,0):setDebugText("bone_tab=".. MYBONETAB)
   MYBONETAB[impl_id+1] = {}
   BIGWIN[impl_id+1] = gu:makeWindow(0,100,1000,100)
-  MYTAB[impl_id+1] = gu:makeTab(2, "test")
+  MYTAB[impl_id+1] = gu:makeTab(0, "test")
   TextFromLua:getIS(0,0):setDebugText("test1")
   for bon_in, bon_nam in ipairs(MYBONENAME[impl_id+1]) do
     TextFromLua:getIS(0,0):setDebugText("bon_in="..bon_in.."bon_nam"..bon_nam)

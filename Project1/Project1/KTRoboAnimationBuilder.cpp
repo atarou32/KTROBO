@@ -1640,7 +1640,7 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 						ii->now_kakera = new AnimationMeshKakera();
 						int bone_size = ii->hon_mesh->mesh->Bones.size();
 						for (int k = 0; k < bone_size; k++) {
-							MeshBone* bn = ii->hon_mesh->mesh->Bones[i];
+							MeshBone* bn = ii->hon_mesh->mesh->Bones[k];
 							ii->now_kakera->mesh_bone_name_index.insert(pair<string,int>(bn->bone_name,k));
 							ii->now_kakera->mesh_bone_isrotx.push_back(true);
 							ii->now_kakera->mesh_bone_isroty.push_back(true);
