@@ -106,9 +106,10 @@ char*  AnimationBuilder::getHonMeshBoneName(int impl_id, int bone_index) {
 }
 
 void  AnimationBuilder::setHonMeshBoneRotX(int impl_id, int bone_index, float rotx) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
@@ -123,12 +124,14 @@ void  AnimationBuilder::setHonMeshBoneRotX(int impl_id, int bone_index, float ro
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 void  AnimationBuilder::setHonMeshBoneRotY(int impl_id, int bone_index, float roty) {
+CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isroty[bone_index]) {
@@ -142,13 +145,15 @@ void  AnimationBuilder::setHonMeshBoneRotY(int impl_id, int bone_index, float ro
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 
 void  AnimationBuilder::setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz) {
+CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera&& impl->now_kakera->mesh_bone_isrotz[bone_index]) {
@@ -162,13 +167,15 @@ void  AnimationBuilder::setHonMeshBoneRotZ(int impl_id, int bone_index, float ro
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
 void  AnimationBuilder::toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index) {
+CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	// falseにすると回転が0になりIKでも回転しなくなる
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera) {
@@ -184,15 +191,17 @@ void  AnimationBuilder::toggleHonMeshBoneRotXIsChange(int impl_id, int bone_inde
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 	
 	
 	
 void  AnimationBuilder::toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index) {
+CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	// falseにすると回転が0になりIKでも回転しなくなる
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera) {
@@ -208,15 +217,16 @@ void  AnimationBuilder::toggleHonMeshBoneRotYIsChange(int impl_id, int bone_inde
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
-
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 
 void  AnimationBuilder::toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index) {
 	// falseにすると回転が0になりIKでも回転しなくなる
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera) {
@@ -232,14 +242,15 @@ void  AnimationBuilder::toggleHonMeshBoneRotZIsChange(int impl_id, int bone_inde
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 
 void  AnimationBuilder::setHonMeshBoneTransX(int impl_id, int bone_index, float dx) {
+CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
@@ -254,13 +265,14 @@ void  AnimationBuilder::setHonMeshBoneTransX(int impl_id, int bone_index, float 
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 void  AnimationBuilder::setHonMeshBoneTransY(int impl_id, int bone_index, float dy) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
@@ -275,12 +287,14 @@ void  AnimationBuilder::setHonMeshBoneTransY(int impl_id, int bone_index, float 
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 void  AnimationBuilder::setHonMeshBoneTransZ(int impl_id, int bone_index, float dz) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
@@ -295,13 +309,15 @@ void  AnimationBuilder::setHonMeshBoneTransZ(int impl_id, int bone_index, float 
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 
 void  AnimationBuilder::setAnimePoseFrame(int impl_id, int frame) {
 	// 現在のとっている姿勢を指定したアニメフレームとして保存する
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
 		AnimationBuilderImpl *impl = impls[impl_id];
 			if (impl->now_kakera) {
 			AnimationMeshKakera* new_kakera = new AnimationMeshKakera();
@@ -318,6 +334,7 @@ void  AnimationBuilder::setAnimePoseFrame(int impl_id, int frame) {
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return;
 	}	
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }	
 	
 	
@@ -1234,6 +1251,232 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 		bone_bills[i] = tex->getRenderBillBoard(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
 	}
  }
+
+ 
+float AnimationBuilder::getHonMeshBoneRotX(int impl_id, int bone_index) {
+	float rotx = 0;
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				rotx = impl->now_kakera->mesh_bone_rotx[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return rotx;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return rotx;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return rotx;
+
+}
+float AnimationBuilder::getHonMeshBoneRotY(int impl_id, int bone_index) {
+	float roty = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				roty = impl->now_kakera->mesh_bone_roty[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return roty;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return roty;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return roty;
+
+
+}
+float AnimationBuilder::getHonMeshBoneRotZ(int impl_id, int bone_index) {
+		float rotz = 0;
+			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				rotz = impl->now_kakera->mesh_bone_rotz[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return rotz;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return rotz;
+	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return rotz;
+
+
+}
+bool AnimationBuilder::getHonMeshBoneRotXIsChange(int impl_id, int bone_index) {
+	// falseにすると回転が0になりIKでも回転しなくなる
+	bool isrotx = false;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				isrotx = impl->now_kakera->mesh_bone_isrotx[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return isrotx;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return isrotx;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return isrotx;
+}	
+	
+	
+	
+bool AnimationBuilder::getHonMeshBoneRotYIsChange(int impl_id, int bone_index) {
+
+	bool isroty = false;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				isroty = impl->now_kakera->mesh_bone_isroty[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return isroty;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return isroty;
+	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return isroty;
+
+
+}
+
+bool AnimationBuilder::getHonMeshBoneRotZIsChange(int impl_id, int bone_index) {
+
+	bool isrotz = false;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				isrotz = impl->now_kakera->mesh_bone_isrotz[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return isrotz;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return isrotz;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return isrotz;
+
+
+}
+float AnimationBuilder::getHonMeshBoneTransX(int impl_id, int bone_index) {
+		float transx = 0;
+			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				transx = impl->now_kakera->mesh_bone_transx[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return transx;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return transx;
+	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return transx;
+
+
+}
+float AnimationBuilder::getHonMeshBoneTransY(int impl_id, int bone_index) {
+
+		float transy = 0;
+			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				transy = impl->now_kakera->mesh_bone_transy[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return transy;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return transy;
+	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return transy;
+
+
+
+}
+
+float AnimationBuilder::getHonMeshBoneTransZ(int impl_id, int bone_index) {
+	float transz = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera) {
+				// ロードされているので設定する
+				transz = impl->now_kakera->mesh_bone_transz[bone_index];
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return transz;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return transz;
+	}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return transz;
+
+
+
+}
 
 
  void AnimationBuilder::leave()

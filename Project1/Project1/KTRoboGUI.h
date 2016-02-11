@@ -10,6 +10,7 @@
 #include "stringconverter.h"
 #include "vector"
 #include "memory.h"
+#include "MyTokenAnalyzer.h"
 
 // GUI のデストラクトはテクスチャのデストラクトの前に行うこと
 using namespace std;
@@ -209,7 +210,7 @@ public:
 	TO_LUA virtual int makeText(float x, float y,float width, float height, char* textd)=0;
 	TO_LUA virtual int makeTex(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height)=0;
 	TO_LUA virtual int makeWindow(int x, int y, int width, int height)=0;
-	TO_LUA virtual int makeTab(int tab_index)=0;
+	TO_LUA virtual int makeTab(int tab_index, char* s)=0;
 	TO_LUA virtual int makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
 	TO_LUA virtual int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
 
@@ -225,6 +226,7 @@ public:
 	TO_LUA virtual float getNowFromSlider(int gui_id)=0;
 	TO_LUA virtual float getMaxFromSlider(int gui_id)=0;
 	TO_LUA virtual float getMinFromSlider(int gui_id)=0;
+	TO_LUA virtual void setNOWMAXMINToSlider(int gui_id, float max, float min, float now)=0;
 
 	TO_LUA virtual void setRootWindowToInputMessageDispatcher(int gui_window_id)=0; // 一番上につっこむ
 	TO_LUA virtual void unregisterWindowToInputMessageDispatcher(int gui_window_id)=0;
@@ -494,7 +496,7 @@ private:
 	vector<MYRECT> tex_rect_boxs;
 
 	int now_index; // 現在注目されているウィンドウのインデックス
-
+	char l_str[128];
 	static Texture* tex;
 	static unsigned int colors[8];
 
@@ -505,17 +507,21 @@ public:
 	void setNowIndex(int i) {
 		if (i >=0 && i < tex_rect_boxs.size()) {
 			now_index = i;
-		//	setIsEffect(is_effect);
-		//	setIsRender(is_render);
+			/*setIsEffect(true);*/setIsEffect(is_effect);
+			/*setIsRender(true);*/setIsRender(is_render);
 		}
 	}
 	int getNowIndex() {
 		return now_index;
 	}
 
-	GUI_TAB(int tab_index) : GUI_PART() {
+	GUI_TAB(int tab_index, char* l_s) : GUI_PART() {
 		this->tab_index = tab_index;
+		memset(l_str,0,128);
+		hmystrcpy(l_str,128,0,l_s);
 		now_index = 0;
+		is_effect = true;
+		is_render =true;
 	}
 	~GUI_TAB() {
 		vector<int>::iterator it = window_names.begin();
@@ -539,7 +545,7 @@ public:
 		
 		// tex_rectsにMYRECT int を入れる
 		int tsize = tex_rects.size();
-		int tex_i = tex->getTexture(KTROBO_GUI_PNG,4096);
+		int tex_i = tex->getTexture("resrc/sample/none.png",4096);
 		int inde = tsize % 8;
 		int place_x_max  = tex->loader->g->getScreenWidth()/ KTROBO_GUI_TAB_WIDTH;
 		int place = tsize;
@@ -547,6 +553,7 @@ public:
 		int place_y = place / place_x_max;
 		int tex_id = tex->getRenderTex(tex_i,colors[inde], KTROBO_GUI_TAB_WIDTH* place_x, KTROBO_GUI_TAB_HEIGHT*2*tab_index+ place_y*KTROBO_GUI_TAB_HEIGHT, KTROBO_GUI_TAB_WIDTH,
 			KTROBO_GUI_TAB_HEIGHT, 0, 0, 1 , 1);
+		tex->setRenderTexIsRender(tex_id,true);
 		MYRECT r;
 		r.left = place_x * KTROBO_GUI_TAB_WIDTH;
 		r.right = r.left + KTROBO_GUI_TAB_WIDTH;
@@ -655,7 +662,7 @@ public:
 	float getMax() {return max;}
 	float getMin() {return min;}
 	float getNow() {return now;}
-
+	void setMAXMINNOW(float max, float min, float now);
 	bool moveBox(int dx, int dy);
 	void moveAllBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time);
@@ -701,6 +708,7 @@ public:
 	float getMax() {return max;}
 	float getMin() {return min;}
 	float getNow() {return now;}
+	void setMAXMINNOW(float max, float min, float now);
 	bool handleMessage(int msg, void* data, DWORD time);
 	void setIsEffect(bool t) {
 		is_effect = t;
@@ -754,7 +762,7 @@ public:
 	int makeText(float x, float y,float width, float height, char* textd);
 	int makeTex(char* tex_name, int x, int y, int width, int height, int tex_x, int tex_y, int tex_width, int tex_height);
 	int makeWindow(int x, int y, int width, int height);
-	int makeTab(int tab_index);
+	int makeTab(int tab_index, char* s);
 	int makeSliderV(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str);
 	int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str);
 
@@ -769,6 +777,7 @@ public:
 	float getNowFromSlider(int gui_id);
 	float getMaxFromSlider(int gui_id);
 	float getMinFromSlider(int gui_id);
+	void setNOWMAXMINToSlider(int gui_id, float max, float min, float now);
 	void setTabIndex(int tab_gui_id, int index);
 	void setRootWindowToInputMessageDispatcher(int gui_window_id);
 	void unregisterWindowToInputMessageDispatcher(int gui_window_id);

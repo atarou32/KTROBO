@@ -31,7 +31,39 @@ mes:getMsgBody(msg_siz,msgsi, msg_ids, sender_ids, receiver_ids, msgs, fmsgs)
 MYBONENAME = MYBONENAME or {}
 MYBONETAB = MYBONETAB or {}
 MYTAB = MYTAB or {}
+if MYSLIDERS == nil then
+  MYSLIDERS = {}
+   offset = 150
+  MYSLIDERS[1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","0","0","resrc/script/AB_sliderX.lua")
+  MYSLIDERS[2] = gu:makeSliderH({500+offset,800+offset,130,150},"10","0","0","resrc/script/AB_sliderX.lua")
+  MYSLIDERS[3] = gu:makeButton(tostring(450+offset),"100","40","40", "resrc/script/AB_sliderXBut.lua", 30, "tog")
+     TextFromLua:getIS(0,0):setDebugText("test12")
+    -- roty
+    -- transy
+    -- is_rotybutton
+    -- tab‚Ö‚Ì“o˜^
+  MYSLIDERS[4] = gu:makeSliderH({500+offset,800+offset,160,180},"3.14","0","0","resrc/script/AB_sliderY.lua")
+  MYSLIDERS[5] = gu:makeSliderH({500+offset,800+offset,190,210},"10","0","0","resrc/script/AB_sliderY.lua")
+  MYSLIDERS[6] = gu:makeButton(tostring(offset+450),"160","40","40", "resrc/script/AB_sliderYBut.lua", 30, "tog")
+        
+    -- rotz
+    -- transz
+    -- is_rotzbutton
+    -- tab‚Ö‚Ì“o˜^
+  MYSLIDERS[7] = gu:makeSliderH({500+offset,800+offset,220,240},"3.14","0","0","resrc/script/AB_sliderZ.lua")
+  MYSLIDERS[8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","0","0","resrc/script/AB_sliderZ.lua")
+  MYSLIDERS[9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
+  MYSLIDERS[10] = gu:makeWindow(0,0,1000,800)
+  for i=1,9 do
+    --   gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
+    --  gu:setRender(MYBONETAB[impl_id+1][bon_in][i],true)
+    gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[i])
+  end
+  gu:setEffect(MYSLIDERS[10], true)
+  gu:setRender(MYSLIDERS[10], true)
+  gu:setRootWindowToInputMessageDispatcher(MYSLIDERS[10])
 
+end
 gu = GUI:getIS(0,0)
 BIGWIN = BIGWIN or {}
 TextFromLua:getIS(0,0):setDebugText(""..msg_siz)
@@ -51,7 +83,7 @@ for i=1,msg_siz do
  -- TextFromLua:getIS(0,0):setDebugText("bone_tab=".. MYBONETAB)
   MYBONETAB[impl_id+1] = {}
   BIGWIN[impl_id+1] = gu:makeWindow(0,100,1000,100)
-  MYTAB[impl_id+1] = gu:makeTab(2)
+  MYTAB[impl_id+1] = gu:makeTab(2, "test")
   TextFromLua:getIS(0,0):setDebugText("test1")
   for bon_in, bon_nam in ipairs(MYBONENAME[impl_id+1]) do
     TextFromLua:getIS(0,0):setDebugText("bon_in="..bon_in.."bon_nam"..bon_nam)
@@ -67,30 +99,30 @@ for i=1,msg_siz do
     -- TO_LUA virtual int makeSliderH(YARITORI MYRECT* zentai, float max, float min, float now, char* l_str)=0;
     offset = 150
     MYBONETAB[impl_id+1][bon_in] = {}
-    MYBONETAB[impl_id+1][bon_in][1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","0","0","resrc/script/AB_sliderX.lua")
-    MYBONETAB[impl_id+1][bon_in][2] = gu:makeSliderH({500+offset,800+offset,130,150},"10","0","0","resrc/script/AB_sliderX.lua")
-    MYBONETAB[impl_id+1][bon_in][3] = gu:makeButton(tostring(450+offset),"100","40","40", "resrc/script/AB_sliderXBut.lua", 30, "tog")
+   -- MYBONETAB[impl_id+1][bon_in][1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","0","0","resrc/script/AB_sliderX.lua")
+   -- MYBONETAB[impl_id+1][bon_in][2] = gu:makeSliderH({500+offset,800+offset,130,150},"10","0","0","resrc/script/AB_sliderX.lua")
+   -- MYBONETAB[impl_id+1][bon_in][3] = gu:makeButton(tostring(450+offset),"100","40","40", "resrc/script/AB_sliderXBut.lua", 30, "tog")
      TextFromLua:getIS(0,0):setDebugText("test12")
     -- roty
     -- transy
     -- is_rotybutton
     -- tab‚Ö‚Ì“o˜^
-    MYBONETAB[impl_id+1][bon_in][4] = gu:makeSliderH({500+offset,800+offset,160,180},"3.14","0","0","resrc/script/AB_sliderY.lua")
-    MYBONETAB[impl_id+1][bon_in][5] = gu:makeSliderH({500+offset,800+offset,190,210},"10","0","0","resrc/script/AB_sliderY.lua")
-    MYBONETAB[impl_id+1][bon_in][6] = gu:makeButton(tostring(offset+450),"160","40","40", "resrc/script/AB_sliderYBut.lua", 30, "tog")
+   -- MYBONETAB[impl_id+1][bon_in][4] = gu:makeSliderH({500+offset,800+offset,160,180},"3.14","0","0","resrc/script/AB_sliderY.lua")
+   -- MYBONETAB[impl_id+1][bon_in][5] = gu:makeSliderH({500+offset,800+offset,190,210},"10","0","0","resrc/script/AB_sliderY.lua")
+   -- MYBONETAB[impl_id+1][bon_in][6] = gu:makeButton(tostring(offset+450),"160","40","40", "resrc/script/AB_sliderYBut.lua", 30, "tog")
         
     -- rotz
     -- transz
     -- is_rotzbutton
     -- tab‚Ö‚Ì“o˜^
-    MYBONETAB[impl_id+1][bon_in][7] = gu:makeSliderH({500+offset,800+offset,220,240},"3.14","0","0","resrc/script/AB_sliderZ.lua")
-    MYBONETAB[impl_id+1][bon_in][8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","0","0","resrc/script/AB_sliderZ.lua")
-    MYBONETAB[impl_id+1][bon_in][9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
+   -- MYBONETAB[impl_id+1][bon_in][7] = gu:makeSliderH({500+offset,800+offset,220,240},"3.14","0","0","resrc/script/AB_sliderZ.lua")
+   -- MYBONETAB[impl_id+1][bon_in][8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","0","0","resrc/script/AB_sliderZ.lua")
+   -- MYBONETAB[impl_id+1][bon_in][9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
     TextFromLua:getIS(0,0):setDebugText("test13")
     win  = gu:makeWindow(0,0,1000,800)--450, 100, 340, 40)
     for i=1,9 do
-      gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
-      gu:setRender(MYBONETAB[impl_id+1][bon_in][i],true)
+   --   gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
+    --  gu:setRender(MYBONETAB[impl_id+1][bon_in][i],true)
       
     end
     gu:setRender(win,true)

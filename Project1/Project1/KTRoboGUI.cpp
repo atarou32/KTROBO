@@ -136,8 +136,8 @@ int GUI::makeWindow(int x, int y, int width, int height) {
 	return size;
 }
 
-int GUI::makeTab(int tab_index) {
-	GUI_TAB* t = new GUI_TAB(tab_index);
+int GUI::makeTab(int tab_index,char *s) {
+	GUI_TAB* t = new GUI_TAB(tab_index,s );
 	int size = parts.size();
 	int bsize = tabs.size();
 	parts.push_back(t);
@@ -184,6 +184,49 @@ void GUI::setRender(int gui_id, bool t) {
 		parts[gui_id]->setIsRender(t);
 	}
 	CS::instance()->leave(CS_MESSAGE_CS, "seteffect");
+}
+void GUI::setNOWMAXMINToSlider(int gui_id, float max, float min, float now) {
+
+	
+
+	CS::instance()->enter(CS_MESSAGE_CS, "getmin");
+	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
+
+		GUI_SLIDERH* s = sliderhs[p_sliderhs_index[gui_id]];
+		s->setMAXMINNOW(max, min, now);
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return;
+	}
+	if (p_slidervs_index.find(gui_id) != p_slidervs_index.end()) {
+
+		GUI_SLIDERV* s = slidervs[p_slidervs_index[gui_id]];
+		s->setMAXMINNOW(max, min, now);
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return;
+	}
+
+
+	CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+}
+
+
+void GUI_SLIDERH::setMAXMINNOW(float max, float min, float now) {
+
+	this->max = max;
+	this->min = min;
+	this->now = now;
+	setMINMAXNOWFROMZENTAI();
+
+}
+
+
+void GUI_SLIDERV::setMAXMINNOW(float max, float min, float now) {
+
+	this->max = max;
+	this->min = min;
+	this->now = now;
+	setMINMAXNOWFROMZENTAI();
+
 }
 
 void GUI::setPartToWindow(int window_gui_id, int part_gui_id) {
@@ -1548,7 +1591,8 @@ void GUI_TEXT::render(Graphics* g) {
 
 bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
-
+	//is_effect = true;
+	//is_render =true;
 	if ((msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) && getIsEffect()) {
 		unsigned int butukari;
 		int size = tex_rect_boxs.size();
@@ -1558,8 +1602,10 @@ bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 			if (butukari & BUTUKARIPOINT_IN) {
 				if (d->getMOUSESTATE()->mouse_l_button_pressed) {
 					now_index = i;
-					setIsEffect(is_effect);
-					setIsRender(is_render);
+					setIsEffect(true);//is_effect);
+					setIsRender(true);//is_render);
+					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, this->l_str);
+
 					return true;
 				}
 			}

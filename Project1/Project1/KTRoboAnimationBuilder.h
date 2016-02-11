@@ -23,6 +23,28 @@ public:
 	TO_LUA virtual void setHonMeshBoneTransX(int impl_id, int bone_index, float dx)=0;
 	TO_LUA virtual void setHonMeshBoneTransY(int impl_id, int bone_index, float dy)=0;
 	TO_LUA virtual void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz)=0;
+
+
+	TO_LUA virtual float getHonMeshBoneRotX(int impl_id, int bone_index)=0;
+	TO_LUA virtual float getHonMeshBoneRotY(int impl_id, int bone_index)=0;
+	TO_LUA virtual float getHonMeshBoneRotZ(int impl_id, int bone_index)=0;
+	TO_LUA virtual bool getHonMeshBoneRotXIsChange(int impl_id, int bone_index)=0; // falseにすると回転が0になりIKでも回転しなくなる
+	TO_LUA virtual bool getHonMeshBoneRotYIsChange(int impl_id, int bone_index)=0;
+	TO_LUA virtual bool getHonMeshBoneRotZIsChange(int impl_id, int bone_index)=0;
+	TO_LUA virtual float getHonMeshBoneTransX(int impl_id, int bone_index)=0;
+	TO_LUA virtual float getHonMeshBoneTransY(int impl_id, int bone_index)=0;
+	TO_LUA virtual float getHonMeshBoneTransZ(int impl_id, int bone_index)=0;
+
+
+
+
+
+
+
+
+
+
+
 	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, bool is_loop)=0;
 	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int pose_id,  int frame, float time)=0;
@@ -374,6 +396,18 @@ public:
 	void setHonMeshBoneTransX(int impl_id, int bone_index, float dx);
 	void setHonMeshBoneTransY(int impl_id, int bone_index, float dy);
 	void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz);
+
+
+	float getHonMeshBoneRotX(int impl_id, int bone_index);
+	float getHonMeshBoneRotY(int impl_id, int bone_index);
+	float getHonMeshBoneRotZ(int impl_id, int bone_index);
+	bool getHonMeshBoneRotXIsChange(int impl_id, int bone_index); // falseにすると回転が0になりIKでも回転しなくなる
+	bool getHonMeshBoneRotYIsChange(int impl_id, int bone_index);
+	bool getHonMeshBoneRotZIsChange(int impl_id, int bone_index);
+	float getHonMeshBoneTransX(int impl_id, int bone_index);
+	float getHonMeshBoneTransY(int impl_id, int bone_index);
+	float getHonMeshBoneTransZ(int impl_id, int bone_index);
+
 	void setAnimePoseFrame(int impl_id, int frame);// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
 	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);

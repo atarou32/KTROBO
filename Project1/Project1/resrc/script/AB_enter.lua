@@ -35,7 +35,7 @@ gu:setRender(win, true)
 gu:setRootWindowToInputMessageDispatcher(win)
 
 -- impl—p‚Ìtab‚ð“o˜^‚·‚é
-MYIMPLTAB = gu:makeTab(1)
+MYIMPLTAB = gu:makeTab(1, "test")
 win = gu:makeWindow(0,0,1000,800)
 gu:setPartToWindow(win, MYIMPLTAB)
 gu:setEffect(MYIMPLTAB,true)
