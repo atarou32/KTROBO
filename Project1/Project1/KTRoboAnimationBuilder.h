@@ -45,7 +45,8 @@ public:
 
 
 
-	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
+	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;
+	TO_LUA virtual void saveAnimePoseFrame(int impl_id, int saveframe)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, bool is_loop)=0;
 	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int pose_id,  int frame, float time)=0;
 	TO_LUA virtual void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time)=0;
@@ -59,6 +60,7 @@ public:
 	TO_LUA virtual void setNowIMPLIndex(int index)=0;
 	TO_LUA virtual int getNowIMPLIndex()=0;
 	TO_LUA virtual int getNowBoneIndex()=0;
+	TO_LUA virtual void setNowBoneIndex(int index)=0;
 };
 
 class AnimationMeshKakera {
@@ -206,6 +208,8 @@ public:
 
 	vector<AnimationMesh*> animes;
 	AnimationMeshKakera* now_kakera;
+
+	void setNowKakeraFrame(int frame);
 	AnimationBuilderMesh* getOyaMesh(char* oya_filepath) {
 		if (hon_mesh) {
 			if (hon_mesh->isOyaFile(oya_filepath)) {
@@ -408,10 +412,11 @@ public:
 	float getHonMeshBoneTransY(int impl_id, int bone_index);
 	float getHonMeshBoneTransZ(int impl_id, int bone_index);
 
-	void setAnimePoseFrame(int impl_id, int frame);// 現在のとっている姿勢を指定したアニメフレームとして保存する
+	void setAnimePoseFrame(int impl_id, int frame);
 	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
 	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);
 	void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time);
+	void saveAnimePoseFrame(int impl_id, int saveframe);// 現在のとっている姿勢を指定したアニメフレームとして保存する
 
 	bool saveNowToFile(char* filename);
 	bool loadFromFile(char* filename);

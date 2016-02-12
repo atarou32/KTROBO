@@ -311,9 +311,43 @@ void  AnimationBuilder::setHonMeshBoneTransZ(int impl_id, int bone_index, float 
 	}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
-
-
+void AnimationBuilderImpl::setNowKakeraFrame(int frame) {
+	
+	int bsize = now_kakera->mesh_bone_name_index.size();
+	for (int b=0;b<bsize;b++) {
+		now_kakera->mesh_bone_default_anime_frame[b] = frame;
+//		now_kakera->mesh_bone_isrotx[b] = true; isrotに関しては変えない
+//		now_kakera->mesh_bone_isroty[b] = true;
+//		now_kakera->mesh_bone_isrotz[b] = true;
+		now_kakera->mesh_bone_rotx[b] = 0;
+		now_kakera->mesh_bone_roty[b] = 0;
+		now_kakera->mesh_bone_rotz[b] = 0;
+		now_kakera->mesh_bone_transx[b] = 0;
+		now_kakera->mesh_bone_transy[b] = 0;
+		now_kakera->mesh_bone_transz[b] = 0;
+		this->setIsAnimate(false);
+	}
+}
 void  AnimationBuilder::setAnimePoseFrame(int impl_id, int frame) {
+	// 姿勢を本来のポーズに戻す
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+			if (impl->now_kakera) {
+				impl->setNowKakeraFrame(frame);
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return;
+			}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}	
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}	
+
+
+void  AnimationBuilder::saveAnimePoseFrame(int impl_id, int frame) {
 	// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {		

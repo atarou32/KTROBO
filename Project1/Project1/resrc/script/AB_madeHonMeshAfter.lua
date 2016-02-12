@@ -54,11 +54,14 @@ if MYSLIDERS == nil then
   MYSLIDERS[8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","-10","0","resrc/script/AB_sliderZ.lua")
   MYSLIDERS[9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
   MYSLIDERS[10] = gu:makeWindow(0,0,1000,800)
+  MYSLIDERS[11] = gu:makeSliderH({500+offset,800+offset,450,470},"511","1","1","resrc/script/AB_setSisei.lua") --gu:makeButton(tostring(offset+450), "350", "35","35", "resrc/script/AB_clearSisei.lua",30,"cl")
   for i=1,9 do
     --   gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
     --  gu:setRender(MYBONETAB[impl_id+1][bon_in][i],true)
     gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[i])
   end
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[11])
+  
   gu:setEffect(MYSLIDERS[10], true)
   gu:setRender(MYSLIDERS[10], true)
   gu:setRootWindowToInputMessageDispatcher(MYSLIDERS[10])
@@ -83,7 +86,7 @@ for i=1,msg_siz do
  -- TextFromLua:getIS(0,0):setDebugText("bone_tab=".. MYBONETAB)
   MYBONETAB[impl_id+1] = {}
   BIGWIN[impl_id+1] = gu:makeWindow(0,100,1000,100)
-  MYTAB[impl_id+1] = gu:makeTab(0, "test")
+  MYTAB[impl_id+1] = gu:makeTab(0, "resrc/script/AB_tabbonepushed.lua")
   TextFromLua:getIS(0,0):setDebugText("test1")
   for bon_in, bon_nam in ipairs(MYBONENAME[impl_id+1]) do
     TextFromLua:getIS(0,0):setDebugText("bon_in="..bon_in.."bon_nam"..bon_nam)

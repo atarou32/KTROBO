@@ -1,5 +1,4 @@
 
-
 dofile("resrc/script/nanchatte.lua")
 dofile("tolua_glue/tolua.lua")
 
@@ -7,9 +6,9 @@ ab = AnimationBuilder:getIS(0,0)
 gu = GUI:getIS(0,0)
 
 impl_id = ab:getNowIMPLIndex()
-bone_id = ab:getNowBoneIndex()
+bone_id = gu:getTabIndex(MYTAB[impl_id+1])
+ab:setNowBoneIndex(bone_id)
 
-gu:setTabIndex(MYTAB[impl_id+1],bone_id)
 -- sliderÇÃílÇê›íËÇ∑ÇÈ
 rotx = ab:getHonMeshBoneRotX(impl_id, bone_id)
 roty = ab:getHonMeshBoneRotY(impl_id, bone_id)
@@ -26,4 +25,3 @@ gu:setNOWMAXMINToSlider(MYSLIDERS[5], "10", "-10", transy)
 
 gu:setNOWMAXMINToSlider(MYSLIDERS[7], "3.14","-3.14", rotz)
 gu:setNOWMAXMINToSlider(MYSLIDERS[8], "10", "-10", transz)
-
