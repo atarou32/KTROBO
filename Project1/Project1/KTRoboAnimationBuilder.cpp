@@ -4,6 +4,7 @@
 #include "KTRoboLuaCollection.h"
 #include "KTRoboInput.h"
 #include "tolua_glue/tolua_glue.h"
+#include "MyGyouretuKeisan.h"
 
 using namespace KTROBO;
 
@@ -311,6 +312,27 @@ void  AnimationBuilder::setHonMeshBoneTransZ(int impl_id, int bone_index, float 
 	}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
+
+void AnimationBuilderImpl::setNowKakeraKakeraFrame(int frame) {
+	
+	// 一番近いフレームかけらを見つけてくる
+	int now_index = 0;
+	int now_frame = 0;
+	int bsize = kakeras.size();
+	for (int i=0;i<bsize;i++) {
+		int mframe = kakeras[i]->frame;
+		if (mframe <= frame && now_frame < mframe) {
+			now_frame = mframe;
+			now_index = i;
+		}
+	}
+
+	if (bsize) {
+		now_kakera->copy(kakeras[now_index]);
+	}
+	this->setIsAnimate(false);
+}
+
 void AnimationBuilderImpl::setNowKakeraFrame(int frame) {
 	
 	int bsize = now_kakera->mesh_bone_name_index.size();
@@ -325,9 +347,29 @@ void AnimationBuilderImpl::setNowKakeraFrame(int frame) {
 		now_kakera->mesh_bone_transx[b] = 0;
 		now_kakera->mesh_bone_transy[b] = 0;
 		now_kakera->mesh_bone_transz[b] = 0;
+		now_kakera->frame = frame;
 		this->setIsAnimate(false);
 	}
 }
+
+void  AnimationBuilder::setAnimePoseFrameKakera(int impl_id, int frame) {
+	// 姿勢を本来のポーズに戻す
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+			if (impl->now_kakera) {
+				impl->setNowKakeraKakeraFrame(frame);
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return;
+			}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}	
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}	
+
 void  AnimationBuilder::setAnimePoseFrame(int impl_id, int frame) {
 	// 姿勢を本来のポーズに戻す
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -354,10 +396,21 @@ void  AnimationBuilder::saveAnimePoseFrame(int impl_id, int frame) {
 	
 		AnimationBuilderImpl *impl = impls[impl_id];
 			if (impl->now_kakera) {
+
+            // すでに同じフレームのかけらがあるかどうか調べる
+				int size = impl->kakeras.size();
+				for (int i=0;i<size;i++) {
+					if (impl->kakeras[i]->frame == frame) {
+						impl->kakeras[i]->copy(impl->now_kakera);
+						CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+						return;
+					}
+				}
+
 			AnimationMeshKakera* new_kakera = new AnimationMeshKakera();
 			new_kakera->copy(impl->now_kakera);
 			new_kakera->frame = frame;
-			int size = impl->kakeras.size();
+		
 			impl->kakeras.push_back(new_kakera);
 			impl->frame_to_kakera_index.insert(pair<int,int>(frame,size));
 
@@ -1120,14 +1173,200 @@ void  AnimationBuilder::deleteAll() {
 	CS::instance()->leave(CS_RENDERDATA_CS, "renderdata");
 }
 
+float AnimationBuilder::getHonRotX(char* bone_name, float rotx) {
+
+	if (strcmp(bone_name, "migiArmBone")==0) {
+		if (rotx > 1.57) {
+			rotx = 1.57;
+		}
+		if (rotx < -0.78) {
+			rotx = -0.78;
+		}
+		
+	}
+
+	if (strcmp(bone_name, "migiSakotuBone")==0) {
+		if (rotx > 1.57) {
+			rotx = 1.57;
+		}
+		if (rotx < -1.57) {
+			rotx = -1.57;
+		}
+		rotx = 0;
+	}
+	if (strcmp(bone_name,"migiArmSitaBone")==0) {
+		if (rotx > 1.57) {
+			rotx = 1.57;
+		}
+		if (rotx < -1.57) {
+			rotx = -1.57;
+		}
+		rotx = 0;
+	}
 
 
+
+	return rotx;
+}
+
+float AnimationBuilder::getHonRotY(char* bone_name, float roty) {
+
+	if (strcmp(bone_name, "migiArmBone")==0) {
+		if (roty > 1.57) {
+			roty = 1.57;
+		}
+		if (roty < -1.57) {
+			roty = -1.57;
+		}
+		roty = 0;
+	}
+
+	if (strcmp(bone_name, "migiSakotuBone")==0) {
+		if (roty > 1.57) {
+			roty = 1.57;
+		}
+		if (roty < -1.57) {
+			roty = -1.57;
+		}
+		roty = 0;
+	}
+
+	if (strcmp(bone_name,"migiArmSitaBone")==0) {
+		if (roty > 1.57) {
+			roty = 1.57;
+		}
+		if (roty < -1.57) {
+			roty = -1.57;
+		}
+		roty = 0;
+	}
+
+
+
+
+
+
+	return roty;
+
+
+}
+float AnimationBuilder::getHonRotZ(char* bone_name, float rotz) {
+		if (strcmp(bone_name, "migiArmBone")==0) {
+		if (rotz > 1.57) {
+			rotz = 1.57;
+		}
+		if (rotz < -0.78) {
+			rotz = -0.78;
+		}
+	}
+
+	if (strcmp(bone_name, "migiSakotuBone")==0) {
+		if (rotz > 1.57) {
+			rotz = 1.57;
+		}
+		if (rotz < -1.57) {
+			rotz = -1.57;
+		}
+		rotz = 0;
+	}
+
+	if (strcmp(bone_name,"migiArmSitaBone")==0) {
+		if (rotz > 1.57) {
+			rotz = 1.57;
+		}
+		if (rotz < 0) {
+			rotz = 0;
+		}
+
+	}
+
+
+
+	return rotz;
+}
+
+void AnimationBuilder::hetareIK() {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size()) {
+		
+		static int test = 0;
+	
+		AnimationBuilderImpl *impl = impls[now_index];
+	//	if (!test) {
+//			MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0)->getRenderBillBoard(
+		impl->now_kakera->setOffsetMatrixToMesh(impl->hon_mesh->mesh);
+		MyIKMODOKI ik(impl->hon_mesh->mesh, &MYVECTOR3(0,-10,11),"doBone", "migiArmTekubiBone");
+		int bsize = impl->hon_mesh->mesh->Bones.size();
+		MeshBone* saki = impl->hon_mesh->mesh->Bones[impl->hon_mesh->mesh->BoneIndexes["migiArmTekubiBone"]];
+		MeshBone* moto = impl->hon_mesh->mesh->Bones[impl->hon_mesh->mesh->BoneIndexes["migiSakotuBone"]];
+		MeshBone* sakip = saki->parent_bone;
+		MeshBone* bsakip = saki->parent_bone;
+		MYMATRIX mat;
+		MyMatrixMultiply(mat, saki->combined_matrix, saki->matrix_local);
+		MYVECTOR3 vec(0,0,0);
+		MyVec3TransformCoord(vec,vec,mat);
+		vec.float3.z -= 10.0f;
+		vec = MYVECTOR3(0,-15,11);
+		ik.setMokuhyou(&vec);
+		while (sakip && strcmp(bsakip->bone_name , moto->bone_name )!=0) {
+
+			if (strcmp(bsakip->bone_name, "migiSakotuBone")==0) {
+			} else if(strcmp(bsakip->bone_name, "migiArmBone")==0) {
+				ik.setXFreeBone(sakip->bone_name);
+			ik.setZFreeBone(sakip->bone_name);
+
+			} else if(strcmp(bsakip->bone_name, "migiArmSitaBone")==0) {
+
+				ik.setZFreeBone(sakip->bone_name);
+			}else {
+			ik.setXFreeBone(sakip->bone_name);
+			ik.setYFreeBone(sakip->bone_name);
+			ik.setZFreeBone(sakip->bone_name);
+			}
+			bsakip = sakip;
+			sakip = sakip->parent_bone;
+		}
+
+		for (int s=0;s<6;s++) {
+			impl->now_kakera->setOffsetMatrixToMesh(impl->hon_mesh->mesh);
+			ik.updateStep();
+			for (int i=0;i<bsize;i++) {
+
+				MeshBone* bone = impl->hon_mesh->mesh->Bones[i];
+				float drotx = ik.getdthetaXBone(bone->bone_name);
+				float droty = ik.getdthetaYBone(bone->bone_name);
+				float drotz = ik.getdthetaZBone(bone->bone_name);
+				if (abs(drotx) > 0.0001f) {
+				float nrotx = this->getHonMeshBoneRotX(now_index,i);
+				float hon_rotx = this->getHonRotX(bone->bone_name,nrotx+drotx);
+				this->setHonMeshBoneRotX(now_index, i, hon_rotx);
+				}
+				if (abs(droty) > 0.0001f) {
+				float nroty = this->getHonMeshBoneRotY(now_index,i);
+				float hon_roty = this->getHonRotY(bone->bone_name,nroty+droty);
+				this->setHonMeshBoneRotY(now_index, i, hon_roty);
+				}
+				if (abs(drotz) > 0.0001f) {
+				float nrotz = this->getHonMeshBoneRotZ(now_index,i);
+				float hon_rotz = this->getHonRotZ(bone->bone_name, nrotz+drotz);
+				this->setHonMeshBoneRotZ(now_index, i, hon_rotz);
+				}
+			}
+			impl->now_kakera->setOffsetMatrixToMesh(impl->hon_mesh->mesh);
+		}
+		impl->setIsAnimate(false);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+}
 void AnimationMeshKakera::setOffsetMatrixToMesh(Mesh* mesh) {
 
 	int bone_max = mesh->Bones.size();
 	for (int i=0;i<bone_max;i++) {
 		MeshBone* bn = mesh->Bones[i];
-		float frame = this->frame;
+		float frame = this->mesh_bone_default_anime_frame[i];//this->frame;
 		unsigned short ans_minmax;
 		unsigned short ans_maxmin;
 		float weight;
@@ -1147,15 +1386,25 @@ void AnimationMeshKakera::setOffsetMatrixToMesh(Mesh* mesh) {
 		// zxy の順にかける
 		int bone_index = this->mesh_bone_name_index[bn->bone_name];
 		MYMATRIX rotz;
+	    MYMATRIX ans;
 		MyMatrixRotationZ(rotz, this->mesh_bone_rotz[bone_index]);
 		MYMATRIX rotx;
-		MyMatrixRotationX(rotx, this->mesh_bone_rotx[bone_index]);
+		MYVECTOR3 axisx(1,0,0);
+//		MyVec3TransformNormal(axisx,axisx,rotz);
+		MyMatrixRotationAxis(rotx, axisx,this->mesh_bone_rotx[bone_index]);
+//		MyMatrixRotationX(rotx, this->mesh_bone_rotx[bone_index]);
+		MyMatrixMultiply(ans, rotz, rotx);
+
 		MYMATRIX roty;
-		MyMatrixRotationY(roty, this->mesh_bone_roty[bone_index]);
+		MYVECTOR3 axisy(0,1,0);
+//		MyVec3TransformNormal(axisy,axisy,ans);
+		MyMatrixRotationAxis(roty, axisy,this->mesh_bone_roty[bone_index]);
+
+		//MyMatrixRotationY(roty, this->mesh_bone_roty[bone_index]);
 		MYMATRIX trans;
 		MyMatrixTranslation(trans, this->mesh_bone_transx[bone_index],  this->mesh_bone_transy[bone_index], 
 			 this->mesh_bone_transz[bone_index] );
-		MYMATRIX ans;
+	
 		MyMatrixMultiply(ans, rotz, rotx);
 		MyMatrixMultiply(ans, ans, roty);
 		MyMatrixMultiply(ans, ans, trans);
@@ -1184,7 +1433,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 		mesh_bone_default_anime_frame = kakera_moto->mesh_bone_default_anime_frame;
 		mesh_offset_matrix = kakera_moto->mesh_offset_matrix;
 		this->mesh_filepathname = kakera_moto->mesh_filepathname;
-		this->frame = kakera_moto->frame;
+	//	this->frame = kakera_moto->frame;
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
@@ -1233,7 +1482,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 			 stringconverter sc;
 			 sprintf_s(bb,512, "%d, %d",input->getMOUSESTATE()->mouse_x, input->getMOUSESTATE()->mouse_y);
 			 sc.charToWCHAR(bb,buf);
-			 DebugTexts::instance()->setText(ab->gs[TASKTHREADS_AIDECISION],wcslen(buf), buf);
+		//	 DebugTexts::instance()->setText(ab->gs[TASKTHREADS_AIDECISION],wcslen(buf), buf);
 			 MyMatrixMultiply(mat,view, ab->proj);
 			// mat = view;
 			 bool is_bone_osareta = false;
@@ -1246,7 +1495,7 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 				 sprintf_s(bb,512, "%f, %f",posx, posy);
 				 sc.charToWCHAR(bb,buf);
 				 if (i < 16) {
-				 DebugTexts::instance()->setText(ab->gs[TASKTHREADS_AIDECISION],wcslen(buf), buf);
+			//	 DebugTexts::instance()->setText(ab->gs[TASKTHREADS_AIDECISION],wcslen(buf), buf);
 				 }
 				 if ((posx - input->getMOUSESTATE()->mouse_x)*(posx-input->getMOUSESTATE()->mouse_x) +
 					 (posy - input->getMOUSESTATE()->mouse_y)*(posy-input->getMOUSESTATE()->mouse_y) < 25*25) {

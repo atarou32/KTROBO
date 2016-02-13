@@ -854,10 +854,10 @@ void KTROBO::WAsetScaleToMatrix(MYMATRIX* mat, MYVECTOR3* v) {
 
 void Mesh::getOffsetMatrixToGetMinMaxAndWeightIndex(MeshBone* bone, float frame, unsigned short* ans_minmax_index, unsigned short* ans_maxmin_index, float* weight) {
 	// まず一番近いアニメフレームを取得する
-	float minmax = 1000000;
-	float maxmin = -1;
-	int minmaxindex = -1;
-	int maxminindex = -1;
+	float minmax = 511;
+	float maxmin = 0;
+	int minmaxindex = bone->animes.size()-1;
+	int maxminindex = 0;
 	int siz = bone->animes.size();
 	for (int i=0;i<siz; i++) {
 		MeshAnime* animebone = bone->animes[i];

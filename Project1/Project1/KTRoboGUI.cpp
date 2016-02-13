@@ -1730,21 +1730,25 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 		}
 
 		if (is_min_pressed && getIsEffect()) {
-
+			//moveBox(-1,-1);
 			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 			// lua ファイル実行
 		}
 
 		if (is_max_pressed && getIsEffect()) {
-
+			//moveBox(1,1);
 			moveBox(abs(d->getMOUSESTATE()->mouse_dx), abs(d->getMOUSESTATE()->mouse_dy));
 			// lua ファイル実行
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 
 		}
 
 		if (is_box_moved && getIsEffect() && d->getMOUSESTATE()->mouse_l_button_pressed) {
+
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 			// lua ファイル実行
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 		}
 	
 
@@ -1776,6 +1780,16 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 		}
 	}
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+
+
+
+
+
+
+
+
+
+
 		// 範囲に入っているかつ左マウスボタンが押されている→press
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
 		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
@@ -1788,10 +1802,14 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 			if (butu_max & BUTUKARIPOINT_IN) {
 				is_max_pressed = true;
 				this->setIsEffect(true);
+				moveBox(1,1);
+				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERVMAX_PRESS_LEFT, KTROBO_GUI_SLIDERVMAX_PRESS_TOP,
 					KTROBO_GUI_SLIDERVMAX_PRESS_WIDTH,KTROBO_GUI_SLIDERVMAX_PRESS_HEIGHT);
 			} else if (butu_min & BUTUKARIPOINT_IN) {
 				is_min_pressed = true;
+				moveBox(-1,-1);
+				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 				this->setIsEffect(true);
 				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERVMIN_PRESS_LEFT, KTROBO_GUI_SLIDERVMIN_PRESS_TOP,
 					KTROBO_GUI_SLIDERVMIN_PRESS_WIDTH,KTROBO_GUI_SLIDERVMIN_PRESS_HEIGHT);
@@ -2016,15 +2034,17 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 		}
 
 		if (is_min_pressed && getIsEffect()) {
-
+			//moveBox(-1,-1);
 			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 			// lua ファイル実行
 
 		}
 
 		if (is_max_pressed && getIsEffect()) {
-
+			//moveBox(1,1);
 			moveBox(abs(d->getMOUSESTATE()->mouse_dx), abs(d->getMOUSESTATE()->mouse_dy));
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 			// lua ファイル実行
 
 		}
@@ -2064,6 +2084,14 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 		}
 	}
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+
+
+
+
+
+
+
+
 		// 範囲に入っているかつ左マウスボタンが押されている→press
 		unsigned int butukari = getButukariStatusPoint(d->getMOUSESTATE()->mouse_x, d->getMOUSESTATE()->mouse_y, &zentai_box);
 		if ((butukari & BUTUKARIPOINT_IN) && (d->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN)) {
@@ -2078,11 +2106,17 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 				this->setIsEffect(true);
 				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERHMAX_PRESS_LEFT, KTROBO_GUI_SLIDERHMAX_PRESS_TOP,
 					KTROBO_GUI_SLIDERHMAX_PRESS_WIDTH,KTROBO_GUI_SLIDERHMAX_PRESS_HEIGHT);
+				moveBox(1,1);
+		//	moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 			} else if (butu_min & BUTUKARIPOINT_IN) {
 				is_min_pressed = true;
 				this->setIsEffect(true);
 				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERHMIN_PRESS_LEFT, KTROBO_GUI_SLIDERHMIN_PRESS_TOP,
 					KTROBO_GUI_SLIDERHMIN_PRESS_WIDTH,KTROBO_GUI_SLIDERHMIN_PRESS_HEIGHT);
+				moveBox(-1,-1);
+		//	moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 			} else if (butu_now & BUTUKARIPOINT_IN) {
 				is_box_moved = true;
 				this->setIsEffect(true);
@@ -2121,10 +2155,12 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 			is_box_moved =false;
 				return false;
 			}
+			
 			is_min_pressed = false;
 			is_max_pressed = false;
 			is_box_moved =false;
 			setIsEffect(false);
+			
 		}
 	}
 

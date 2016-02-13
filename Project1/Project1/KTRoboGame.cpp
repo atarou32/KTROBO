@@ -194,7 +194,7 @@ bool Game::Init(HWND hwnd) {
 	KTROBO::DebugTexts::instance()->setText(g, 3, L"‚„‚„‚„");
 	telop_texts = new TelopTexts();
 	telop_texts->Init(g,demo->font);
-	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
+//	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
 	/*
 	mesh = new Mesh();
 	mesh->readMesh(g, "resrc/model/ponko2-3/pk2skirt.MESH", demo->tex_loader);
@@ -422,10 +422,10 @@ bool Game::Init(HWND hwnd) {
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 	GUI::Init(hwnd, texdayo->getInstance(0), Ls[TASKTHREADS_AIDECISION], g->getScreenWidth(), g->getScreenHeight());
 //	GUI_INPUTTEXT::Init(hwnd, texdayo->getInstance(0));
-	inputtext = new GUI_INPUTTEXT(0,100,800,24);
-	inputtext->setIsRender(true);
-	but = new GUI_BUTTON(100,200,120,120,"",0, "Œˆ’è");
-	but->setIsRender(true);
+	//inputtext = new GUI_INPUTTEXT(0,100,800,24);
+	//inputtext->setIsRender(true);
+	/*but = new GUI_BUTTON(100,200,120,120,"",0, "Œˆ’è");
+	but->setIsRender(true);*/
 	MYRECT zem;
 	zem.left = 0;
 	zem.right = 300;
@@ -435,8 +435,8 @@ bool Game::Init(HWND hwnd) {
 	slih->setIsRender(true);
 	*/
 	//InputMessageDispatcher::registerImpl(slih,NULL,NULL);
-	InputMessageDispatcher::registerImpl(but, NULL,NULL);
-	InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
+	//InputMessageDispatcher::registerImpl(but, NULL,NULL);
+	//InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 /*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	
@@ -823,7 +823,7 @@ void Game::Run() {
 		0.3f,0.4f,0.8f,1.0f};
 	telop_texts->plusTime(g,millisecond);
 	if (telop_texts->isRenderFinished()) {
-		telop_texts->readFile(g,"resrc/sample/KTROBO.txt",30,14,&MYVECTOR4(1,1,1,1),0.1);
+//		telop_texts->readFile(g,"resrc/sample/KTROBO.txt",30,14,&MYVECTOR4(1,1,1,1),0.1);
 	}
 	
 	//demo->Render(g);
