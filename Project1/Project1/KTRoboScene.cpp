@@ -153,9 +153,11 @@ bool ONEMESSAGE::handleMessage(int msg, void* data, DWORD time) {
 
 	MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
 
+
+
 	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		if (input->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) {
-			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "SCENE_remove.lua");
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/SCENE_remove.lua");
 
 			return true;
 
@@ -163,8 +165,15 @@ bool ONEMESSAGE::handleMessage(int msg, void* data, DWORD time) {
 	}
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
 		if (input->getMOUSESTATE()->mouse_button & (KTROBO_MOUSESTATE_R_DOWN | KTROBO_MOUSESTATE_L_DOWN)) {
-			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "SCENE_remove.lua");
-
+			MYRECT re;
+			re.left = 0;
+			re.right = gs[TASKTHREADS_AIDECISION]->getScreenWidth();
+			re.top = 0;
+			re.bottom = gs[TASKTHREADS_AIDECISION]->getScreenHeight();
+			unsigned int butu = getButukariStatusPoint(input->getMOUSESTATE()->mouse_x, input->getMOUSESTATE()->mouse_y, &re);
+			if (butu & BUTUKARIPOINT_IN) {
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/SCENE_remove.lua");
+			}
 			return true;
 
 		}
@@ -200,12 +209,12 @@ void TWOTAKU::enter() {
 
 	memset(str,0,sizeof(str));
 	hmystrcpy(str,512,0,yes_str.c_str());
-	yes_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
+	yes_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth()/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
 		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*5, str, strlen(str), "‚Í‚¢");
 
 	memset(str,0,sizeof(str));
 	hmystrcpy(str,512,0,no_str.c_str());
-	no_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth*3/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
+	no_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth()*3/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
 		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*5, str, strlen(str), "‚¢‚¢‚¦");
 
 	gui->setRender(yes_button, true);
@@ -251,11 +260,19 @@ void TWOTAKU::leave() {
 	
 	Scene::leave();
 }
+void TWOTAKU::setYesStr(char* y) {
+		yes_str = string(y);
+}
+void TWOTAKU::setNoStr(char* n) {
+		no_str = string(n);
+}
+void TWOTAKU::setRenderText(char* t) {
+		srender_text = string(t);
+}
 
 
-
-TWOTAKU::TWOTAKU ( char* yes_str, char* no_str, char* text) : Scene("twotaku",7) {
-	this->yes_str = string(yes_str);
-	this->no_str = string(no_str);
-	this->srender_text = string(text);
+TWOTAKU::TWOTAKU ( char* dyes_str, char* dno_str, char* dtext) : Scene("twotaku",7) {
+	this->yes_str = string(dyes_str);
+	this->no_str = string(dno_str);
+	this->srender_text = string(dtext);
 }

@@ -6,6 +6,8 @@
 #include "tolua_glue/MyLuaGlueMakeCommon.h"
 #include "KTRoboGraphics.h"
 #include "KTRoboAnimationBuilder.h"
+#include "KTRoboScene.h"
+
 namespace KTROBO {
 
 class Game;
@@ -15,6 +17,9 @@ public:
 	TO_LUA virtual int add(int a, int b)=0;
 	TO_LUA virtual void enterABScene(COLLECTED AnimationBuilder* a)=0;
 	TO_LUA virtual void enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a)=0;
+	TO_LUA virtual void removeScene()=0;
+	TO_LUA virtual void enterTWOTAKU(char* yes_str, char* no_str, char* render_text)=0; // 二つのTWOTAKUがでていないようにすること
+	TO_LUA virtual void enterONEMESSAGE(char* mes)=0; // ふたつのメッセージがでていないようにすること
 	TO_LUA virtual void makeAILua(bool is_lock_sita, char* lua_filename)=0;
 	TO_LUA virtual void makeButukariLua(bool is_lock, char* lua_filename)=0;
 	TO_LUA virtual void makeLoadLua(bool is_lock, char* lua_filename)=0;
@@ -27,6 +32,8 @@ class TextFromLua : public ITextFromLua
 private:
 	Graphics* g;
 	Game* gdayo;
+	TWOTAKU* two;
+	ONEMESSAGE* one;
 public:
 	TextFromLua(Graphics* gg, Game* ggg);
 	~TextFromLua(void);
@@ -41,7 +48,9 @@ public:
 	void makeRenderLua(bool is_lock, char* lua_filename);
 	void enterABScene(COLLECTED AnimationBuilder* a);
 	void enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a);
-
+	void enterTWOTAKU(char* yes_str, char* no_str, char* render_text);
+	void enterONEMESSAGE(char* mes);
+	void removeScene();
 
 };
 

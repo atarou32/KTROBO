@@ -711,7 +711,7 @@ void InputMessageDispatcher::messageMake() {
 
 INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::getGetMessageStruct(INPUTSHORICLASS* cl) {
 	for (int i=0;i<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;i++) {
-		if (!InputMessageDispatcher::message_getter_structs[i].getIsUse()) {					
+		if (InputMessageDispatcher::message_getter_structs[i].getIsUse()) {					
 			if (message_getter_structs[i].impl == cl) {
 				return &message_getter_structs[i];
 			}
@@ -742,7 +742,7 @@ INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::registerImpl(INPUTSHORICLASS* c
 			if (child) {
 				child_struct = getGetMessageStruct(child);
 				if (child_struct) {
-					child_struct->setChild(&message_getter_structs[i]);
+					child_struct->setParent(&message_getter_structs[i]);
 				}
 			}
 			message_getter_structs[i].setParam(cl,parent_struct, child_struct);

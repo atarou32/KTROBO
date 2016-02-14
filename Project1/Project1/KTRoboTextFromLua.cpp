@@ -8,11 +8,21 @@ TextFromLua::TextFromLua(Graphics* gg, Game* ggg)
 {
 	g  = gg;
 	gdayo = ggg;
+	two = new TWOTAKU("test","test","test");
+	one = new ONEMESSAGE();
 }
 
 
 TextFromLua::~TextFromLua(void)
 {
+	if (two) {
+		delete two;
+		two = 0;
+	}
+	if (one) {
+		delete one;
+		one = 0;
+	}
 }
 
 void TextFromLua::enterABScene(COLLECTED AnimationBuilder* a) {
@@ -20,6 +30,20 @@ void TextFromLua::enterABScene(COLLECTED AnimationBuilder* a) {
 	this->gdayo->setScene(a);
 }
 
+void TextFromLua::enterTWOTAKU(char* yes_str, char* no_str, char* render_text) {
+	
+	two->setNoStr(no_str);
+	two->setYesStr(yes_str);
+	two->setRenderText(render_text);
+	gdayo->setScene(two);
+}
+void TextFromLua::enterONEMESSAGE(char* mes) {
+	one->changeText(mes);
+	gdayo->setScene(one);
+}
+void TextFromLua::removeScene() {
+	gdayo->removeScene();
+}
 
 void TextFromLua::enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a) {
 	

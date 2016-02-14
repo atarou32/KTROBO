@@ -353,6 +353,26 @@ float GUI::getMinFromSlider(int gui_id) {
 
 }
 
+void GUI::setLeafWindowToInputMessageDispatcher(int gui_window_id) {
+	// ˆê”Ô‰º‚É‚Â‚Á‚±‚Þ
+	CS::instance()->enter(CS_MESSAGE_CS, "inputmessage");
+
+	if (p_windows_index.find(gui_window_id) != p_windows_index.end()) {
+		GUI_WINDOW* w = windows[p_windows_index[gui_window_id]];
+		INPUTGETBYMESSAGESTRUCT* c = InputMessageDispatcher::getRootInputGetStruct();
+		INPUTGETBYMESSAGESTRUCT* cc = c;
+		cc = c->getParent();
+		if (cc) {
+		InputMessageDispatcher::registerImpl(w,cc->impl,c->impl);
+		} else {
+			InputMessageDispatcher::registerImpl(w, NULL,c->impl);
+		}
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "inputmessage");
+
+}
+
+
 void GUI::setRootWindowToInputMessageDispatcher(int gui_window_id) {
 
 
@@ -654,6 +674,7 @@ bool GUI_PART::moveBox(int dx, int dy) {
 		box = temp_box;
 		return true;
 	}
+
 	return ans;
 }
 bool GUI_INPUTTEXT::moveBox(int dx, int dy) {
@@ -675,6 +696,13 @@ bool GUI_INPUTTEXT::moveBox(int dx, int dy) {
 	return ans;
 }
 
+bool GUI_WINDOW::moveBox(int dx, int dy) {
+
+	bool ans = GUI_PART::moveBox(dx, dy);
+
+
+	return ans;
+}
 bool GUI_BUTTON::moveBox(int dx, int dy) {
 
 	bool ans = GUI_PART::moveBox(dx, dy);

@@ -229,6 +229,7 @@ public:
 	TO_LUA virtual void setNOWMAXMINToSlider(int gui_id, float max, float min, float now)=0;
 
 	TO_LUA virtual void setRootWindowToInputMessageDispatcher(int gui_window_id)=0; // ˆê”Ôã‚É‚Â‚Á‚±‚Þ
+	TO_LUA virtual void setLeafWindowToInputMessageDispatcher(int gui_window_id)=0; // ˆê”Ô‰º‚É‚Â‚Á‚±‚Þ
 	TO_LUA virtual void unregisterWindowToInputMessageDispatcher(int gui_window_id)=0;
 	TO_LUA virtual void deleteAll()=0;
 
@@ -397,7 +398,7 @@ public:
 		bodys.push_back(p);
 	}
 	
-	
+	bool moveBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time) {
 		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
 		if (!is_effect) {return false;}
@@ -406,6 +407,7 @@ public:
 			if (getIsMove()) {
 				// “®‚©‚·
 				if (!moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy)) {
+				//bool t = moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 				vector<GUI_PART*>::iterator it = bodys.begin();
 				while(it != bodys.end()) {
 					GUI_PART* p = *it;
@@ -432,9 +434,10 @@ public:
 		while (it != bodys.end()) {
 
 			GUI_PART* par = *it;
+			// ‚·‚×‚Ä‚Ìƒp[ƒg‚É“n‚·
 			
 			if (par->handleMessage(msg, data, time)) {
-				return true;
+			//	return true;
 			}
 
 			it = it + 1;
@@ -781,6 +784,7 @@ public:
 	void setTabIndex(int tab_gui_id, int index);
 	void setRootWindowToInputMessageDispatcher(int gui_window_id);
 	void unregisterWindowToInputMessageDispatcher(int gui_window_id);
+	void setLeafWindowToInputMessageDispatcher(int gui_window_id); // ˆê”Ô‰º‚É‚Â‚Á‚±‚Þ
 	void deleteAll();
 
 	GUI(void);

@@ -54,17 +54,34 @@ if MYSLIDERS == nil then
   MYSLIDERS[8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","-10","0","resrc/script/AB_sliderZ.lua")
   MYSLIDERS[9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
   MYSLIDERS[10] = gu:makeWindow(0,0,1000,800)
-  MYSLIDERS[11] = gu:makeSliderH({500+offset,800+offset,450,470},"511","1","1","resrc/script/AB_setSisei.lua") --gu:makeButton(tostring(offset+450), "350", "35","35", "resrc/script/AB_clearSisei.lua",30,"cl")
+  MYSLIDERS[11] = gu:makeSliderH({300+offset,812+offset,450,470},"511","1","1","resrc/script/AB_setSisei.lua") --gu:makeButton(tostring(offset+450), "350", "35","35", "resrc/script/AB_clearSisei.lua",30,"cl")
+  MYSLIDERS[12] = gu:makeButton(tostring(offset+300), "410", "30","30", "resrc/script/AB_setFrame.lua", 28, "set")
+  MYSLIDERS[13] = gu:makeSliderH({300+offset,812+offset,480,500},"511","1","1","resrc/script/AB_setSiseiFrameKakera.lua")
+  MYSLIDERS[14] = gu:makeButton(tostring(offset+600), "410", "30","30", "resrc/script/AB_hetareIK.lua", 28, "ik")
   for i=1,9 do
     --   gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
     --  gu:setRender(MYBONETAB[impl_id+1][bon_in][i],true)
     gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[i])
   end
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[11])
-  
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[12])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[13])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[14])
   gu:setEffect(MYSLIDERS[10], true)
   gu:setRender(MYSLIDERS[10], true)
   gu:setRootWindowToInputMessageDispatcher(MYSLIDERS[10])
+
+  gu:setEffect(MYSLIDERS[12], true)
+  gu:setRender(MYSLIDERS[12], true)
+  
+  gu:setEffect(MYSLIDERS[13], true)
+  gu:setRender(MYSLIDERS[13], true)
+  
+  gu:setEffect(MYSLIDERS[14], true)
+  gu:setRender(MYSLIDERS[14], true)
+  
+  --gu:setRootWindowToInputMessageDispatcher(MYSLIDERS[11])
+
 
 end
 gu = GUI:getIS(0,0)

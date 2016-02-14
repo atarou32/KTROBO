@@ -9,7 +9,9 @@
 #include "KTRoboGameError.h"
 #include "KTRoboTask.h"
 #include "MyTokenAnalyzer.h"
-
+#include "KTRoboInput.h"
+#include "string.h"
+using namespace std;
 namespace KTROBO {
 
 class Game;
@@ -91,6 +93,7 @@ public:
 class ONEMESSAGE : public Scene, public INPUTSHORICLASS {
 	int message;
 	string message_str;
+public:
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
 	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
 	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
@@ -117,7 +120,7 @@ private:
 	int render_text;
 	int yes_button;
 	int no_button;
-
+public:
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
 	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
 	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
@@ -127,8 +130,13 @@ private:
 	void enter();
 	void leave();
 	bool handleMessage(int msg, void* data, DWORD time);
+
+	void setYesStr(char* y);
+	void setNoStr(char* n);
+	void setRenderText(char* t);
+
 	TWOTAKU ( char* yes_str, char* no_str, char* text);
 
 };
-
+}
 #endif
