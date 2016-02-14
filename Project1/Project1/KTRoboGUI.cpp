@@ -44,9 +44,19 @@ void GUI::Release() {
 		InputMessageDispatcher::unregisterImpl(registered_rootwindow);
 	}
 
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "release renderguiclass");
+	// ウィンドウを解除する
+	int bsize = windows.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "release renderguiclsass");
+	for (int i=0;i<bsize;i++) {
+		// bsizeは上下しない状況でdeleteallが呼ばれると考える
+		InputMessageDispatcher::unregisterImpl(windows[i]);
+		windows[i]->clearBody();
+	}
 	CS::instance()->enter(CS_RENDERDATA_CS, "release renderguiclass");
 	registered_rootwindow = 0;
-	CS::instance()->leave(CS_RENDERDATA_CS, "release renderguiclsass");
+	
 
 
 
@@ -80,7 +90,7 @@ void GUI::Release() {
 
 	parts.clear();
 
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "release renderguiclsass");
 
 }
 

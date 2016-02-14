@@ -76,7 +76,44 @@ void KTROBO::Task::exec() {
 }
 
 
+void KTROBO::Task::donow(void(*exec)(TCB*), void* data,  unsigned long* work,unsigned int prio) {
 
+
+
+	TCB* newTCB;
+	TCB* prevTCB;
+	TCB* nextTCB;
+	int id;
+	CS::instance()->enter(CS_TASK_CS,"",index);
+
+	for(id=0;id<MAX_TASK_COUNT;id++) {
+		if (!(Tasks[id].flag & TASK_USE)) break;
+	}
+
+	if (id == MAX_TASK_COUNT) {
+		CS::instance()->leave(CS_TASK_CS,"",index);
+		throw new GameError(KTROBO::FATAL_ERROR, "to many tasks");
+		//return NULL;
+	}
+	newTCB = &Tasks[id];
+	
+
+	ZeroMemory(newTCB, sizeof(TCB));
+	newTCB->Exec = exec;
+	newTCB->data = data;
+	newTCB->prio = prio;
+
+	
+	for (int i=0;i<TASK_WORK_SIZE;i++) {
+		newTCB->Work[i] = work[i];
+	}
+
+	newTCB->flag = 0;
+	exec(newTCB);
+	CS::instance()->leave(CS_TASK_CS,"",index);
+	return;
+
+}
 TCB* KTROBO::Task::make(void(*exec)(TCB*),void* data, unsigned long* work, unsigned int prio) {
 	TCB* newTCB;
 	TCB* prevTCB;

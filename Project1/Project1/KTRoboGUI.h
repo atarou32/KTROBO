@@ -231,7 +231,7 @@ public:
 	TO_LUA virtual void setRootWindowToInputMessageDispatcher(int gui_window_id)=0; // 一番上につっこむ
 	TO_LUA virtual void setLeafWindowToInputMessageDispatcher(int gui_window_id)=0; // 一番下につっこむ
 	TO_LUA virtual void unregisterWindowToInputMessageDispatcher(int gui_window_id)=0;
-	TO_LUA virtual void deleteAll()=0;
+	TO_LUA virtual void deleteAll()=0; // ウィンドウのみunregisterする
 
 };
 
@@ -397,7 +397,9 @@ public:
 	void setBody(GUI_PART* p) {
 		bodys.push_back(p);
 	}
-	
+	void clearBody() {
+		bodys.clear();
+	}
 	bool moveBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time) {
 		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;

@@ -67,6 +67,7 @@ public:
 	}
 	bool getIsExecTask() {return is_exec_task;}
 	TCB* make(void(*exec)(TCB*), void* data,  unsigned long* work,unsigned int prio);// work ‚ÍTASK_WORK_SIZE‚Ì‘å‚«‚³‚ðŠm•Û‚·‚é‚±‚Æ
+	void donow(void(*exec)(TCB*), void* data,  unsigned long* work,unsigned int prio);
 	void kill(TCB* killTCB);
 	void change(TCB* thisTCB, void(*exec)(TCB*), void* data);
 	void deleteTask();

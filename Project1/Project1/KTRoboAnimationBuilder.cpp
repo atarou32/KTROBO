@@ -915,9 +915,13 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 }
 
 bool AnimationBuilder::_forceLoadFromFile(char* filename) {
-
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_AIDECISION);
 	deleteAll();
-
+	// ここでGUIのデストラクトとLUAのAB_ENTERの呼び出しを済ませておく
+	TCB test;
+	MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(0)->deleteAll();
+	LuaTCBMaker::doTCBnow(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_AIDECISION);
 	MyTokenAnalyzer a;
 	a.load(filename);
 	while(!a.enddayo()) {
@@ -1521,6 +1525,9 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 	 AnimationBuilderImpl* imp = ab->getNowImpl();
 	 if (imp) {
 		 imp->setIsAnimate(false);
+	 } else {
+		 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		 return true;
 	 }
 	 if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
@@ -2054,6 +2061,8 @@ void AnimationBuilder::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* 
 	if (load_done && do_force_load) {
 		do_force_load = false;
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
 		MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
 		if (load_result) {
 			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("ロードしました");

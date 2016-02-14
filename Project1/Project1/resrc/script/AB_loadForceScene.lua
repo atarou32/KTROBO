@@ -11,7 +11,8 @@ bone_id = ab:getNowBoneIndex()
 if inputtext_scene ~= nil then
  -- TextFromLua:getIS(0,0):removeScene()
   test = gu:getStrFromInput(inputtext_scene)
-  ab:force_loadFromFile(test)
+  MYSLIDERS=nil
+  ab:forceLoadFromFile(test)
   
  
 end

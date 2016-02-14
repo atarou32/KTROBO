@@ -48,7 +48,9 @@ void TCB_luaExec(TCB* thisTCB) {
     } else {
 		lua_settop(L,tee);
 		tt->is_use = false;
-		t->kill(thisTCB);
+		if (thisTCB->flag) {
+			t->kill(thisTCB);
+		}
 	}
 	CS::instance()->leave(CS_MESSAGE_CS, "luaexec");
 	if (is_lock) {
@@ -101,6 +103,46 @@ void LuaTCBMaker::makeTCBExec() {
 		}
 	}
 	CS::instance()->leave(CS_MESSAGE_CS, "maketcbexec");
+
+}
+
+void LuaTCBMaker::doTCBnow(int task_index, bool is_lock_sita, char* lua_filename) {
+	if (task_index >= 0 && task_index < TASKTHREAD_NUM) {
+	
+		CS::instance()->enter(CS_MESSAGE_CS, "maketcb");
+		if (strcmp(lua_filename, "test") ==0 || strlen(lua_filename) ==0) {
+			CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
+			return;
+		}
+
+		for (int i=0;i<KTROBO_LUAEXEC_STRUCT_SIZE;i++) {
+			if (!structs[i].is_use) {
+				structs[i].is_use = true;
+				structs[i].is_send =false;
+				structs[i].is_lock_sita = is_lock_sita;
+				structs[i].task_index = task_index;
+				strcpy_s(structs[i].lua_filename,256,lua_filename);
+				structs[i].lua_filename[strlen(lua_filename)] = '\0';
+				CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
+
+				unsigned long Work[TASK_WORK_SIZE];
+				memset(Work, 0, sizeof(unsigned long)*TASK_WORK_SIZE);
+				Work[0] = (unsigned long)&structs[i];
+				Work[1] = (unsigned long)ls[structs[i].task_index];
+				Work[2] = (unsigned long)structs[i].task_index;
+				Work[3] = (unsigned long)structs[i].is_lock_sita;
+				int task_index = structs[i].task_index;
+				structs[i].is_send = true;
+				CS::instance()->leave(CS_MESSAGE_CS, "maketcbexec");
+				ts[task_index]->donow(TCB_luaExec, ts[task_index], Work, 0x0000FFFF);
+				//CS::instance()->enter(CS_MESSAGE_CS, "maketcbexec");
+
+				return;
+			}
+		}
+		CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
+	
+	}
 
 }
 
