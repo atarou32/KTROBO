@@ -544,15 +544,15 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 	KTROBO::mylog::writelog(filename, "IMPLNUM=%d;\n",num);
 	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
 	
-	for (int i=0;i<num;i++) {
+	for (int ki=0;ki<num;ki++) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "savenowtofile");
-	AnimationBuilderImpl* im = impls[i];
+	AnimationBuilderImpl* im = impls[ki];
 	KTROBO::mylog::writelog(filename,"IMPL{\n");
 
 	if (im->hon_mesh) {
 		KTROBO::mylog::writelog(filename, "HON_MESH{\n");
 
-		im->hon_mesh->write(filename,i);
+		im->hon_mesh->write(filename,ki);
 
 		KTROBO::mylog::writelog(filename, "}//honmesh\n");
 	}
@@ -564,7 +564,7 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 		for (int i=0;i<s;i++) {
 			KTROBO::mylog::writelog(filename, "ONAJI_MESH{\n");
 
-			im->onaji_mesh[i]->write(filename,i);
+			im->onaji_mesh[i]->write(filename,ki);
 
 
 			KTROBO::mylog::writelog(filename, "}//onajimesh\n");
@@ -580,7 +580,7 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 		for (int i=0;i<s;i++) {
 			KTROBO::mylog::writelog(filename, "KO_MESH{\n");
 
-			im->ko_mesh[i]->write(filename,i);
+			im->ko_mesh[i]->write(filename,ki);
 
 
 			KTROBO::mylog::writelog(filename, "}//komesh\n");
@@ -591,7 +591,7 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 	
 	if (im->now_kakera) {
 		KTROBO::mylog::writelog(filename, "NOW_KAKERA{\n");
-		im->now_kakera->write(filename,i);
+		im->now_kakera->write(filename,ki);
 
 		KTROBO::mylog::writelog(filename, "}\n");
 	}
@@ -602,7 +602,7 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 		KTROBO::mylog::writelog(filename, "NUM=%d;\n", num);
 		for (int i=0;i<num;i++) {
 			KTROBO::mylog::writelog(filename,"KAKERA {\n");
-			im->kakeras[i]->write(filename,i);
+			im->kakeras[i]->write(filename,ki);
 			KTROBO::mylog::writelog(filename, "}\n");
 		}
 		KTROBO::mylog::writelog(filename, "}\n");
@@ -615,7 +615,7 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 		KTROBO::mylog::writelog(filename, "NUM=%d;\n", num);
 		for (int i=0;i<num;i++) {
 			KTROBO::mylog::writelog(filename,"ANIME {\n");
-			im->animes[i]->write(filename,i);
+			im->animes[i]->write(filename,ki);
 			KTROBO::mylog::writelog(filename, "}\n");
 		}
 		KTROBO::mylog::writelog(filename, "}\n");
@@ -749,7 +749,7 @@ void AnimationMeshKakera::write(char* filename, int impl_id) {
 	map<string,int>::iterator itt = mesh_bone_name_index.begin();
 	while( itt  != mesh_bone_name_index.end()) {
 		pair<string,int> p = *itt;
-		KTROBO::mylog::writelog(filename, "\"%s\"=%d;\n",p.first,p.second);
+		KTROBO::mylog::writelog(filename, "\"%s\"=%d;\n",p.first.c_str(),p.second);
 		itt++;
 	}
 	KTROBO::mylog::writelog(filename, "}\n");
@@ -2162,7 +2162,7 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 					ii->hon_mesh->mesh_loaded = true;
 					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 					MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(
-						KTROBO_MESSAGE_ID_ANIMATIONBUILDER_HON_MESH_AFTER,KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, this->now_index,0,true);
+						KTROBO_MESSAGE_ID_ANIMATIONBUILDER_HON_MESH_AFTER,KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, i,0,true);
 					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_madeHonMeshAfter.lua");
 					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 				}
@@ -2197,6 +2197,7 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 						char* animename = mm->mesh_animepath;
 						MYMATRIX kakeru = mm->matrix_kakeru;
 						AnimationBuilderMesh* oya_mm = ii->getOyaMesh(mm->oya_filepath);
+						if (!oya_mm) continue;
 						if (!oya_mm->mesh_loaded) continue;
 							
 						CS::instance()->leave(CS_RENDERDATA_CS, "leave");

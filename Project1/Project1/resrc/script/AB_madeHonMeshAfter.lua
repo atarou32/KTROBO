@@ -10,7 +10,7 @@ bone_inde = ab:getNowBoneIndex()
 gu:setTabIndex(tan_inde, bone_inde)
 ]]
 
-
+gu = GUI:getIS(0,0)
 mes = Message:getIS(0,0)
 msgsi = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 msg_siz = mes:getMessageIndexsFromMsgId(KTROBO_MESSAGE_ID_ANIMATIONBUILDER_HON_MESH_AFTER,msgsi)
@@ -31,7 +31,9 @@ mes:getMsgBody(msg_siz,msgsi, msg_ids, sender_ids, receiver_ids, msgs, fmsgs)
 MYBONENAME = MYBONENAME or {}
 MYBONETAB = MYBONETAB or {}
 MYTAB = MYTAB or {}
-if MYSLIDERS == nil then
+--MYSLIDERS = MYSLIDERS or {}
+
+if MYSLIDERS==nil then
   MYSLIDERS = {}
    offset = 150
   MYSLIDERS[1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","-3.14","0","resrc/script/AB_sliderX.lua")
@@ -161,11 +163,9 @@ for i=1,msg_siz do
   gu:setWindowToTab(MYIMPLTAB, BIGWIN[impl_id+1],""..impl_id)
   TextFromLua:getIS(0,0):setDebugText("test2")
 end
+
 gu:setRender(MYIMPLTAB, true)
 gu:setEffect(MYIMPLTAB, true)
 TextFromLua:getIS(0,0):setDebugText("test3")
--- MYBONETAB = gu:makeButton("450","220","400","400", "resrc/script/AB_sliderZBut.lua", 30, "tog")
---gu:setPartToWindow(BIGWIN[1], MYBONETAB)
 
---TextFromLua:getIS(0,0):removeScene()
 TextFromLua:getIS(0,0):setDebugText("unko")
