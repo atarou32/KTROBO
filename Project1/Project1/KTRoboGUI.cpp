@@ -2236,6 +2236,7 @@ int GUIs::makeInst() {
 				makeInst();
 				return getInstance(1);
 			}
+			return getInstance(1);
 		}
 
 
@@ -2256,8 +2257,9 @@ int GUIs::makeInst() {
 			int s = makeInst();
 			if (s !=1) {
 				makeInst();
-				return getInstance(1);
+				return getInterface(1);
 			}
+			return getInterface(1);
 		}
 
 

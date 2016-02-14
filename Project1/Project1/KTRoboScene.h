@@ -120,6 +120,7 @@ private:
 	int render_text;
 	int yes_button;
 	int no_button;
+	int window_id;
 public:
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
 	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};

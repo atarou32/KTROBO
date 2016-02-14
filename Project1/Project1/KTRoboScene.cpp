@@ -210,12 +210,15 @@ void TWOTAKU::enter() {
 	memset(str,0,sizeof(str));
 	hmystrcpy(str,512,0,yes_str.c_str());
 	yes_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth()/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
-		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*5, str, strlen(str), "はい");
+		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT, str, strlen(str), "はい");
 
 	memset(str,0,sizeof(str));
 	hmystrcpy(str,512,0,no_str.c_str());
 	no_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth()*3/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
-		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*5, str, strlen(str), "いいえ");
+		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT, str, strlen(str), "いいえ");
+	window_id = gui->makeWindow(-10,-10,1,1);
+	gui->setPartToWindow(window_id, yes_button);
+	gui->setPartToWindow(window_id, no_button);
 
 	gui->setRender(yes_button, true);
 	gui->setEffect(yes_button, true);
@@ -230,9 +233,7 @@ void TWOTAKU::enter() {
 		ss = ss->getParent();
 	}
 	InputMessageDispatcher::registerImpl(this, NULL, ss->impl);
-	gui->setRootWindowToInputMessageDispatcher(yes_button);
-	gui->setRootWindowToInputMessageDispatcher(no_button);
-
+	gui->setRootWindowToInputMessageDispatcher(window_id);
 
 
 
@@ -242,13 +243,16 @@ void TWOTAKU::enter() {
 void TWOTAKU::leave() {
 	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 	GUI* gui = MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(1); // メッセージ表示関連は1を使用する
-	
+	if (window_id) {
+		gui->unregisterWindowToInputMessageDispatcher(window_id);
+		window_id = 0;
+	}
 	if(yes_button) {
-		gui->unregisterWindowToInputMessageDispatcher(yes_button);
+		
 		yes_button = 0;
 	}
 	if (no_button) {
-		gui->unregisterWindowToInputMessageDispatcher(no_button);
+		
 		no_button = 0;
 	}
 	InputMessageDispatcher::unregisterImpl(this);
