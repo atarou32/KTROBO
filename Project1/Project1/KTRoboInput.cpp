@@ -249,6 +249,7 @@ void InputMessageDispatcher::Init() {
 void InputMessageDispatcher::_messageDispatch(MYINPUTMESSAGESTRUCT* message, INPUTGETBYMESSAGESTRUCT* get_input, DWORD time) {
 
 	if (get_input->handleMessage(message->getMSGID(), (void*)message, time)) {
+	
 		return;
 	}
 
@@ -270,7 +271,7 @@ void InputMessageDispatcher::messageDispatch() {
 	int mes_index = (InputMessageDispatcher::now_message_index+1)% KTROBO_INPUTMESSAGESTRUCT_SIZE;
 	for (int i=0;i<KTROBO_INPUTMESSAGESTRUCT_SIZE;i++) {
 		int index = (mes_index + i) % KTROBO_INPUTMESSAGESTRUCT_SIZE;
-		MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[i];
+		MYINPUTMESSAGESTRUCT* s = &InputMessageDispatcher::message_structs[index];
 		if (s->getISUSE()) {
 			// ˆ—‚ğs‚¤
 			for (int k=0;k<KTROBO_INPUTGETMESSAGESTRUCT_SIZE;k++) {

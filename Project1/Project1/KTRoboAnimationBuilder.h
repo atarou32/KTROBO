@@ -354,6 +354,13 @@ private:
 	int now_index;
 	MyTextureLoader* loader;
 	MYMATRIX view;
+	bool do_force_save;
+	bool save_done;
+	bool do_force_load;
+	bool load_done;
+	bool save_result;
+	bool load_result;
+	string filename;
 public:
 	MYMATRIX proj;
 private:
@@ -433,6 +440,7 @@ public:
 	bool loadFromFile(char* filename);
 	bool saveAnimeAndFrameToFile(int impl_id, char* filename);
 	bool force_saveNowToFile(char* filename);
+	bool _force_saveNowToFile(char* filename);
 	bool forceLoadFromFile(char* filename);
 	bool force_saveAnimeAndFrameToFile(int impl_id, char* filename);
 	void deleteAll();

@@ -11,6 +11,9 @@
 #include "MyTokenAnalyzer.h"
 #include "KTRoboInput.h"
 #include "string.h"
+#include "mmsystem.h"
+
+
 using namespace std;
 namespace KTROBO {
 
@@ -95,7 +98,7 @@ class ONEMESSAGE : public Scene, public INPUTSHORICLASS {
 	string message_str;
 public:
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
-	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
+	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
 	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
 	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
 	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
@@ -111,6 +114,26 @@ public:
 
 // yes_luastr
 // no_luastrにはシーンのリムーブするコマンドが入っていること
+
+class LOADTYUU : public Scene, public INPUTSHORICLASS {
+private:
+	int string_id;
+	DWORD time;
+	int dtime;
+public:
+	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
+	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+
+	void enter();
+	void leave();
+	bool handleMessage(int msg, void* data, DWORD time);
+	LOADTYUU();
+};
+
+
 class TWOTAKU : public Scene, public INPUTSHORICLASS {// 下のシーンにインプットメッセージを送らせないためにINPUTSHORICLASSを継承させる
 private:
 	string yes_str;

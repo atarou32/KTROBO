@@ -27,7 +27,12 @@ AnimationBuilder::AnimationBuilder(char* n,int len, MyTextureLoader* lo) : Scene
 		bone_bills[i] = 0;
 	}
 
-
+	do_force_save = false;
+	do_force_load = false;
+	save_done = true;
+	load_done = true;
+	save_result = true;
+	load_result = true;
 }
 
 int AnimationBuilder::createAnimationBuilderImpl(char* hon_filepath) {
@@ -505,19 +510,32 @@ void AnimationMesh::write(char* filename, int impl_id) {
 	}
 }
 
+bool AnimationBuilder::force_saveNowToFile(char* dfilename) {
 
-bool AnimationBuilder::force_saveNowToFile(char* filename) {
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	save_done = false;
+	do_force_save = true;
+	this->filename = string(dfilename);
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	return true;
+}
+
+bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 	// すべての今の状態を保存する
 	FILE* fp;
 	// いったん消去する
 	fopen_s(&fp, filename, "w");
-	if (fp != NULL) {
+	if (fp == NULL) {
 		
 		return false;
 	}
 	fclose(fp);
 
 	// 書き出しはじめ
+
+	//MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
 
 	KTROBO::mylog::writelog(filename, "AB{\n");
 	CS::instance()->enter(CS_RENDERDATA_CS, "savenowtofile");
@@ -606,8 +624,10 @@ bool AnimationBuilder::force_saveNowToFile(char* filename) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
 	}
 
-
+	Sleep(10000);
 	KTROBO::mylog::writelog(filename, "}//file\n");
+	//MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+	return true;
 }
 
 
@@ -729,6 +749,7 @@ void AnimationMeshKakera::write(char* filename, int impl_id) {
 	while( itt  != mesh_bone_name_index.end()) {
 		pair<string,int> p = *itt;
 		KTROBO::mylog::writelog(filename, "\"%s\"=%d;\n",p.first,p.second);
+		itt++;
 	}
 	KTROBO::mylog::writelog(filename, "}\n");
 
@@ -862,15 +883,23 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 	return true;
 }
 
-bool  AnimationBuilder::saveNowToFile(char* filename) {
+bool  AnimationBuilder::saveNowToFile(char* dfilename) {
 	// すべての今の状態を保存する
+	CS::instance()->enter(CS_RENDERDATA_CS,"test");
 	FILE* fp;
-	fopen_s(&fp, filename, "r");
+	fopen_s(&fp, dfilename, "r");
 	if (fp != NULL) {
 		fclose(fp);
+		CS::instance()->leave(CS_RENDERDATA_CS,"test");
 		return false;
 	}
-	return force_saveNowToFile(filename);
+
+	this->filename = string(dfilename);
+	do_force_save = true;
+	save_done =false;
+	CS::instance()->leave(CS_RENDERDATA_CS,"test");
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	return true;//force_saveNowToFile(filename);
 }
 
 bool AnimationBuilder::forceLoadFromFile(char* filename) {
@@ -1989,11 +2018,19 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 
 
 void AnimationBuilder::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
-
-
-
-
-
+	CS::instance()->enter(CS_RENDERDATA_CS,"leave");
+	if (save_done && do_force_save) {
+		do_force_save = false;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+		if (save_result) {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("セーブしました");
+		} else {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("失敗しました");
+		}
+		CS::instance()->enter(CS_RENDERDATA_CS ,"ret");
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"enter");
 }
 
 
@@ -2006,6 +2043,23 @@ void AnimationBuilder::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 
 
 void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+
+	// ここでロードとセーブを行う
+
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	if (do_force_save && !save_done) {
+		// セーブする
+		char buf[512];
+		memset(buf,0,512);
+		hmystrcpy(buf,512,0,filename.c_str());
+		CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+		bool tes = _force_saveNowToFile(buf);
+		CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	//	do_force_save = false;
+		save_done = true;
+		
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	int im = impls.size();

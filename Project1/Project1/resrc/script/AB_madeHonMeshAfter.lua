@@ -69,8 +69,8 @@ if MYSLIDERS == nil then
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[14])
   gu:setEffect(MYSLIDERS[10], true)
   gu:setRender(MYSLIDERS[10], true)
-  gu:setRootWindowToInputMessageDispatcher(MYSLIDERS[10])
-
+  --gu:setLeafWindowToInputMessageDispatcher(MYSLIDERS[10])
+  gu:setPartToWindow(win3, MYSLIDERS[10])
   gu:setEffect(MYSLIDERS[12], true)
   gu:setRender(MYSLIDERS[12], true)
   
@@ -80,7 +80,7 @@ if MYSLIDERS == nil then
   gu:setEffect(MYSLIDERS[14], true)
   gu:setRender(MYSLIDERS[14], true)
   
-  --gu:setRootWindowToInputMessageDispatcher(MYSLIDERS[11])
+  --gu:setLeafWindowToInputMessageDispatcher(MYSLIDERS[11])
 
 
 end
@@ -167,4 +167,5 @@ TextFromLua:getIS(0,0):setDebugText("test3")
 -- MYBONETAB = gu:makeButton("450","220","400","400", "resrc/script/AB_sliderZBut.lua", 30, "tog")
 --gu:setPartToWindow(BIGWIN[1], MYBONETAB)
 
+--TextFromLua:getIS(0,0):removeScene()
 TextFromLua:getIS(0,0):setDebugText("unko")

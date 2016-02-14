@@ -10,6 +10,7 @@ TextFromLua::TextFromLua(Graphics* gg, Game* ggg)
 	gdayo = ggg;
 	two = new TWOTAKU("test","test","test");
 	one = new ONEMESSAGE();
+	load = new LOADTYUU();
 }
 
 
@@ -22,6 +23,10 @@ TextFromLua::~TextFromLua(void)
 	if (one) {
 		delete one;
 		one = 0;
+	}
+	if (load) {
+		delete load;
+		load = 0;
 	}
 }
 
@@ -49,6 +54,10 @@ void TextFromLua::enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a) {
 	
 	gdayo->setScene(a);
 }
+
+ void TextFromLua::enterLOADTYUU() {
+	 gdayo->setScene(load);
+ }
 
 void TextFromLua::setDebugText(char* str) {
 	WCHAR test[512];

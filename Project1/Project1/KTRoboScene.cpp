@@ -219,7 +219,8 @@ void TWOTAKU::enter() {
 	window_id = gui->makeWindow(-10,-10,1,1);
 	gui->setPartToWindow(window_id, yes_button);
 	gui->setPartToWindow(window_id, no_button);
-
+	gui->setRender(window_id, true);
+	gui->setEffect(window_id, true);
 	gui->setRender(yes_button, true);
 	gui->setEffect(yes_button, true);
 	gui->setRender(no_button, true);
@@ -279,4 +280,75 @@ TWOTAKU::TWOTAKU ( char* dyes_str, char* dno_str, char* dtext) : Scene("twotaku"
 	this->yes_str = string(dyes_str);
 	this->no_str = string(dno_str);
 	this->srender_text = string(dtext);
+}
+
+
+
+
+
+
+
+
+
+void LOADTYUU::enter() {
+	Scene::enter();
+
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	this->string_id = tex->getRenderText("セーブロード中・・・", gs[TASKTHREADS_AIDECISION]->getScreenWidth()/2 - 12*KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT/2,
+		gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2 - KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT/2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT,12*KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT);
+	tex->setRenderTextIsRender(string_id, true);
+
+	INPUTGETBYMESSAGESTRUCT* ss  = InputMessageDispatcher::getRootInputGetStruct();
+	while (ss->getParent()) {
+		ss = ss->getParent();
+	}
+	InputMessageDispatcher::registerImpl(this, NULL, ss->impl);
+
+}
+
+void LOADTYUU::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)
+	{
+		time =timeGetTime();
+		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+		static char* strs[] = {
+			"セーブロード中・・・",
+			"セーブロード中・・",
+			"セーブロード中・"
+		};
+
+		int ddtime = time % 1000;
+		int dddtime = 0;
+		if (ddtime < 333) {
+			dddtime = 0;
+		} else if(ddtime < 667) {
+			dddtime = 1;
+		} else {
+			dddtime = 2;
+		}
+		if (dtime != dddtime) {
+			dtime = dddtime;
+			tex->setRenderTextChangeText(string_id, strs[dtime % 3]);
+
+	}
+}
+
+void LOADTYUU::leave() {
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+
+	if (string_id) {
+		tex->lightdeleteRenderText(string_id);
+		string_id = 0;
+	}
+	InputMessageDispatcher::unregisterImpl(this);
+	Scene::leave();
+}
+
+
+bool LOADTYUU::handleMessage(int msg, void* data, DWORD time) {
+	return true;
+}
+LOADTYUU::LOADTYUU(): Scene("loadtyuu", 8) {
+	dtime = 0;
+	time = 0;
+	string_id = 0;
 }

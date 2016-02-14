@@ -7,9 +7,9 @@ dofile("tolua_glue/tolua.lua")
 gu = GUI:makeInst(0)
 
 
-inputtext_scene = gu:makeInputText("50","800","500","16")
-scene_but = gu:makeButton("550","800","30","30", "resrc/script/AB_saveScene.lua",29,"save")
-win4 = gu:makeWindow(50,800,530,30)
+inputtext_scene = gu:makeInputText("50","400","500","16")
+scene_but = gu:makeButton("550","400","30","30", "resrc/script/AB_saveScene.lua",29,"save")
+win4 = gu:makeWindow(50,400,530,30)
 gu:setPartToWindow(win4, inputtext_scene)
 gu:setPartToWindow(win4, scene_but)
 gu:setEffect(inputtext_scene, true)
@@ -21,8 +21,8 @@ gu:setRender(win4, true)
 --gu:setRootWindowToInputMessageDispatcher(win4)
 
 
-TextFromLua:getIS(0,0):enterONEMESSAGE("testdesuyo")
-
+--TextFromLua:getIS(0,0):enterONEMESSAGE("testdesuyo")
+TextFromLua:getIS(0,0):enterTWOTAKU("resrc/script/SCENE_remove.lua", "resrc/script/SCENE_remove.lua", "‚·‚±‚µ‚¸‚Â‚â‚è‚Ü‚µ‚å‚¤")
 inputtext_hon_mesh = gu:makeInputText("50","500","500","20")
 hon_mesh_but = gu:makeButton("550","500","110","40","resrc/script/AB_makehonmesh.lua",31, "–{mesh")
 win = gu:makeWindow(50,500,610,60)
