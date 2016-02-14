@@ -363,7 +363,7 @@ private:
 public:
 	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
 	int bone_bills[KTROBO_MESH_BONE_MAX];
-	
+	int bone_name_text;
 
 public:
 	AnimationBuilder(char* c, int len, MyTextureLoader* loader);

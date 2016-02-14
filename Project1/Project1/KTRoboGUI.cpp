@@ -2201,6 +2201,16 @@ int GUIs::makeInst() {
 		if (index >= 0 && index < guis.size()) {
 			return guis[index];
 		}
+
+		if (index == 1) {
+			int s = makeInst();
+			if (s !=1) {
+				makeInst();
+				return getInstance(1);
+			}
+		}
+
+
 		if (index ==0) {
 			makeInst();
 			return getInstance(0);
@@ -2213,6 +2223,16 @@ int GUIs::makeInst() {
 		if (index >= 0 && index < guis.size()) {
 			return guis[index];
 		}
+
+		if (index == 1) {
+			int s = makeInst();
+			if (s !=1) {
+				makeInst();
+				return getInstance(1);
+			}
+		}
+
+
 		if (index ==0) {
 			makeInst();
 			return getInterface(0);

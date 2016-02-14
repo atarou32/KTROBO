@@ -87,9 +87,48 @@ public:
 		loaddestructIMPL(task,thisTCB,gs[TASKTHREADS_LOADDESTRUCT], Ls[TASKTHREADS_LOADDESTRUCT], game);
 	};
 };
-}
 
+class ONEMESSAGE : public Scene, public INPUTSHORICLASS {
+	int message;
+	string message_str;
+	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
+	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
+	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
 
+	void enter();
+	void leave();
 
+	void changeText(char* message);
+	ONEMESSAGE();
+	bool handleMessage(int msg, void* data, DWORD time);
+
+};
+
+// yes_luastr
+// no_luastrにはシーンのリムーブするコマンドが入っていること
+class TWOTAKU : public Scene, public INPUTSHORICLASS {// 下のシーンにインプットメッセージを送らせないためにINPUTSHORICLASSを継承させる
+private:
+	string yes_str;
+	string no_str;
+	string srender_text;
+
+	int render_text;
+	int yes_button;
+	int no_button;
+
+	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {};
+	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {};
+	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){};
+
+	void enter();
+	void leave();
+	bool handleMessage(int msg, void* data, DWORD time);
+	TWOTAKU ( char* yes_str, char* no_str, char* text);
+
+};
 
 #endif

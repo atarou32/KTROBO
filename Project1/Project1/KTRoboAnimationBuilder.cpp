@@ -49,13 +49,15 @@ void  AnimationBuilder::setOnajiMesh(int impl_id, char* onaji_filepath) {
 	memset(onaji_animepath,0,128);
 	sprintf_s(onaji_meshpath,128,"%s.MESH", onaji_filepath);
 	sprintf_s(onaji_animepath,128,"%s.ANIME", onaji_filepath);
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >= 0) {
 		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(onaji_filepath, onaji_meshpath,onaji_animepath);	
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		impl->onaji_mesh.push_back(mesh);
-		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* matrix_kakeru) {
@@ -65,33 +67,37 @@ void  AnimationBuilder::setKoMesh(int impl_id, char* ko_filepath, char* oya_file
 	memset(ko_animepath,0,128);
 	sprintf_s(ko_meshpath,128,"%s.MESH", ko_filepath);
 	sprintf_s(ko_animepath, 128, "%s.ANIME", ko_filepath);
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		AnimationBuilderMesh* mesh = new AnimationBuilderMesh(ko_filepath, ko_meshpath,ko_animepath);
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		mesh->setOyaMesh(oya_filepath, parent_bone_name, is_connect_without_material_local, matrix_kakeru);
 		impl->ko_mesh.push_back(mesh);
-		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		
 	}
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 int  AnimationBuilder::getHonMeshBoneNum(int impl_id) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
 		AnimationBuilderImpl *impl = impls[impl_id];
 		int num = impl->hon_mesh->mesh->Bones.size();
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return num;
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return 0;
 }
 
 char*  AnimationBuilder::getHonMeshBoneName(int impl_id, int bone_index) {
+CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
-		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 		AnimationBuilderImpl *impl = impls[impl_id];
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			char* bone_name = impl->hon_mesh->mesh->Bones[bone_index]->bone_name;
@@ -101,6 +107,7 @@ char*  AnimationBuilder::getHonMeshBoneName(int impl_id, int bone_index) {
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 		return "nullbone";
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return "nullbone";
 
 
@@ -1294,9 +1301,11 @@ void AnimationBuilder::hetareIK() {
 	
 		AnimationBuilderImpl *impl = impls[now_index];
 		if (!strlen(impl->ik_bone_moto.c_str())) {
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 		}
 		if (!strlen(impl->ik_bone_saki.c_str())) {
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 		}
 	//	if (!test) {
@@ -1625,6 +1634,8 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 		MyMatrixIdentity(world);
 		bone_bills[i] = tex->getRenderBillBoard(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
 	}
+	bone_name_text = tex->getRenderText("default",0,600,16,16*18,18);
+	tex->setRenderTextIsRender(bone_name_text,true);
  }
 
  
@@ -1863,6 +1874,7 @@ float AnimationBuilder::getHonMeshBoneTransZ(int impl_id, int bone_index) {
 	for (int i=0;i < KTROBO_MESH_BONE_MAX; i++) {
 		tex->lightdeleteRenderBillBoard(bone_bills[i]);//(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
 	}
+	tex->lightdeleteRenderText(bone_name_text);
 }
 
 int AnimationBuilder::getNowIMPLIndex() {
@@ -2100,7 +2112,9 @@ void AnimationBuilder::setNowBoneIndex(int index) {
 	}
 
 	te->setRenderBillBoardColor(bone_bills[bone_index],0xFFFF00FF);
-
+	if (impls.size() && impls[now_index]->hon_mesh->mesh->Bones.size()) {
+		te->setRenderTextChangeText(bone_name_text, impls[now_index]->hon_mesh->mesh->Bones[index]->bone_name);
+	}
 }
 
 

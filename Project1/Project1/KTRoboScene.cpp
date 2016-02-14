@@ -1,5 +1,6 @@
 #include "KTRoboScene.h"
 #include "KTRoboGame.h"
+#include "tolua_glue/tolua_glue.h"
 
 using namespace KTROBO;
 
@@ -98,4 +99,163 @@ void Scene::leave() {
 		t[TASKTHREADS_UPDATEPOSBUTUKARI]->kill(looptcbs[TASKTHREADS_UPDATEPOSBUTUKARI]);
 		looptcbs[TASKTHREADS_UPDATEPOSBUTUKARI] = 0;
 	}
+}
+
+#define KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT 30
+
+void ONEMESSAGE::enter() {
+	Scene::enter();
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	WCHAR buf[512];
+	memset(buf, 0, sizeof(buf));
+	stringconverter sc;
+	sc.charToWCHAR(message_str.c_str(), buf);
+	int len = wcslen(buf);
+	char str[512];
+	memset(str,0,sizeof(str));
+	hmystrcpy(str,512,0,message_str.c_str());
+	message = tex->getRenderText(str, gs[TASKTHREADS_AIDECISION]->getScreenWidth()/2 - len*KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT/2,
+		gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2 - KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT/2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT,len*KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT);
+	tex->setRenderTextIsRender(message, true);
+
+	INPUTGETBYMESSAGESTRUCT* ss  = InputMessageDispatcher::getRootInputGetStruct();
+	while (ss->getParent()) {
+		ss = ss->getParent();
+	}
+	InputMessageDispatcher::registerImpl(this, NULL, ss->impl);
+
+}
+
+void ONEMESSAGE::leave() {
+
+	InputMessageDispatcher::unregisterImpl(this);
+	if (message) {
+		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+		tex->lightdeleteRenderText(message);
+		message = 0;
+	}
+
+	Scene::leave();
+}
+
+ONEMESSAGE::ONEMESSAGE() : Scene("one_message",11){
+	message = 0;
+
+}
+void ONEMESSAGE::changeText(char* message) {
+	message_str = string(message);
+	if (this->message) {
+		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+		tex->setRenderTextChangeText(this->message, message);
+	}
+}
+bool ONEMESSAGE::handleMessage(int msg, void* data, DWORD time) {
+
+	MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+		if (input->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) {
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "SCENE_remove.lua");
+
+			return true;
+
+		}
+	}
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		if (input->getMOUSESTATE()->mouse_button & (KTROBO_MOUSESTATE_R_DOWN | KTROBO_MOUSESTATE_L_DOWN)) {
+			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "SCENE_remove.lua");
+
+			return true;
+
+		}
+	}
+
+	return true;
+}
+
+
+
+
+
+bool TWOTAKU::handleMessage(int msg, void* data, DWORD time){
+	return true;
+}
+
+void TWOTAKU::enter() {
+	Scene::enter();
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	GUI* gui = MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(1); // メッセージ表示関連は1を使用する
+	WCHAR buf[512];
+	memset(buf, 0, sizeof(buf));
+	stringconverter sc;
+	sc.charToWCHAR(srender_text.c_str(), buf);
+	int len = wcslen(buf);
+	char str[512];
+	memset(str,0,sizeof(str));
+	hmystrcpy(str,512,0,srender_text.c_str());
+
+	render_text = tex->getRenderText(str, gs[TASKTHREADS_AIDECISION]->getScreenWidth()/2 - len*KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT/2,
+		gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2 - KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT/2*3,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT,len*KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT);
+	tex->setRenderTextIsRender(render_text, true);
+
+	memset(str,0,sizeof(str));
+	hmystrcpy(str,512,0,yes_str.c_str());
+	yes_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
+		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*5, str, strlen(str), "はい");
+
+	memset(str,0,sizeof(str));
+	hmystrcpy(str,512,0,no_str.c_str());
+	no_button = gui->makeButton(gs[TASKTHREADS_AIDECISION]->getScreenWidth*3/4, gs[TASKTHREADS_AIDECISION]->getScreenHeight()/2,
+		KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*2,KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT*5, str, strlen(str), "いいえ");
+
+	gui->setRender(yes_button, true);
+	gui->setEffect(yes_button, true);
+	gui->setRender(no_button, true);
+	gui->setEffect(no_button, true);
+
+
+
+	// 下のクラスにいかせないために先に登録しておく　setrootwindowtoinputmessagedispatcherよりも先に登録すること
+	INPUTGETBYMESSAGESTRUCT* ss  = InputMessageDispatcher::getRootInputGetStruct();
+	while (ss->getParent()) {
+		ss = ss->getParent();
+	}
+	InputMessageDispatcher::registerImpl(this, NULL, ss->impl);
+	gui->setRootWindowToInputMessageDispatcher(yes_button);
+	gui->setRootWindowToInputMessageDispatcher(no_button);
+
+
+
+
+}
+
+
+void TWOTAKU::leave() {
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	GUI* gui = MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(1); // メッセージ表示関連は1を使用する
+	
+	if(yes_button) {
+		gui->unregisterWindowToInputMessageDispatcher(yes_button);
+		yes_button = 0;
+	}
+	if (no_button) {
+		gui->unregisterWindowToInputMessageDispatcher(no_button);
+		no_button = 0;
+	}
+	InputMessageDispatcher::unregisterImpl(this);
+	if (render_text) {
+		tex->lightdeleteRenderText(render_text);
+		render_text = 0;
+	}
+	gui->deleteAll();
+	
+	Scene::leave();
+}
+
+
+
+TWOTAKU::TWOTAKU ( char* yes_str, char* no_str, char* text) : Scene("twotaku",7) {
+	this->yes_str = string(yes_str);
+	this->no_str = string(no_str);
+	this->srender_text = string(text);
 }
