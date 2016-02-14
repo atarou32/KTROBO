@@ -516,9 +516,10 @@ bool AnimationBuilder::force_saveNowToFile(char* dfilename) {
 	save_done = false;
 	do_force_save = true;
 	this->filename = string(dfilename);
-	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+	
 	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
 	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
 	return true;
 }
 
@@ -624,7 +625,7 @@ bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "savenowtofile");
 	}
 
-	Sleep(10000);
+	//Sleep(10000);
 	KTROBO::mylog::writelog(filename, "}//file\n");
 	//MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
 	return true;
@@ -897,12 +898,23 @@ bool  AnimationBuilder::saveNowToFile(char* dfilename) {
 	this->filename = string(dfilename);
 	do_force_save = true;
 	save_done =false;
-	CS::instance()->leave(CS_RENDERDATA_CS,"test");
 	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS,"test");
+	
 	return true;//force_saveNowToFile(filename);
 }
-
 bool AnimationBuilder::forceLoadFromFile(char* filename) {
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	do_force_load = true;
+	load_done = false;
+	load_filename = string(filename);
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return true;
+}
+
+bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 
 	deleteAll();
 
@@ -1159,7 +1171,13 @@ bool  AnimationBuilder::loadFromFile(char* filename) {
 	// すべての状態が保存されたファイルから状態を復元する現在のものは消してしまう
 	if (impls.size()) return false;
 
-	return forceLoadFromFile(filename);
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	do_force_load = true;
+	load_done = false;
+	load_filename = string(filename);
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return true;
 	
 	
 
@@ -2031,6 +2049,20 @@ void AnimationBuilder::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* 
 		CS::instance()->enter(CS_RENDERDATA_CS ,"ret");
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS,"enter");
+
+	CS::instance()->enter(CS_RENDERDATA_CS,"leave");
+	if (load_done && do_force_load) {
+		do_force_load = false;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+		if (load_result) {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("ロードしました");
+		} else {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("失敗しました");
+		}
+		CS::instance()->enter(CS_RENDERDATA_CS ,"ret");
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"enter");
 }
 
 
@@ -2056,7 +2088,24 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 		bool tes = _force_saveNowToFile(buf);
 		CS::instance()->enter(CS_RENDERDATA_CS,"enter");
 	//	do_force_save = false;
+		save_result = tes;
 		save_done = true;
+		
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	if (do_force_load && !load_done) {
+		// ロードする
+		char buf[512];
+		memset(buf,0,512);
+		hmystrcpy(buf,512,0,load_filename.c_str());
+		CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+		bool tes  = _forceLoadFromFile(buf);
+		CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	//	do_force_save = false;
+		load_result = tes;
+		load_done = true;
 		
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS,"leave");

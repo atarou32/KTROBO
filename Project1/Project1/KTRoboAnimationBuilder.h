@@ -361,6 +361,7 @@ private:
 	bool save_result;
 	bool load_result;
 	string filename;
+	string load_filename;
 public:
 	MYMATRIX proj;
 private:
@@ -442,6 +443,8 @@ public:
 	bool force_saveNowToFile(char* filename);
 	bool _force_saveNowToFile(char* filename);
 	bool forceLoadFromFile(char* filename);
+    bool _forceLoadFromFile(char* filename);
+
 	bool force_saveAnimeAndFrameToFile(int impl_id, char* filename);
 	void deleteAll();
 	void setNowIMPLIndex(int index);
