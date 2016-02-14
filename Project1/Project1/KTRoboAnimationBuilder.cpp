@@ -1293,13 +1293,19 @@ void AnimationBuilder::hetareIK() {
 		static int test = 0;
 	
 		AnimationBuilderImpl *impl = impls[now_index];
+		if (!strlen(impl->ik_bone_moto.c_str())) {
+			return;
+		}
+		if (!strlen(impl->ik_bone_saki.c_str())) {
+			return;
+		}
 	//	if (!test) {
 //			MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0)->getRenderBillBoard(
 		impl->now_kakera->setOffsetMatrixToMesh(impl->hon_mesh->mesh);
-		MyIKMODOKI ik(impl->hon_mesh->mesh, &MYVECTOR3(0,-10,11),"doBone", "migiArmTekubiBone");
+		MyIKMODOKI ik(impl->hon_mesh->mesh, &MYVECTOR3(0,-10,11),impl->ik_bone_moto.c_str(), impl->ik_bone_saki.c_str());
 		int bsize = impl->hon_mesh->mesh->Bones.size();
-		MeshBone* saki = impl->hon_mesh->mesh->Bones[impl->hon_mesh->mesh->BoneIndexes["migiArmTekubiBone"]];
-		MeshBone* moto = impl->hon_mesh->mesh->Bones[impl->hon_mesh->mesh->BoneIndexes["migiSakotuBone"]];
+		MeshBone* saki = impl->hon_mesh->mesh->Bones[impl->hon_mesh->mesh->BoneIndexes[impl->ik_bone_saki.c_str()]];
+		MeshBone* moto = impl->hon_mesh->mesh->Bones[impl->hon_mesh->mesh->BoneIndexes[impl->ik_bone_moto.c_str()]];
 		MeshBone* sakip = saki->parent_bone;
 		MeshBone* bsakip = saki->parent_bone;
 		MYMATRIX mat;
@@ -1472,9 +1478,24 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 			 }
 
 		 }
+
+		 if (keystate['Q'] & KTROBO_INPUT_BUTTON_DOWN) {
+			  int size = ab->getNowImpl()->hon_mesh->mesh->Bones.size();
+			 if (size) {
+				 ab->getNowImpl()->ik_bone_moto = string(ab->getNowImpl()->hon_mesh->mesh->Bones[ab->getNowBoneIndex()]->bone_name);
+				 		 Texture* te = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+						 te->setRenderBillBoardColor(ab->bone_bills[ab->getNowBoneIndex()], 0xFF0000FF);
+				
+				// MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(KTROBO_MESSAGE_ID_ANIMATIONBUILDER_BONE_PUSHED, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, ab->getNowBoneIndex(),0, true);
+			//	 LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
+			 }
+		 }
 	 } else if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
 		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
-		 if (input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN) {
+
+		
+
+		 if ((input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN)&& !(input->getKEYSTATE()[VK_LSHIFT] & KTROBO_INPUT_BUTTON_PRESSED)) {
 			 // ボタンが押されたので
 			 MYMATRIX mat;
 			 char bb[512];
@@ -1511,7 +1532,78 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 			//	 MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(KTROBO_MESSAGE_ID_ANIMATIONBUILDER_BONE_PUSHED, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, ab->getNowBoneIndex(),0, true);
 				 LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AB_bonepushed.lua");
 			 }
+
+
+			
+
+
+
+
+
+
 		 }
+
+
+
+
+
+		 if (input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN) {
+			  MYMATRIX mat;
+			  MyMatrixMultiply(mat,view, ab->proj);
+			  for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
+				
+				 MYVECTOR3 pos;
+				 MyVec3TransformCoord(pos,this->ab->bone_poss[i],mat);
+				 float posx = 0 + (pos.float3.x+1) * this->ab->gs[0]->getScreenWidth()/2;
+				 float posy = this->ab->gs[0]->getScreenHeight() - (pos.float3.y+1) * this->ab->gs[0]->getScreenHeight()/2;
+				 if ((posx - input->getMOUSESTATE()->mouse_x)*(posx-input->getMOUSESTATE()->mouse_x) +
+					 (posy - input->getMOUSESTATE()->mouse_y)*(posy-input->getMOUSESTATE()->mouse_y) < 25*25) {
+						 // ぼねおされた
+						 imp->ik_bone_moto = string(imp->hon_mesh->mesh->Bones[i]->bone_name);
+						 // 色を変える
+						 Texture* te = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+
+						 for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
+							 te->setRenderBillBoardColor(ab->bone_bills[k], 0xFFFFFFFF);
+						 }
+						 te->setRenderBillBoardColor(ab->bone_bills[i],0xFF0000FF);						 
+				 }
+
+			 }
+		 }
+
+		 if ((input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN) && (input->getKEYSTATE()[VK_LSHIFT] & KTROBO_INPUT_BUTTON_PRESSED)) {
+			 	  MYMATRIX mat;
+			  MyMatrixMultiply(mat,view, ab->proj);
+			  for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
+				
+				 MYVECTOR3 pos;
+				 MyVec3TransformCoord(pos,this->ab->bone_poss[i],mat);
+				 float posx = 0 + (pos.float3.x+1) * this->ab->gs[0]->getScreenWidth()/2;
+				 float posy = this->ab->gs[0]->getScreenHeight() - (pos.float3.y+1) * this->ab->gs[0]->getScreenHeight()/2;
+				 if ((posx - input->getMOUSESTATE()->mouse_x)*(posx-input->getMOUSESTATE()->mouse_x) +
+					 (posy - input->getMOUSESTATE()->mouse_y)*(posy-input->getMOUSESTATE()->mouse_y) < 25*25) {
+						 // ぼねおされた
+						 imp->ik_bone_saki = string(imp->hon_mesh->mesh->Bones[i]->bone_name);
+						 // 色を変える
+						 Texture* te = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+						 te->setRenderBillBoardColor(ab->bone_bills[i],0x0000FFFF);						 
+				 }
+
+			 }
+		 }
+
+
+
+
+
+
+
+
+
+
+
+
 	 }
 	 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 

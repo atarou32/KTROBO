@@ -63,6 +63,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 //	MyMatrixMultiply(mat,inv_mat,mat);
 	MyMatrixInverse(mat,NULL,mat);
 
+	/*
 	float matdayo[12*12];
 	float matdayo2[12*12];
 	float out_matdayo[12*12];
@@ -71,7 +72,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	}
 	k.getMatrixInverse(matdayo,12,matdayo2);
 	k.getMatrixMultiply(12,12,matdayo,12,12,matdayo2,out_matdayo);
-
+	*/
 
 
 

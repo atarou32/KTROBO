@@ -211,6 +211,11 @@ public:
 	AnimationMeshKakera* now_kakera;
 	void setNowKakeraKakeraFrame(int frame);
 	void setNowKakeraFrame(int frame);
+
+	string ik_bone_moto;
+	string ik_bone_saki;
+
+
 	AnimationBuilderMesh* getOyaMesh(char* oya_filepath) {
 		if (hon_mesh) {
 			if (hon_mesh->isOyaFile(oya_filepath)) {
@@ -357,8 +362,8 @@ private:
 	int bone_index;
 public:
 	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
-private:
 	int bone_bills[KTROBO_MESH_BONE_MAX];
+	
 
 public:
 	AnimationBuilder(char* c, int len, MyTextureLoader* loader);
