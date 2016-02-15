@@ -353,6 +353,92 @@ void AnimationBuilderImpl::setNowKakeraKakeraFrame(int frame) {
 	this->setIsAnimate(false);
 }
 
+
+
+void AnimationBuilder::setNowKakeraKakeraFrameAnime(AnimationBuilderImpl* impl, float frame) {
+	
+	// 一番近いフレームかけらを見つけてくる
+	AnimationMesh* mm = impl->animes[anime_index];
+	float fframe = calcAnimeNow((float)frame, mm->all_time);
+	
+	int now_index_min = -1;
+	int now_frame_min = -1;
+	int now_index_max = 100000;
+	int now_frame_max = 100000;
+	int bsize = impl->animes[anime_index]->frames.size();
+	for (int i=0;i<bsize;i++) {
+		int mframe = impl->animes[anime_index]->frames[i]->frame;
+		if (mframe <= fframe && now_frame_min < mframe) {
+			now_frame_min = mframe;
+			now_index_min = i;
+		}
+		if (mframe >= fframe && now_frame_max > mframe) {
+			now_frame_max = mframe;
+			now_index_max = i;
+		}
+	}
+
+	if (now_index_min ==-1) {
+		return;
+		//now_frame_min = impl->animes[anime_index]->frames[0]->frame;
+	}
+	if (now_index_max == 100000) {
+		now_frame_max = impl->animes[anime_index]->frames[now_index_min]->frame;
+		now_index_max = now_index_min;
+	}
+
+	AnimationMeshKakera* k1 = impl->animes[anime_index]->frames[now_index_min]->kakera;
+	AnimationMeshKakera* k2 = impl->animes[anime_index]->frames[now_index_max]->kakera;
+	float weightb = now_frame_max - now_frame_min;
+/*	if (weightb < 0.00001) {
+		// k1 = k2 なので now_kakera にかけらの情報を入れる
+		impl->now_kakera->copy(k1);
+		impl->setIsAnimate(false);
+		return;
+	}*/
+	float weight;
+	if(weightb ==0) {
+		weight = 1;
+	}else {
+	weight = (float)(now_frame_max - fframe)/(float)weightb;
+	}
+	// k1 != k2 なのでブレンドする
+	// now_kakeraにブレンドの結果を入れる
+
+	int msize = impl->now_kakera->mesh_offset_matrix.size();
+	for (int m=0;m<msize;m++) {
+		MYMATRIX mat2 = k1->mesh_offset_matrix[m];
+		MYMATRIX mat1 = k2->mesh_offset_matrix[m];
+		MYMATRIX mat3;
+		for (int i=0;i<16;i++) {
+			mat2.m[i/4][i%4] *= weight;
+			mat1.m[i/4][i%4] *= (1-weight);
+			mat3.m[i/4][i%4] = mat2.m[i/4][i%4] + mat1.m[i/4][i%4];
+		}
+		MYVECTOR3 v(1,1,1);
+		WAsetScaleToMatrix(&mat3, &v);
+		impl->hon_mesh->mesh->Bones[m]->offset_matrix = mat3;
+		int osize = impl->onaji_mesh.size();
+		for (int l = 0; l < osize;l++) {
+			impl->onaji_mesh[l]->mesh->Bones[m]->offset_matrix = mat3;
+		}
+	}
+	impl->hon_mesh->mesh->animate(0,false);
+	impl->hon_mesh->is_animated = true;
+	int osize = impl->onaji_mesh.size();
+	for (int l = 0; l < osize;l++) {
+		impl->onaji_mesh[l]->mesh->animate(0,false);
+		impl->onaji_mesh[l]->is_animated = true;
+	}
+	int ksize = impl->ko_mesh.size();
+	for (int k=0;k<ksize;k++) {
+		impl->ko_mesh[k]->mesh->animate(0,true);
+		impl->ko_mesh[k]->is_animated = true;
+	}
+	impl->setIsAnimate(true);
+}
+
+
 void AnimationBuilderImpl::setNowKakeraFrame(int frame) {
 	
 	int bsize = now_kakera->mesh_bone_name_index.size();
@@ -371,7 +457,29 @@ void AnimationBuilderImpl::setNowKakeraFrame(int frame) {
 		this->setIsAnimate(false);
 	}
 }
+void AnimationBuilder::setAnimePoseFrameExeAnime(int impl_id, float frame) {
+	// 姿勢をアニメのポーズに戻す
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+			if (impl->now_kakera && impl->animes.size() && impl->animes[anime_index]->frames.size()) {
+				this->setNowKakeraKakeraFrameAnime(impl, frame);
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			
+			return;
+			}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}	
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
+
+
+
+
+
+}
 void  AnimationBuilder::setAnimePoseFrameKakera(int impl_id, int frame) {
 	// 姿勢を本来のポーズに戻す
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -465,32 +573,65 @@ int  AnimationBuilder::createFrameExe(int impl_id, char* frameexe_name, float al
 	return aa;
 }
 
-void AnimationBuilder::changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time) {
-	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-	if (impls.size() > impl_id && impl_id >=0) {
-		AnimationBuilderImpl *impl = impls[impl_id];
-		AnimationMesh* mm = impl->animes[frameexe_id];
-		if (frame_id >=0 && frame_id < mm->frames.size()) {
-			mm->frames[frame_id]->frame = frame;
-			mm->frames[frame_id]->time = time;
+float AnimationBuilder::calcAnimeNow(float anime_now, float all_time) {
+
+	float ans = anime_now/(float)KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX * all_time;
+
+	return ans;
+
+}
+
+int AnimationBuilder::getNearFloorPoseIdFromCalcKakera(AnimationBuilderImpl* impl, int kakera_now_calc) {
+	int ans;
+	int ksize = impl->kakeras.size();
+	int min_index=0;
+	int min = 0;
+	for (int k=0;k<ksize;k++) {
+		AnimationMeshKakera* ka = impl->kakeras[k];
+		if (ka->frame <= kakera_now_calc && min <= ka->frame) {
+			min = ka->frame;
+			min_index = k;
 		}
 	}
-	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	if (min == 0) {
+		min_index = 0;
+	}
+	return min_index;
 }
 
 
-void AnimationBuilder::setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time) {
+void AnimationBuilder::setFrameToExe(int impl_id, int frameexe_id, float anime_now, float kakera_now) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-	if (impls.size() > impl_id && impl_id >=0) {
+	if (impls.size() > impl_id && impl_id >=0 && frameexe_id < impls[impl_id]->animes.size() && frameexe_id >=0) {
 		AnimationBuilderImpl *impl = impls[impl_id];
 		AnimationMesh* mm = impl->animes[frameexe_id];
-		mm->all_time += time;
+		float anime_now_calc = calcAnimeNow(floor(anime_now), mm->all_time);
+		float kakera_now_calc = calcAnimeNow(floor(kakera_now), KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX);
+		// すでに登録されているフレームなのかどうか判定する
+		int fsize = mm->frames.size();
+		bool sudeniari=false;
+		for (int f=0;f<fsize;f++) {
+			if (mm->frames[f]->frame == anime_now_calc) {
+				AnimationMeshFrame* fra = mm->frames[f];
+				int pose_id = getNearFloorPoseIdFromCalcKakera(impl, kakera_now_calc);
+				fra->kakera_index = pose_id;//(impl->frame_to_kakera_index)[pose_id];
+				fra->kakera = impl->kakeras[fra->kakera_index];
+				fra->frame = anime_now_calc;
+				fra->time=0;
+				sudeniari = true;
+			}
+		}
+		if (!sudeniari) {
 		AnimationMeshFrame* fra= new AnimationMeshFrame();
-		fra->time = time;
-		fra->kakera_index = (impl->frame_to_kakera_index)[pose_id];
-		fra->kakera = impl->kakeras[fra->kakera_index];
-		fra->frame = frame;
-		mm->frames.push_back(fra);
+		
+			int pose_id = getNearFloorPoseIdFromCalcKakera(impl, kakera_now_calc);
+
+			fra->kakera_index = pose_id;//(impl->frame_to_kakera_index)[pose_id];
+			fra->kakera = impl->kakeras[fra->kakera_index];
+			fra->frame = anime_now_calc;
+			fra->time=0;
+			mm->frames.push_back(fra);
+		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
@@ -501,16 +642,16 @@ void AnimationMesh::write(char* filename, int impl_id) {
 	KTROBO::mylog::writelog(filename, "ANIME_INDEX=%d;\n", this->anime_index);
 	KTROBO::mylog::writelog(filename, "ANIME_NAME=\"%s\"\n", this->anime_name);
 	if (is_loop) {
-		KTROBO::mylog::writelog(filename, "IS_LOOP=1");
+		KTROBO::mylog::writelog(filename, "IS_LOOP=1;");
 	} else {
-		KTROBO::mylog::writelog(filename, "IS_LOOP=0");
+		KTROBO::mylog::writelog(filename, "IS_LOOP=0;");
 	}
 	int num = this->frames.size();
-	KTROBO::mylog::writelog(filename, "FRAME_NUM=%d\n",num);
+	KTROBO::mylog::writelog(filename, "FRAME_NUM=%d;\n",num);
 	for (int i=0;i<num;i++) {
 		KTROBO::mylog::writelog(filename, "FRAME{\n");
 		
-		KTROBO::mylog::writelog(filename, "FR=%d;\n",frames[i]->frame);
+		KTROBO::mylog::writelog(filename, "FR=%f;\n",frames[i]->frame);
 		KTROBO::mylog::writelog(filename, "KI=%d;\n", frames[i]->kakera_index);
 		KTROBO::mylog::writelog(filename, "KAKERAFRAME=%d", frames[i]->kakera->frame);
 		KTROBO::mylog::writelog(filename, "TI=%f;\n", frames[i]->time);
@@ -1456,7 +1597,7 @@ bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 				a.GetToken("FRAME");
 				a.GetToken("{");
 				a.GetToken("FR");
-				frame->frame = a.GetIntToken();
+				frame->frame = a.GetFloatToken();
 				a.GetToken("KI");
 				frame->kakera_index = a.GetIntToken();
 				
@@ -1827,26 +1968,36 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 
 	 a = 0.01f;
 	 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-	 if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
+	 if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE ) {
 		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
 		 if (input->getMOUSESTATE()->mouse_r_button_pressed) {
-	 MYMATRIX s;
-	 MyMatrixRotationZ(s,a);
+			 MYMATRIX s;
+			 MyMatrixRotationZ(s,a);
 
-	 MYVECTOR3 fromat = from - at;
-	 MyVec3TransformNormal(fromat,fromat,s);
-	 from = at+fromat;
+			 MYVECTOR3 fromat = from - at;
+			 MyVec3TransformNormal(fromat,fromat,s);
+			 from = at+fromat;
 
-	 MyMatrixLookAtRH(view,from,at,up);
+			 MyMatrixLookAtRH(view,from,at,up);
+		 
+	 
+		AnimationBuilderImpl* imp = ab->getNowImpl();
+		if (imp) {
+			 imp->setIsAnimate(false);
+		 } else {
+			 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			 return true;
 		 }
-	 }
+		 }
+	}
 	 AnimationBuilderImpl* imp = ab->getNowImpl();
-	 if (imp) {
-		 imp->setIsAnimate(false);
-	 } else {
-		 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-		 return true;
-	 }
+	 if (!imp) {
+			 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			 return true;
+     }
+
+
+
 	 if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
 		 unsigned char* keystate = input->getKEYSTATE();
@@ -2563,6 +2714,14 @@ void AnimationBuilder::setNowBoneIndex(int index) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
+int AnimationBuilder::getNowAnimeIndex() {
+	int a =0;
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	a = anime_index;
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return a;
+}
 
 void AnimationBuilder::setNowAnimeIndex(int index) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -2679,3 +2838,4 @@ char* AnimationBuilder::getAnimeName(int impl_id, int anime_index) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return "null";
 }
+

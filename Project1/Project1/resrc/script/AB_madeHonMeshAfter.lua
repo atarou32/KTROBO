@@ -59,9 +59,9 @@ if MYSLIDERS==nil then
   MYSLIDERS[8] = gu:makeSliderH({500+offset,800+offset,250,270},"10","-10","0","resrc/script/AB_sliderZ.lua")
   MYSLIDERS[9] = gu:makeButton(tostring(offset+450),"220","40","40", "resrc/script/AB_sliderZBut.lua", 30, "tog")
   MYSLIDERS[10] = gu:makeWindow(0,0,1000,800)
-  MYSLIDERS[11] = gu:makeSliderH({300+offset,812+offset,450,470},"511","1","1","resrc/script/AB_setSisei.lua") --gu:makeButton(tostring(offset+450), "350", "35","35", "resrc/script/AB_clearSisei.lua",30,"cl")
+  MYSLIDERS[11] = gu:makeSliderH({300+offset,812+offset,450,470},"511","0","0","resrc/script/AB_setSisei.lua") --gu:makeButton(tostring(offset+450), "350", "35","35", "resrc/script/AB_clearSisei.lua",30,"cl")
   MYSLIDERS[12] = gu:makeButton(tostring(offset+300), "410", "30","30", "resrc/script/AB_setFrame.lua", 28, "set")
-  MYSLIDERS[13] = gu:makeSliderH({300+offset,812+offset,480,500},"511","1","1","resrc/script/AB_setSiseiFrameKakera.lua")
+  MYSLIDERS[13] = gu:makeSliderH({300+offset,812+offset,480,500},"511","0","0","resrc/script/AB_setSiseiFrameKakera.lua")
   MYSLIDERS[14] = gu:makeButton(tostring(offset+600), "410", "30","30", "resrc/script/AB_hetareIK.lua", 28, "ik")
   
   MYSLIDERS[15] = gu:makeButton("950","100","20","18", "resrc/script/AB_sliderXButMax.lua", 33, "max")
@@ -72,8 +72,9 @@ if MYSLIDERS==nil then
   
   MYSLIDERS[19] = gu:makeButton("950","220","20","18", "resrc/script/AB_sliderZButMax.lua", 33, "max")
   MYSLIDERS[20] = gu:makeButton("950","240","20","18", "resrc/script/AB_sliderZButMin.lua", 33, "min")
-  
-  
+  MYSLIDERS[21] = gu:makeSliderH({300+offset,812+offset,510,530},"511","0","0","resrc/script/AB_setSiseiAnime.lua")
+  MYSLIDERS[22] = gu:makeButton(tostring(offset+700), "410", "30","30", "resrc/script/AB_setFrameAnime.lua", 33, "aset")
+ 
   
   for i=1,9 do
     --   gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
@@ -90,6 +91,8 @@ if MYSLIDERS==nil then
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[18])
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[19])
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[20])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[21])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[22])
   
   gu:setEffect(MYSLIDERS[10], true)
   gu:setRender(MYSLIDERS[10], true)
@@ -121,6 +124,12 @@ if MYSLIDERS==nil then
   
   gu:setEffect(MYSLIDERS[20], true)
   gu:setRender(MYSLIDERS[20], true)
+ 
+  gu:setEffect(MYSLIDERS[21], true)
+  gu:setRender(MYSLIDERS[21], true)
+  
+  gu:setEffect(MYSLIDERS[22], true)
+  gu:setRender(MYSLIDERS[22], true)
   
   --gu:setLeafWindowToInputMessageDispatcher(MYSLIDERS[11])
 

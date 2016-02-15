@@ -49,12 +49,12 @@ public:
 	TO_LUA virtual float getHonMeshBoneTransY(int impl_id, int bone_index)=0;
 	TO_LUA virtual float getHonMeshBoneTransZ(int impl_id, int bone_index)=0;
 
+	TO_LUA virtual void setAnimePoseFrameExeAnime(int impl_id, float frame)=0;
 	TO_LUA virtual void setAnimePoseFrameKakera(int impl_id, int frame)=0;
 	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;
 	TO_LUA virtual void saveAnimePoseFrame(int impl_id, int saveframe)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
 	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, float all_frame)=0;
-	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int pose_id,  int frame, float time)=0;
-	TO_LUA virtual void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time)=0;
+	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, float anime_now, float kakera_now)=0;
 	TO_LUA virtual bool saveNowToFile(char* filename)=0;
 	TO_LUA virtual bool loadFromFile(char* filename)=0;
 	TO_LUA virtual bool forceLoadFromFile(char* filename)=0;
@@ -67,6 +67,7 @@ public:
 	TO_LUA virtual int getNowBoneIndex()=0;
 	TO_LUA virtual void setNowBoneIndex(int index)=0;
 	TO_LUA virtual void setNowAnimeIndex(int index)=0;
+	TO_LUA virtual int getNowAnimeIndex()=0;
 	TO_LUA virtual void hetareIK()=0;
 };
 
@@ -134,7 +135,7 @@ class AnimationMeshFrame {
 public:
 	AnimationMeshKakera* kakera;
 	int kakera_index;
-	int frame;
+	float frame;
 	float time;
 };
 
@@ -466,16 +467,11 @@ public:
 	void setHonMeshBoneRotXMin(int impl_id, int bone_index, float rotx);
 	void setHonMeshBoneRotYMin(int impl_id, int bone_index, float roty);
 	void setHonMeshBoneRotZMin(int impl_id, int bone_index, float rotz);
-	
-
-
-
-
+	void setAnimePoseFrameExeAnime(int impl_id, float frame);
 	void setAnimePoseFrameKakera(int impl_id, int frame);
 	void setAnimePoseFrame(int impl_id, int frame);
 	int createFrameExe(int impl_id, char* frameexe_name, float all_frame);
-	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);
-	void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time);
+	void setFrameToExe(int impl_id, int frameexe_id, float anime_now, float kakera_now);
 	void saveAnimePoseFrame(int impl_id, int saveframe);// 現在のとっている姿勢を指定したアニメフレームとして保存する
 
 	bool saveNowToFile(char* filename);
@@ -494,6 +490,11 @@ public:
 	int getNowIMPLIndex();
 	void hetareIK();
 	void setNowAnimeIndex(int index);
+	int getNowAnimeIndex();
+
+	void setNowKakeraKakeraFrameAnime(AnimationBuilderImpl* impl, float frame);
+	float calcAnimeNow(float anime_now, float all_time);
+	int getNearFloorPoseIdFromCalcKakera(AnimationBuilderImpl* impl, int kakera_now_calc);
 	AnimationMeshKakera* loadKakera(MyTokenAnalyzer* a);
 };
 
