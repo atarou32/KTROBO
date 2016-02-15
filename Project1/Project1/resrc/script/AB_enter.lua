@@ -51,7 +51,7 @@ gu:setRender(win2, true)
 
 
 -- impl—p‚Ìtab‚ð“o˜^‚·‚é
-MYIMPLTAB = gu:makeTab(1, "test")
+MYIMPLTAB = gu:makeTab(1, "resrc/script/AB_tabimplpushed.lua")
 win3 = gu:makeWindow(-10,-10,1,1)
 gu:setPartToWindow(win3, MYIMPLTAB)
 gu:setPartToWindow(win3,win2)

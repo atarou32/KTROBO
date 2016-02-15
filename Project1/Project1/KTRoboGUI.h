@@ -497,7 +497,7 @@ private:
 	int tab_index; //　ルートから何番目のタブかということ
 	vector<int> window_names;// デストラクタが呼ばれる
 	vector<GUI_WINDOW*> child_windows;// tabのデストラクトが呼ばれてもwindowをデストラクトはされない
-	vector<int> tex_rects; 
+	vector<int> tex_rects; //デストラクトを呼ぶ
 	vector<MYRECT> tex_rect_boxs;
 
 	int now_index; // 現在注目されているウィンドウのインデックス
@@ -539,6 +539,14 @@ public:
 			tex->lightdeleteRenderText(t);
 			it = it + 1;
 		}
+
+		it = tex_rects.begin();
+		while(it != tex_rects.end()) {
+			int t = *it;
+			tex->lightdeleteRenderTex(t);
+			it = it + 1;
+		}
+		tex_rects.clear();
 		window_names.clear();
 	}
 	int setWindow(GUI_WINDOW* c, string name) {
@@ -580,14 +588,14 @@ public:
 	static void Init(Texture* te) {
 		tex = te;
 		
-		colors[0] =	0xFFFFFF77;
-		colors[1] =	0xFFFF0077;
-		colors[2] =	0xFF00FF77;
-		colors[3] =	0x00FFFF77;
-		colors[4] =	0xFF000077;
-		colors[5] =	0x00FF0077;
-		colors[6] =	0x0000FF77;
-		colors[7] =	0x00000077;
+		colors[0] =	0xFFFFFF33;
+		colors[1] =	0xFFFF0033;
+		colors[2] =	0xFF00FF33;
+		colors[3] =	0x00FFFF33;
+		colors[4] =	0xFF000033;
+		colors[5] =	0x00FF0033;
+		colors[6] =	0x0000FF33;
+		colors[7] =	0x00000033;
 
 		f_colors[0] =	0xFFFFFFFF;
 		f_colors[1] =	0xFFFF00FF;

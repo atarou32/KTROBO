@@ -12,6 +12,8 @@ if inputtext_scene ~= nil then
  -- TextFromLua:getIS(0,0):removeScene()
   test = gu:getStrFromInput(inputtext_scene)
   MYSLIDERS=nil
+  MYBONETAB=nil
+  MYTAB=nil
   ab:forceLoadFromFile(test)
   
  

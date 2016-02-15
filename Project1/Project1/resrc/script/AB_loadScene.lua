@@ -14,6 +14,8 @@ if inputtext_scene ~= nil then
  
   if ab:loadFromFile(test) then
    MYSLIDERS=nil
+   MYTAB=nil
+   MYBONETAB=nil
   else
    
     TextFromLua:getIS(0,0):enterTWOTAKU("resrc/script/AB_loadForceScene.lua", "resrc/script/SCENE_remove.lua", "åªç›ÇÃÉfÅ[É^ÇÕé∏ÇÌÇÍÇ‹Ç∑Ç™ÇÊÇ¢Ç≈Ç∑Ç©")

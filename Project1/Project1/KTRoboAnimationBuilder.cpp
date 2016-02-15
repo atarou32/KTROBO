@@ -913,6 +913,98 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return true;
 }
+AnimationMeshKakera* AnimationBuilder::loadKakera(MyTokenAnalyzer* a) {
+
+	a->GetToken("ROTTRANSISPARAM");
+	a->GetToken("{");
+	int rotxsize = a->GetIntToken();
+	AnimationMeshKakera* kakera = new AnimationMeshKakera();
+	for (int i=0;i<rotxsize;i++) {
+		kakera->mesh_bone_rotx.push_back(a->GetFloatToken());
+	}
+	int rotysize = a->GetIntToken();
+	for (int i=0;i<rotysize;i++) {
+		kakera->mesh_bone_roty.push_back(a->GetFloatToken());
+	}
+	int rotzsize = a->GetIntToken();
+	for (int i=0;i<rotzsize;i++) {
+		kakera->mesh_bone_rotz.push_back(a->GetFloatToken());
+	}
+	int transxsize = a->GetIntToken();
+	for (int i=0;i<transxsize;i++) {
+		kakera->mesh_bone_transx.push_back(a->GetFloatToken());
+	}
+	int transysize = a->GetIntToken();
+	for (int i=0;i<transysize;i++) {
+		kakera->mesh_bone_transy.push_back(a->GetFloatToken());
+	}
+	int transzsize = a->GetIntToken();
+	for (int i=0; i < transzsize; i++) {
+		kakera->mesh_bone_transz.push_back(a->GetFloatToken());
+	}
+
+	int isrotxsize = a->GetIntToken();
+	for (int i=0;i<isrotxsize;i++) {
+		int t = a->GetIntToken();
+		if (t) {
+			kakera->mesh_bone_isrotx.push_back(true);
+		} else {
+			kakera->mesh_bone_isrotx.push_back(false);
+		}
+	}
+	int isrotysize = a->GetIntToken();
+	for (int i=0;i<isrotysize;i++) {
+		int t = a->GetIntToken();
+		if (t) {
+			kakera->mesh_bone_isroty.push_back(true);
+		} else {
+			kakera->mesh_bone_isroty.push_back(false);
+		}
+	}
+	int isrotzsize = a->GetIntToken();
+	for (int i=0;i<isrotzsize;i++) {
+		int t = a->GetIntToken();
+		if (t) {
+			kakera->mesh_bone_isrotz.push_back(true);
+		} else {
+			kakera->mesh_bone_isrotz.push_back(false);
+		}
+	}
+	a->GetToken("}");
+	a->GetToken("MESHFILEPATHNAME");
+	a->GetToken();
+	kakera->mesh_filepathname = string(a->Toke());
+	a->GetToken("FRAME");
+	kakera->frame = a->GetIntToken();
+	a->GetToken("MESHBONENAMEINDEX");
+	a->GetToken("{");
+	int mn = a->GetIntToken();
+	for (int i=0;i<mn;i++) {
+		a->GetToken();
+		string s = string(a->Toke());
+		int inde = a->GetIntToken();
+		kakera->mesh_bone_name_index.insert(pair<string,int>(s,inde));
+	}
+	a->GetToken("}");
+	a->GetToken("DEFAULTFRAMEANDMATRIX");
+	a->GetToken("{");
+	mn = a->GetIntToken();
+	for (int i=0;i<mn;i++) {
+		int d = a->GetIntToken();
+		kakera->mesh_bone_default_anime_frame.push_back(d);
+	}
+	mn = a->GetIntToken();
+	for (int i=0;i<mn;i++) {
+		MYMATRIX m;
+		for (int k=0;k<16;k++) {
+				
+			m.m[k/4][k%4] = a->GetFloatToken();
+		}
+		kakera->mesh_offset_matrix.push_back(m);
+	}
+	
+	return kakera;
+}
 
 bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_AIDECISION);
@@ -1021,101 +1113,36 @@ bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 			a.GetToken("{");
 			a.GetToken("IMPL_ID");
 			int impl_id = a.GetIntToken();
-			a.GetToken("ROTTRANSISPARAM");
-			a.GetToken("{");
-			int rotxsize = a.GetIntToken();
-			AnimationMeshKakera* kakera = new AnimationMeshKakera();
-			for (int i=0;i<rotxsize;i++) {
-				kakera->mesh_bone_rotx.push_back(a.GetFloatToken());
-			}
-			int rotysize = a.GetIntToken();
-			for (int i=0;i<rotysize;i++) {
-				kakera->mesh_bone_roty.push_back(a.GetFloatToken());
-			}
-			int rotzsize = a.GetIntToken();
-			for (int i=0;i<rotzsize;i++) {
-				kakera->mesh_bone_rotz.push_back(a.GetFloatToken());
-			}
-			int transxsize = a.GetIntToken();
-			for (int i=0;i<transxsize;i++) {
-				kakera->mesh_bone_transx.push_back(a.GetFloatToken());
-			}
-			int transysize = a.GetIntToken();
-			for (int i=0;i<transysize;i++) {
-				kakera->mesh_bone_transy.push_back(a.GetFloatToken());
-			}
-			int transzsize = a.GetIntToken();
-			for (int i=0; i < transzsize; i++) {
-				kakera->mesh_bone_transz.push_back(a.GetFloatToken());
-			}
-
-			int isrotxsize = a.GetIntToken();
-			for (int i=0;i<isrotxsize;i++) {
-				int t = a.GetIntToken();
-				if (t) {
-					kakera->mesh_bone_isrotx.push_back(true);
-				} else {
-					kakera->mesh_bone_isrotx.push_back(false);
-				}
-			}
-			int isrotysize = a.GetIntToken();
-			for (int i=0;i<isrotysize;i++) {
-				int t = a.GetIntToken();
-				if (t) {
-					kakera->mesh_bone_isroty.push_back(true);
-				} else {
-					kakera->mesh_bone_isroty.push_back(false);
-				}
-			}
-			int isrotzsize = a.GetIntToken();
-			for (int i=0;i<isrotzsize;i++) {
-				int t = a.GetIntToken();
-				if (t) {
-					kakera->mesh_bone_isrotz.push_back(true);
-				} else {
-					kakera->mesh_bone_isrotz.push_back(false);
-				}
-			}
-			a.GetToken("}");
-			a.GetToken("MESHFILEPATHNAME");
-			a.GetToken();
-			kakera->mesh_filepathname = string(a.Toke());
-			a.GetToken("FRAME");
-			kakera->frame = a.GetIntToken();
-			a.GetToken("MESHBONENAMEINDEX");
-			a.GetToken("{");
-			int mn = a.GetIntToken();
-			for (int i=0;i<mn;i++) {
-				a.GetToken();
-				string s = string(a.Toke());
-				int inde = a.GetIntToken();
-				kakera->mesh_bone_name_index.insert(pair<string,int>(s,inde));
-			}
-			a.GetToken("}");
-			a.GetToken("DEFAULTFRAMEANDMATRIX");
-			a.GetToken("{");
-			mn = a.GetIntToken();
-			for (int i=0;i<mn;i++) {
-				int d = a.GetIntToken();
-				kakera->mesh_bone_default_anime_frame.push_back(d);
-			}
-			mn = a.GetIntToken();
-			for (int i=0;i<mn;i++) {
-				MYMATRIX m;
-				for (int k=0;k<16;k++) {
-					
-					m.m[k/4][k%4] = a.GetFloatToken();
-				}
-				kakera->mesh_offset_matrix.push_back(m);
-			}
-			a.GetToken("}");
+			AnimationMeshKakera* kakera = this->loadKakera(&a);
 			impls[impl_id]->kakeras.push_back(kakera);
 			impls[impl_id]->frame_to_kakera_index.insert(pair<int,int>(kakera->frame, impls[impl_id]->kakeras.size()-1));
-
+			a.GetToken("}");
 		}
 	}
 
 	// now_kakeraについてはhon_meshが読み込まれた後と同時にロードされるためロードファイルからは読み込まない
+	// としたが可動範囲の情報をかけらにもたせるためにここでロードしておく
+
+	a.resetPointer();
+	while(!a.enddayo()) {
+		a.GetToken();
+		if (strcmp(a.Toke(), "NOW_KAKERA")==0) {
+			a.GetToken("{");
+			a.GetToken("IMPL_ID");
+			int impl_id = a.GetIntToken();
+			AnimationMeshKakera* kakera = loadKakera(&a);
+			a.GetToken("}");
+			//impls[impl_id]->kakeras.push_back(kakera);
+			impls[impl_id]->now_kakera = kakera;
+			break;
+			//impls[impl_id]->frame_to_kakera_index.insert(pair<int,int>(kakera->frame, impls[impl_id]->kakeras.size()-1));
+
+		}
+	}
+
+
+
+
 	// kakeras と animesについて
 	// animesをロードする
 
@@ -2140,7 +2167,7 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 					m->readAnime(animename);
 					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 
-					/// TODO now_kakera を作る
+					/// TODO now_kakera を作る ない場合は
 					if (!ii->now_kakera) {
 						ii->now_kakera = new AnimationMeshKakera();
 						int bone_size = ii->hon_mesh->mesh->Bones.size();

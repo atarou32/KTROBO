@@ -453,6 +453,7 @@ public:
 	int getNowIMPLIndex();
 	void hetareIK();
 
+	AnimationMeshKakera* loadKakera(MyTokenAnalyzer* a);
 };
 
 

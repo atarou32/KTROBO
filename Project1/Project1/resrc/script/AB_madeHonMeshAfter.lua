@@ -96,7 +96,7 @@ for i=1,msg_siz do
   --char* getHonMeshBoneName(int impl_id, int bone_index);
   bon_num = ab:getHonMeshBoneNum(impl_id)
   for j=1,bon_num do
-    bone_name = ab:getHonMeshBoneName(impl_id, j)
+    bone_name = ab:getHonMeshBoneName(impl_id, j-1)
     MYBONENAME[impl_id+1] = MYBONENAME[impl_id+1] or {}
     MYBONENAME[impl_id+1][j] = bone_name
   end
@@ -156,8 +156,8 @@ for i=1,msg_siz do
   end
   gu:setEffect(MYTAB[impl_id+1],true)
   gu:setRender(MYTAB[impl_id+1],true)
-  gu:setEffect(MYBONETAB[impl_id+1][bon_num][10], true)
-  gu:setRender(MYBONETAB[impl_id+1][bon_num][10], true)
+ -- gu:setEffect(MYBONETAB[impl_id+1][bon_num][10], true)
+ -- gu:setRender(MYBONETAB[impl_id+1][bon_num][10], true)
   gu:setPartToWindow(BIGWIN[impl_id+1], MYTAB[impl_id+1])
   -- MYIMPLTAB‚É“o˜^
   gu:setWindowToTab(MYIMPLTAB, BIGWIN[impl_id+1],""..impl_id)
