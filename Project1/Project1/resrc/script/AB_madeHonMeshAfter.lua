@@ -31,6 +31,9 @@ mes:getMsgBody(msg_siz,msgsi, msg_ids, sender_ids, receiver_ids, msgs, fmsgs)
 MYBONENAME = MYBONENAME or {}
 MYBONETAB = MYBONETAB or {}
 MYTAB = MYTAB or {}
+MYANIMETAB = MYANIMETAB or {}
+MYANIMETABINDEX = MYANIMETABINDEX or {}
+
 --MYSLIDERS = MYSLIDERS or {}
 
 if MYSLIDERS==nil then
@@ -137,12 +140,16 @@ for i=1,msg_siz do
     MYBONENAME[impl_id+1] = MYBONENAME[impl_id+1] or {}
     MYBONENAME[impl_id+1][j] = bone_name
   end
+  
+
+  
   TextFromLua:getIS(0,0):setDebugText("impl_id="..impl_id)
   TextFromLua:getIS(0,0):setDebugText("impl_id+1="..(impl_id+1))
  -- TextFromLua:getIS(0,0):setDebugText("bone_tab=".. MYBONETAB)
   MYBONETAB[impl_id+1] = {}
   BIGWIN[impl_id+1] = gu:makeWindow(0,100,1000,100)
   MYTAB[impl_id+1] = gu:makeTab(0, "resrc/script/AB_tabbonepushed.lua")
+  MYANIMETAB[impl_id+1] = gu:makeTab(2, "resrc/script/AB_tabanimepushed.lua")
   TextFromLua:getIS(0,0):setDebugText("test1")
   for bon_in, bon_nam in ipairs(MYBONENAME[impl_id+1]) do
     TextFromLua:getIS(0,0):setDebugText("bon_in="..bon_in.."bon_nam"..bon_nam)
@@ -194,12 +201,28 @@ for i=1,msg_siz do
   end
   gu:setEffect(MYTAB[impl_id+1],true)
   gu:setRender(MYTAB[impl_id+1],true)
+  gu:setEffect(MYANIMETAB[impl_id+1], true)
+  gu:setRender(MYANIMETAB[impl_id+1], true)
  -- gu:setEffect(MYBONETAB[impl_id+1][bon_num][10], true)
  -- gu:setRender(MYBONETAB[impl_id+1][bon_num][10], true)
   gu:setPartToWindow(BIGWIN[impl_id+1], MYTAB[impl_id+1])
+  gu:setPartToWindow(BIGWIN[impl_id+1], MYANIMETAB[impl_id+1])
   -- MYIMPLTAB‚É“o˜^
   gu:setWindowToTab(MYIMPLTAB, BIGWIN[impl_id+1],""..impl_id)
   TextFromLua:getIS(0,0):setDebugText("test2")
+  
+  anime_num = ab:getAnimeNum(impl_id)
+  for j=1, anime_num do
+    anime_name = ab:getAnimeName(impl_id, j-1)
+    MYANIMETABINDEX = MYANMETABINDEX or {}
+    MYANIMETABINDEX[impl_id+1] = MYANIMETABINDEX[impl_id+1] or {}
+    wind = gu:makeWindow(0,0,1000,800)
+    index = gu:setWindowToTab(MYANIMETAB[impl_id+1], wind, anime_name)
+    MYANIMETABINDEX[impl_id+1][j] =  index
+  end
+  
+  
+  
 end
 
 gu:setRender(MYIMPLTAB, true)

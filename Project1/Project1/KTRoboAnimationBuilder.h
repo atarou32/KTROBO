@@ -14,6 +14,8 @@ public:
 	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru)=0;
 	TO_LUA virtual int getHonMeshBoneNum(int impl_id)=0;
 	TO_LUA virtual char* getHonMeshBoneName(int impl_id, int bone_index)=0;
+	TO_LUA virtual int getAnimeNum(int impl_id)=0;
+	TO_LUA virtual char* getAnimeName(int impl_id, int anime_index)=0;
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
 	TO_LUA virtual void setHonMeshBoneRotY(int impl_id, int bone_index, float roty)=0;
 	TO_LUA virtual void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz)=0;
@@ -50,7 +52,7 @@ public:
 	TO_LUA virtual void setAnimePoseFrameKakera(int impl_id, int frame)=0;
 	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;
 	TO_LUA virtual void saveAnimePoseFrame(int impl_id, int saveframe)=0;// 現在のとっている姿勢を指定したアニメフレームとして保存する
-	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, bool is_loop)=0;
+	TO_LUA virtual int createFrameExe(int impl_id, char* frameexe_name, float all_frame)=0;
 	TO_LUA virtual void setFrameToExe(int impl_id, int frameexe_id, int pose_id,  int frame, float time)=0;
 	TO_LUA virtual void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time)=0;
 	TO_LUA virtual bool saveNowToFile(char* filename)=0;
@@ -64,6 +66,7 @@ public:
 	TO_LUA virtual int getNowIMPLIndex()=0;
 	TO_LUA virtual int getNowBoneIndex()=0;
 	TO_LUA virtual void setNowBoneIndex(int index)=0;
+	TO_LUA virtual void setNowAnimeIndex(int index)=0;
 	TO_LUA virtual void hetareIK()=0;
 };
 
@@ -138,7 +141,7 @@ public:
 class AnimationMesh {
 public:
 	vector<AnimationMeshFrame*> frames;
-	string anime_name;
+	char anime_name[128];
 	int anime_index;
 	float all_time;
 	bool is_loop;
@@ -393,11 +396,12 @@ private:
 	kurukuru* kuru;
 
 	int bone_index;
+	int anime_index;
 public:
 	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
 	int bone_bills[KTROBO_MESH_BONE_MAX];
 	int bone_name_text;
-
+	int anime_name_text;
 public:
 	AnimationBuilder(char* c, int len, MyTextureLoader* loader);
 	virtual ~AnimationBuilder(void) {
@@ -433,7 +437,8 @@ public:
 	void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath,char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru);
 	int getHonMeshBoneNum(int impl_id);
 	char* getHonMeshBoneName(int impl_id, int bone_index);
-
+	int getAnimeNum(int impl_id);
+	char* getAnimeName(int impl_id, int anime_index);
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
 	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
 	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
@@ -468,7 +473,7 @@ public:
 
 	void setAnimePoseFrameKakera(int impl_id, int frame);
 	void setAnimePoseFrame(int impl_id, int frame);
-	int createFrameExe(int impl_id, char* frameexe_name, bool is_loop);
+	int createFrameExe(int impl_id, char* frameexe_name, float all_frame);
 	void setFrameToExe(int impl_id, int frameexe_id, int pose_id, int frame, float time);
 	void changeFrameExe(int impl_id, int frameexe_id, int frame_id, int frame, float time);
 	void saveAnimePoseFrame(int impl_id, int saveframe);// 現在のとっている姿勢を指定したアニメフレームとして保存する
@@ -488,7 +493,7 @@ public:
 	void setNowBoneIndex(int index);
 	int getNowIMPLIndex();
 	void hetareIK();
-
+	void setNowAnimeIndex(int index);
 	AnimationMeshKakera* loadKakera(MyTokenAnalyzer* a);
 };
 

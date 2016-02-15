@@ -51,15 +51,33 @@ gu:setRender(win2, true)
 
 -- impl—p‚Ìtab‚ð“o˜^‚·‚é
 MYIMPLTAB = gu:makeTab(1, "resrc/script/AB_tabimplpushed.lua")
+
+inputtext_animename = gu:makeInputText("50", "750", "500", "20")
+inputtext_animeframe = gu:makeInputText("570", "750", "60", "18")
+anime_but = gu:makeButton("640", "750", "40","40", "resrc/script/AB_makeAnime.lua", 29, "anime")
+win5 = gu:makeWindow(50,750,610,40)
+gu:setPartToWindow(win5, inputtext_animename)
+gu:setPartToWindow(win5, inputtext_animeframe)
+gu:setPartToWindow(win5, anime_but)
+gu:setRender(inputtext_animename, true)
+gu:setEffect(inputtext_animename, true)
+gu:setRender(inputtext_animeframe, true)
+gu:setEffect(inputtext_animeframe, true)
+gu:setRender(anime_but, true)
+gu:setEffect(anime_but, true)
+gu:setRender(win5, true)
+gu:setEffect(win5, true)
+
 win3 = gu:makeWindow(-10,-10,1,1)
 gu:setPartToWindow(win3, MYIMPLTAB)
-gu:setPartToWindow(win3,win2)
+gu:setPartToWindow(win3, win5)
+gu:setPartToWindow(win3, win2)
 gu:setPartToWindow(win3, win)
 gu:setPartToWindow(win3, win4)
 gu:setEffect(MYIMPLTAB,true)
 gu:setRender(MYIMPLTAB,true)
+
+
 gu:setEffect(win3, true)
 gu:setRender(win3, true)
 gu:setLeafWindowToInputMessageDispatcher(win3)
-
-

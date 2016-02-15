@@ -8,6 +8,9 @@ impl_id = gu:getTabIndex(MYIMPLTAB)
 bone_id = gu:getTabIndex(MYTAB[impl_id+1])
 ab:setNowIMPLIndex(impl_id)
 
+gu:setTabIndex(MYANIMETAB[impl_id+1],0)
+
+
 -- slider‚Ì’l‚ğİ’è‚·‚é
 rotx = ab:getHonMeshBoneRotX(impl_id, bone_id)
 roty = ab:getHonMeshBoneRotY(impl_id, bone_id)

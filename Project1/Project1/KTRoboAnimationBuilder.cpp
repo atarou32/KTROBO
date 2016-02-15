@@ -16,6 +16,7 @@ AnimationBuilder::AnimationBuilder(char* n,int len, MyTextureLoader* lo) : Scene
 	MYVECTOR3 up(0,0,1);
 	now_index = 0;
 	bone_index = 0;
+	anime_index =0;
 	MyMatrixLookAtRH(view,from,at,up);
 	MyMatrixPerspectiveFovRH(proj, 1, gs[TASKTHREADS_AIDECISION]->getScreenWidth() / (float)gs[TASKTHREADS_AIDECISION]->getScreenHeight(), 1, 1000);
 	
@@ -446,15 +447,16 @@ void  AnimationBuilder::saveAnimePoseFrame(int impl_id, int frame) {
 	
 	
 	
-int  AnimationBuilder::createFrameExe(int impl_id, char* frameexe_name, bool is_loop) {
+int  AnimationBuilder::createFrameExe(int impl_id, char* frameexe_name, float all_frame) {
 	int aa = 0;
 	AnimationMesh* am = new AnimationMesh();
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		AnimationBuilderImpl *impl = impls[impl_id];
-		am->anime_name = string(frameexe_name);
-		am->is_loop = is_loop;
-		am->all_time = 0;
+		memset(am->anime_name,0,sizeof(char)*128);
+		hmystrcpy(am->anime_name,128,0,frameexe_name);
+		am->is_loop = false;//is_loop;
+		am->all_time = all_frame;
 		am->anime_index = impl->animes.size();
 		aa = am->anime_index;
 		impl->animes.push_back(am);
@@ -1437,7 +1439,9 @@ bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 			am->anime_index = a.GetIntToken();
 			a.GetToken("ANIME_NAME");
 			a.GetToken();
-			am->anime_name = string(a.Toke());
+			memset(am->anime_name,0,128);
+			hmystrcpy(am->anime_name,128,0,a.Toke());
+//			am->anime_name = string(a.Toke());
 			a.GetToken("IS_LOOP");
 			int t = a.GetIntToken();
 			if (t) {
@@ -2003,7 +2007,9 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 		bone_bills[i] = tex->getRenderBillBoard(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
 	}
 	bone_name_text = tex->getRenderText("default",0,600,16,16*18,18);
+	anime_name_text = tex->getRenderText("default",0,630,16,16*18,18);
 	tex->setRenderTextIsRender(bone_name_text,true);
+	tex->setRenderTextIsRender(anime_name_text, true);
  }
 
  
@@ -2243,6 +2249,7 @@ float AnimationBuilder::getHonMeshBoneTransZ(int impl_id, int bone_index) {
 		tex->lightdeleteRenderBillBoard(bone_bills[i]);//(tex_id, 0xFFFFFFFF,&world, 1.0f,1.0f,0,0,1,1);
 	}
 	tex->lightdeleteRenderText(bone_name_text);
+	tex->lightdeleteRenderText(anime_name_text);
 }
 
 int AnimationBuilder::getNowIMPLIndex() {
@@ -2542,6 +2549,7 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 void AnimationBuilder::setNowBoneIndex(int index) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	this->bone_index = index;
 	Texture* te = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 	for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
@@ -2552,13 +2560,28 @@ void AnimationBuilder::setNowBoneIndex(int index) {
 	if (impls.size() && impls[now_index]->hon_mesh->mesh->Bones.size()) {
 		te->setRenderTextChangeText(bone_name_text, impls[now_index]->hon_mesh->mesh->Bones[index]->bone_name);
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
+
+void AnimationBuilder::setNowAnimeIndex(int index) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	this->anime_index = index;
+	Texture* te = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	if (impls.size() && impls[now_index]->animes.size()) {
+		char temp[512];
+		memset(temp, 0,sizeof(temp));
+		hmystrcpy(temp,512,0,impls[now_index]->animes[index]->anime_name);
+		te->setRenderTextChangeText(anime_name_text, temp);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}
 
 void AnimationBuilder::setNowIMPLIndex(int index) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > index && index >=0) {
 		now_index = index;
+		anime_index = 0;
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
@@ -2622,4 +2645,37 @@ void AnimationBuilderImpl::setIsAnimate(bool t) {
 	for (int i=0;i<xsize; i++) {
 		ko_mesh[i]->is_animated = t;
 	}
+}
+
+int AnimationBuilder::getAnimeNum(int impl_id) {
+	int ans = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		ans = impl->animes.size();
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
+}
+
+
+char* AnimationBuilder::getAnimeName(int impl_id, int anime_index) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+	
+		AnimationBuilderImpl *impl = impls[impl_id];
+		int asize = impl->animes.size();
+		if (asize > anime_index && anime_index >=0) {
+			char* bone_name = impl->animes[anime_index]->anime_name;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return bone_name;
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return "null";
 }
