@@ -36,7 +36,7 @@ public:
 	static Game* game;
 protected:
 	TCB* looptcbs[TASKTHREAD_NUM];
-	
+	bool send_remove_message;
 public:	
 	virtual void mainrenderIMPL(bool is_focused, Graphics* g, Game* game)=0;
 	virtual void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)=0;
@@ -69,6 +69,7 @@ public:
 		for (int i=0;i<TASKTHREAD_NUM;i++) {
 			looptcbs[i] = 0;
 		}
+		send_remove_message = false;
 		
 	}
 	virtual ~Scene(void);

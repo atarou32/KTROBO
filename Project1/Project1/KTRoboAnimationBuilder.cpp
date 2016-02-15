@@ -916,12 +916,15 @@ bool AnimationBuilder::forceLoadFromFile(char* filename) {
 
 bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_AIDECISION);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
 	deleteAll();
 	// ここでGUIのデストラクトとLUAのAB_ENTERの呼び出しを済ませておく
 	TCB test;
 	MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(0)->deleteAll();
 	LuaTCBMaker::doTCBnow(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
+	CS::instance()->leave(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
 	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_AIDECISION);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
 	MyTokenAnalyzer a;
 	a.load(filename);
 	while(!a.enddayo()) {
@@ -1167,6 +1170,7 @@ bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 
 
 	a.deletedayo();
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_LOADDESTRUCT);
 	return true;
 }
 
@@ -2110,7 +2114,9 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 		memset(buf,0,512);
 		hmystrcpy(buf,512,0,load_filename.c_str());
 		CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+		CS::instance()->leave(CS_TASK_CS, "leave",TASKTHREADS_LOADDESTRUCT);
 		bool tes  = _forceLoadFromFile(buf);
+		CS::instance()->enter(CS_TASK_CS, "enter",TASKTHREADS_LOADDESTRUCT);
 		CS::instance()->enter(CS_RENDERDATA_CS,"enter");
 	//	do_force_save = false;
 		load_result = tes;

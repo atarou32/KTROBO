@@ -132,7 +132,7 @@ void Message::getMsgBody(int mindex_len, int* msg_indexs, OUT_ int* msg_ids, OUT
 
 	CS::instance()->enter(CS_MESSAGE_CS, "enter");
 	for (int i=0;i<mindex_len;i++) {
-		int inde = msg_indexs[mindex_len];
+		int inde = msg_indexs[i];
 		if (structs[inde].is_use) {
 			msg_ids[i] = structs[inde].msg_id;
 			sender_ids[i] = structs[inde].sender_id;
@@ -146,7 +146,7 @@ void Message::getMsgBody(int mindex_len, int* msg_indexs, OUT_ int* msg_ids, OUT
 	}
 
 	for (int i=0;i<mindex_len;i++) {
-		int inde = msg_indexs[mindex_len];
+		int inde = msg_indexs[i];
 		if (structs[inde].is_use) {
 			structs[inde].is_use = false;
 		}

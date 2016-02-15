@@ -66,7 +66,7 @@ void Scene::enter() {
 	work[0] = (unsigned long)(pos_butukari_task);
 	TCB* pos_butukari_tcb = pos_butukari_task->make(TCB_SCENE_POSBUTUKARI, this, work, 0x0000FFFF);
 	
-	Task* load_task = t[TASKTHREADS_UPDATEPOSBUTUKARI];
+	Task* load_task = t[TASKTHREADS_LOADDESTRUCT];
 	work[0] = (unsigned long)(load_task);
 	TCB* load_tcb = load_task->make(TCB_SCENE_LOAD, this, work, 0x0000FFFF);
 
@@ -74,6 +74,7 @@ void Scene::enter() {
 	this->looptcbs[TASKTHREADS_LOADDESTRUCT] = load_tcb;
 	this->looptcbs[TASKTHREADS_UPDATEANIMEFRAMENADO] = render_hojyo_tcb;
 	this->looptcbs[TASKTHREADS_UPDATEPOSBUTUKARI] = pos_butukari_tcb;
+	send_remove_message = false;
 }
 
 void Scene::leave() {
@@ -99,6 +100,7 @@ void Scene::leave() {
 		t[TASKTHREADS_UPDATEPOSBUTUKARI]->kill(looptcbs[TASKTHREADS_UPDATEPOSBUTUKARI]);
 		looptcbs[TASKTHREADS_UPDATEPOSBUTUKARI] = 0;
 	}
+	send_remove_message = true;
 }
 
 #define KTROBO_SCENE_ONEMESSAGE_STR_HEIGHT 30
@@ -123,7 +125,7 @@ void ONEMESSAGE::enter() {
 		ss = ss->getParent();
 	}
 	InputMessageDispatcher::registerImpl(this, NULL, ss->impl);
-
+	
 }
 
 void ONEMESSAGE::leave() {
@@ -157,8 +159,10 @@ bool ONEMESSAGE::handleMessage(int msg, void* data, DWORD time) {
 
 	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		if (input->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) {
+			if (!send_remove_message) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/SCENE_remove.lua");
-
+			send_remove_message = true;
+			}
 			return true;
 
 		}
@@ -172,7 +176,10 @@ bool ONEMESSAGE::handleMessage(int msg, void* data, DWORD time) {
 			re.bottom = gs[TASKTHREADS_AIDECISION]->getScreenHeight();
 			unsigned int butu = getButukariStatusPoint(input->getMOUSESTATE()->mouse_x, input->getMOUSESTATE()->mouse_y, &re);
 			if (butu & BUTUKARIPOINT_IN) {
-			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/SCENE_remove.lua");
+				if (!send_remove_message) {
+					LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/SCENE_remove.lua");
+					send_remove_message = true;
+				}
 			}
 			return true;
 
@@ -303,7 +310,6 @@ void LOADTYUU::enter() {
 		ss = ss->getParent();
 	}
 	InputMessageDispatcher::registerImpl(this, NULL, ss->impl);
-
 }
 
 void LOADTYUU::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)
