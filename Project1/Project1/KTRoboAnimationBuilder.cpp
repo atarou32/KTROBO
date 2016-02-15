@@ -127,7 +127,9 @@ void  AnimationBuilder::setHonMeshBoneRotX(int impl_id, int bone_index, float ro
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isrotx[bone_index]) {
 				// ロードされているので設定する
-				impl->now_kakera->mesh_bone_rotx[bone_index] = rotx;
+				impl->now_kakera->setRotX(bone_index, rotx);
+
+			//	impl->now_kakera->mesh_bone_rotx[bone_index] = rotx;
 				impl->setIsAnimate(false);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			
@@ -149,7 +151,8 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			if (impl->now_kakera && impl->now_kakera->mesh_bone_isroty[bone_index]) {
 				// ロードされているので設定する
-				impl->now_kakera->mesh_bone_roty[bone_index] = roty;
+				impl->now_kakera->setRotY(bone_index, roty);
+			//	impl->now_kakera->mesh_bone_roty[bone_index] = roty;
 			impl->setIsAnimate(false);
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
@@ -172,7 +175,8 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 			if (impl->now_kakera&& impl->now_kakera->mesh_bone_isrotz[bone_index]) {
 				// ロードされているので設定する
 				impl->setIsAnimate(false);
-				impl->now_kakera->mesh_bone_rotz[bone_index] = rotz;
+				impl->now_kakera->setRotZ(bone_index, rotz);
+//				impl->now_kakera->mesh_bone_rotz[bone_index] = rotz;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 			return;
 			}
@@ -183,7 +187,7 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
-void  AnimationBuilder::toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index) {
+bool AnimationBuilder::toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index) {
 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	// falseにすると回転が0になりIKでも回転しなくなる
 	if (impls.size() > impl_id && impl_id >=0) {
@@ -196,20 +200,21 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotx[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transx[bone_index] = 0;
-				impl->now_kakera->mesh_bone_isrotx[bone_index] = !impl->now_kakera->mesh_bone_isrotx[bone_index];
+				bool t = impl->now_kakera->mesh_bone_isrotx[bone_index] = !impl->now_kakera->mesh_bone_isrotx[bone_index];
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-			return;
+			return t;
 			}
 		}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-		return;
+		return true;
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return true;
 }
 	
 	
 	
-void  AnimationBuilder::toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index) {
+bool  AnimationBuilder::toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index) {
 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	// falseにすると回転が0になりIKでも回転しなくなる
 	if (impls.size() > impl_id && impl_id >=0) {
@@ -222,19 +227,20 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_roty[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transy[bone_index] = 0;
-				impl->now_kakera->mesh_bone_isroty[bone_index] = !impl->now_kakera->mesh_bone_isroty[bone_index];
+				bool t = impl->now_kakera->mesh_bone_isroty[bone_index] = !impl->now_kakera->mesh_bone_isroty[bone_index];
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-			return;
+			return t;
 			}
 		}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-		return;
+		return true;
 	}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return true;
 }
 
 
-void  AnimationBuilder::toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index) {
+bool  AnimationBuilder::toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index) {
 	// falseにすると回転が0になりIKでも回転しなくなる
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
@@ -247,15 +253,16 @@ void  AnimationBuilder::toggleHonMeshBoneRotZIsChange(int impl_id, int bone_inde
 				impl->setIsAnimate(false);
 				impl->now_kakera->mesh_bone_rotz[bone_index] = 0;
 				impl->now_kakera->mesh_bone_transz[bone_index] = 0;
-				impl->now_kakera->mesh_bone_isrotz[bone_index] = !impl->now_kakera->mesh_bone_isrotz[bone_index];
+				bool t = impl->now_kakera->mesh_bone_isrotz[bone_index] = !impl->now_kakera->mesh_bone_isrotz[bone_index];
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-			return;
+			return t;
 			}
 		}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-		return;
+		return true;
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return true;
 }
 
 
@@ -730,6 +737,65 @@ void AnimationMeshKakera::write(char* filename, int impl_id) {
 		}
 	}
 	KTROBO::mylog::writelog(filename, "\n");
+
+
+
+
+	int mesh_bone_rotx_max_size = mesh_bone_rotx_max.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotx_max_size);
+	for (int i=0;i<mesh_bone_rotx_max_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", mesh_bone_rotx_max[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_rotx_min_size = mesh_bone_rotx_min.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotx_min_size);
+	for (int i=0;i<mesh_bone_rotx_min_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", mesh_bone_rotx_min[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+
+	int mesh_bone_roty_max_size = mesh_bone_roty_max.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_roty_max_size);
+	for (int i=0;i<mesh_bone_roty_max_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", mesh_bone_roty_max[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_roty_min_size = mesh_bone_roty_min.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_roty_min_size);
+	for (int i=0;i<mesh_bone_roty_min_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", mesh_bone_roty_min[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+
+	int mesh_bone_rotz_max_size = mesh_bone_rotz_max.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotz_max_size);
+	for (int i=0;i<mesh_bone_rotz_max_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", mesh_bone_rotz_max[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	int mesh_bone_rotz_min_size = mesh_bone_rotz_min.size();
+	KTROBO::mylog::writelog(filename, "%d;",mesh_bone_rotz_min_size);
+	for (int i=0;i<mesh_bone_rotz_min_size;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", mesh_bone_rotz_min[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+
+
+
+
+
+
+
+
+
+
+
 	KTROBO::mylog::writelog(filename, "}\n");
 	/*
 	string mesh_filepathname;
@@ -970,6 +1036,47 @@ AnimationMeshKakera* AnimationBuilder::loadKakera(MyTokenAnalyzer* a) {
 			kakera->mesh_bone_isrotz.push_back(false);
 		}
 	}
+
+	int rotxmaxsize = a->GetIntToken();
+	for (int i=0;i<rotxmaxsize;i++) {
+		float t = a->GetFloatToken();
+		kakera->mesh_bone_rotx_max.push_back(t);
+	}
+
+	int rotxminsize = a->GetIntToken();
+	for (int i=0;i<rotxminsize;i++) {
+		float t = a->GetFloatToken();
+		kakera->mesh_bone_rotx_min.push_back(t);
+	}
+
+	
+	int rotymaxsize = a->GetIntToken();
+	for (int i=0;i<rotymaxsize;i++) {
+		float t = a->GetFloatToken();
+		kakera->mesh_bone_roty_max.push_back(t);
+	}
+
+	int rotyminsize = a->GetIntToken();
+	for (int i=0;i<rotyminsize;i++) {
+		float t = a->GetFloatToken();
+		kakera->mesh_bone_roty_min.push_back(t);
+	}
+
+
+	
+	int rotzmaxsize = a->GetIntToken();
+	for (int i=0;i<rotzmaxsize;i++) {
+		float t = a->GetFloatToken();
+		kakera->mesh_bone_rotz_max.push_back(t);
+	}
+
+	int rotzminsize = a->GetIntToken();
+	for (int i=0;i<rotzminsize;i++) {
+		float t = a->GetFloatToken();
+		kakera->mesh_bone_rotz_min.push_back(t);
+	}
+
+
 	a->GetToken("}");
 	a->GetToken("MESHFILEPATHNAME");
 	a->GetToken();
@@ -1005,6 +1112,175 @@ AnimationMeshKakera* AnimationBuilder::loadKakera(MyTokenAnalyzer* a) {
 	
 	return kakera;
 }
+
+
+void AnimationMeshKakera::setRotX(int bone_index,float rotx) {
+	if (rotx > mesh_bone_rotx_max[bone_index]) {
+		rotx = mesh_bone_rotx_max[bone_index];
+	}
+	if (rotx < mesh_bone_rotx_min[bone_index]) {
+		rotx = mesh_bone_rotx_min[bone_index];
+	}
+	mesh_bone_rotx[bone_index] = rotx;
+
+}
+
+void AnimationMeshKakera::setRotY(int bone_index, float roty) {
+	if (roty > mesh_bone_roty_max[bone_index]) {
+		roty = mesh_bone_roty_max[bone_index];
+	}
+	if (roty < mesh_bone_roty_min[bone_index]) {
+		roty = mesh_bone_roty_min[bone_index];
+	}
+	mesh_bone_roty[bone_index] = roty;
+
+}
+
+void AnimationMeshKakera::setRotZ(int bone_index, float rotz) {
+	if (rotz > mesh_bone_rotz_max[bone_index]) {
+		rotz = mesh_bone_rotz_max[bone_index];
+	}
+	if (rotz < mesh_bone_rotz_min[bone_index]) {
+		rotz = mesh_bone_rotz_min[bone_index];
+	}
+	mesh_bone_rotz[bone_index] = rotz;
+
+}
+
+
+void AnimationBuilder::setHonMeshBoneRotXMax(int impl_id, int bone_index, float rotx) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera&& impl->now_kakera->mesh_bone_rotx_max[bone_index]) {
+				// ロードされているので設定する
+				impl->now_kakera->mesh_bone_rotx_max[bone_index] = rotx;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+void AnimationBuilder::setHonMeshBoneRotYMax(int impl_id, int bone_index, float roty) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera&& impl->now_kakera->mesh_bone_roty_max[bone_index]) {
+				// ロードされているので設定する
+				impl->now_kakera->mesh_bone_roty_max[bone_index] = roty;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+
+void AnimationBuilder::setHonMeshBoneRotZMax(int impl_id, int bone_index, float rotz) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera&& impl->now_kakera->mesh_bone_rotz_max[bone_index]) {
+				// ロードされているので設定する
+				impl->now_kakera->mesh_bone_rotz_max[bone_index] = rotz;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+
+void AnimationBuilder::setHonMeshBoneRotXMin(int impl_id, int bone_index, float rotx) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera&& impl->now_kakera->mesh_bone_rotx_min[bone_index]) {
+				// ロードされているので設定する
+				impl->now_kakera->mesh_bone_rotx_min[bone_index] = rotx;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+
+void AnimationBuilder::setHonMeshBoneRotYMin(int impl_id, int bone_index, float roty) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera&& impl->now_kakera->mesh_bone_roty_min[bone_index]) {
+				// ロードされているので設定する
+				impl->now_kakera->mesh_bone_roty_min[bone_index] = roty;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+}
+
+
+void AnimationBuilder::setHonMeshBoneRotZMin(int impl_id, int bone_index, float rotz) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (impls.size() > impl_id && impl_id >=0) {
+		
+		
+		AnimationBuilderImpl *impl = impls[impl_id];
+		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
+			if (impl->now_kakera&& impl->now_kakera->mesh_bone_rotz_min[bone_index]) {
+				// ロードされているので設定する
+				impl->now_kakera->mesh_bone_rotz_min[bone_index] = rotz;
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			return;
+			}
+		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+}
+
+
 
 bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_AIDECISION);
@@ -1530,6 +1806,13 @@ void AnimationMeshKakera::copy(AnimationMeshKakera* kakera_moto) {
 		mesh_bone_default_anime_frame = kakera_moto->mesh_bone_default_anime_frame;
 		mesh_offset_matrix = kakera_moto->mesh_offset_matrix;
 		this->mesh_filepathname = kakera_moto->mesh_filepathname;
+		mesh_bone_rotx_max = kakera_moto->mesh_bone_rotx_max;
+		mesh_bone_rotx_min = kakera_moto->mesh_bone_rotx_min;
+		mesh_bone_roty_max = kakera_moto->mesh_bone_roty_max;
+		mesh_bone_roty_min = kakera_moto->mesh_bone_roty_min;
+		mesh_bone_rotz_max = kakera_moto->mesh_bone_rotz_max;
+		mesh_bone_rotz_min = kakera_moto->mesh_bone_rotz_min;
+
 	//	this->frame = kakera_moto->frame;
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
@@ -2183,6 +2466,14 @@ void AnimationBuilder::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, l
 							ii->now_kakera->mesh_bone_transx.push_back(0);
 							ii->now_kakera->mesh_bone_transy.push_back(0);
 							ii->now_kakera->mesh_bone_transz.push_back(0);
+							ii->now_kakera->mesh_bone_rotx_max.push_back(1.57f);
+							ii->now_kakera->mesh_bone_rotx_min.push_back(-1.57f);
+							ii->now_kakera->mesh_bone_roty_max.push_back(1.57f);
+							ii->now_kakera->mesh_bone_roty_min.push_back(-1.57f);
+							ii->now_kakera->mesh_bone_rotz_max.push_back(1.57f);
+							ii->now_kakera->mesh_bone_rotz_min.push_back(-1.57f);
+
+
 							ii->now_kakera->mesh_filepathname = string(ii->hon_mesh->mesh_filepath);
 							ii->now_kakera->frame=0;
 							ii->now_kakera->mesh_bone_default_anime_frame.push_back(0);

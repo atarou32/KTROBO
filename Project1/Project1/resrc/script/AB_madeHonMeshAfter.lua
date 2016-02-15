@@ -39,7 +39,7 @@ if MYSLIDERS==nil then
   MYSLIDERS[1] = gu:makeSliderH({500+offset,800+offset,100,120},"3.14","-3.14","0","resrc/script/AB_sliderX.lua")
   MYSLIDERS[2] = gu:makeSliderH({500+offset,800+offset,130,150},"10","-10","0","resrc/script/AB_sliderX.lua")
   MYSLIDERS[3] = gu:makeButton(tostring(450+offset),"100","40","40", "resrc/script/AB_sliderXBut.lua", 30, "tog")
-     TextFromLua:getIS(0,0):setDebugText("test12")
+  TextFromLua:getIS(0,0):setDebugText("test12")
     -- roty
     -- transy
     -- is_rotybutton
@@ -60,6 +60,18 @@ if MYSLIDERS==nil then
   MYSLIDERS[12] = gu:makeButton(tostring(offset+300), "410", "30","30", "resrc/script/AB_setFrame.lua", 28, "set")
   MYSLIDERS[13] = gu:makeSliderH({300+offset,812+offset,480,500},"511","1","1","resrc/script/AB_setSiseiFrameKakera.lua")
   MYSLIDERS[14] = gu:makeButton(tostring(offset+600), "410", "30","30", "resrc/script/AB_hetareIK.lua", 28, "ik")
+  
+  MYSLIDERS[15] = gu:makeButton("950","100","20","18", "resrc/script/AB_sliderXButMax.lua", 33, "max")
+  MYSLIDERS[16] = gu:makeButton("950","120","20","18", "resrc/script/AB_sliderXButMin.lua", 33, "min")
+  
+  MYSLIDERS[17] = gu:makeButton("950","160","20","18", "resrc/script/AB_sliderYButMax.lua", 33, "max")
+  MYSLIDERS[18] = gu:makeButton("950","180","20","18", "resrc/script/AB_sliderYButMin.lua", 33, "min")
+  
+  MYSLIDERS[19] = gu:makeButton("950","220","20","18", "resrc/script/AB_sliderZButMax.lua", 33, "max")
+  MYSLIDERS[20] = gu:makeButton("950","240","20","18", "resrc/script/AB_sliderZButMin.lua", 33, "min")
+  
+  
+  
   for i=1,9 do
     --   gu:setPartToWindow(win, MYBONETAB[impl_id+1][bon_in][i])
     --  gu:setRender(MYBONETAB[impl_id+1][bon_in][i],true)
@@ -69,6 +81,13 @@ if MYSLIDERS==nil then
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[12])
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[13])
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[14])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[15])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[16])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[17])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[18])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[19])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[20])
+  
   gu:setEffect(MYSLIDERS[10], true)
   gu:setRender(MYSLIDERS[10], true)
   --gu:setLeafWindowToInputMessageDispatcher(MYSLIDERS[10])
@@ -81,6 +100,24 @@ if MYSLIDERS==nil then
   
   gu:setEffect(MYSLIDERS[14], true)
   gu:setRender(MYSLIDERS[14], true)
+  
+  gu:setEffect(MYSLIDERS[15], true)
+  gu:setRender(MYSLIDERS[15], true)
+  
+  gu:setEffect(MYSLIDERS[16], true)
+  gu:setRender(MYSLIDERS[16], true)
+  
+  gu:setEffect(MYSLIDERS[17], true)
+  gu:setRender(MYSLIDERS[17], true)
+  
+  gu:setEffect(MYSLIDERS[18], true)
+  gu:setRender(MYSLIDERS[18], true)
+  
+  gu:setEffect(MYSLIDERS[19], true)
+  gu:setRender(MYSLIDERS[19], true)
+  
+  gu:setEffect(MYSLIDERS[20], true)
+  gu:setRender(MYSLIDERS[20], true)
   
   --gu:setLeafWindowToInputMessageDispatcher(MYSLIDERS[11])
 
@@ -153,6 +190,7 @@ for i=1,msg_siz do
     MYBONETAB[impl_id+1][bon_in][10] = gu:setWindowToTab(MYTAB[impl_id+1], win, bon_nam)
 	--TextFromLua:getIS(0,0):setDebugText("test1")
 	
+	
   end
   gu:setEffect(MYTAB[impl_id+1],true)
   gu:setRender(MYTAB[impl_id+1],true)
@@ -169,3 +207,4 @@ gu:setEffect(MYIMPLTAB, true)
 TextFromLua:getIS(0,0):setDebugText("test3")
 
 TextFromLua:getIS(0,0):setDebugText("unko")
+

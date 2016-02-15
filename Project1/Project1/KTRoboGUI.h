@@ -141,6 +141,7 @@ protected:
 	bool is_render;
 	bool is_effect;
 	bool is_move; // マウス右ボタンをクリックしながら動かすとなんでも移動させられる
+	bool is_disabled;
 protected:
 	MYRECT box;
 	MYRECT max_boxdayo;
@@ -149,6 +150,7 @@ protected:
 		is_render = false;
 		is_effect = false;
 		is_move = false;
+		is_disabled = false;
 		max_boxdayo = max_default_box;
 		box.left = 0;
 		box.right = 0;
@@ -194,6 +196,8 @@ public:
 	bool getIsRender() {return is_render;}
 	bool getIsEffect() {return is_effect;}
 	bool getIsMove() {return is_move;}
+	bool getIsDisabled() {return is_disabled;}
+	void setIsDisabled(bool t) {is_disabled = t;}
 	virtual void setIsMove(bool t) {is_move = t;}
 	virtual void setIsRender(bool t)=0;
 	virtual void setIsEffect(bool t)=0;
@@ -216,6 +220,7 @@ public:
 
 	TO_LUA virtual void setEffect(int gui_id, bool t)=0;
 	TO_LUA virtual void setRender(int gui_id, bool t)=0;
+	TO_LUA virtual void setEnable(int gui_id, bool t)=0;
 
 	TO_LUA virtual void setPartToWindow(int window_gui_id, int part_gui_id)=0;
 	TO_LUA virtual int setWindowToTab(int tab_gui_id, int window_gui_id, char* window_name)=0;
@@ -403,6 +408,7 @@ public:
 	bool moveBox(int dx, int dy);
 	bool handleMessage(int msg, void* data, DWORD time) {
 		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+		if (getIsDisabled()) return false;
 		if (!is_effect) {return false;}
 
 		if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
@@ -796,7 +802,7 @@ public:
 	void unregisterWindowToInputMessageDispatcher(int gui_window_id);
 	void setLeafWindowToInputMessageDispatcher(int gui_window_id); // 一番下につっこむ
 	void deleteAll();
-
+	void setEnable(int gui_id, bool t);
 	GUI(void);
 	~GUI(void);
 

@@ -24,7 +24,6 @@ gu:setRender(win4, true)
 
 
 
- --TextFromLua:getIS(0,0):enterTWOTAKU("resrc/script/SCENE_remove.lua", "resrc/script/SCENE_remove.lua", "‚·‚±‚µ‚¸‚Â‚â‚è‚Ü‚µ‚å‚¤")
 inputtext_hon_mesh = gu:makeInputText("50","500","500","20")
 hon_mesh_but = gu:makeButton("550","500","110","40","resrc/script/AB_makehonmesh.lua",31, "–{mesh")
 win = gu:makeWindow(50,500,610,60)

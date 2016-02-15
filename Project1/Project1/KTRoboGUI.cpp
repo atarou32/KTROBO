@@ -425,7 +425,7 @@ void GUI::deleteAll() {
 bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 
 		MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
-
+		if (getIsDisabled()) return false;
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
 		// 範囲に入っているかつ左マウスボタンが押されていない→focus
 		// 範囲に入っているかつ左マウスボタンが押されている→press
@@ -726,7 +726,7 @@ bool GUI_BUTTON::moveBox(int dx, int dy) {
 bool GUI_INPUTTEXT::handleMessage(int msg, void* data, DWORD time){
 
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
-
+	if (getIsDisabled()) return false;
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
 		// 範囲に入っているかつ左マウスボタンが押されていない→focus
 		// 範囲に入っているかつ左マウスボタンが押されている→press
@@ -1629,6 +1629,7 @@ void GUI_TEXT::render(Graphics* g) {
 
 bool GUI_TAB::handleMessage(int msg, void* data, DWORD time) {
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+	if (getIsDisabled()) return false;
 	//is_effect = true;
 	//is_render =true;
 	if ((msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) && getIsEffect()) {
@@ -1755,7 +1756,7 @@ bool GUI_SLIDERV::moveBox(int dx, int dy) {
 bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 	
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
-
+	if (getIsDisabled()) return false;
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
 		// 範囲に入っているかつ左マウスボタンが押されていない→focus
 		// 範囲に入っているかつ左マウスボタンが押されている→press
@@ -2055,10 +2056,25 @@ void GUI_SLIDERV::moveAllBox(int dx, int dy) {
 
 }
 
+
+void GUI::setEnable(int gui_id, bool t) {
+
+
+	CS::instance()->enter(CS_MESSAGE_CS, "seteffect");
+	int size = parts.size();
+	if (gui_id >=0 && size > gui_id) {
+		parts[gui_id]->setIsDisabled(!t);
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "seteffect");
+
+
+}
+
 bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 
 
 	MYINPUTMESSAGESTRUCT* d = (MYINPUTMESSAGESTRUCT*)data;
+	if (getIsDisabled()) return false;
 
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE) {
 		// 範囲に入っているかつ左マウスボタンが押されていない→focus

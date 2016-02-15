@@ -17,9 +17,21 @@ public:
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
 	TO_LUA virtual void setHonMeshBoneRotY(int impl_id, int bone_index, float roty)=0;
 	TO_LUA virtual void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz)=0;
-	TO_LUA virtual void toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index)=0; // falseÇ…Ç∑ÇÈÇ∆âÒì]Ç™0Ç…Ç»ÇËIKÇ≈Ç‡âÒì]ÇµÇ»Ç≠Ç»ÇÈ
-	TO_LUA virtual void toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index)=0;
-	TO_LUA virtual void toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index)=0;
+	
+	TO_LUA virtual void setHonMeshBoneRotXMax(int impl_id, int bone_index, float rotx)=0;
+	TO_LUA virtual void setHonMeshBoneRotYMax(int impl_id, int bone_index, float roty)=0;
+	TO_LUA virtual void setHonMeshBoneRotZMax(int impl_id, int bone_index, float rotz)=0;
+	TO_LUA virtual void setHonMeshBoneRotXMin(int impl_id, int bone_index, float rotx)=0;
+	TO_LUA virtual void setHonMeshBoneRotYMin(int impl_id, int bone_index, float roty)=0;
+	TO_LUA virtual void setHonMeshBoneRotZMin(int impl_id, int bone_index, float rotz)=0;
+	
+	
+	
+	
+	
+	TO_LUA virtual bool toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index)=0; // falseÇ…Ç∑ÇÈÇ∆âÒì]Ç™0Ç…Ç»ÇËIKÇ≈Ç‡âÒì]ÇµÇ»Ç≠Ç»ÇÈ
+	TO_LUA virtual bool toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index)=0; // toggleå„ÇÃåãâ Çï‘Ç∑
+	TO_LUA virtual bool toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index)=0;
 	TO_LUA virtual void setHonMeshBoneTransX(int impl_id, int bone_index, float dx)=0;
 	TO_LUA virtual void setHonMeshBoneTransY(int impl_id, int bone_index, float dy)=0;
 	TO_LUA virtual void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz)=0;
@@ -34,15 +46,6 @@ public:
 	TO_LUA virtual float getHonMeshBoneTransX(int impl_id, int bone_index)=0;
 	TO_LUA virtual float getHonMeshBoneTransY(int impl_id, int bone_index)=0;
 	TO_LUA virtual float getHonMeshBoneTransZ(int impl_id, int bone_index)=0;
-
-
-
-
-
-
-
-
-
 
 	TO_LUA virtual void setAnimePoseFrameKakera(int impl_id, int frame)=0;
 	TO_LUA virtual void setAnimePoseFrame(int impl_id, int frame)=0;
@@ -76,6 +79,17 @@ public:
 	vector<bool> mesh_bone_isroty;
 	vector<bool> mesh_bone_isrotz;
 
+
+	vector<float> mesh_bone_rotx_max;
+	vector<float> mesh_bone_rotx_min;
+	vector<float> mesh_bone_roty_max;
+	vector<float> mesh_bone_roty_min;
+	vector<float> mesh_bone_rotz_max;
+	vector<float> mesh_bone_rotz_min;
+
+
+
+
 	string mesh_filepathname;
 	int frame;
 	map<string,int> mesh_bone_name_index;
@@ -84,6 +98,9 @@ public:
 
 	vector<MYMATRIX> mesh_offset_matrix;
 public:
+	void setRotX(int bone_index, float rotx);
+	void setRotY(int bone_index,float roty);
+	void setRotZ(int bone_index,float rotz);
 	void setOffsetMatrixToMesh(Mesh* mesh); // åªç›ÇÃépê®ÇåvéZÇµÇƒmesh_offset_matrixÇ…ì¸ÇÍçûÇﬁ
 	void copy(AnimationMeshKakera* kakera_moto);// ÉRÉsÅ[å≥Ç©ÇÁÉRÉsÅ[Ç∑ÇÈ
 	void write(char* filename,int impl_id);
@@ -97,6 +114,12 @@ public:
 		mesh_bone_isrotx.clear();
 		mesh_bone_isroty.clear();
 		mesh_bone_isrotz.clear();
+		mesh_bone_rotx_max.clear();
+		mesh_bone_rotx_min.clear();
+		mesh_bone_roty_max.clear();
+		mesh_bone_roty_min.clear();
+		mesh_bone_rotz_max.clear();
+		mesh_bone_rotz_min.clear();
 		mesh_bone_name_index.clear();
 		mesh_bone_default_anime_frame.clear();
 		mesh_offset_matrix.clear();
@@ -163,6 +186,8 @@ public:
 		}
 		return false;
 	}
+
+
 	AnimationBuilderMesh(char* dmesh_filepath,char* dmesh_meshpath, char* dmesh_animepath) {
 		mesh = new Mesh();
 		mesh_loaded = false;
@@ -412,9 +437,9 @@ public:
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
 	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
 	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);
-	void toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index); // falseÇ…Ç∑ÇÈÇ∆âÒì]Ç™0Ç…Ç»ÇËIKÇ≈Ç‡âÒì]ÇµÇ»Ç≠Ç»ÇÈ
-	void toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index);
-	void toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index);
+	bool toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index); // falseÇ…Ç∑ÇÈÇ∆âÒì]Ç™0Ç…Ç»ÇËIKÇ≈Ç‡âÒì]ÇµÇ»Ç≠Ç»ÇÈ
+	bool toggleHonMeshBoneRotYIsChange(int impl_id, int bone_index);
+	bool toggleHonMeshBoneRotZIsChange(int impl_id, int bone_index);
 	void setHonMeshBoneTransX(int impl_id, int bone_index, float dx);
 	void setHonMeshBoneTransY(int impl_id, int bone_index, float dy);
 	void setHonMeshBoneTransZ(int impl_id, int bone_index, float dz);
@@ -429,6 +454,17 @@ public:
 	float getHonMeshBoneTransX(int impl_id, int bone_index);
 	float getHonMeshBoneTransY(int impl_id, int bone_index);
 	float getHonMeshBoneTransZ(int impl_id, int bone_index);
+
+	void setHonMeshBoneRotXMax(int impl_id, int bone_index, float rotx);
+	void setHonMeshBoneRotYMax(int impl_id, int bone_index, float roty);
+	void setHonMeshBoneRotZMax(int impl_id, int bone_index, float rotz);
+	void setHonMeshBoneRotXMin(int impl_id, int bone_index, float rotx);
+	void setHonMeshBoneRotYMin(int impl_id, int bone_index, float roty);
+	void setHonMeshBoneRotZMin(int impl_id, int bone_index, float rotz);
+	
+
+
+
 
 	void setAnimePoseFrameKakera(int impl_id, int frame);
 	void setAnimePoseFrame(int impl_id, int frame);

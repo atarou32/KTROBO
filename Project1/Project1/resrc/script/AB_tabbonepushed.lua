@@ -25,3 +25,39 @@ gu:setNOWMAXMINToSlider(MYSLIDERS[5], "10", "-10", transy)
 
 gu:setNOWMAXMINToSlider(MYSLIDERS[7], "3.14","-3.14", rotz)
 gu:setNOWMAXMINToSlider(MYSLIDERS[8], "10", "-10", transz)
+
+
+if MYSLIDERS ~= nil then
+  gu = GUI:getIS(0,0)
+  ab = AnimationBuilder:getIS(0,0)
+  
+  impl_id = ab:getNowIMPLIndex()
+  bone_id = ab:getNowBoneIndex()
+  tog = ab:getHonMeshBoneRotXIsChange(impl_id, bone_id)
+  if tog then
+    gu:setEnable(MYSLIDERS[1], true)
+    gu:setEnable(MYSLIDERS[2], true)
+  else
+    gu:setEnable(MYSLIDERS[1], false)
+    gu:setEnable(MYSLIDERS[2], false)
+  end
+  
+  tog = ab:getHonMeshBoneRotYIsChange(impl_id, bone_id)
+  if tog then
+    gu:setEnable(MYSLIDERS[4], true)
+    gu:setEnable(MYSLIDERS[5], true)
+  else
+    gu:setEnable(MYSLIDERS[4], false)
+    gu:setEnable(MYSLIDERS[5], false)
+  end
+  
+  tog = ab:getHonMeshBoneRotZIsChange(impl_id, bone_id)
+  if tog then
+    gu:setEnable(MYSLIDERS[7], true)
+    gu:setEnable(MYSLIDERS[8], true)
+  else
+    gu:setEnable(MYSLIDERS[7], false)
+    gu:setEnable(MYSLIDERS[8], false)
+  end
+
+end
