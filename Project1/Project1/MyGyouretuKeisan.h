@@ -5,11 +5,12 @@
 #include "KTRoboMesh.h"
 #include "vector"
 #include "MyDefine.h"
+#include "set"
 
 using namespace KTROBO;
 using namespace std;
 
-#define GYOURETU_MAX 12
+#define GYOURETU_MAX 24
 
 
 class MyGyouretuKeisan
@@ -28,33 +29,69 @@ public:
 
 class MyIKMODOKI {
 private:
+	float dthetadayo[GYOURETU_MAX*GYOURETU_MAX];
 	float ymat[GYOURETU_MAX*GYOURETU_MAX];
+	float inv_ymat[GYOURETU_MAX*GYOURETU_MAX];
 	MYVECTOR3 mokuhyou;
 	string mokuhyou_bonename;
 	string moto_bonename;
 	Mesh* mesh;
-	vector<string> x_freebone;
-	vector<string> y_freebone;
-	vector<string> z_freebone;
+	set<string> x_freebone;
+	set<string> y_freebone;
+	set<string> z_freebone;
+	map<string, int> bone_rotxdayo;
+	map<string, int> bone_rotydayo;
+	map<string, int> bone_rotzdayo;
 
-	void setFreeBone();
 	void calcYMat();
-	void updateStep();
+	
 public:
-	MyIKMODOKI(Mesh* m, MYVECTOR3* mo, char* moto, char* moku) {
+	MyIKMODOKI(Mesh* m, MYVECTOR3* mo, const char* moto, const char* moku) {
 		setMesh(m);
 		setMokuhyou(mo);
 		setbonename(moto, moku);
 	}
 
-	void updateMesh();
+	void updateStep();
+	float getdthetaXBone(char* bone_name) {
+		if (bone_rotxdayo.find(bone_name) != bone_rotxdayo.end()) {
+			return dthetadayo[bone_rotxdayo[bone_name]];
+		}
+		return 0;
+	}
+
+	float getdthetaYBone(char* bone_name) {
+		if (bone_rotydayo.find(bone_name) != bone_rotydayo.end()) {
+			return dthetadayo[bone_rotydayo[bone_name]];
+		}
+		return 0;
+	}
+
+	float getdthetaZBone(char* bone_name) {
+		if (bone_rotzdayo.find(bone_name) != bone_rotzdayo.end()) {
+			return dthetadayo[bone_rotzdayo[bone_name]];
+		}
+		return 0;
+	}
+
+	void setXFreeBone(char* bone_name) {
+		x_freebone.insert(string(bone_name));
+	}
+	void setYFreeBone(char* bone_name) {
+		y_freebone.insert(string(bone_name));
+	}
+
+	void setZFreeBone(char* bone_name) {
+		z_freebone.insert(string(bone_name));
+	}
+
 	void setMesh(Mesh* m) {
 		mesh = m;
 	}
 	void setMokuhyou(MYVECTOR3* mo) {
 		mokuhyou = *mo;
 	}
-	void setbonename(char* moto, char* moku) {
+	void setbonename(const char* moto, const char* moku) {
 		mokuhyou_bonename = string(moku);
 		moto_bonename = string(moto);
 	}

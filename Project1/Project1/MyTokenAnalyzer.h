@@ -11,6 +11,12 @@
 int SJISMultiCheck(unsigned char c);
 int SJISlength(unsigned char* c);
 
+
+int hstrpos(char *haystack, char *needle);
+void hmystrcpy(char* dst, int max, int pos, const char* src);
+void hmystrcpy2(char *dst, int max, int mpos, const  char* src);
+
+
 class MyTokenAnalyzer
 {
 private:
@@ -44,6 +50,7 @@ public:
 	void GetToken() {
 	char* p = Pointer;
 	char* q = Token;
+	int offset = 0;
 
 	while(*p != '\0') {
 		if (!strchr(" \t\r\n,;\"=", *p)) {
@@ -60,7 +67,7 @@ public:
 	if (*p=='{' || *p =='}') {
 		*q++ = *p++;
 	} else {
-		while (*p!='\0') {
+		while (*p!='\0' && offset < 1023) {
 			if (strchr(" \t\r\n,;\"{}=", *p)) {
 				break;
 			}
@@ -69,13 +76,16 @@ public:
 			*q = *p;
 			q++;
 			p++;
+			offset++;
 			*q = *p;
 			q++;
 			p++;
+			offset++;
 			} else {
 				*q = *p;
 				q++;
 				p++;
+				offset++;
 			}
 		}
 	}

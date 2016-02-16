@@ -20,10 +20,6 @@ const UINT GAME_HEIGHT = 800;
 const UINT ESC_KEY = 0x1B;
 #define MY_DEFAULT_TEXT_HEIGHT 20
 
-const char SOUND_BANK[] ="resrc/audio/SoundBank.xsb";
-const char WAVE_BANK[] = "resrc/audio/WaveBank.xwb";
-const char yume[] = "yume";
-const char streamdayo[] = "Stream";
 #define MYVECTOR2 XMFLOAT2
 #define MYVECTOR3 MYXMFLOAT3
 
@@ -134,7 +130,15 @@ namespace KTROBO {
 #define TASKTHREADS_LOADDESTRUCT 3
 #define TASKTHREADS_AIDECISION 4
 
-}
+#define RENDERTIME_IGNORETIME 1200
+#define RENDERTIME_SETTIME 33
+#define RENDERTIME_FRAMECOUNT 60
 
+}
+namespace KTROBO {
+extern const char* SOUND_BANK; //="resrc/audio/SoundBank.xsb";
+extern const char* WAVE_BANK; //= "resrc/audio/WaveBank.xwb";
+extern const char* yumes[3];// = {
+}
 #endif
 
