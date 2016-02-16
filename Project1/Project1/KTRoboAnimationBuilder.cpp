@@ -34,6 +34,8 @@ AnimationBuilder::AnimationBuilder(char* n,int len, MyTextureLoader* lo) : Scene
 	load_done = true;
 	save_result = true;
 	load_result = true;
+	anime_play_time = 0;
+	anime_play = false;
 }
 
 int AnimationBuilder::createAnimationBuilderImpl(char* hon_filepath) {
@@ -187,6 +189,15 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
+}
+
+void AnimationBuilder::toggleAnimePlay() {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	anime_play = !anime_play;
+	anime_play_time = timeGetTime();
+
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 bool AnimationBuilder::toggleHonMeshBoneRotXIsChange(int impl_id, int bone_index) {
 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -2507,6 +2518,26 @@ void AnimationBuilder::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lu
 		}
 	//	impls[now_index]->setIsAnimate(true);
 	}
+
+	if (num) {
+		if (anime_play && impls[now_index]->animes.size()) {
+			static float mae_FRAME = 0;
+			DWORD dtime = timeGetTime() - anime_play_time+1;
+			AnimationMesh* mm = impls[now_index]->animes[anime_index];
+			if (mm->all_time > 0) {
+				dtime = dtime % (int)(1000);
+				float frame = dtime / (float)1000 * 512;
+				if ( abs(frame - mae_FRAME) > 1) {
+					mae_FRAME = frame;
+					this->setNowKakeraKakeraFrameAnime(impls[now_index], frame);
+				}
+			}
+		}
+	}
+
+
+
+
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 

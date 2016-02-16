@@ -30,12 +30,21 @@
 #include "KTRoboAnimationBuilder.h"
 #include "vector"
 #include "KTRoboMessage.h"
+#include "MySound.h"
+#include "MyDefine.h"
 
 namespace KTROBO {
-#define RENDERTIME_IGNORETIME 1200
-#define RENDERTIME_SETTIME 33
 
-
+class TempInputShori : public INPUTSHORICLASS {
+public:
+	TempInputShori(MySound* sound) {
+		this->sound = sound;
+		sound_index =0;
+	}
+	MySound* sound;
+	int sound_index;
+	bool handleMessage(int msg, void * data, DWORD time);
+};
 class Game
 {
 private:
@@ -81,6 +90,9 @@ private:
 	AnimationBuilders* abs;
 	GUIs* guis;
 	Messages* messages;
+	MySound* sound;
+	TempInputShori* temp_input_shori;
+
 public:
 	Game(void);
 	~Game(void);
@@ -89,6 +101,11 @@ public:
 	bool Init(HWND hwnd);
 	void Del();
 	void Run();
+
+	MySound* getSound() {
+		return sound;
+	}
+
 	Task** getTask() {
 		return task_threads;
 	}

@@ -69,6 +69,7 @@ public:
 	TO_LUA virtual void setNowAnimeIndex(int index)=0;
 	TO_LUA virtual int getNowAnimeIndex()=0;
 	TO_LUA virtual void hetareIK()=0;
+	TO_LUA virtual void toggleAnimePlay()=0;
 };
 
 class AnimationMeshKakera {
@@ -398,6 +399,8 @@ private:
 
 	int bone_index;
 	int anime_index;
+	bool anime_play;
+	DWORD anime_play_time;
 public:
 	MYVECTOR3 bone_poss[KTROBO_MESH_BONE_MAX];
 	int bone_bills[KTROBO_MESH_BONE_MAX];
@@ -491,6 +494,7 @@ public:
 	void hetareIK();
 	void setNowAnimeIndex(int index);
 	int getNowAnimeIndex();
+	void toggleAnimePlay();
 
 	void setNowKakeraKakeraFrameAnime(AnimationBuilderImpl* impl, float frame);
 	float calcAnimeNow(float anime_now, float all_time);

@@ -11,6 +11,7 @@
 using namespace KTROBO;
 
 
+
 // タスクスレッドの分割
 // メインスレッド：描画（毎回処理が走る）
 // TASK0:  描画のための更新処理（アニメの計算処理）など
@@ -55,6 +56,7 @@ Game::Game(void)
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {
 		task_threads[i] = 0;
 		g_for_task_threads[i] = 0;
+		Ls[i]=0;
 	}
 
 	mesh = 0;
@@ -75,6 +77,8 @@ Game::Game(void)
 	abs = 0;
 	messages = 0;
 	guis = 0;
+	sound = 0;
+	temp_input_shori = 0;
 }
 
 
@@ -103,6 +107,23 @@ void CALCCOMBINEDTCB(TCB* thisTCB) {
 		mis->loadColorToTexture(g);
 
 	//}
+}
+
+
+bool TempInputShori::handleMessage(int msg, void * data, DWORD time) {
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+		MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*) data;
+		if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_DOWN) {
+
+			CS::instance()->enter(CS_SOUND_CS, "enter");
+			sound->stopCue(yumes[sound_index]);
+			sound_index =(sound_index+1) % 3;
+			sound->playCue(yumes[sound_index]);
+			CS::instance()->leave(CS_SOUND_CS, "leave");
+		}
+	}
+	return false;
 }
 
 
@@ -328,7 +349,14 @@ bool Game::Init(HWND hwnd) {
 	MYMATRIX kakeru;
 	MyMatrixIdentity(kakeru);
 
-	
+	sound = new MySound();
+	HRESULT hr = sound->initialize();
+	if (FAILED(hr)) {
+		throw new GameError(KTROBO::FATAL_ERROR, "error in init sound");
+	}
+	temp_input_shori = new TempInputShori(sound);
+	sound->playCue(yumes[temp_input_shori->sound_index]);
+	InputMessageDispatcher::registerImpl(temp_input_shori, NULL,NULL);
 
 	MYMATRIX worl;
 	/*
@@ -656,10 +684,14 @@ void Game::Del() {
 
 	if (L) {
 		lua_close(L);
+		L =0;
 	}
 	
 	for (int i=0;i<TASKTHREAD_NUM;i++) {
+		if (Ls[i]) {
 		lua_close(Ls[i]);
+		Ls[i] = 0;
+		}
 	}
 
 	 if (cmeshs) {
@@ -748,7 +780,15 @@ void Game::Del() {
 		}
 	}
 
+	if (sound) {
+		delete sound;
+		sound = 0;
+	}
 
+	if (temp_input_shori) {
+		delete temp_input_shori;
+		temp_input_shori = 0;
+	}
 }
 
 
@@ -788,8 +828,9 @@ void Game::Run() {
 		Sleep(1);
 		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	}
-
-	
+	CS::instance()->enter(CS_SOUND_CS, "enter");
+	sound->run();
+	CS::instance()->leave(CS_SOUND_CS, "leave");
 	c->plus((float)millisecond);
 
 	big_timestamp =	c->getBigTimeStamp();

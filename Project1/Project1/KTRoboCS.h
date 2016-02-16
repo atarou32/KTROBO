@@ -10,7 +10,7 @@
 #include "process.h"
 
 // 複数ロックするときの順番
-// AI(TASK4) LOAD(TASK3) //INPUT(MAIN)inputはMESSAGEをロックする // MAINRENDER(TASK2) ANIME(TASK1) BUTUKARI(TASK0) DEVICE LOAD LOG MESSAGE RENDERDATA の順
+// AI(TASK4) LOAD(TASK3) //INPUT(MAIN)inputはMESSAGEをロックする // MAINRENDER(TASK2) ANIME(TASK1) BUTUKARI(TASK0) DEVICE LOAD LOG MESSAGE SOUND RENDERDATA の順
 
 namespace KTROBO {
 #define CS_LOG_CS 2
@@ -21,6 +21,7 @@ namespace KTROBO {
 #define CS_MESSAGE_CS 7 // スレッド間のデータのやり取りにも使われる
 #define CS_RENDERDATA_CS 8 //描画関係のデータの参照更新に使われる 
 #define CS_CS_CS 9
+#define CS_SOUND_CS 10
 // 例　GUIボタンでボタンが押されたと判定するのがhandleMessageでその処理の結果、クラスの更新キュー
 
 
@@ -43,6 +44,7 @@ private:
 	CRITICAL_MYSTRUCT MESSAGE_CS;
 	CRITICAL_MYSTRUCT RENDERDATA_CS;
 	CRITICAL_MYSTRUCT CS_CS;
+	CRITICAL_MYSTRUCT SOUND_CS;
 	bool is_main_enter;
 private:
 	CS(void);
@@ -90,9 +92,11 @@ public:
 		RENDERDATA_CS.lock_count = 0;
 		RENDERDATA_CS.thread_id = 0;
 		InitializeCriticalSection(&CS_CS.cs);
-		RENDERDATA_CS.lock_count = 0;
-		RENDERDATA_CS.thread_id = 0;
-
+		CS_CS.lock_count = 0;
+		CS_CS.thread_id = 0;
+		InitializeCriticalSection(&SOUND_CS.cs);
+		SOUND_CS.lock_count = 0;
+		SOUND_CS.thread_id = 0;
 	}
 
 	void Del() {
@@ -106,6 +110,7 @@ public:
 		DeleteCriticalSection(&MESSAGE_CS.cs);
 		DeleteCriticalSection(&RENDERDATA_CS.cs);
 		DeleteCriticalSection(&CS_CS.cs);
+		DeleteCriticalSection(&SOUND_CS.cs);
 	}
 
 	~CS(void);
@@ -220,6 +225,21 @@ public:
 			RENDERDATA_CS.thread_id = GetCurrentThreadId();
 			int length = strlen(buf);
 			log(index, buf, length);
+		} else if(index == CS_SOUND_CS) {
+			EnterCriticalSection(&CS_CS.cs);
+			if (SOUND_CS.lock_count != 0) {
+				if (GetCurrentThreadId() == SOUND_CS.thread_id) {
+					SOUND_CS.lock_count++;
+					LeaveCriticalSection(&CS_CS.cs);
+					return;
+				}
+			}
+			LeaveCriticalSection(&CS_CS.cs);
+			EnterCriticalSection(&SOUND_CS.cs);
+			SOUND_CS.lock_count++;
+			SOUND_CS.thread_id = GetCurrentThreadId();
+			int length = strlen(buf);
+			log(index, buf, length);
 		}
 	}
 
@@ -327,6 +347,20 @@ public:
 			RENDERDATA_CS.thread_id = 0;
 			LeaveCriticalSection(&CS_CS.cs);
 			LeaveCriticalSection(&RENDERDATA_CS.cs);	
+			int length = strlen(buf);
+			log(index, buf, length);
+		}else if(index == CS_SOUND_CS) {
+			EnterCriticalSection(&CS_CS.cs);
+			if (SOUND_CS.lock_count) {
+				SOUND_CS.lock_count--;
+			}
+			if (SOUND_CS.lock_count) {
+				LeaveCriticalSection(&CS_CS.cs);
+				return;
+			}
+			SOUND_CS.thread_id = 0;
+			LeaveCriticalSection(&CS_CS.cs);
+			LeaveCriticalSection(&SOUND_CS.cs);	
 			int length = strlen(buf);
 			log(index, buf, length);
 		}
