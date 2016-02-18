@@ -382,6 +382,7 @@ public:
 	static void messageMakeButtonUp(int i, DWORD ntime);
 	static void messageMakeMouseMove(DWORD n_time);
 	static void messageMakeMouseRawStateChanged(DWORD n_time);
+	static void setCommand(MyCommand* coms, int len);
 
 	static void commandMake(DWORD time);
 	static bool _commandHantei(MyCommand* com, int k);

@@ -118,7 +118,7 @@ bool TempInputShori::handleMessage(int msg, void * data, DWORD time) {
 
 			CS::instance()->enter(CS_SOUND_CS, "enter");
 			sound->stopCue(yumes[sound_index]);
-			sound_index =(sound_index+1) % 3;
+			sound_index =(sound_index+1) % 6;
 			sound->playCue(yumes[sound_index]);
 			CS::instance()->leave(CS_SOUND_CS, "leave");
 		}

@@ -805,3 +805,24 @@ volatile unsigned char Input::command_key[INPUTJYOUTAI_KEY_INDEX_MAX];
 MyCommand InputMessageDispatcher::command[KTROBO_INPUTCOMMAND_SIZE];
 INPUTGETBYMESSAGESTRUCT* InputMessageDispatcher::rootinputget=0;
 INPUTSHORINONE InputMessageDispatcher::getinputdonone;
+
+
+
+void InputMessageDispatcher::setCommand(MyCommand* coms, int len) {
+	if (len <= KTROBO_INPUTCOMMAND_SIZE) {
+
+		// ‘S‚ÄƒNƒŠƒA‚·‚é
+		for (int i=0;i<KTROBO_INPUTCOMMAND_SIZE;i++) {
+			command[i].is_use = false;
+		}
+
+		for (int i=0;i<len;i++) {
+			command[i] = coms[i];
+			command[i].is_use = true;
+		}
+
+	} else {
+		throw new GameError(KTROBO::FATAL_ERROR, "too many commands");
+	}
+
+}
