@@ -17,6 +17,7 @@ void ActionEditor::enter() {
 
 void ActionEditor::leave() {
 	Scene::leave();
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AE_leave.lua");
 }
 
 void ActionEditor::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
@@ -45,23 +46,28 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 
 int ActionEditor::createActionCharacter(char* name) {
 
-
+	return 0;
 }
 
 
 int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat) {
 
-
+	return 0;
 
 }
 
 
 int ActionEditor::setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename) {
 
+	return 0;
+
+}
+void ActionEditor::toggleMeshRender(int character_id, int hon_mesh_id) {
+
+
 
 
 }
-
 
 void ActionEditor::toggleMeshOptional(int character_id, int hon_mesh_id) {
 	// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグルする
@@ -79,36 +85,36 @@ int ActionEditor::setAnimeAndAkatFile(int character_id, int hon_mesh_id, char* a
 
 
 
-
+	return 0;
 }
 
 
 int ActionEditor::getAkatID(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename) {
 
-
+	return 0;
 
 }
 
 int ActionEditor::getAkatNum(int character_id, int akat_id) {
 
-
+	return 0;
 
 }
 
 
 char* ActionEditor::getAkatName(int character_id, int akat_id, int akat_index) {
 
-
+	return "";
 
 }
 
 
 int ActionEditor::makeAction(int character_id, char* action_name) {
-
+	return 0;
 }
 
 int ActionEditor::setAkatToAction(int character_id, int action_id, int akat_id, int akat_index) {
-
+	return 0;
 }
 
 void ActionEditor::setNowCharacterId(int character_id) {
@@ -117,7 +123,7 @@ void ActionEditor::setNowCharacterId(int character_id) {
 }
 int ActionEditor::getNowCharacterId() {
 
-
+	return 0;
 }
 
 void ActionEditor::setNowAkat(int character_id, int akat_id, int akat_index) {
@@ -155,7 +161,7 @@ void ActionEditor::togglePlayNowAkat() {
 
 }
 
-void ActionEditor::setCommandToCharacter(int character_id, int command_id, char* command) {
+void ActionEditor::setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority) {
 
 
 
@@ -163,7 +169,7 @@ void ActionEditor::setCommandToCharacter(int character_id, int command_id, char*
 
 int ActionEditor::makeActiontoAction(int character_id, char* action_name_moto, char* action_name_saki, int command_id, bool is_modoru) {
 
-
+	return 0;
 }
 
 void ActionEditor::clearActionToAction(int character_id, int action_to_action_id) {
