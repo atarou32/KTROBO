@@ -57,6 +57,17 @@ public:
 	Mesh* mesh;
 	float radius;
 	vector<MYMATRIX> combined_matrixs;
+	AtariHantei() {
+		start_frame = 0;
+		end_frame = 0;
+		is_bone = true;
+		memset(bone_name,0,128);
+		memset(mesh_name,0,128);
+		bone = 0;
+		mesh = 0;
+		radius = 0;
+	}
+
 };
 
 
@@ -67,12 +78,39 @@ class Action {
 	int action_type;
 	map<CharacterMesh*, Akat*> mesh_akat_pair;
 	vector<AtariHantei*> hanteis;
+
+	Action() {
+		action_id = 0;
+		memset(action_name,0,32);
+		all_max_frame = 0;
+		action_type = 0;
+	}
+	~Action() {Release();}
+
+	void Release() {
+		vector<AtariHantei*>::iterator it = hanteis.begin();
+		while(it != hanteis.end()) {
+			AtariHantei* ag = *it;
+			if (ag) {
+				delete ag;
+				ag =0;
+			}
+			it++;
+		}
+		hanteis.clear();
+	}
+
 };
 
 class ActionToAction {
 	int moto_action_id;
 	int saki_action_id;
 	int command_id;// MyCommand‚Ìcommand_id
+	ActionToAction() {
+		moto_action_id = 0;
+		saki_action_id = 0;
+		command_id = 0;
+	}
 };
 
 class CharacterActionCommand : public MyCommand{
@@ -88,12 +126,44 @@ class AkatFrame {
 	int akat_frame;
 	AkatFrame* left;
 	AkatFrame* right;
+	void Release() {};
+	AkatFrame() {
+		mesh_instanced_frame = 0;
+		akat_frame = 0;
+		left = 0;
+		right = 0;
+	}
+
 };
 class Akat {
 	char name[32];
 	int all_frame;
 	AkatFrame* root_akat_frame;
 	vector<AkatFrame*> all_akat_frame;
+
+	Akat() {
+		memset(name,0,32);
+		all_frame = 0;
+		root_akat_frame = 0;
+	}
+	~Akat() {
+		Release();
+	}
+
+	void Release() {
+		vector<AkatFrame*>::iterator it = all_akat_frame.begin();
+		while(it != all_akat_frame.end()) {
+			AkatFrame* ak = *it;
+			if (ak) {
+				ak->Release();
+				delete ak;
+				ak = 0;
+			}
+			it++;
+		}
+		all_akat_frame.clear();
+	}
+
 };
 class CharacterMesh {
 public:
@@ -130,6 +200,19 @@ public:
 			it = it + 1;
 		}
 		meshs.clear();
+
+		vector<Akat*>::iterator itt = akats.begin();
+		while(itt != akats.end()) {
+			Akat* ak = *itt;
+			if (ak) {
+				ak->Release();
+				delete ak;
+				ak = 0;
+			}
+			itt = itt +1;
+		}
+		akats.clear();
+
 	}
 };
 class ActionCharacter {
@@ -139,6 +222,60 @@ class ActionCharacter {
 	vector<ActionToAction*> action_to_actions;
 	vector<CharacterActionCommand*> commands;
 
+	ActionCharacter(char* name) {
+		memset(character_name,0,32);
+		hmystrcpy(character_name,31,0,name);
+	}
+	~ActionCharacter() {
+		Release();
+	}
+	void Release() {
+		vector<CharacterMesh*>::iterator mesh_it = meshs.begin();
+		while( mesh_it != meshs.end()) {
+			CharacterMesh* cm = *mesh_it;
+			if (cm) {
+				delete cm;
+				cm = 0;
+			}
+			mesh_it++;
+		}
+		meshs.clear();
+
+		vector<Action*>::iterator a_it = actions.begin();
+		while(a_it != actions.end()) {
+			Action* ac = *a_it;
+			if (ac) {
+				delete ac;
+				ac = 0;
+			}
+			a_it++;
+		}
+		a_it.clear();
+
+		vector<ActionToAction*>::iterator atoa_it = action_to_actions.begin();
+		while(atoa_it != action_to_actions.end()) {
+		
+			ActionToAction* a = *atoa_it;
+			if (a) {
+			delete a;
+			a = 0;
+			}
+			atoa_it++;
+		}
+		action_to_actions.clear();
+		
+		vector<CharacterActionCommnad*>::iterator ittt = commands.begin();
+		while(ittt != commands.end()) {
+			CharacterActionCommand* cac = *ittt;
+			if (cac) {
+				delete cac;
+				cac = 0;
+			}
+
+			ittt++;
+		}
+		commands.clear();
+	}
 };
 
 class ActionEditor : public Scene, public IActionEditor
