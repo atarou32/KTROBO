@@ -4,7 +4,9 @@
 #pragma once
 #include "KTRoboScene.h"
 #include "tolua_glue/MyLuaGlueMakeCommon.h"
-
+#include "MyTextureLoader.h"
+#include "vector"
+using namespace std;
 namespace KTROBO {
 
 
@@ -65,7 +67,7 @@ class ActionCharacter {
 
 };
 
-class ActionEditor : public Scene
+class ActionEditor : public Scene, public IActionEditor
 {
 public:
 	ActionEditor(void);
@@ -110,6 +112,40 @@ public:
 
 };
 
+
+
+
+class ActionEditors {
+private:
+	vector<ActionEditor*> aes;
+	MyTextureLoader* loader;
+public:
+	int makeInst();
+	
+	
+
+	ActionEditor* getInstance(int index);
+	
+
+	IActionEditor* getInterface(int index);
+	
+
+	ActionEditors(MyTextureLoader* lo) {
+	 loader = lo;
+	}
+	~ActionEditors() {
+		Release();
+	}
+
+	void Release() {
+		int size = aes.size();
+		for (int i= 0; i<size;i++) {
+			delete aes[i];
+			aes[i] = 0;
+		}
+		aes.clear();
+	}
+};
 
 
 

@@ -1,5 +1,5 @@
 #include "KTRoboActionEditor.h"
-
+#include "KTRoboLuaCollection.h"
 using namespace KTROBO;
 ActionEditor::ActionEditor(void) : Scene("action_editor", 13) 
 {
@@ -11,14 +11,12 @@ ActionEditor::~ActionEditor(void)
 }
 
 void ActionEditor::enter() {
-
-
-
+	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AE_enter.lua");
+	Scene::enter();
 }
 
 void ActionEditor::leave() {
-
-
+	Scene::leave();
 }
 
 void ActionEditor::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
@@ -228,3 +226,33 @@ void ActionEditor::forceSaveNowCharacterToFile(char* filename) {
 
 
 
+
+int ActionEditors::makeInst() {
+	if (aes.size()) {
+		return 0;
+	}
+	ActionEditor* ae = new ActionEditor();
+	aes.push_back(ae);
+	return 0;
+
+}
+
+	
+ActionEditor* ActionEditors::getInstance(int index) {
+	if (aes.size()) {
+		return aes[0];
+	} else {
+		makeInst();
+		return aes[0];
+	}
+}
+
+	
+IActionEditor* ActionEditors::getInterface(int index) {
+	if (aes.size()) {
+		return aes[0];
+	} else {
+		makeInst();
+		return aes[0];
+	}
+}
