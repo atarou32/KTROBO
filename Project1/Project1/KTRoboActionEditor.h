@@ -18,16 +18,15 @@ TO_LUA virtual int setHonMesh(int character_id, char* mesh_filename, char* oya_m
 TO_LUA virtual int setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename)=0;
 TO_LUA virtual void toggleMeshOptional(int character_id, int hon_mesh_id)=0;// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグルする
 TO_LUA virtual void toggleMeshRender(int character_id, int hon_mesh_id)=0;
-TO_LUA virtual int setAnimeAndAkatFile(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename)=0;
-TO_LUA virtual int getAkatID(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename)=0;
-TO_LUA virtual int getAkatNum(int character_id, int akat_id)=0;
-TO_LUA virtual char* getAkatName(int character_id, int akat_id, int akat_index)=0;
+TO_LUA virtual int setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename)=0;
+TO_LUA virtual int getAkatNum(int character_id, int hon_mesh_id, int skeleton_id)=0;
+TO_LUA virtual char* getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index)=0;
 TO_LUA virtual int makeAction(int character_id, char* action_name)=0;
-TO_LUA virtual int setAkatToAction(int character_id, int action_id, int akat_id, int akat_index)=0;
+TO_LUA virtual int setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id,  int akat_index)=0;
 TO_LUA virtual void setNowCharacterId(int character_id)=0;
 TO_LUA virtual int getNowCharacterId()=0;
-TO_LUA virtual void setNowAkat(int character_id, int akat_id, int akat_index)=0;
-TO_LUA virtual void getNowAkatIndex(int character_id, OUT_ int* akat_id, OUT_ int* akat_index)=0;
+TO_LUA virtual void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id, int akat_index)=0;
+TO_LUA virtual void getNowAkatIndex(int character_id, int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index)=0;
 TO_LUA virtual void setNowAction(int character_id, int action_id)=0;
 TO_LUA virtual void togglePlayNowAction()=0;
 TO_LUA virtual void togglePlayNowAkat()=0;
@@ -146,6 +145,53 @@ class CharacterMeshSkeleton {
 public:
 	Mesh* skeleton;
 	vector<Akat*> akats;
+	bool skeletons_loaded;
+	char mesh_meshname[128];
+	char akat_filename[128];// .AKATを含む
+	char mesh_animename[128]; // .ANIMEを含む
+
+	int now_akat_index;
+
+
+	void setNowAkat(int index) {
+		if (index >=0 && index < akats.size()) {
+			now_akat_index = index;
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of now akat");
+		}
+	}
+
+
+	CharacterMeshSkeleton(char* mesh_meshname, char* akat_filename, char* mesh_animename) {
+		skeleton = new Mesh();
+		skeletons_loaded = false;
+		hmystrcpy(this->mesh_meshname, 128,0,mesh_meshname);
+		hmystrcpy(this->akat_filename, 128,0, akat_filename);
+		hmystrcpy(this->mesh_animename, 128,0, mesh_animename);
+	}
+
+	~CharacterMeshSkeleton() {
+		Release();
+	}
+	void Release() {
+		if (skeleton) {
+			skeleton->Release();
+			delete skeleton;
+			skeleton =0;
+		}
+		vector<Akat*>::iterator it = akats.begin();
+		while(it != akats.end()) {
+			Akat* aka = *it;
+			if (aka) {
+				aka->Release();
+				delete aka;
+				aka = 0;
+			}
+			it++;
+		}
+		akats.clear();
+	}
+
 };
 
 class CharacterMesh {
@@ -158,15 +204,19 @@ public:
 	bool is_connect_without_material_local;
 	MYMATRIX matrix_kakeru;
 	bool is_akat_loaded;
-	vector<Akat*> akats;
-
+	vector<CharacterMeshSkeleton*> skeletons; 
 	bool is_optional;
 	bool is_render;
 
+	int now_skeleton;
 
-	char akat_filename[128];// .AKATを含む
-	char mesh_animename[128]; // .ANIMEを含む
-
+	void setNowSkeleton(int index) {
+		if (index >=0 && index < skeletons.size()) {
+			now_skeleton = index;
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of now skeleton");
+		}
+	}
 
 
 	CharacterMesh() {
@@ -176,8 +226,6 @@ public:
 		is_render = false;
 		MyMatrixIdentity(matrix_kakeru);
 		memset(oya_meshfilename,0,128);
-		memset(akat_filename, 0, 128);
-		memset(mesh_animename,0,128);
 		is_akat_loaded = false;
 	}
 
@@ -194,9 +242,9 @@ public:
 		}
 		meshs.clear();
 
-		vector<Akat*>::iterator itt = akats.begin();
-		while(itt != akats.end()) {
-			Akat* ak = *itt;
+		vector<CharacterMeshSkeleton*>::iterator itt = skeletons.begin();
+		while(itt != skeletons.end()) {
+			CharacterMeshSkeleton* ak = *itt;
 			if (ak) {
 				ak->Release();
 				delete ak;
@@ -204,7 +252,7 @@ public:
 			}
 			itt = itt +1;
 		}
-		akats.clear();
+		skeletons.clear();
 
 	}
 };
@@ -252,21 +300,22 @@ private:
 	vector<ActionToAction*> action_to_actions;
 	vector<CharacterActionCommand*> commands;
 	Texture* tex;
-	int now_akat;
+	
 	int now_action;
-	int now_akat_text;
 	int now_action_text;
+	int now_mesh;
+	int now_mesh_text;
 public:
 	vector<CharacterMesh*>* getMeshs() {return &meshs;};
-	void setNowAkat(int now_character_index, int index) {
-		if (index >=0 && index < meshs[now_character_index]->akats.size()) {
-			now_akat = index;
-			tex->setRenderTextChangeText(now_akat_text, meshs[now_character_index]->akats[index]->name);
+	void setNowMesh(int index) {
+		if (index >=0 && index < meshs.size()) {
+			now_mesh = index;
+			tex->setRenderTextChangeText(now_mesh_text, meshs[index]->mesh_filenames[0].c_str());
 		} else {
-			throw new GameError(KTROBO::WARNING, "out side vector of now akat");
+			throw new GameError(KTROBO::WARNING, "out side vector of now mesh");
 		}
 	}
-	void setNowAction(int now_character_index, int index) {
+	void setNowAction(int index) {
 		if (index >= 0 && index < actions.size()) {
 			now_action = index;
 			tex->setRenderTextChangeText(now_action_text, actions[now_action]->action_name);
@@ -278,9 +327,9 @@ public:
 		this->tex = tex;
 		memset(character_name,0,32);
 		hmystrcpy(character_name,31,0,name);
-		now_akat = 0;
+		now_mesh = 0;
 		now_action = 0;
-		now_akat_text = tex->getRenderText(name,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		now_mesh_text = tex->getRenderText(name,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
 		now_action_text = tex->getRenderText(name, 0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
@@ -289,9 +338,9 @@ public:
 	~ActionCharacter() {
 		Release();
 
-		if (now_akat_text) {
-			tex->lightdeleteRenderText(now_akat_text);
-			now_akat_text = 0;
+		if (now_mesh_text) {
+			tex->lightdeleteRenderText(now_mesh_text);
+			now_mesh_text = 0;
 		}
 		if (now_action_text) {
 			tex->lightdeleteRenderText(now_action_text);
@@ -302,12 +351,12 @@ public:
 	}
 
 	void setFocus(Texture* tex) {
-		tex->setRenderTextIsRender(now_akat_text, true);
+		tex->setRenderTextIsRender(now_mesh_text, true);
 		tex->setRenderTextIsRender(now_action_text, true);
 	}
 
 	void setUnFocus(Texture* tex) {
-		tex->setRenderTextIsRender(now_akat_text, false);
+		tex->setRenderTextIsRender(now_mesh_text, false);
 		tex->setRenderTextIsRender(now_action_text, false);
 	}
 
@@ -386,17 +435,17 @@ public:
 	int createActionCharacter(char* name);
 	int setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat);
 	int setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename);
-	void toggleMeshOptional(int character_id, int hon_mesh_id);// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグルする
-	int setAnimeAndAkatFile(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename);
-	int getAkatID(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename);
-	int getAkatNum(int character_id, int akat_id);
-	char* getAkatName(int character_id, int akat_id, int akat_index);
+	void toggleMeshOptional(int character_id, int hon_mesh_id);// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグル
+	
+	int setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename);
+	int getAkatNum(int character_id, int hon_mesh_id, int skeleton_id);
+	char* getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index);
 	int makeAction(int character_id, char* action_name);
-	int setAkatToAction(int character_id, int action_id, int akat_id, int akat_index);
+	int setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index);
 	void setNowCharacterId(int character_id);
 	int getNowCharacterId();
-	void setNowAkat(int character_id, int akat_id, int akat_index);
-	void getNowAkatIndex(int character_id, OUT_ int* akat_id, OUT_ int* akat_index);
+	void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id,  int akat_index);
+	void getNowAkatIndex(int character_id,  int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index);
 	void setNowAction(int character_id, int action_id);
 	void togglePlayNowAction();
 	void togglePlayNowAkat();

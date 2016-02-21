@@ -12,6 +12,7 @@
 #include "KTRoboGraphics.h"
 #include "KTRoboGameError.h"
 #include "tolua_glue/MyLuaGlueMakeCommon.h"
+#include "MyTokenAnalyzer.h"
 
 using namespace std;
 

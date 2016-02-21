@@ -138,29 +138,38 @@ void ActionEditor::toggleMeshOptional(int character_id, int hon_mesh_id) {
 }	
 	
 	
-int ActionEditor::setAnimeAndAkatFile(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename) {
+int ActionEditor::setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename) {
+
+	int ans = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
+		ans = mesh->skeletons.size();
+		char meshfilename[128];
+		memset(meshfilename,0,128);
+		if (mesh->mesh_filenames.size()) {
+			hmystrcpy(meshfilename, 128,0, mesh->mesh_filenames[0].c_str());
+			CharacterMeshSkeleton* skle = new CharacterMeshSkeleton(meshfilename, akat_filename, anime_filename);
+			mesh->skeletons.push_back(skle);
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 
 
-
-	return 0;
+	return ans;
 }
 
 
-int ActionEditor::getAkatID(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename) {
-
-	return 0;
-
-}
-
-int ActionEditor::getAkatNum(int character_id, int akat_id) {
+int ActionEditor::getAkatNum(int character_id, int hon_mesh_id, int skeleton_id) {
 
 	return 0;
 
 }
 
 
-char* ActionEditor::getAkatName(int character_id, int akat_id, int akat_index) {
+char* ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index) {
 
 	return "";
 
@@ -171,7 +180,7 @@ int ActionEditor::makeAction(int character_id, char* action_name) {
 	return 0;
 }
 
-int ActionEditor::setAkatToAction(int character_id, int action_id, int akat_id, int akat_index) {
+int ActionEditor::setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index) {
 	return 0;
 }
 
@@ -184,14 +193,14 @@ int ActionEditor::getNowCharacterId() {
 	return 0;
 }
 
-void ActionEditor::setNowAkat(int character_id, int akat_id, int akat_index) {
+void ActionEditor::setNowAkat(int character_id, int hon_mesh_id, int skeleton_id,  int akat_index) {
 
 
 
 }
 
 
-void ActionEditor::getNowAkatIndex(int character_id, OUT_ int* akat_id, OUT_ int* akat_index) {
+void ActionEditor::getNowAkatIndex(int character_id,  int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index) {
 
 
 
