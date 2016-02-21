@@ -255,8 +255,8 @@ public:
 	int command;
 	int priority; // 0~15 0 のほうが優先される
 	int frame; // 0~INPUTJYOUTAI_FRAME_MAX
-	long idou[INPUT_MYCOMMAND_FRAME_MAX];
-	long koudou[INPUT_MYCOMMAND_FRAME_MAX];
+	unsigned long idou[INPUT_MYCOMMAND_FRAME_MAX];
+	unsigned long koudou[INPUT_MYCOMMAND_FRAME_MAX];
 	char name[32];
 	bool is_use;
 	bool is_reset; // 発動したときバッファをクリアするかどうか

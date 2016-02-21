@@ -30,16 +30,18 @@ TO_LUA virtual void getNowAkatIndex(int character_id, int hon_mesh_id, int skele
 TO_LUA virtual void setNowAction(int character_id, int action_id)=0;
 TO_LUA virtual void togglePlayNowAction()=0;
 TO_LUA virtual void togglePlayNowAkat()=0;
-TO_LUA virtual void setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority)=0;
-TO_LUA virtual int makeActiontoAction(int character_id, char* action_name_moto, char* action_name_saki, int command_id, bool is_modoru)=0;
+TO_LUA virtual void setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority,bool is_reset, int frame)=0;
+TO_LUA virtual int makeActiontoAction(int character_id, int command_id)=0;// コマンドIDは必ず１以上にすること
+TO_LUA virtual void setSakiAction(int character_id, int action_id)=0;
+TO_LUA virtual void setMotoAction(int character_id, int action_id)=0;
 TO_LUA virtual void clearActionToAction(int character_id, int action_to_action_id)=0;
 TO_LUA virtual void deleteAll()=0;
-TO_LUA virtual void saveNowToFile(char* filename)=0;
+TO_LUA virtual bool saveNowToFile(char* filename)=0;
 TO_LUA virtual void forceSaveNowToFile(char* filename)=0;
-TO_LUA virtual void loadFromFile(char* filename)=0;
+TO_LUA virtual bool loadFromFile(char* filename)=0;
 TO_LUA virtual void forceLoadFromFile(char* filename)=0;
-TO_LUA virtual void saveNowCharacterToFile(char* filename)=0;
-TO_LUA virtual void forceSaveNowCharacterToFile(char* filename)=0;
+TO_LUA virtual bool saveNowCharacterToFile(char* filename)=0;
+TO_LUA virtual bool forceSaveNowCharacterToFile(char* filename)=0;
 };
 
 
@@ -303,7 +305,15 @@ public:
 	int now_action_text;
 	int now_mesh;
 	int now_mesh_text;
+
+
+	int moto_action;
+	int saki_action;
+	int moto_action_text;
+	int saki_action_text;
+
 public:
+	void write(char* filename);
 	vector<CharacterMesh*>* getMeshs() {return &meshs;};
 	void setNowMesh(int index) {
 		if (index >=0 && index < meshs.size()) {
@@ -324,6 +334,29 @@ public:
 			throw new GameError(KTROBO::WARNING, "out side vector of now action");
 		}
 	}
+
+	void setMotoAction(int index) {
+		if (index >= 0 && index < actions.size()) {
+			moto_action = index;
+			tex->setRenderTextChangeText(moto_action_text, actions[moto_action]->action_name);
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of moto action");
+		}
+	}
+
+	void setSakiAction(int index) {
+		if (index >= 0 && index < actions.size()) {
+			saki_action = index;
+			tex->setRenderTextChangeText(saki_action_text, actions[saki_action]->action_name);
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of saki action");
+		}
+	}
+
+
+
+
+
 	ActionCharacter(char* name, Texture* tex) {
 		this->tex = tex;
 		memset(character_name,0,32);
@@ -332,8 +365,17 @@ public:
 		now_action = 0;
 		now_mesh_text = tex->getRenderText(name,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
-		now_action_text = tex->getRenderText(name, 0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		now_action_text = tex->getRenderText(name, KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
+
+		moto_action_text = tex->getRenderText(name, 0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*4,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
+
+		saki_action_text = tex->getRenderText(name, KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*4,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
+		moto_action = 0;
+		saki_action = 0;
+
 
 	}
 	~ActionCharacter() {
@@ -348,17 +390,33 @@ public:
 			now_action_text = 0;
 		}
 
+		if (moto_action_text) {
+			tex->lightdeleteRenderText(moto_action_text);
+			moto_action_text = 0;
+		}
+
+		if (saki_action_text) {
+			tex->lightdeleteRenderText(saki_action_text);
+			saki_action_text = 0;
+		}
+
 
 	}
 
 	void setFocus(Texture* tex) {
 		tex->setRenderTextIsRender(now_mesh_text, true);
 		tex->setRenderTextIsRender(now_action_text, true);
+		tex->setRenderTextIsRender(moto_action_text, true);
+		tex->setRenderTextIsRender(saki_action_text, true);
 	}
 
 	void setUnFocus(Texture* tex) {
 		tex->setRenderTextIsRender(now_mesh_text, false);
 		tex->setRenderTextIsRender(now_action_text, false);
+		tex->setRenderTextIsRender(moto_action_text, false);
+		tex->setRenderTextIsRender(saki_action_text, false);
+
+
 	}
 
 	void Release() {
@@ -425,6 +483,21 @@ private:
 
 	float frame_of_akat;
 	bool anime_akat;
+
+
+
+	bool do_force_save;
+	bool save_done;
+	bool do_force_load;
+	bool load_done;
+	bool save_result;
+	bool load_result;
+	string filename;
+	string load_filename;
+
+
+
+
 	void analyzeStrCommand(char* command, CharacterActionCommand* new_command);
 public:
 
@@ -457,17 +530,24 @@ public:
 	void setNowAction(int character_id, int action_id);
 	void togglePlayNowAction();
 	void togglePlayNowAkat();
-	void setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority);
-	int makeActiontoAction(int character_id, char* action_name_moto, char* action_name_saki, int command_id, bool is_modoru);
+	void setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority, bool is_reset, int frame);
+	int makeActiontoAction(int character_id, int command_id);
+	void setSakiAction(int character_id, int action_id);
+	void setMotoAction(int character_id, int action_id);
+
 	void clearActionToAction(int character_id, int action_to_action_id);
 	void deleteAll();
-	void saveNowToFile(char* filename);
+	bool saveNowToFile(char* filename);
 	void forceSaveNowToFile(char* filename);
-	void loadFromFile(char* filename);
+	bool loadFromFile(char* filename);
 	void forceLoadFromFile(char* filename);
-	void saveNowCharacterToFile(char* filename);
-	void forceSaveNowCharacterToFile(char* filename);
+	bool saveNowCharacterToFile(char* filename);
+	bool forceSaveNowCharacterToFile(char* filename);
 	void toggleMeshRender(int character_id, int hon_mesh_id);
+private:
+	bool _forceSaveNowToFile(char* filename);
+	bool _forceLoadFromFile(char* filename);
+
 };
 
 

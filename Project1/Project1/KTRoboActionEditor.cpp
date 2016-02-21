@@ -14,6 +14,16 @@ ActionEditor::ActionEditor(void) : Scene("action_editor", 13)
 	anime_akat = false;
 	now_character_index = 0;
 	now_character_text = 0;
+
+
+
+
+	do_force_save = false;
+	save_done = true;
+	do_force_load = false;
+	load_done = true;
+	save_result = true;
+	load_result = true;
 }
 
 
@@ -71,6 +81,41 @@ void ActionEditor::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 }
 
 void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+	// ここでロードとセーブを行う
+
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	if (do_force_save && !save_done) {
+		// セーブする
+		char buf[512];
+		memset(buf,0,512);
+		hmystrcpy(buf,512,0,filename.c_str());
+		CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+		bool tes = _forceSaveNowToFile(buf);
+		CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	//	do_force_save = false;
+		save_result = tes;
+		save_done = true;
+		
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	if (do_force_load && !load_done) {
+		// ロードする
+		char buf[512];
+		memset(buf,0,512);
+		hmystrcpy(buf,512,0,load_filename.c_str());
+		CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+		CS::instance()->leave(CS_TASK_CS, "leave",TASKTHREADS_LOADDESTRUCT);
+		bool tes  = _forceLoadFromFile(buf);
+		CS::instance()->enter(CS_TASK_CS, "enter",TASKTHREADS_LOADDESTRUCT);
+		CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	//	do_force_save = false;
+		load_result = tes;
+		load_done = true;
+		
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
 
 
 }
@@ -402,14 +447,99 @@ void ActionEditor::togglePlayNowAkat() {
 
 void ActionEditor::analyzeStrCommand(char* command, CharacterActionCommand* new_command) {
 
+	// 大文字が離されたとき 小文字が押されたとき
+	char* strs[] = {
+		"q","w","e","r","t",
+		"a","s","d","f","g",
+		"z","x","c","v","b",
+		":"/*ジャンプのスペース*/,"-"/*しゃがみのshift*/,";"/*呼吸のコントロール*/
+		"Q","W","E","R","T",
+		"A","S","D","F","G",
+		"Z","X","C","V","B",
+		"*","=","+"};
+	bool strs_is_koudou[] = {
+		true,false,true,true,true,
+		false,false,false,true,true,
+		false,false,false,
+		true,false,true,true,true,
+		false,false,false,true,true,
+		false,false,false
+	};
+
+	unsigned long commanddayo[] = {
+		INPUTJYOUTAI_KAMAE_DOWN, INPUTJYOUTAI_FORWARD_DOWN,INPUTJYOUTAI_PICK_DOWN,INPUTJYOUTAI_JYAKU_PUNCH_DOWN, INPUTJYOUTAI_KYOU_PUNCH_DOWN,
+		INPUTJYOUTAI_LEFT_DOWN, INPUTJYOUTAI_BACK_DOWN, INPUTJYOUTAI_RIGHT_DOWN, INPUTJYOUTAI_JYAKU_KICK_DOWN, INPUTJYOUTAI_KYOU_KICK_DOWN,
+		0, 0, INPUTJYOUTAI_FRIEND_DOWN, 0, 0,
+		INPUTJYOUTAI_JUMP_DOWN, INPUTJYOUTAI_SHAGAMI_DOWN, INPUTJYOUTAI_KOKYUU_DOWN,
+		INPUTJYOUTAI_KAMAE_UP, INPUTJYOUTAI_FORWARD_UP, INPUTJYOUTAI_PICK_UP, INPUTJYOUTAI_JYAKU_PUNCH_UP, INPUTJYOUTAI_KYOU_PUNCH_UP,
+		INPUTJYOUTAI_LEFT_UP, INPUTJYOUTAI_BACK_UP, INPUTJYOUTAI_RIGHT_UP, INPUTJYOUTAI_JYAKU_KICK_UP, INPUTJYOUTAI_KYOU_KICK_UP,
+		0, 0, INPUTJYOUTAI_FRIEND_UP, 0, 0,
+		INPUTJYOUTAI_JUMP_UP, INPUTJYOUTAI_SHAGAMI_UP, INPUTJYOUTAI_KOKYUU_UP,
+	};
+
+	int index = 0;
+	memset(new_command->idou,0, sizeof(long)*INPUT_MYCOMMAND_FRAME_MAX);
+	memset(new_command->koudou,0, sizeof(long)*INPUT_MYCOMMAND_FRAME_MAX);
+	while(command[index] != '\0' && index < INPUT_MYCOMMAND_FRAME_MAX) {
+
+		for (int i=0;i<36;i++) {
+			char commandd = command[index];
+			if (strcmp(&commandd, strs[i])==0) {
+				if (strs_is_koudou[i]) {
+					new_command->koudou[index] |= commanddayo[i];
+				} else {
+					new_command->idou[index] |= commanddayo[i];
+				}
+			}
+		}
+
+		index++;
+	}
+		/*
+		#define INPUTJYOUTAI_KOKYUU_UP 0x01
+#define INPUTJYOUTAI_KOKYUU_DOWN 0x02
+#define INPUTJYOUTAI_LEFT_UP 0x04
+#define INPUTJYOUTAI_LEFT_DOWN 0x08
+#define INPUTJYOUTAI_RIGHT_UP 0x010
+#define INPUTJYOUTAI_RIGHT_DOWN 0x020
+#define INPUTJYOUTAI_FORWARD_UP 0x040
+#define INPUTJYOUTAI_FORWARD_DOWN 0x080
+#define INPUTJYOUTAI_BACK_UP 0x0100
+#define INPUTJYOUTAI_BACK_DOWN 0x0200
+#define INPUTJYOUTAI_KAMAE_UP 0x0400
+#define INPUTJYOUTAI_KAMAE_DOWN 0x0800
+#define INPUTJYOUTAI_JUMP_UP 0x1000
+#define INPUTJYOUTAI_JUMP_DOWN 0x2000
+#define INPUTJYOUTAI_SHAGAMI_UP 0x4000
+#define INPUTJYOUTAI_SHAGAMI_DOWN 0x8000
+
+// 行動構造体
+#define INPUTJYOUTAI_MOUSEBUTTON_R_UP 0x0001
+#define INPUTJYOUTAI_MOUSEBUTTON_R_DOWN 0x0002
+#define INPUTJYOUTAI_MOUSEBUTTON_L_UP 0x0004
+#define INPUTJYOUTAI_MOUSEBUTTON_L_DOWN 0x0008
+#define INPUTJYOUTAI_PICK_UP 0x0010
+#define INPUTJYOUTAI_PICK_DOWN 0x0020
+#define INPUTJYOUTAI_FRIEND_UP 0x0040
+#define INPUTJYOUTAI_FRIEND_DOWN 0x0080
+#define INPUTJYOUTAI_JYAKU_PUNCH_UP 0x0100
+#define INPUTJYOUTAI_JYAKU_PUNCH_DOWN 0x0200
+#define INPUTJYOUTAI_KYOU_PUNCH_UP 0x0400
+#define INPUTJYOUTAI_KYOU_PUNCH_DOWN 0x0800
+#define INPUTJYOUTAI_JYAKU_KICK_UP 0x1000
+#define INPUTJYOUTAI_JYAKU_KICK_DOWN 0x2000
+#define INPUTJYOUTAI_KYOU_KICK_UP 0x4000
+#define INPUTJYOUTAI_KYOU_KICK_DOWN 0x8000
 
 
+
+*/
 
 
 
 }
 
-void ActionEditor::setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority) {
+void ActionEditor::setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority, bool is_reset, int frame) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	
 	if (character_id >= 0 && character_id < characters.size()) {
@@ -417,6 +547,9 @@ void ActionEditor::setCommandToCharacter(int character_id, int command_id, char*
 		
 		CharacterActionCommand* new_command = new CharacterActionCommand();
 		new_command->priority = priority;
+		new_command->is_reset = is_reset;
+		new_command->is_use = true;
+		new_command->frame = frame;
 		new_command->command = command_id;
 		hmystrcpy(new_command->name,32,0,name);
 		analyzeStrCommand(command, new_command);
@@ -424,67 +557,279 @@ void ActionEditor::setCommandToCharacter(int character_id, int command_id, char*
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
+void ActionEditor::setSakiAction(int character_id, int action_id) {
 
-int ActionEditor::makeActiontoAction(int character_id, char* action_name_moto, char* action_name_saki, int command_id, bool is_modoru) {
 
-	return 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (character_id >= 0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		if (action_id >=0 && action_id < ac->actions.size()) {
+			ac->setSakiAction(action_id);
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+
+}
+
+
+void ActionEditor::setMotoAction(int character_id, int action_id) {
+
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (character_id >= 0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		if (action_id >=0 && action_id < ac->actions.size()) {
+			ac->setMotoAction(action_id);
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+
+
+}
+
+int ActionEditor::makeActiontoAction(int character_id, int command_id) {
+	int ans = 0;
+	// 元のアクションと先のアクションが同じactiontoactionがすでに登録されているかどうか
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (character_id >= 0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		bool is_has_already= false;
+		bool is_has_command = false;
+		ActionToAction* ans_ata = 0;
+		
+
+		int asize = ac->action_to_actions.size();
+		if (asize) {
+			for (int i=0;i<asize;i++) {
+				ActionToAction* ata = ac->action_to_actions[i];
+				if ((ata->moto_action_id == ac->moto_action) && (ata->saki_action_id == ac->saki_action)) {
+					is_has_already = true;
+					ans_ata = ata;
+					ans = i;
+					break;
+				}
+			}
+		}
+		// 次にコマンドが実際にあるものかどうか確かめる
+		int csize = ac->commands.size();
+		if(csize) {
+			for (int i=0;i<csize;i++) {
+				CharacterActionCommand* aca = ac->commands[i];
+				if (aca->command == command_id) {
+					is_has_command = true;
+					break;
+				}
+			}
+		}
+
+		if (!is_has_command) {
+			throw new GameError(KTROBO::WARNING, "no command");
+		}
+
+		if (!is_has_already) {
+			ans_ata = new ActionToAction();
+			ans_ata->moto_action_id = ac->moto_action;
+			ans_ata->saki_action_id = ac->saki_action;
+			ans = ac->action_to_actions.size();
+			ac->action_to_actions.push_back(ans_ata);
+		}
+		ans_ata->command_id = command_id;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+	return ans;
 }
 
 void ActionEditor::clearActionToAction(int character_id, int action_to_action_id) {
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (character_id >= 0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		if (action_to_action_id >=0 && action_to_action_id < ac->action_to_actions.size()) {
+			ActionToAction* actt = ac->action_to_actions[action_to_action_id];
+			actt->command_id = 0;// 不使用にする
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
 
 void ActionEditor::deleteAll() {
+	CS::instance()->enter(CS_RENDERDATA_CS, "renderdata");
+	vector<ActionCharacter*>::iterator it = characters.begin();
+	while(it != characters.end()) {
 
+		ActionCharacter* i = *it;
+		if (i) {
+			i->Release();
+			delete i;
+			i = 0;
+		}
+		it++;
+	}
+	characters.clear();
+	CS::instance()->leave(CS_RENDERDATA_CS, "renderdata");
+}
 
+bool ActionEditor::saveNowToFile(char* dfilename) {
+
+	// すべての今の状態を保存する
+	CS::instance()->enter(CS_RENDERDATA_CS,"test");
+	FILE* fp;
+	fopen_s(&fp, dfilename, "r");
+	if (fp != NULL) {
+		fclose(fp);
+		CS::instance()->leave(CS_RENDERDATA_CS,"test");
+		return false;
+	}
+
+	this->filename = string(dfilename);
+	do_force_save = true;
+	save_done =false;
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS,"test");
+	
+	return true;//force_saveNowToFile(filename);
 
 }
 
-void ActionEditor::saveNowToFile(char* filename) {
+void ActionEditor::forceSaveNowToFile(char* dfilename) {
 
-
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	save_done = false;
+	do_force_save = true;
+	this->filename = string(dfilename);
+	
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+	return;
 
 }
 
-void ActionEditor::forceSaveNowToFile(char* filename) {
+bool ActionEditor::loadFromFile(char* filename) {
 
 
+	// すべての状態が保存されたファイルから状態を復元する現在のものは消してしまう
+	if (characters.size()) return false;
 
-}
-
-void ActionEditor::loadFromFile(char* filename) {
-
-
-
-
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	do_force_load = true;
+	load_done = false;
+	load_filename = string(filename);
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return true;
 }
 
 
 
 void ActionEditor::forceLoadFromFile(char* filename) {
 
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	do_force_load = true;
+	load_done = false;
+	load_filename = string(filename);
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+	MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterLOADTYUU();
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return;
+
+
+}
+
+
+bool ActionEditor::saveNowCharacterToFile(char* dfilename) {
+
+
+
+	CS::instance()->enter(CS_RENDERDATA_CS,"test");
+	FILE* fp;
+	fopen_s(&fp, dfilename, "r");
+	if (fp != NULL) {
+		fclose(fp);
+		CS::instance()->leave(CS_RENDERDATA_CS,"test");
+		return false;
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS,"test");
+	
+	return forceSaveNowCharacterToFile(dfilename);//force_saveNowToFile(filename);
+}
+void ActionCharacter::write(char* filename) {
+
+	KTROBO::mylog::writelog(filename, "ACHARACTER{\n");
+	KTROBO::mylog::writelog(filename, "name=\"%s\";\n",this->character_name);
+	
+
+	KTROBO::mylog::writelog(filename, "}\n");
+}
+
+bool ActionEditor::_forceSaveNowToFile(char* filename) {
+	
+
+		// すべての今の状態を保存する
+	FILE* fp;
+	// いったん消去する
+	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+	fopen_s(&fp, filename, "w");
+	if (fp == NULL) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		return false;
+	}
+	fclose(fp);
+
+	KTROBO::mylog::writelog(filename, "ACS{\n");
+	KTROBO::mylog::writelog(filename, "characters_num=%d;\n",characters.size());
+	int size = characters.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	for (int i=0;i<size;i++) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		characters[i]->write(filename);
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
+	
+}
+
+
+bool ActionEditor::_forceLoadFromFile(char* filename) {
+
+
+
+
 
 
 
 }
 
 
-void ActionEditor::saveNowCharacterToFile(char* filename) {
+bool ActionEditor::forceSaveNowCharacterToFile(char* filename) {
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "test");
 
+	FILE* fp;
+	// いったん消去する
+	fopen_s(&fp, filename, "w");
+	if ((fp == NULL) || !characters.size() ) {
+		CS::instance()->leave(CS_RENDERDATA_CS, "test");
+		return false;
+	}
+	fclose(fp);
 
+	ActionCharacter* ac = characters[now_character_index];
+	ac->write(filename);
 
-}
-
-
-void ActionEditor::forceSaveNowCharacterToFile(char* filename) {
-
-
-
-
-
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "test");
+	return true;
 }
 
 
