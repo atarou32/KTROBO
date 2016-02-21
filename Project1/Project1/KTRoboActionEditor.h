@@ -141,6 +141,13 @@ public:
 	}
 
 };
+
+class CharacterMeshSkeleton {
+public:
+	Mesh* skeleton;
+	vector<Akat*> akats;
+};
+
 class CharacterMesh {
 public:
 	vector<Mesh*> meshs;

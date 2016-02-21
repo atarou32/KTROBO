@@ -239,6 +239,8 @@ public:
 	void animate(float frame, bool calculate_offsetmatrix);
 	void readAnime(char* filename);
 	void readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader);
+	void readMeshWithoutVertex(Graphics* g, char* filename, MyTextureLoader* tex_loader);
+
 	void draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
 	bool RootBone_connect_without_material_local;
 public:
@@ -247,7 +249,8 @@ public:
 	ID3D11Buffer* p_vertexbuffer;
 	ID3D11Buffer* p_indexbuffer;
 private:
-	
+	void readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* vertexs, UINT* indexs);
+
 	static MeshCBuf1 cbuf1;
 	static MeshCBuf2 cbuf2;
 	static MeshCBuf3 cbuf3;

@@ -489,7 +489,175 @@ void readBoneFrame(MyTokenAnalyzer* a,vector<MeshBone*>* BS, MeshBone* parent, m
 }
 
 
+void Mesh::readMeshWithoutVertex(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 
+
+	
+
+	MESH_VERTEX* vertexs=0;
+	UINT* indexs = 0; 
+
+	MyTokenAnalyzer a;
+	if (!a.load(filename)) {
+		throw new GameError(FATAL_ERROR, "no model");
+	}
+	try {
+
+		readBoneInfo(&a, false, vertexs, indexs);
+
+	} catch (GameError* err) {
+		a.deletedayo();
+		Release();
+
+		char buf[4096];
+		memset(buf,0,4096);
+		sprintf_s(buf,4096, "%s %s",filename, err->getMessage());
+		GameError* new_error = new GameError(err->getErrorCode(), string(buf));
+		delete err;
+
+
+		throw new_error;
+	}
+
+
+
+
+	a.deletedayo();
+
+
+
+
+
+
+}
+
+void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* vertexs, UINT* indexs) {
+
+
+
+
+
+		// ボーン情報
+	
+	a->resetPointer();
+	while (!a->enddayo()) {
+		a->GetToken();
+		if (strcmp(a->Toke(), "boneinfo") ==0) {
+			a->GetToken("{");
+			int bone_size = a->GetIntToken();
+			for (int i=0;i<bone_size; i++) {
+				int bone_inde = a->GetIntToken();
+				a->GetToken();
+				string* bone_name = new string(a->Toke());
+				float matrix[16];
+				a->GetToken();
+				for(int j=0;j<16;j++) {
+					matrix[j] = a->GetFloatToken();
+				}
+				float matrix_local[16];
+				a->GetToken();
+				for(int j=0;j<16;j++) {
+					matrix_local[j] = a->GetFloatToken();
+				}
+				MeshBone* b = new MeshBone(bone_inde, matrix_local, bone_name->c_str());
+				if (Bones.size() <= bone_inde) {
+					Bones.insert(Bones.begin()+bone_inde, b);
+				} else {
+					Bones[bone_inde] = b;
+				}
+			
+
+				BoneIndexes.insert(pair<string,int>(*bone_name, bone_inde));
+				delete bone_name;
+			}
+			a->GetToken("}");
+		}
+	}
+
+	a->resetPointer();
+	while (!a->enddayo()) {
+		a->GetToken();
+
+		// ボーン階層構造
+		if (strcmp(a->Toke(), "bone_layer") ==0) {
+			a->GetToken("{");
+			a->GetToken();
+			int index = BoneIndexes[a->Toke()];
+			Bones[index]->setParent(&Bones, KTROBO_MESH_BONE_NULL);
+			this->RootBone = Bones[index];
+			int childnum = a->GetIntToken();
+			for (int i=0;i<childnum;i++) {
+				readBoneFrame(a,&Bones,Bones[index], &BoneIndexes);
+			}
+			a->GetToken("}");
+
+			// ボーン階層構造が読み終わったので
+			// bone_max_depth を計算する
+			int bone_size = Bones.size();
+			int max_dep = 0;
+			for (int i = 0 ; i< bone_size; i++) {
+				int dep = 0;
+				MeshBone* bb = Bones[i];
+				dep = bb->getDepth();
+
+				if (dep > max_dep) {
+					max_dep = dep;
+				}
+			}
+			this->bone_max_depth = max_dep;
+		}
+
+		
+
+		// ボーンの各頂点に対する重み
+		if (strcmp(a->Toke(), "boneweights") ==0 && is_read_weight) {
+			
+			a->GetToken("{");
+		
+
+			int size = a->GetIntToken();
+			if (size > KTROBO_MESH_VERTEX_COUNT_MAX) {
+				if (vertexs) {
+					delete[] vertexs;
+					vertexs = 0;
+				}
+				if (indexs) {
+					delete[] indexs;
+					indexs = 0;
+				}
+
+				throw new GameError(FATAL_ERROR, "too many vertexs");
+			}
+
+			for (int i = 0;i<size;i++) {
+				int vertice_index = a->GetIntToken();
+				int group_size = a->GetIntToken();
+				MESH_VERTEX* v = vertexs;
+				/*
+				for (int k = 0 ; k < MODEL_BLEND_COUNT+3; k++) {
+					v[vertice_index].Index[k] = 0;
+				}
+				for (int k = 0 ; k < MODEL_BLEND_COUNT; k++) {
+					v[vertice_index].weight[k] = 0;
+				}
+				*/
+
+				if (vertice_index < size) {
+					for (int j=0;j<group_size;j++) {
+						unsigned int inde = a->GetUIntToken();//a->GetIntToken() << (8*j);
+						float f = a->GetFloatToken();
+						if (j < MODEL_BLEND_COUNT) {
+							v[vertice_index].Index[j] = (unsigned char)inde;//0x00000001;//inde;
+						}
+						if (j < MODEL_BLEND_COUNT){
+							v[vertice_index].weight[j] = f;
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 void Mesh::readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 
@@ -606,126 +774,7 @@ void Mesh::readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 		}
 	}
 
-	// ボーン情報
-	
-	a.resetPointer();
-	while (!a.enddayo()) {
-		a.GetToken();
-		if (strcmp(a.Toke(), "boneinfo") ==0) {
-			a.GetToken("{");
-			int bone_size = a.GetIntToken();
-			for (int i=0;i<bone_size; i++) {
-				int bone_inde = a.GetIntToken();
-				a.GetToken();
-				string* bone_name = new string(a.Toke());
-				float matrix[16];
-				a.GetToken();
-				for(int j=0;j<16;j++) {
-					matrix[j] = a.GetFloatToken();
-				}
-				float matrix_local[16];
-				a.GetToken();
-				for(int j=0;j<16;j++) {
-					matrix_local[j] = a.GetFloatToken();
-				}
-				MeshBone* b = new MeshBone(bone_inde, matrix_local, bone_name->c_str());
-				if (Bones.size() <= bone_inde) {
-					Bones.insert(Bones.begin()+bone_inde, b);
-				} else {
-					Bones[bone_inde] = b;
-				}
-			
-
-				BoneIndexes.insert(pair<string,int>(*bone_name, bone_inde));
-				delete bone_name;
-			}
-			a.GetToken("}");
-		}
-	}
-
-	a.resetPointer();
-	while (!a.enddayo()) {
-		a.GetToken();
-
-		// ボーン階層構造
-		if (strcmp(a.Toke(), "bone_layer") ==0) {
-			a.GetToken("{");
-			a.GetToken();
-			int index = BoneIndexes[a.Toke()];
-			Bones[index]->setParent(&Bones, KTROBO_MESH_BONE_NULL);
-			this->RootBone = Bones[index];
-			int childnum = a.GetIntToken();
-			for (int i=0;i<childnum;i++) {
-				readBoneFrame(&a,&Bones,Bones[index], &BoneIndexes);
-			}
-			a.GetToken("}");
-
-			// ボーン階層構造が読み終わったので
-			// bone_max_depth を計算する
-			int bone_size = Bones.size();
-			int max_dep = 0;
-			for (int i = 0 ; i< bone_size; i++) {
-				int dep = 0;
-				MeshBone* bb = Bones[i];
-				dep = bb->getDepth();
-
-				if (dep > max_dep) {
-					max_dep = dep;
-				}
-			}
-			this->bone_max_depth = max_dep;
-		}
-
-		
-
-		// ボーンの各頂点に対する重み
-		if (strcmp(a.Toke(), "boneweights") ==0) {
-			
-			a.GetToken("{");
-		
-
-			int size = a.GetIntToken();
-			if (size > KTROBO_MESH_VERTEX_COUNT_MAX) {
-				if (vertexs) {
-					delete[] vertexs;
-					vertexs = 0;
-				}
-				if (indexs) {
-					delete[] indexs;
-					indexs = 0;
-				}
-
-				throw new GameError(FATAL_ERROR, "too many vertexs");
-			}
-
-			for (int i = 0;i<size;i++) {
-				int vertice_index = a.GetIntToken();
-				int group_size = a.GetIntToken();
-				MESH_VERTEX* v = vertexs;
-				/*
-				for (int k = 0 ; k < MODEL_BLEND_COUNT+3; k++) {
-					v[vertice_index].Index[k] = 0;
-				}
-				for (int k = 0 ; k < MODEL_BLEND_COUNT; k++) {
-					v[vertice_index].weight[k] = 0;
-				}
-				*/
-
-				if (vertice_index < size) {
-					for (int j=0;j<group_size;j++) {
-						unsigned int inde = a.GetUIntToken();//a.GetIntToken() << (8*j);
-						float f = a.GetFloatToken();
-						if (j < MODEL_BLEND_COUNT) {
-							v[vertice_index].Index[j] = (unsigned char)inde;//0x00000001;//inde;
-						}
-						if (j < MODEL_BLEND_COUNT){
-							v[vertice_index].weight[j] = f;
-						}
-					}
-				}
-			}
-		}
-	}
+	readBoneInfo(&a, true, vertexs, indexs);
 	} catch (GameError* err) {
 		a.deletedayo();
 		Release();
