@@ -768,7 +768,42 @@ void ActionCharacter::write(char* filename) {
 
 	KTROBO::mylog::writelog(filename, "ACHARACTER{\n");
 	KTROBO::mylog::writelog(filename, "name=\"%s\";\n",this->character_name);
-	
+	KTROBO::mylog::writelog(filename, "ACTIONS{\n");
+	KTROBO::mylog::writelog(filename, "action_num=%d;\n",this->actions.size());
+	int asize = actions.size();
+	for (int i=0;i<asize;i++) {
+		actions[i]->write(filename);
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
+
+	KTROBO::mylog::writelog(filename, "ACTION_TO_ACTIONS{\n");
+	KTROBO::mylog::writelog(filename, "num=%d;\n", action_to_actions.size());
+	int bsize = action_to_actions.size();
+	for (int i=0;i<bsize;i++) {
+		KTROBO::mylog::writelog(filename, "ATA{\n");
+		KTROBO::mylog::writelog(filename, "command_id=%d;\n", action_to_actions[i]->command_id);
+		KTROBO::mylog::writelog(filename, "moto_id=%d;\n", action_to_actions[i]->moto_action_id);
+		KTROBO::mylog::writelog(filename, "saki_id=%d;\n", action_to_actions[i]->saki_action_id);
+		KTROBO::mylog::writelog(filename, "}\n");
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
+
+	KTROBO::mylog::writelog(filename, "MESHS{\n");
+	KTROBO::mylog::writelog(filename, "num=%d;\n", meshs.size());
+	int csize = meshs.size();
+	for (int i=0;i<csize;i++){
+		meshs[i]->write(filename);
+	}
+
+	KTROBO::mylog::writelog(filename, "}\n");
+
+	KTROBO::mylog::writelog(filename, "COMMANDS{\n");
+	KTROBO::mylog::writelog(filename, "num=%d;\n", commands.size());
+	int dsize = commands.size();
+	for (int i=0;i<dsize;i++) {
+		commands[i]->write(filename);
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
 
 	KTROBO::mylog::writelog(filename, "}\n");
 }
