@@ -614,10 +614,10 @@ void MyFuncDef::getHIKISUUStr(MakeGlueInput* input, int index, char* ans) {
 void MyLuaGlueMake::checkType(char *filename, MakeGlueInput* input, MyFuncDef* def, int i) {
 	// -i-3なのは　-1にcollection_のインデックスが入るため -2 にcollectedのインデックスが入る
 	if (def->hikisuu[i].is_pointer && 
-		(!(def->hikisuu[i].type != MyDefType::CHAR)) &&
-		(!(def->hikisuu[i].type != MyDefType::PCHAR)) &&
-		(!(def->hikisuu[i].type != MyDefType::PUCHAR)) &&
-		(!(def->hikisuu[i].type != MyDefType::UCHAR))) {
+		((def->hikisuu[i].type != MyDefType::CHAR)) &&
+		((def->hikisuu[i].type != MyDefType::PCHAR)) &&
+		((def->hikisuu[i].type != MyDefType::PUCHAR)) &&
+		((def->hikisuu[i].type != MyDefType::UCHAR))) {
 		KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", 3+i);
 		return;
 	}
@@ -628,7 +628,12 @@ void MyLuaGlueMake::checkType(char *filename, MakeGlueInput* input, MyFuncDef* d
 
 			break;
 			case MyDefType::CHAR:
-			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+					if (def->hikisuu[i].is_out) {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", i+3);
+				} else {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+				}
+		
 			break;
 			case MyDefType::CLASSDAYO:
 			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", i+3);
@@ -643,16 +648,30 @@ void MyLuaGlueMake::checkType(char *filename, MakeGlueInput* input, MyFuncDef* d
 			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TNUMBER);\n", i+3);
 			break;
 			case MyDefType::PCHAR:
-			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+				if (def->hikisuu[i].is_out) {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", i+3);
+				} else {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+				}
 			break;
 			case MyDefType::PUCHAR:
-			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+		
+				if (def->hikisuu[i].is_out) {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", i+3);
+				} else {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+				}
 			break;
 			case MyDefType::SHORT:
 			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TNUMBER);\n", i+3);
 			break;
 			case MyDefType::UCHAR:
-			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+		
+				if (def->hikisuu[i].is_out) {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", i+3);
+				} else {
+					KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", i+3);
+				}
 			break;
 			case MyDefType::UINT:
 			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TNUMBER);\n", i+3);
@@ -761,10 +780,16 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 				
 			break;
 			case MyDefType::CHAR:
-//			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TSTRING);\n", -i-2);
-			
+				if (def->hikisuu[i].is_out) {
+					// テーブルとして渡されるので１番目の要素を取得する
+					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, 1);\n");
+					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "  mystrcpy(%s, %d,0, lua_tostring(L, -1));\n", def->hikisuu[i].num_name, TEMPSTRING_SIZE);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
+
+				} else {
 					KTROBO::mylog::writelog(filename, "mystrcpy(%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
-					
+				}
 			break;
 			case MyDefType::CLASSDAYO:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", -i-2);
@@ -846,12 +871,28 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 
 			break;
 			case MyDefType::PCHAR:
-				KTROBO::mylog::writelog(filename, "mystrcpy(%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
-		
+				if (def->hikisuu[i].is_out) {
+					// テーブルとして渡されるので１番目の要素を取得する
+					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, 1);\n");
+					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "  mystrcpy(%s, %d,0, lua_tostring(L, -1));\n", def->hikisuu[i].num_name, TEMPSTRING_SIZE);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
+
+				} else {
+					KTROBO::mylog::writelog(filename, "mystrcpy(%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
+				}
 			break;
 			case MyDefType::PUCHAR:
-				KTROBO::mylog::writelog(filename, "mystrcpy((char*)%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
-		
+				if (def->hikisuu[i].is_out) {
+					// テーブルとして渡されるので１番目の要素を取得する
+					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, 1);\n");
+					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "  mystrcpy((char*)%s, %d,0, lua_tostring(L, -1));\n", def->hikisuu[i].num_name, TEMPSTRING_SIZE);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
+
+				} else {
+					KTROBO::mylog::writelog(filename, "mystrcpy((char*)%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
+				}
 			break;
 			case MyDefType::SHORT:
 					KTROBO::mylog::writelog(filename, "{\n");
@@ -867,8 +908,16 @@ void MyLuaGlueMake::getHIKISUU(char* filename, MakeGlueInput* input, MyFuncDef* 
 
 			break;
 			case MyDefType::UCHAR:
-				KTROBO::mylog::writelog(filename, "mystrcpy((char*)%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
-		
+				if (def->hikisuu[i].is_out) {
+					// テーブルとして渡されるので１番目の要素を取得する
+					KTROBO::mylog::writelog(filename, "  lua_pushnumber(L, 1);\n");
+					KTROBO::mylog::writelog(filename, "  lua_gettable(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "  mystrcpy((char*)%s, %d,0, lua_tostring(L, -1));\n", def->hikisuu[i].num_name, TEMPSTRING_SIZE);
+					KTROBO::mylog::writelog(filename, "  lua_remove(L,-1);\n");
+
+				} else {
+					KTROBO::mylog::writelog(filename, "mystrcpy((char*)%s,%d,0,lua_tostring(L,%d));\n", def->hikisuu[i].num_name,TEMPSTRING_SIZE, i+3);
+				}
 
 			break;
 			case MyDefType::UINT:
@@ -1072,9 +1121,10 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 		
 			break;
 			case MyDefType::CHAR:
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L,1);\n");
 					KTROBO::mylog::writelog(filename, "lua_pushstring(L, %s);\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "lua_replace(L, %d);\n", i+3);
-			break;
+					KTROBO::mylog::writelog(filename, "lua_settable(L, %d);\n", i+3);
+				break;
 			case MyDefType::CLASSDAYO:
 //			KTROBO::mylog::writelog(filename, "luaL_checktype(L,%d, LUA_TTABLE);\n", -i-2);
 				// 後で書く
@@ -1157,15 +1207,20 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::PCHAR:
 				if (def->hikisuu[i].is_pointer) {
+
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L,1);\n");
 					KTROBO::mylog::writelog(filename, "lua_pushstring(L, %s);\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "lua_replace(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "lua_settable(L, %d);\n", i+3);
 
 				}		
 			break;
 			case MyDefType::PUCHAR:
 				if (def->hikisuu[i].is_pointer) {
+
+
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L,1);\n");
 					KTROBO::mylog::writelog(filename, "lua_pushstring(L, %s);\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "lua_replace(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "lua_settable(L, %d);\n", i+3);
 
 				}	
 			break;
@@ -1186,8 +1241,9 @@ void MyLuaGlueMake::hanneiHIKISUU(char* filename, MakeGlueInput* input, MyFuncDe
 			break;
 			case MyDefType::UCHAR:
 				if (def->hikisuu[i].is_pointer) {
+					KTROBO::mylog::writelog(filename, "lua_pushnumber(L,1);\n");
 					KTROBO::mylog::writelog(filename, "lua_pushstring(L, %s);\n", def->hikisuu[i].num_name);
-					KTROBO::mylog::writelog(filename, "lua_replace(L, %d);\n", i+3);
+					KTROBO::mylog::writelog(filename, "lua_settable(L, %d);\n", i+3);
 
 				}	
 
