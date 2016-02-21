@@ -101,7 +101,7 @@ int  AnimationBuilder::getHonMeshBoneNum(int impl_id) {
 	return 0;
 }
 
-char*  AnimationBuilder::getHonMeshBoneName(int impl_id, int bone_index) {
+void  AnimationBuilder::getHonMeshBoneName(int impl_id, int bone_index, OUT_ char* name) {
 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (impls.size() > impl_id && impl_id >=0) {
 		
@@ -110,13 +110,17 @@ CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 		if (impl->hon_mesh->mesh->Bones.size() > bone_index && bone_index >=0) {
 			char* bone_name = impl->hon_mesh->mesh->Bones[bone_index]->bone_name;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-			return bone_name;
+		//	return bone_name;
+			hmystrcpy(name,64,0,bone_name);
+			return;
 		}
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-		return "nullbone";
+		hmystrcpy(name,9,0,"nullbone");
+		return;// "nullbone";
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-	return "nullbone";
+	hmystrcpy(name,9,0,"nullbone");
+	return;// "nullbone";
 
 
 }
@@ -651,11 +655,11 @@ void AnimationMesh::write(char* filename, int impl_id) {
 	KTROBO::mylog::writelog(filename, "IMPL_ID=%d;\n",impl_id);
 	KTROBO::mylog::writelog(filename, "ALL_TIME=%f;\n", this->all_time);
 	KTROBO::mylog::writelog(filename, "ANIME_INDEX=%d;\n", this->anime_index);
-	KTROBO::mylog::writelog(filename, "ANIME_NAME=\"%s\"\n", this->anime_name);
+	KTROBO::mylog::writelog(filename, "ANIME_NAME=\"%s\";\n", this->anime_name);
 	if (is_loop) {
-		KTROBO::mylog::writelog(filename, "IS_LOOP=1;");
+		KTROBO::mylog::writelog(filename, "IS_LOOP=1;\n");
 	} else {
-		KTROBO::mylog::writelog(filename, "IS_LOOP=0;");
+		KTROBO::mylog::writelog(filename, "IS_LOOP=0;\n");
 	}
 	int num = this->frames.size();
 	KTROBO::mylog::writelog(filename, "FRAME_NUM=%d;\n",num);
@@ -664,7 +668,7 @@ void AnimationMesh::write(char* filename, int impl_id) {
 		
 		KTROBO::mylog::writelog(filename, "FR=%f;\n",frames[i]->frame);
 		KTROBO::mylog::writelog(filename, "KI=%d;\n", frames[i]->kakera_index);
-		KTROBO::mylog::writelog(filename, "KAKERAFRAME=%d", frames[i]->kakera->frame);
+		KTROBO::mylog::writelog(filename, "KAKERAFRAME=%d;\n", frames[i]->kakera->frame);
 		KTROBO::mylog::writelog(filename, "TI=%f;\n", frames[i]->time);
 
 		KTROBO::mylog::writelog(filename, "}\n");
@@ -1232,7 +1236,7 @@ AnimationMeshKakera* AnimationBuilder::loadKakera(MyTokenAnalyzer* a) {
 
 
 	a->GetToken("}");
-	a->GetToken("MESHFILEPATHNAME");
+	a->GetToken("MESH_FILEPATHNAME");
 	a->GetToken();
 	kakera->mesh_filepathname = string(a->Toke());
 	a->GetToken("FRAME");
@@ -1584,7 +1588,7 @@ bool AnimationBuilder::_forceLoadFromFile(char* filename) {
 			a.GetToken("{");
 			a.GetToken("IMPL_ID");
 			int impl_id = a.GetIntToken();
-			a.GetToken("ALLTIME");
+			a.GetToken("ALL_TIME");
 			AnimationMesh* am = new AnimationMesh();
 			am->all_time = a.GetFloatToken();
 			a.GetToken("ANIME_INDEX");
@@ -2852,7 +2856,7 @@ int AnimationBuilder::getAnimeNum(int impl_id) {
 }
 
 
-char* AnimationBuilder::getAnimeName(int impl_id, int anime_index) {
+void AnimationBuilder::getAnimeName(int impl_id, int anime_index, OUT_ char* name) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	
 	if (impls.size() > impl_id && impl_id >=0) {
@@ -2861,12 +2865,15 @@ char* AnimationBuilder::getAnimeName(int impl_id, int anime_index) {
 		AnimationBuilderImpl *impl = impls[impl_id];
 		int asize = impl->animes.size();
 		if (asize > anime_index && anime_index >=0) {
-			char* bone_name = impl->animes[anime_index]->anime_name;
+			char* anime_name = impl->animes[anime_index]->anime_name;
 			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-			return bone_name;
+			//return bone_name;
+			hmystrcpy(name, 128,0,anime_name);
+			return;
 		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-	return "null";
+	hmystrcpy(name, 5,0,"null");
+	return;// "null";
 }
 

@@ -310,7 +310,10 @@ public:
 	void setNowMesh(int index) {
 		if (index >=0 && index < meshs.size()) {
 			now_mesh = index;
-			tex->setRenderTextChangeText(now_mesh_text, meshs[index]->mesh_filenames[0].c_str());
+			char fi[128];
+			memset(fi,0,128);
+			hmystrcpy(fi,128,0,meshs[index]->mesh_filenames[0].c_str());
+			tex->setRenderTextChangeText(now_mesh_text, fi);
 		} else {
 			throw new GameError(KTROBO::WARNING, "out side vector of now mesh");
 		}

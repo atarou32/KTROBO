@@ -132,7 +132,7 @@ void CMesh::copyDAYO(CMesh* src) {
 		}
 	}
 
-	int size = meshs.size();
+	size = meshs.size();
 	for (int i=0;i<size; i++) {
 		Meshdayo* me = meshs[i];
 		if (me->has_responsibility) {

@@ -164,13 +164,47 @@ int ActionEditor::setSkeleton(int character_id, int hon_mesh_id, char* anime_fil
 
 int ActionEditor::getAkatNum(int character_id, int hon_mesh_id, int skeleton_id) {
 
-	return 0;
 
+	int ans = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
+		if (skeleton_id >= 0 && skeleton_id < mesh->skeletons.size()) {
+			CharacterMeshSkeleton* skle = mesh->skeletons[skeleton_id];
+			if (skle->skeletons_loaded) {
+				ans = skle->akats.size();
+			} else {
+				CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+				throw new GameError(KTROBO::WARNING, "skleton is not loaded");
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
 }
 
 
 char* ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index) {
 
+	char* ans =0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
+		if (skeleton_id >= 0 && skeleton_id < mesh->skeletons.size()) {
+			CharacterMeshSkeleton* skle = mesh->skeletons[skeleton_id];
+			if (skle->skeletons_loaded && akat_index >= 0 && akat_index < skle->akats.size()) {
+				ans = skle->akats[akat_index]->name;
+				CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+				return ans;
+			} else {
+				CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+				throw new GameError(KTROBO::WARNING, "skleton is not loaded");
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return "";
 
 }

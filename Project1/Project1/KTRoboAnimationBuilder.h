@@ -13,9 +13,9 @@ public:
 	TO_LUA virtual void setOnajiMesh(int impl_id, char* onaji_filepath)=0;
 	TO_LUA virtual void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath, char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru)=0;
 	TO_LUA virtual int getHonMeshBoneNum(int impl_id)=0;
-	TO_LUA virtual char* getHonMeshBoneName(int impl_id, int bone_index)=0;
+	TO_LUA virtual void getHonMeshBoneName(int impl_id, int bone_index, OUT_ char* name)=0;
 	TO_LUA virtual int getAnimeNum(int impl_id)=0;
-	TO_LUA virtual char* getAnimeName(int impl_id, int anime_index)=0;
+	TO_LUA virtual void getAnimeName(int impl_id, int anime_index, OUT_ char* name)=0;
 	TO_LUA virtual void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx)=0;
 	TO_LUA virtual void setHonMeshBoneRotY(int impl_id, int bone_index, float roty)=0;
 	TO_LUA virtual void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz)=0;
@@ -440,9 +440,9 @@ public:
 	void setOnajiMesh(int impl_id, char* onaji_filepath);
 	void setKoMesh(int impl_id, char* ko_filepath, char* oya_filepath,char* parent_bone_name, bool is_connect_without_material_local, YARITORI MYMATRIX* kakeru);
 	int getHonMeshBoneNum(int impl_id);
-	char* getHonMeshBoneName(int impl_id, int bone_index);
+	void getHonMeshBoneName(int impl_id, int bone_index, OUT_ char* name);
 	int getAnimeNum(int impl_id);
-	char* getAnimeName(int impl_id, int anime_index);
+	void getAnimeName(int impl_id, int anime_index, OUT_ char* name);
 	void setHonMeshBoneRotX(int impl_id, int bone_index, float rotx);
 	void setHonMeshBoneRotY(int impl_id, int bone_index, float roty);
 	void setHonMeshBoneRotZ(int impl_id, int bone_index, float rotz);

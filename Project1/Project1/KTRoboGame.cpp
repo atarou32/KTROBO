@@ -473,14 +473,7 @@ bool Game::Init(HWND hwnd) {
 
 
 
-	unsigned long work[TASK_WORK_SIZE];
-	memset(work,0, sizeof(work));
-	work[0] = (unsigned long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
-
-	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
-
-
-
+	
 
 
 	MYMATRIX jiken;
@@ -530,7 +523,9 @@ bool Game::Init(HWND hwnd) {
 //	MyMatrixRotationZ(world, 0.5f);
 	MyMatrixLookAtRH(view,from,at,up);
 	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
-/*
+
+	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
+	/*
 	j = texdayo->getRenderBillBoard(i,0xFFFFFFFF,&world,0.021,0.021,0,0,500,500);
 	texdayo->setRenderBillBoardIsRender(j,true);
 	MyMatrixTranslation(world,0,0,0);
@@ -553,6 +548,15 @@ bool Game::Init(HWND hwnd) {
 //	texdayo->setViewProj(g,&view,&proj,&from, &at);
 	
 	//long work[TASK_WORK_SIZE];
+
+	unsigned long work[TASK_WORK_SIZE];
+	memset(work,0, sizeof(work));
+	work[0] = (unsigned long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
+
+	task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO]->make(CALCCOMBINEDTCB,mesh_instanceds,work,0x0000FFFF);
+
+
+
 	memset(work,0, sizeof(work));
 	work[1] = (unsigned long)g_for_task_threads[TASKTHREADS_AIDECISION];
 	work[0] = (unsigned long)task_threads[TASKTHREADS_AIDECISION];
@@ -565,7 +569,7 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	//InputMessageDispatcher::registerImpl(&k,NULL,NULL);
-	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
+	
 	return true;
 }
 void Game::Del() {
