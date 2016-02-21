@@ -15,6 +15,7 @@ class CMesh;
 interface ICMesh {
 public:
 	TO_LUA virtual int getMesh(char* path_without_dot)=0;
+	TO_LUA virtual int getMeshWithAnime(char* path_without_dot, char* path_to_anime)=0;
 	TO_LUA virtual bool getIsLoad()=0;
 	TO_LUA virtual void setIsLoad(bool t)=0;
 	TO_LUA virtual void deleteMesh(char* path_without_dot)=0;
@@ -31,10 +32,12 @@ class CMesh : public ICMesh, public Loadable {
 private:
 	vector<Meshdayo*> meshs;
 	map<string, int> meshname_index;
+	
 	Graphics* g;
 	MyTextureLoader* tex_loader;
 public:
 	int getMesh(char* path_without_dot);
+	int getMeshWithAnime(char* path_without_dot, char* path_to_anime);
 	bool getIsLoad();
 	void setIsLoad(bool t);
 	void deleteMesh(char* path_without_dot);

@@ -1,5 +1,9 @@
 #include "KTRoboActionEditor.h"
 #include "KTRoboLuaCollection.h"
+#include "tolua_glue/tolua_glue.h"
+#include "MyTokenAnalyzer.h"
+
+
 using namespace KTROBO;
 ActionEditor::ActionEditor(void) : Scene("action_editor", 13) 
 {
@@ -45,38 +49,92 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 }
 
 int ActionEditor::createActionCharacter(char* name) {
-
-	return 0;
+	int ans;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	ans = characters.size();
+	ActionCharacter* mm = new ActionCharacter(name, MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0));
+	characters.push_back(mm);
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
 }
 
 
 int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat) {
 
-	return 0;
+	int ans;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		int ans = cha->getMeshs()->size();
+		CharacterMesh* mesh = new CharacterMesh();
+		hmystrcpy(mesh->oya_meshfilename,128,0,oya_mesh_filename);
+		string filename = mesh_filename;
+		mesh->is_akat_loaded = false;
+		mesh->is_connect_without_material_local = is_connect_without_matrial_local;
+		mesh->matrix_kakeru = *mat;
+		// Meshの作成とフラグをオフにしておく
+		Mesh* m = new Mesh();
+		bool mesh_has_loaded = false;	
+		if (strlen(oya_mesh_filename)) {
+			// 親メッシュがいるので設定が必要
+			mesh->has_oya_mesh = true;
+			// meshへの実際の設定は親メッシュがロードされてから子メッシュをロードする際に行う
+		}else {
+			mesh->has_oya_mesh = false;
+		}
+		mesh->meshs.push_back(m);
+		mesh->mesh_filenames.push_back(filename);
+		mesh->mesh_has_loaded.push_back(mesh_has_loaded);
 
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
 }
 
 
 int ActionEditor::setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename) {
 
-	return 0;
+	int ans;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
+		string filename = mesh_filename;
+		Mesh* m = new Mesh();
+		bool mesh_has_loaded = false;	
+		ans = mesh->meshs.size();
+		mesh->meshs.push_back(m);
+		mesh->mesh_filenames.push_back(filename);
+		mesh->mesh_has_loaded.push_back(mesh_has_loaded);
 
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
 }
 void ActionEditor::toggleMeshRender(int character_id, int hon_mesh_id) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
+		mesh->is_render = !mesh->is_render;
 
-
-
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return;
 
 }
 
 void ActionEditor::toggleMeshOptional(int character_id, int hon_mesh_id) {
 	// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグルする
 
-	
-	
-	
-	
-	
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* cha = characters[character_id];
+		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
+		mesh->is_optional = !mesh->is_optional;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return;
 }	
 	
 	

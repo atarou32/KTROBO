@@ -6,6 +6,8 @@
 #include "MyTextureLoader.h"
 #include "KTRoboMesh.h"
 #include "KTRoboInput.h"
+#include "KTRoboTexture.h"
+#include "KTRoboGameError.h"
 
 #include "vector"
 using namespace std;
@@ -71,38 +73,9 @@ public:
 };
 
 
-class Action {
-	int action_id;
-	char action_name[32];
-	int all_max_frame;
-	int action_type;
-	map<CharacterMesh*, Akat*> mesh_akat_pair;
-	vector<AtariHantei*> hanteis;
-
-	Action() {
-		action_id = 0;
-		memset(action_name,0,32);
-		all_max_frame = 0;
-		action_type = 0;
-	}
-	~Action() {Release();}
-
-	void Release() {
-		vector<AtariHantei*>::iterator it = hanteis.begin();
-		while(it != hanteis.end()) {
-			AtariHantei* ag = *it;
-			if (ag) {
-				delete ag;
-				ag =0;
-			}
-			it++;
-		}
-		hanteis.clear();
-	}
-
-};
 
 class ActionToAction {
+public:
 	int moto_action_id;
 	int saki_action_id;
 	int command_id;// MyCommand‚Ìcommand_id
@@ -114,14 +87,16 @@ class ActionToAction {
 };
 
 class CharacterActionCommand : public MyCommand{
+public:
 	CharacterActionCommand() : MyCommand() {
 	}
 	~CharacterActionCommand() {
-		~MyCommand();
+		MyCommand::~MyCommand();
 	}
 
 };
 class AkatFrame {
+public:
 	int mesh_instanced_frame;
 	int akat_frame;
 	AkatFrame* left;
@@ -136,6 +111,7 @@ class AkatFrame {
 
 };
 class Akat {
+public:
 	char name[32];
 	int all_frame;
 	AkatFrame* root_akat_frame;
@@ -168,16 +144,23 @@ class Akat {
 class CharacterMesh {
 public:
 	vector<Mesh*> meshs;
-	vector<string> mesh_filenames;
+	vector<bool> mesh_has_loaded;
+	vector<string> mesh_filenames;// .MESH‚ðŠÜ‚Ü‚È‚¢
 	bool has_oya_mesh;
 	char oya_meshfilename[128];
 	bool is_connect_without_material_local;
 	MYMATRIX matrix_kakeru;
-
+	bool is_akat_loaded;
 	vector<Akat*> akats;
 
 	bool is_optional;
 	bool is_render;
+
+
+	char akat_filename[128];// .AKAT‚ðŠÜ‚Þ
+	char mesh_animename[128]; // .ANIME‚ðŠÜ‚Þ
+
+
 
 	CharacterMesh() {
 		has_oya_mesh = false;
@@ -186,6 +169,9 @@ public:
 		is_render = false;
 		MyMatrixIdentity(matrix_kakeru);
 		memset(oya_meshfilename,0,128);
+		memset(akat_filename, 0, 128);
+		memset(mesh_animename,0,128);
+		is_akat_loaded = false;
 	}
 
 	~CharacterMesh() {
@@ -215,21 +201,113 @@ public:
 
 	}
 };
+
+
+class Action {
+public:
+	int action_id;
+	char action_name[32];
+	int all_max_frame;
+	int action_type;
+	map<CharacterMesh*, Akat*> mesh_akat_pair;
+	vector<AtariHantei*> hanteis;
+
+	Action() {
+		action_id = 0;
+		memset(action_name,0,32);
+		all_max_frame = 0;
+		action_type = 0;
+	}
+	~Action() {Release();}
+
+	void Release() {
+		vector<AtariHantei*>::iterator it = hanteis.begin();
+		while(it != hanteis.end()) {
+			AtariHantei* ag = *it;
+			if (ag) {
+				delete ag;
+				ag =0;
+			}
+			it++;
+		}
+		hanteis.clear();
+	}
+
+};
+
+#define KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT 16
+
 class ActionCharacter {
+private:
 	char character_name[32];
 	vector<CharacterMesh*> meshs;
 	vector<Action*> actions;
 	vector<ActionToAction*> action_to_actions;
 	vector<CharacterActionCommand*> commands;
-
-	ActionCharacter(char* name) {
+	Texture* tex;
+	int now_akat;
+	int now_action;
+	int now_akat_text;
+	int now_action_text;
+public:
+	vector<CharacterMesh*>* getMeshs() {return &meshs;};
+	void setNowAkat(int now_character_index, int index) {
+		if (index >=0 && index < meshs[now_character_index]->akats.size()) {
+			now_akat = index;
+			tex->setRenderTextChangeText(now_akat_text, meshs[now_character_index]->akats[index]->name);
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of now akat");
+		}
+	}
+	void setNowAction(int now_character_index, int index) {
+		if (index >= 0 && index < actions.size()) {
+			now_action = index;
+			tex->setRenderTextChangeText(now_action_text, actions[now_action]->action_name);
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of now action");
+		}
+	}
+	ActionCharacter(char* name, Texture* tex) {
+		this->tex = tex;
 		memset(character_name,0,32);
 		hmystrcpy(character_name,31,0,name);
+		now_akat = 0;
+		now_action = 0;
+		now_akat_text = tex->getRenderText(name,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
+		now_action_text = tex->getRenderText(name, 0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
+
 	}
 	~ActionCharacter() {
 		Release();
+
+		if (now_akat_text) {
+			tex->lightdeleteRenderText(now_akat_text);
+			now_akat_text = 0;
+		}
+		if (now_action_text) {
+			tex->lightdeleteRenderText(now_action_text);
+			now_action_text = 0;
+		}
+
+
 	}
+
+	void setFocus(Texture* tex) {
+		tex->setRenderTextIsRender(now_akat_text, true);
+		tex->setRenderTextIsRender(now_action_text, true);
+	}
+
+	void setUnFocus(Texture* tex) {
+		tex->setRenderTextIsRender(now_akat_text, false);
+		tex->setRenderTextIsRender(now_action_text, false);
+	}
+
 	void Release() {
+
+	
+
 		vector<CharacterMesh*>::iterator mesh_it = meshs.begin();
 		while( mesh_it != meshs.end()) {
 			CharacterMesh* cm = *mesh_it;
@@ -250,7 +328,7 @@ class ActionCharacter {
 			}
 			a_it++;
 		}
-		a_it.clear();
+		actions.clear();
 
 		vector<ActionToAction*>::iterator atoa_it = action_to_actions.begin();
 		while(atoa_it != action_to_actions.end()) {
@@ -264,7 +342,7 @@ class ActionCharacter {
 		}
 		action_to_actions.clear();
 		
-		vector<CharacterActionCommnad*>::iterator ittt = commands.begin();
+		vector<CharacterActionCommand*>::iterator ittt = commands.begin();
 		while(ittt != commands.end()) {
 			CharacterActionCommand* cac = *ittt;
 			if (cac) {
@@ -283,6 +361,7 @@ class ActionEditor : public Scene, public IActionEditor
 private:
 	vector<ActionCharacter*> characters;
 	int now_character_index;
+	int now_character_text;
 public:
 
 	ActionEditor(void);

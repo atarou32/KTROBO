@@ -1,15 +1,68 @@
 #include "KTRoboLuaCMesh.h"
 
 using namespace KTROBO;
+int CMesh::getMeshWithAnime(char* path_without_dot, char* path_to_anime) {
 
-int CMesh::getMesh(char* path_without_dot) {
+
 	// まずはすでにロードされているかどうか判定する
+	CS::instance()->enter(CS_LOAD_CS, "enter");
 	if (meshname_index.find(path_without_dot) != meshname_index.end()) {
 		// 見つかったので
 		// meshname_indexを返す
-		return meshname_index[path_without_dot];
+		int ans = meshname_index[path_without_dot];
+		CS::instance()->leave(CS_LOAD_CS, "leave");
+		return ans;
 	} else {
 		execConstructOrDestruct();
+		// ロードされていなかったらロード処理が必要だけれども
+		// これはロードスレッドでのみ可能
+		// 更新スレッドでメッシュを取得するためにこのメソッドをロードしてないものを呼んだ場合c++側に例外が飛ぶ
+		// これは事前に必要なものがわかっており、そのものが変化しない場合にのみ対応できる
+		// ものが変化する場合は copyをとって 差分を反映してそのコピーと更新処理で使っているものを入れ替える必要がある
+		// たぶんfinishcommandlist されてexecuteされたかどうかをサブスレッドが知ることはできない？と思われる
+		// MeshInstancedのコピー処理にはテクスチャのコピー処理が入ってくるが、インデックスをコピーしているので
+		// 差分が変なところを上書きはしないようにはなっている・・・　つまりオッケーということである！
+		Mesh* m = new Mesh();
+		char meshname[512];
+		char animename[512];
+		char path[256];
+		memset(meshname,0,512);
+	
+		memset(path,0,256);
+		mystrcpy(path,255,0,path_without_dot);
+		path[255] = '\0';
+		sprintf_s(meshname, "%s.MESH", path);
+		CS::instance()->leave(CS_LOAD_CS, "leave");
+		m->readMesh(g, meshname, tex_loader);
+		m->readAnime(path_to_anime);
+		m->animate(0, true);
+		Meshdayo* mm =  new Meshdayo();
+		mm->has_responsibility = true;
+		mm->mesh = m;
+		
+		CS::instance()->enter(CS_LOAD_CS, "enter");
+		int size = meshname_index.size();
+		meshs.push_back(mm);
+		meshname_index.insert(pair<string,int>((path_without_dot), size));
+		CS::instance()->leave(CS_LOAD_CS, "leave");
+		return size;
+	}
+	CS::instance()->leave(CS_LOAD_CS, "leave");
+}
+
+int CMesh::getMesh(char* path_without_dot) {
+	// まずはすでにロードされているかどうか判定する
+	CS::instance()->enter(CS_LOAD_CS, "enter");
+	if (meshname_index.find(path_without_dot) != meshname_index.end()) {
+		// 見つかったので
+		// meshname_indexを返す
+		int ans = meshname_index[path_without_dot];
+		CS::instance()->leave(CS_LOAD_CS, "leave");
+		return ans;
+	} else {
+		CS::instance()->leave(CS_LOAD_CS, "leave");
+		execConstructOrDestruct();
+		CS::instance()->enter(CS_LOAD_CS, "enter");
 		// ロードされていなかったらロード処理が必要だけれども
 		// これはロードスレッドでのみ可能
 		// 更新スレッドでメッシュを取得するためにこのメソッドをロードしてないものを呼んだ場合c++側に例外が飛ぶ
@@ -29,17 +82,21 @@ int CMesh::getMesh(char* path_without_dot) {
 		path[255] = '\0';
 		sprintf_s(meshname, "%s.MESH", path);
 		sprintf_s(animename, "%s.ANIME", path);
+		CS::instance()->leave(CS_LOAD_CS, "leave");
 		m->readMesh(g, meshname, tex_loader);
 		m->readAnime(animename);
 		m->animate(0, true);
 		Meshdayo* mm =  new Meshdayo();
 		mm->has_responsibility = true;
 		mm->mesh = m;
+		CS::instance()->enter(CS_LOAD_CS, "enter");
 		int size = meshname_index.size();
 		meshs.push_back(mm);
 		meshname_index.insert(pair<string,int>((path_without_dot), size));
+		CS::instance()->leave(CS_LOAD_CS, "leave");
 		return size;
 	}
+	CS::instance()->leave(CS_LOAD_CS, "leave");
 }
 bool CMesh::getIsLoad() {
 	return Loadable::getIsLoad();
@@ -56,9 +113,10 @@ void CMesh::copyDAYO(CMesh* src) {
 	// このコピーは軽いはず（リソースなどの生成などはなく、自分が持っているものの破棄はないはず・・・）
 	// 破棄に関しては例外を投げるのではなく　破棄を行うことにした
 	// つまりhas_responsibility がtrueのものが多い場合は遅い処理になる
-#ifdef _DEBUG_DEBUGDAYO
-	{
+
+
 	// コピー先が責任を持つメッシュ 
+	CS::instance()->enter(CS_LOAD_CS, "enter");
 	int size = meshs.size();
 	for (int i=0;i<size;i++) {
 		Meshdayo* me = meshs[i];
@@ -67,13 +125,13 @@ void CMesh::copyDAYO(CMesh* src) {
 			for (int k=0;k<isize;k++) {
 				Meshdayo* mee = src->meshs[k];
 				if (mee->mesh == me->mesh) {
+					CS::instance()->leave(CS_LOAD_CS, "leave");
 					throw new GameError(KTROBO::WARNING, "cmech copydayo dest has responsibility of src");
 				}
 			}
 		}
 	}
 
-#endif
 	int size = meshs.size();
 	for (int i=0;i<size; i++) {
 		Meshdayo* me = meshs[i];
@@ -99,12 +157,16 @@ void CMesh::copyDAYO(CMesh* src) {
 		meshs.push_back(me);
 	}
 	meshname_index = src->meshname_index;
+	CS::instance()->leave(CS_LOAD_CS, "leave");
 }
 
 void CMesh::deleteMesh(char* path_without_dot) {
+	CS::instance()->enter(CS_LOAD_CS, "enter");
 	if (meshname_index.find(path_without_dot) != meshname_index.end()) {
 		// 見つかったので
+		CS::instance()->leave(CS_LOAD_CS, "leave");
 		execConstructOrDestruct();
+		CS::instance()->enter(CS_LOAD_CS, "enter");
 		int index = meshname_index[path_without_dot];
 		if (meshs[index]->has_responsibility) {
 			meshs[index]->mesh->Release();
@@ -118,7 +180,7 @@ void CMesh::deleteMesh(char* path_without_dot) {
 		}
 		// 実体は消さない
 	}
-
+	CS::instance()->leave(CS_LOAD_CS, "leave");
 }
 
 
@@ -126,6 +188,7 @@ void CMesh::deleteALL() {
 	
 	// 全部消す
 	execConstructOrDestruct();
+	CS::instance()->enter(CS_LOAD_CS, "enter");
 	meshname_index.clear();
 	vector<Meshdayo*>::iterator it = meshs.begin();
 	while(it != meshs.end()) {
@@ -141,14 +204,18 @@ void CMesh::deleteALL() {
 		it = it + 1;
 	}
 	meshs.clear();
+	CS::instance()->leave(CS_LOAD_CS, "leave");
 }
 
 Mesh* CMesh::getCollectedMesh(int index) {
-
+	CS::instance()->enter(CS_LOAD_CS, "enter");
 	int size = meshs.size();
 	if (size > index && index >= 0) {
-		return meshs[index]->mesh;
+		Mesh* ans = meshs[index]->mesh;
+		CS::instance()->leave(CS_LOAD_CS, "leave");
+		return ans;
 	}
+	CS::instance()->leave(CS_LOAD_CS, "leave");
 	throw new GameError(KTROBO::WARNING, "out range vector of CMESH");
 }
 
