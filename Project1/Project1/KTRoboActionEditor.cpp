@@ -7,6 +7,13 @@
 using namespace KTROBO;
 ActionEditor::ActionEditor(void) : Scene("action_editor", 13) 
 {
+	frame_of_action = 0;
+	anime_action = false;
+
+	frame_of_akat = 0;
+	anime_akat = false;
+	now_character_index = 0;
+	now_character_text = 0;
 }
 
 
@@ -15,12 +22,32 @@ ActionEditor::~ActionEditor(void)
 }
 
 void ActionEditor::enter() {
+	frame_of_action = 0;
+	anime_action = false;
+
+	frame_of_akat = 0;
+	anime_akat = false;
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	now_character_index = 0;
+	now_character_text = tex->getRenderText("defaultcharacter",0,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*32,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AE_enter.lua");
 	Scene::enter();
 }
 
 void ActionEditor::leave() {
+	frame_of_action = 0;
+	anime_action = false;
+
+	frame_of_akat = 0;
+	anime_akat = false;
 	Scene::leave();
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	now_character_index = 0;
+	if (now_character_text) {
+		tex->lightdeleteRenderText(now_character_text);
+		now_character_text = 0;
+	}
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AE_leave.lua");
 }
 
@@ -185,9 +212,8 @@ int ActionEditor::getAkatNum(int character_id, int hon_mesh_id, int skeleton_id)
 }
 
 
-char* ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index) {
+void ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index, OUT_ char* name) {
 
-	char* ans =0;
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (character_id >=0 && character_id < characters.size()) {
 		ActionCharacter* cha = characters[character_id];
@@ -195,9 +221,11 @@ char* ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_
 		if (skeleton_id >= 0 && skeleton_id < mesh->skeletons.size()) {
 			CharacterMeshSkeleton* skle = mesh->skeletons[skeleton_id];
 			if (skle->skeletons_loaded && akat_index >= 0 && akat_index < skle->akats.size()) {
+				char* ans;
 				ans = skle->akats[akat_index]->name;
+				hmystrcpy(name,32,0,ans);
 				CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-				return ans;
+				return;
 			} else {
 				CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 				throw new GameError(KTROBO::WARNING, "skleton is not loaded");
@@ -205,44 +233,145 @@ char* ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_
 		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-	return "";
-
+	hmystrcpy(name, 8,0,"nullaka");
 }
 
 
 int ActionEditor::makeAction(int character_id, char* action_name) {
-	return 0;
+
+	int ans = 0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ans = characters.size();
+		ActionCharacter* mm = characters[character_id];
+		Action* act = new Action();
+		hmystrcpy(act->action_name,32,0,action_name);
+		ans = mm->actions.size();
+		mm->actions.push_back(act);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
+
 }
 
-int ActionEditor::setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index) {
-	return 0;
+void ActionEditor::setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index) {
+	
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* mm = characters[character_id];
+		if (action_id >=0 && action_id < mm->actions.size()) {
+			if (hon_mesh_id >= 0 && mm->meshs.size() > hon_mesh_id) {
+				CharacterMesh* cm = mm->meshs[hon_mesh_id];
+				if (skeleton_id >=0 && skeleton_id < cm->skeletons.size()) {
+					CharacterMeshSkeleton* skel = cm->skeletons[skeleton_id];
+					if (akat_index >= 0 && akat_index < skel->akats.size()) {
+						Akat* aka = skel->akats[akat_index];
+						Action* act = mm->actions[action_id];
+						if (act->mesh_akat_pair.find(cm) != act->mesh_akat_pair.end()) {
+							act->mesh_akat_pair.find(cm)->second = aka;
+						} else {
+							act->mesh_akat_pair.insert(pair<CharacterMesh*, Akat*>(cm,aka));
+						}
+						CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+						return;
+					}
+				}
+			}
+		} else {
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			throw new GameError(KTROBO::WARNING, "out side vector of action");
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 void ActionEditor::setNowCharacterId(int character_id) {
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		this->now_character_index = character_id;
+		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+		tex->setRenderTextChangeText(this->now_character_text, characters[character_id]->character_name);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
 int ActionEditor::getNowCharacterId() {
-
-	return 0;
+	int ans=0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		ans = this->now_character_index;
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
 }
 
 void ActionEditor::setNowAkat(int character_id, int hon_mesh_id, int skeleton_id,  int akat_index) {
 
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* mm = characters[character_id];
+		if (hon_mesh_id >= 0 && hon_mesh_id < mm->meshs.size()) {
+			CharacterMesh* m = mm->meshs[hon_mesh_id];
+			if (m->skeletons.size() > skeleton_id && skeleton_id >=0) {
+				CharacterMeshSkeleton* skel = m->skeletons[skeleton_id];
+				if (akat_index >= 0 && akat_index < skel->akats.size()) {
+					Akat* aka = skel->akats[akat_index];
+					mm->now_mesh = hon_mesh_id;
+					Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+					char filename[256];
+					memset(filename,0,256);
+					hmystrcpy(filename,256,0, m->mesh_filenames[0].c_str());
+					tex->setRenderTextChangeText(mm->now_mesh_text, filename);
+					m->now_skeleton = skeleton_id;
+					skel->now_akat_index = akat_index;
+				}
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
 
 
 void ActionEditor::getNowAkatIndex(int character_id,  int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index) {
 
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* mm = characters[character_id];
+		if (hon_mesh_id >= 0 && hon_mesh_id < mm->meshs.size()) {
+			CharacterMesh* m = mm->meshs[hon_mesh_id];
+			if (m->skeletons.size() > skeleton_id && skeleton_id >=0) {
+				CharacterMeshSkeleton* skel = m->skeletons[skeleton_id];
+				if (akat_index >= 0 && akat_index < skel->akats.size()) {
+					Akat* aka = skel->akats[akat_index];
+					mm->now_mesh = hon_mesh_id;
+					Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+					char filename[256];
+					memset(filename,0,256);
+					hmystrcpy(filename,256,0, m->mesh_filenames[0].c_str());
+					tex->setRenderTextChangeText(mm->now_mesh_text, filename);
+					m->now_skeleton = skeleton_id;
+					*akat_index = skel->now_akat_index;	
+				}
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 }
 
 
 void ActionEditor::setNowAction(int character_id, int action_id) {
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* mm = characters[character_id];
+		if (action_id >=0 && action_id < mm->actions.size()) {
+			mm->now_action = action_id;
+			Action* act = mm->actions[action_id];
+			Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+			tex->setRenderTextChangeText(mm->now_action_text, act->action_name);
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
 
 }
@@ -250,22 +379,50 @@ void ActionEditor::setNowAction(int character_id, int action_id) {
 
 void ActionEditor::togglePlayNowAction() {
 
-
-
-
+	
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (characters.size()) {
+		ActionCharacter* ac = characters[now_character_index];
+		this->anime_action = ! anime_action;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 
 void ActionEditor::togglePlayNowAkat() {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (characters.size()) {
+		ActionCharacter* ac = characters[now_character_index];
+		this->anime_akat = !anime_akat;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+void ActionEditor::analyzeStrCommand(char* command, CharacterActionCommand* new_command) {
+
+
+
 
 
 
 }
 
 void ActionEditor::setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority) {
-
-
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	
+	if (character_id >= 0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		
+		CharacterActionCommand* new_command = new CharacterActionCommand();
+		new_command->priority = priority;
+		new_command->command = command_id;
+		hmystrcpy(new_command->name,32,0,name);
+		analyzeStrCommand(command, new_command);
+		ac->commands.push_back(new_command);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 int ActionEditor::makeActiontoAction(int character_id, char* action_name_moto, char* action_name_saki, int command_id, bool is_modoru) {

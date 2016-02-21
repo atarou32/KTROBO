@@ -20,9 +20,9 @@ TO_LUA virtual void toggleMeshOptional(int character_id, int hon_mesh_id)=0;// ‚
 TO_LUA virtual void toggleMeshRender(int character_id, int hon_mesh_id)=0;
 TO_LUA virtual int setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename)=0;
 TO_LUA virtual int getAkatNum(int character_id, int hon_mesh_id, int skeleton_id)=0;
-TO_LUA virtual char* getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index)=0;
+TO_LUA virtual void getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index, OUT_ char* name)=0;
 TO_LUA virtual int makeAction(int character_id, char* action_name)=0;
-TO_LUA virtual int setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id,  int akat_index)=0;
+TO_LUA virtual void setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id,  int akat_index)=0;
 TO_LUA virtual void setNowCharacterId(int character_id)=0;
 TO_LUA virtual int getNowCharacterId()=0;
 TO_LUA virtual void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id, int akat_index)=0;
@@ -263,7 +263,6 @@ public:
 	int action_id;
 	char action_name[32];
 	int all_max_frame;
-	int action_type;
 	map<CharacterMesh*, Akat*> mesh_akat_pair;
 	vector<AtariHantei*> hanteis;
 
@@ -271,7 +270,6 @@ public:
 		action_id = 0;
 		memset(action_name,0,32);
 		all_max_frame = 0;
-		action_type = 0;
 	}
 	~Action() {Release();}
 
@@ -293,7 +291,7 @@ public:
 #define KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT 16
 
 class ActionCharacter {
-private:
+public:
 	char character_name[32];
 	vector<CharacterMesh*> meshs;
 	vector<Action*> actions;
@@ -421,6 +419,13 @@ private:
 	vector<ActionCharacter*> characters;
 	int now_character_index;
 	int now_character_text;
+
+	float frame_of_action;
+	bool anime_action;
+
+	float frame_of_akat;
+	bool anime_akat;
+	void analyzeStrCommand(char* command, CharacterActionCommand* new_command);
 public:
 
 	ActionEditor(void);
@@ -442,9 +447,9 @@ public:
 	
 	int setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename);
 	int getAkatNum(int character_id, int hon_mesh_id, int skeleton_id);
-	char* getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index);
+	void getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index, OUT_ char* name);
 	int makeAction(int character_id, char* action_name);
-	int setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index);
+	void setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index);
 	void setNowCharacterId(int character_id);
 	int getNowCharacterId();
 	void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id,  int akat_index);
