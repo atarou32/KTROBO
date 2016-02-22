@@ -34,9 +34,9 @@ TABACTIONS = TABACTIONS or {} -- character‚²‚Æ‚Éƒ^ƒu‚ª‚ ‚é
 
 
 BIGHONMESHS = BIGHONMESHS or {}
-BIGSKELETONS = BIGSKELETONS or {}
-BIGAKATS = BIGAKATS or {}
-BIGACTIONS = BIGACTIONS or {}
+--BIGSKELETONS = BIGSKELETONS or {}
+--BIGAKATS = BIGAKATS or {}
+--BIGACTIONS = BIGACTIONS or {}
 
 for e=1,msg_siz do
   -- now_index(character_id)‚Ímsgs‚É“ü‚Á‚Ä‚¢‚é
