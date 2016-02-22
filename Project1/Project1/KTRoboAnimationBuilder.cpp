@@ -689,6 +689,11 @@ bool AnimationBuilder::force_saveNowToFile(char* dfilename) {
 }
 
 bool AnimationBuilder::_force_saveNowToFile(char* filename) {
+
+
+	this->force_saveAnimeAndFrameToFile(now_index, filename);
+
+
 	// ‚·‚×‚Ä‚Ì¡‚Ìó‘Ô‚ğ•Û‘¶‚·‚é
 	FILE* fp;
 	// ‚¢‚Á‚½‚ñÁ‹‚·‚é

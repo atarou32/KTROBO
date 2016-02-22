@@ -334,11 +334,16 @@ void ActionEditor::setNowCharacterId(int character_id) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (character_id >=0 && character_id < characters.size()) {
 		this->now_character_index = character_id;
+		int csize = characters.size();
 		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+		for (int i=0;i<csize;i++) {
+			characters[i]->setUnFocus(tex);
+		}
+		characters[now_character_index]->setFocus(tex);
+		
 		tex->setRenderTextChangeText(this->now_character_text, characters[character_id]->character_name);
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
-
 }
 int ActionEditor::getNowCharacterId() {
 	int ans=0;
@@ -764,12 +769,197 @@ bool ActionEditor::saveNowCharacterToFile(char* dfilename) {
 	
 	return forceSaveNowCharacterToFile(dfilename);//force_saveNowToFile(filename);
 }
+
+void Action::write(char* filename) {
+KTROBO::mylog::writelog(filename, "ACTION{\n");
+KTROBO::mylog::writelog(filename, "name=\"%s\";\n", this->action_name);
+KTROBO::mylog::writelog(filename, "frame=%d;\n", this->all_max_frame);
+
+KTROBO::mylog::writelog(filename, "ATARIS{\n");
+KTROBO::mylog::writelog(filename, "num=%d;\n", this->hanteis.size());
+int bsize = hanteis.size();
+for (int i=0;i<bsize;i++) {
+	hanteis[i]->write(filename);
+}
+KTROBO::mylog::writelog(filename, "}\n");
+
+int csize = mesh_akat_pair.size();
+KTROBO::mylog::writelog(filename, "MAKATPAIRS{\n");
+KTROBO::mylog::writelog(filename, "num=%d;\n", csize);
+for (int i=0;i<csize;i++) {
+	map<CharacterMesh*,Akat*>::iterator it = mesh_akat_pair.begin();
+	for (int j=0;j<i;j++) {
+		it++;
+	}
+	pair<CharacterMesh*, Akat*> p = *it;
+	CharacterMesh* me = p.first;
+	Akat* aka = p.second;
+	KTROBO::mylog::writelog(filename, "MAKATPAIR{\n");
+		KTROBO::mylog::writelog(filename, "charamesh_index=%d;\n",me->myindex);
+		KTROBO::mylog::writelog(filename, "skeleton_index=%d;\n",aka->skeleton_index);
+		KTROBO::mylog::writelog(filename, "akat_index=%d;\n", aka->akat_index);
+	KTROBO::mylog::writelog(filename, "}\n"); 
+}
+
+KTROBO::mylog::writelog(filename, "}\n");
+
+
+
+KTROBO::mylog::writelog(filename, "}\n");
+}
+void CharacterMesh::write(char* filename) {
+	/*
+	int myindex;
+	vector<Mesh*> meshs;
+	vector<bool> mesh_has_loaded;
+	vector<string> mesh_filenames;// .MESHを含まない
+	bool has_oya_mesh;
+	char oya_meshfilename[128]; // .MESHを含まない
+	bool is_connect_without_material_local;
+	MYMATRIX matrix_kakeru;
+	bool is_akat_loaded;
+	vector<CharacterMeshSkeleton*> skeletons;
+	bool is_optional;
+	bool is_render;
+
+	int now_skeleton;
+	*/
+	KTROBO::mylog::writelog(filename, "CHARAMESH{\n");
+	KTROBO::mylog::writelog(filename, "myindex=%d;\n", myindex);
+	if (has_oya_mesh) {
+		KTROBO::mylog::writelog(filename, "has_oya_mesh=1;\n");
+		KTROBO::mylog::writelog(filename, "oya_mesh=\"%s\";\n", oya_meshfilename);
+	} else {
+		KTROBO::mylog::writelog(filename, "has_oya_mesh=0;\n");
+		KTROBO::mylog::writelog(filename, "oya_mesh=\"%s\";\n", "nomesh");
+	}
+
+	if (is_connect_without_material_local) {
+		KTROBO::mylog::writelog(filename, "is_connect_without_material_local=1");
+	} else {
+		KTROBO::mylog::writelog(filename, "is_connect_without_mateiral_local=0");
+	}
+
+	if (is_optional) {
+		KTROBO::mylog::writelog(filename, "is_optional=1");
+	} else {
+		KTROBO::mylog::writelog(filename, "is_optional=0");
+	}
+
+	if (is_render) {
+		KTROBO::mylog::writelog(filename, "is_render=1");
+	} else {
+		KTROBO::mylog::writelog(filename, "is_render=0");
+	}
+	KTROBO::mylog::writelog(filename, "kakeru=\n");
+	for (int i=0;i<16;i++) {
+		KTROBO::mylog::writelog(filename, "%f;", matrix_kakeru.m[i/4][i%4]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+	KTROBO::mylog::writelog(filename, "FILENAMES{\n");
+	KTROBO::mylog::writelog(filename, "num=%d;\n", mesh_filenames.size());
+	int bsize = mesh_filenames.size();
+	for (int i=0;i<bsize;i++) {
+		KTROBO::mylog::writelog(filename, "string=\"%s\";\n",mesh_filenames[i].c_str());
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
+
+
+	KTROBO::mylog::writelog(filename, "SKELETONS{\n");
+	KTROBO::mylog::writelog(filename, "num=%d;\n", skeletons.size());
+	int xsize = skeletons.size();
+	for (int i=0;i<xsize;i++) {
+		KTROBO::mylog::writelog(filename, "SKELETON{\n");
+		KTROBO::mylog::writelog(filename, "akat_filename=\"%s\";\n", skeletons[i]->akat_filename);
+		KTROBO::mylog::writelog(filename, "mesh_meshname=\"%s\";\n", skeletons[i]->mesh_meshname);
+		KTROBO::mylog::writelog(filename, "mesh_animename=\"%s\";\n", skeletons[i]->mesh_animename);
+		KTROBO::mylog::writelog(filename, "}\n");
+	}
+	KTROBO::mylog::writelog(filename, "}\n");
+
+
+	KTROBO::mylog::writelog(filename, "}\n");
+}
+
+void CharacterActionCommand::write(char* filename) {
+
+	/*
+	int command;
+	int priority; // 0~15 0 のほうが優先される
+	int frame; // 0~INPUTJYOUTAI_FRAME_MAX
+	unsigned long idou[INPUT_MYCOMMAND_FRAME_MAX];
+	unsigned long koudou[INPUT_MYCOMMAND_FRAME_MAX];
+	char name[32];
+	bool is_use;
+	bool is_reset; // 発動したときバッファをクリアするかどうか
+	*/
+	KTROBO::mylog::writelog(filename, "ACCOMMAND{\n");
+	KTROBO::mylog::writelog(filename, "command=%d;\n", this->command);
+	KTROBO::mylog::writelog(filename, "priority=%d;\n", this->priority);
+	KTROBO::mylog::writelog(filename, "frame=%d;\n", this->frame);
+	KTROBO::mylog::writelog(filename, "name=\"%s\";\n", this->name);
+	if (is_reset) {
+		KTROBO::mylog::writelog(filename, "is_reset=1;\n");
+	} else {
+		KTROBO::mylog::writelog(filename, "is_reset=0;\n");
+	}
+
+	KTROBO::mylog::writelog(filename, "idou=\n");
+	for (int i=0;i<INPUT_MYCOMMAND_FRAME_MAX;i++) {
+		KTROBO::mylog::writelog(filename, "%ul;", idou[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+	KTROBO::mylog::writelog(filename, "koudou=\n");
+	for (int i=0;i<INPUT_MYCOMMAND_FRAME_MAX;i++) {
+		KTROBO::mylog::writelog(filename, "%ul;", koudou[i]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+
+	KTROBO::mylog::writelog(filename, "}\n");
+
+}
+
+void AtariHantei::write(char* filename) {
+	/*
+	int start_frame;
+	int end_frame;
+	float radius;
+	MYMATRIX combined_matrix;
+	*/
+	KTROBO::mylog::writelog(filename, "ATARI{\n");
+	KTROBO::mylog::writelog(filename, "start_frame=%d;\n", start_frame);
+	KTROBO::mylog::writelog(filename, "end_frame=%d;\n", end_frame);
+	KTROBO::mylog::writelog(filename, "radius=%f;\n", radius);
+	KTROBO::mylog::writelog(filename, "matrix=\n");
+	for (int i=0;i<16;i++) {
+		KTROBO::mylog::writelog(filename, "%f;",combined_matrix.m[i/4][i%4]);
+	}
+	KTROBO::mylog::writelog(filename, "\n");
+
+	KTROBO::mylog::writelog(filename, "}\n");
+}
+
+
 void ActionCharacter::write(char* filename) {
 
 	KTROBO::mylog::writelog(filename, "ACHARACTER{\n");
 	KTROBO::mylog::writelog(filename, "name=\"%s\";\n",this->character_name);
+
+	KTROBO::mylog::writelog(filename, "MESHS{\n");
+	KTROBO::mylog::writelog(filename, "num=%d;\n", meshs.size());
+	int csize = meshs.size();
+	for (int i=0;i<csize;i++){
+		meshs[i]->write(filename);
+	}
+
+	KTROBO::mylog::writelog(filename, "}\n");
+
+
+
+
 	KTROBO::mylog::writelog(filename, "ACTIONS{\n");
-	KTROBO::mylog::writelog(filename, "action_num=%d;\n",this->actions.size());
+	KTROBO::mylog::writelog(filename, "num=%d;\n",this->actions.size());
 	int asize = actions.size();
 	for (int i=0;i<asize;i++) {
 		actions[i]->write(filename);
@@ -788,14 +978,7 @@ void ActionCharacter::write(char* filename) {
 	}
 	KTROBO::mylog::writelog(filename, "}\n");
 
-	KTROBO::mylog::writelog(filename, "MESHS{\n");
-	KTROBO::mylog::writelog(filename, "num=%d;\n", meshs.size());
-	int csize = meshs.size();
-	for (int i=0;i<csize;i++){
-		meshs[i]->write(filename);
-	}
 
-	KTROBO::mylog::writelog(filename, "}\n");
 
 	KTROBO::mylog::writelog(filename, "COMMANDS{\n");
 	KTROBO::mylog::writelog(filename, "num=%d;\n", commands.size());
@@ -810,8 +993,8 @@ void ActionCharacter::write(char* filename) {
 
 bool ActionEditor::_forceSaveNowToFile(char* filename) {
 	
-
-		// すべての今の状態を保存する
+	forceSaveNowCharacterToFile(filename);
+	// すべての今の状態を保存する
 	FILE* fp;
 	// いったん消去する
 	CS::instance()->enter(CS_RENDERDATA_CS,"enter");
@@ -823,7 +1006,7 @@ bool ActionEditor::_forceSaveNowToFile(char* filename) {
 	fclose(fp);
 
 	KTROBO::mylog::writelog(filename, "ACS{\n");
-	KTROBO::mylog::writelog(filename, "characters_num=%d;\n",characters.size());
+	KTROBO::mylog::writelog(filename, "num=%d;\n",characters.size());
 	int size = characters.size();
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	for (int i=0;i<size;i++) {
@@ -836,9 +1019,7 @@ bool ActionEditor::_forceSaveNowToFile(char* filename) {
 }
 
 
-bool ActionEditor::_forceLoadFromFile(char* filename) {
-
-
+Action* Action::load(MyTokenAnalyzer* a) {
 
 
 
@@ -846,14 +1027,127 @@ bool ActionEditor::_forceLoadFromFile(char* filename) {
 
 }
 
+ActionCharacter* ActionCharacter::load(MyTokenAnalyzer* a) {
+
+	a->GetToken("ACHARACTER");
+	a->GetToken("{");
+	a->GetToken("name");
+	a->GetToken();
+	char name[128];
+	memset(name,0,128);
+	hmystrcpy(name,128,0,a->Toke());
+	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	ActionCharacter* ac = new ActionCharacter(name,tex);
+
+	a->GetToken("MESHS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int cnum = a->GetIntToken();
+	for (int i=0;i<cnum;i++) {
+		CharacterMesh* a = CharacterMesh::load(a);
+		ac->meshs.push_back(a);
+	}
+	a->GetToken("}");
+
+
+	a->GetToken("ACTIONS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int anum = a->GetIntToken();
+	for (int i=0;i<anum;i++) {
+		Action* act = Action::load(a, ac);
+		ac->actions.push_back(act);
+	}
+	a->GetToken("}");
+
+	a->GetToken("ACTION_TO_ACTIONS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int bnum = a->GetIntToken();
+	for (int i=0;i<bnum;i++) {
+		a->GetToken("ATA");
+		a->GetToken("{");
+		ActionToAction* ata = new ActionToAction();
+		a->GetToken("command_id");
+		ata->command_id = a->GetIntToken();
+		a->GetToken("moto_id");
+		ata->moto_action_id = a->GetIntToken();
+		a->GetToken("saki_id");
+		ata->saki_action_id = a->GetIntToken();
+		a->GetToken("}");
+		ac->action_to_actions.push_back(ata);
+	}
+
+	a->GetToken("}");
+
+
+
+
+
+	a->GetToken("COMMANDS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int cnum = a->GetIntToken();
+	for (int i=0;i<cnum;i++) {
+		CharacterActionCommand* a = CharacterActionCommand::load(a);
+		ac->commands.push_back(a);
+	}
+	a->GetToken("}");
+
+
+
+
+
+
+
+	a->GetToken("}");
+
+}
+
+
+
+
+bool ActionEditor::_forceLoadFromFile(char* filename) {
+
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_AIDECISION);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
+	deleteAll();
+	// ここでGUIのデストラクトとLUAのAB_ENTERの呼び出しを済ませておく
+	TCB test;
+	MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(0)->deleteAll();
+	LuaTCBMaker::doTCBnow(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
+	CS::instance()->leave(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_AIDECISION);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
+	MyTokenAnalyzer a;
+	a.load(filename);
+
+	a.GetToken("ACS");
+	a.GetToken("{");
+	a.GetToken("num");
+	int num = a.GetIntToken();
+	for (int i=0;i<num;i++) {
+		ActionCharacter* ac = ActionCharacter::load(&a);
+		characters.push_back(ac);
+	}
+
+	a.GetToken("}");
+	a.deletedayo();
+
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_LOADDESTRUCT);
+
+}
+
 
 bool ActionEditor::forceSaveNowCharacterToFile(char* filename) {
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "test");
-
+	char filenamedayo[128];
+	memset(filenamedayo,0,128);
+	sprintf_s(filenamedayo,128,"%s.CHARA",filename);
 	FILE* fp;
 	// いったん消去する
-	fopen_s(&fp, filename, "w");
+	fopen_s(&fp, filenamedayo, "w");
 	if ((fp == NULL) || !characters.size() ) {
 		CS::instance()->leave(CS_RENDERDATA_CS, "test");
 		return false;
@@ -861,7 +1155,7 @@ bool ActionEditor::forceSaveNowCharacterToFile(char* filename) {
 	fclose(fp);
 
 	ActionCharacter* ac = characters[now_character_index];
-	ac->write(filename);
+	ac->write(filenamedayo);
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "test");
 	return true;

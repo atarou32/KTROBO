@@ -50,27 +50,32 @@ class AtariHantei {
 	// •û–@‚»‚Ì‚PGPU‚ÌŒvZŒ‹‰Ê‚ğ‚à‚Á‚Ä‚­‚é
 	// •û–@‚»‚Ì‚QCPU‚Å•Ê“rŒvZ‚·‚é
 	// •û–@‚»‚Ì‚R‚ ‚ç‚©‚¶‚ßêŠ‚ğŒvZ‚µ‚Ä‚¨‚­ ‚»‚Ì‚R‚¾‚ÆŒÀ’è“I‚¾‚¯‚ÇŒvZƒpƒ[‚Íg—p‚¹‚¸‚É‚·‚Ş
+
 public:
 	int start_frame;
 	int end_frame;
+
+	/*
 	bool is_bone;
 	char bone_name[128];
 	char mesh_name[128];
 	MeshBone* bone;
 	Mesh* mesh;
+	*/
 	float radius;
-	vector<MYMATRIX> combined_matrixs;
+	MYMATRIX combined_matrix;
 	AtariHantei() {
 		start_frame = 0;
 		end_frame = 0;
-		is_bone = true;
-		memset(bone_name,0,128);
-		memset(mesh_name,0,128);
-		bone = 0;
-		mesh = 0;
+	//	is_bone = true;
+	//	memset(bone_name,0,128);
+	//	memset(mesh_name,0,128);
+	//	bone = 0;
+	//	mesh = 0;
 		radius = 0;
+		MyMatrixIdentity(combined_matrix);
 	}
-
+	void write(char* filename);
 };
 
 
@@ -95,6 +100,8 @@ public:
 		MyCommand::~MyCommand();
 	}
 
+	void write(char* filename);
+	static CharacterActionCommand* load(MyTokenAnalyzer* a);
 };
 class AkatFrame {
 public:
@@ -113,12 +120,17 @@ public:
 };
 class Akat {
 public:
+	int skeleton_index;
+	int akat_index;
+
 	char name[32];
 	int all_frame;
 	AkatFrame* root_akat_frame;
 	vector<AkatFrame*> all_akat_frame;
 
-	Akat() {
+	Akat(int skeleton_index, int akat_index) {
+		this->skeleton_index = skeleton_index;
+		this->akat_index = akat_index;
 		memset(name,0,32);
 		all_frame = 0;
 		root_akat_frame = 0;
@@ -154,7 +166,7 @@ public:
 
 	int now_akat_index;
 
-
+	void write(char* filename);
 	void setNowAkat(int index) {
 		if (index >=0 && index < akats.size()) {
 			now_akat_index = index;
@@ -198,20 +210,22 @@ public:
 
 class CharacterMesh {
 public:
+	int myindex;
 	vector<Mesh*> meshs;
 	vector<bool> mesh_has_loaded;
 	vector<string> mesh_filenames;// .MESH‚ğŠÜ‚Ü‚È‚¢
 	bool has_oya_mesh;
-	char oya_meshfilename[128];
+	char oya_meshfilename[128]; // .MESH‚ğŠÜ‚Ü‚È‚¢
 	bool is_connect_without_material_local;
 	MYMATRIX matrix_kakeru;
 	bool is_akat_loaded;
-	vector<CharacterMeshSkeleton*> skeletons; 
+	vector<CharacterMeshSkeleton*> skeletons;
 	bool is_optional;
 	bool is_render;
 
 	int now_skeleton;
-
+	void write(char* filename);
+	static CharacterMesh* load(MyTokenAnalyzer* a);
 	void setNowSkeleton(int index) {
 		if (index >=0 && index < skeletons.size()) {
 			now_skeleton = index;
@@ -221,7 +235,8 @@ public:
 	}
 
 
-	CharacterMesh() {
+	CharacterMesh(int myindex) {
+		this->myindex = myindex;
 		has_oya_mesh = false;
 		is_connect_without_material_local = false;
 		is_optional = false;
@@ -262,14 +277,15 @@ public:
 
 class Action {
 public:
-	int action_id;
+
 	char action_name[32];
 	int all_max_frame;
 	map<CharacterMesh*, Akat*> mesh_akat_pair;
 	vector<AtariHantei*> hanteis;
-
+	void write(char* filename);
+	static Action* load(MyTokenAnalyzer* a, ActionCharacter* ac);
 	Action() {
-		action_id = 0;
+	
 		memset(action_name,0,32);
 		all_max_frame = 0;
 	}
@@ -313,6 +329,8 @@ public:
 	int saki_action_text;
 
 public:
+	static ActionCharacter* load(MyTokenAnalyzer* a);
+
 	void write(char* filename);
 	vector<CharacterMesh*>* getMeshs() {return &meshs;};
 	void setNowMesh(int index) {
