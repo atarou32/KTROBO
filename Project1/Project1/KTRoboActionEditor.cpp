@@ -334,7 +334,11 @@ void ActionEditor::toggleMeshRender(int character_id, int hon_mesh_id) {
 		ActionCharacter* cha = characters[character_id];
 		CharacterMesh* mesh = (*cha->getMeshs())[hon_mesh_id];
 		mesh->is_render = !mesh->is_render;
-
+		int msize = mesh->mesh_instanceds.size();
+		for (int i=0;i<msize;i++) {
+			MeshInstanced* mm = mesh->mesh_instanceds[i];
+			mm->setIsRender(mesh->is_render);
+		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return;
