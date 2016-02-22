@@ -76,6 +76,7 @@ public:
 		MyMatrixIdentity(combined_matrix);
 	}
 	void write(char* filename);
+	static AtariHantei* load(MyTokenAnalyzer* a);
 };
 
 
@@ -281,6 +282,7 @@ public:
 	char action_name[32];
 	int all_max_frame;
 	map<CharacterMesh*, Akat*> mesh_akat_pair;
+	map<int,pair<int,int>> mesh_akat_pair_index_for_load;
 	vector<AtariHantei*> hanteis;
 	void write(char* filename);
 	static Action* load(MyTokenAnalyzer* a, ActionCharacter* ac);
@@ -438,8 +440,6 @@ public:
 	}
 
 	void Release() {
-
-	
 
 		vector<CharacterMesh*>::iterator mesh_it = meshs.begin();
 		while( mesh_it != meshs.end()) {

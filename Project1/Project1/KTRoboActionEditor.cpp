@@ -1018,14 +1018,209 @@ bool ActionEditor::_forceSaveNowToFile(char* filename) {
 	
 }
 
+AtariHantei* AtariHantei::load(MyTokenAnalyzer* a) {
 
-Action* Action::load(MyTokenAnalyzer* a) {
-
-
-
-
-
+	a->GetToken("ATARI");
+	a->GetToken("{");
+	a->GetToken("start_frame");
+	int s_frame = a->GetIntToken();
+	a->GetToken("end_frame");
+	int e_frame = a->GetIntToken();
+	a->GetToken("radius");
+	float ra = a->GetFloatToken();
+	a->GetToken("matrix");
+	MYMATRIX mat;
+	for (int i=0;i<16;i++) {
+		mat.m[i/4][i%4] = a->GetFloatToken();
+	}
+	AtariHantei* at = new AtariHantei();
+	at->start_frame = s_frame;
+	at->end_frame = e_frame;
+	at->radius = ra;
+	at->combined_matrix = mat;
+	a->GetToken("}");
+	return at;
 }
+
+
+
+
+Action* Action::load(MyTokenAnalyzer* a, ActionCharacter* ac) {
+	a->GetToken("ACTION");
+	a->GetToken("{");
+	Action* act = new Action();
+	a->GetToken("name");
+	a->GetToken();
+	hmystrcpy(act->action_name,32,0,a->Toke());
+	a->GetToken("frame");
+	act->all_max_frame = a->GetIntToken();
+	a->GetToken("ATARIS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int atarinum = a->GetIntToken();
+	for (int i=0;i<atarinum;i++) {
+		AtariHantei* hantei = AtariHantei::load(a);
+		act->hanteis.push_back(hantei);
+	}
+	a->GetToken("}");
+
+
+	a->GetToken("MAKATPAIRS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int csize = a->GetIntToken();
+	for (int i=0;i<csize;i++) {
+		a->GetToken("MAKATPAIR");
+
+		a->GetToken("{");
+		a->GetToken("charamesh_index");
+		int myindex = a->GetIntToken();
+		a->GetToken("skeleton_index");
+		int s_index = a->GetIntToken();
+		a->GetToken("akat_index");
+		int a_index = a->GetIntToken();
+		act->mesh_akat_pair_index_for_load.insert(pair<int,pair<int,int>>(myindex,pair<int,int>(s_index,a_index)));
+
+		a->GetToken("}");
+
+	}
+	a->GetToken("}");
+
+	a->GetToken("}");
+	return act;
+}
+CharacterActionCommand* CharacterActionCommand::load(MyTokenAnalyzer* a) {
+	a->GetToken("ACCOMMAND");
+	a->GetToken("{");
+	CharacterActionCommand* c = new CharacterActionCommand();
+
+	a->GetToken("command");
+	c->command = a->GetIntToken();
+	a->GetToken("priority");
+	c->priority = a->GetIntToken();
+	a->GetToken("frame");
+	c->frame = a->GetIntToken();
+	a->GetToken("name");
+	a->GetToken();
+	hmystrcpy(c->name,32,0,a->Toke());
+
+	a->GetToken("is_reset");
+	int is_reset = a->GetIntToken();
+	if (is_reset) {
+		c->is_reset = true;
+		c->is_use = true;
+	} else {
+		c->is_reset = false;
+		c->is_use = true;
+	}
+	a->GetToken("idou");
+	for (int i=0;i<INPUT_MYCOMMAND_FRAME_MAX;i++) {
+		c->idou[i] = a->GetUIntToken();
+	}
+
+	a->GetToken("koudou");
+	for (int i=0;i<INPUT_MYCOMMAND_FRAME_MAX;i++) {
+		c->koudou[i] = a->GetUIntToken();
+
+	}
+	a->GetToken("}");
+	return c;
+}
+
+CharacterMesh* CharacterMesh::load(MyTokenAnalyzer* a) {
+	a->GetToken("CHARAMESH");
+	a->GetToken("{");
+	a->GetToken("myindex");
+	CharacterMesh* cm = new CharacterMesh();
+	cm->myindex = a->GetIntToken();
+	a->GetToken("has_oya_mesh");
+	int has_oya_mesh = a->GetIntToken();
+	if (has_oya_mesh) {
+		a->GetToken();
+		hmystrcpy(cm->oya_meshfilename,128,0,a->Toke());
+		cm->has_oya_mesh = true;
+	} else {
+		a->GetToken();
+		cm->has_oya_mesh = false;
+	}
+
+	a->GetToken("is_connect_without_material_local");
+	int is_connect_without_material_local = a->GetIntToken();
+	if (is_connect_without_material_local) {
+		cm->is_connect_without_material_local = true;
+	} else {
+		cm->is_connect_without_material_local = false;
+	}
+
+	a->GetToken("is_optional");
+	int is_optional = a->GetIntToken();
+	if (is_optional) {
+		cm->is_optional = true;
+	} else{
+		cm->is_optional = false;
+	}
+
+	a->GetToken("is_render");
+	int is_render = a->GetIntToken();
+	if (is_render) {
+		cm->is_render = true;
+	} else {
+		cm->is_render = false;
+	}
+
+	a->GetToken("kakeru");
+	for (int i=0;i<16;i++) {
+		cm->matrix_kakeru.m[i/4][i%4] = a->GetFloatToken();
+	}
+
+	a->GetToken("FILENAMES");
+	a->GetToken("{");
+	a->GetToken("num");
+	int n = a->GetIntToken();
+	for (int i=0;i<n;i++) {
+		a->GetToken();
+		string s = a->Toke();
+		cm->mesh_filenames.push_back(s);
+	}
+
+	a->GetToken("}");
+
+	a->GetToken("SKELETONS");
+	a->GetToken("{");
+	a->GetToken("num");
+	int nu = a->GetIntToken();
+	for (int i=0;i<nu;i++) {
+		a->GetToken("SKELETON");
+		a->GetToken("{");
+		a->GetToken("akat_filename");
+		a->GetToken();
+		char akat[128];
+		memset(akat,0,128);
+		char mesh[128];
+		memset(mesh,0,128);
+		char anime[128];
+		memset(anime,0,128);
+		hmystrcpy(akat,128,0,a->Toke());
+
+		a->GetToken("mesh_meshname");
+		a->GetToken();
+		hmystrcpy(mesh,128,0,a->Toke());
+		a->GetToken("mesh_animename");
+		a->GetToken();
+		hmystrcpy(anime,128,0,a->Toke());
+
+
+		CharacterMeshSkeleton* skel = new CharacterMeshSkeleton(mesh,akat,anime);
+		cm->skeletons.push_back(skel);
+		a->GetToken("}");
+	}
+	a->GetToken("}");
+
+
+	a->GetToken("}");
+	return cm;
+}
+
 
 ActionCharacter* ActionCharacter::load(MyTokenAnalyzer* a) {
 
@@ -1101,7 +1296,7 @@ ActionCharacter* ActionCharacter::load(MyTokenAnalyzer* a) {
 
 
 	a->GetToken("}");
-
+	return ac;
 }
 
 
