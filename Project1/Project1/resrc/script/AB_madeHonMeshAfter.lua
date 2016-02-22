@@ -74,6 +74,7 @@ if MYSLIDERS==nil then
   MYSLIDERS[20] = gu:makeButton("950","240","20","18", "resrc/script/AB_sliderZButMin.lua", 33, "min")
   MYSLIDERS[21] = gu:makeSliderH({300+offset,812+offset,510,530},"511","0","0","resrc/script/AB_setSiseiAnime.lua")
   MYSLIDERS[22] = gu:makeButton(tostring(offset+700), "410", "30","30", "resrc/script/AB_setFrameAnime.lua", 33, "aset")
+  MYSLIDERS[23] = gu:makeButton(tostring(offset+750), "410", "30","30", "resrc/script/AB_animeplaypushed.lua", 35, "aplay")
  
   
   for i=1,9 do
@@ -93,6 +94,7 @@ if MYSLIDERS==nil then
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[20])
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[21])
   gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[22])
+  gu:setPartToWindow(MYSLIDERS[10], MYSLIDERS[23])
   
   gu:setEffect(MYSLIDERS[10], true)
   gu:setRender(MYSLIDERS[10], true)
@@ -131,6 +133,9 @@ if MYSLIDERS==nil then
   gu:setEffect(MYSLIDERS[22], true)
   gu:setRender(MYSLIDERS[22], true)
   
+  gu:setEffect(MYSLIDERS[23], true)
+  gu:setRender(MYSLIDERS[23], true)
+  
   --gu:setLeafWindowToInputMessageDispatcher(MYSLIDERS[11])
 
 
@@ -145,9 +150,10 @@ for i=1,msg_siz do
   --char* getHonMeshBoneName(int impl_id, int bone_index);
   bon_num = ab:getHonMeshBoneNum(impl_id)
   for j=1,bon_num do
-    bone_name = ab:getHonMeshBoneName(impl_id, j-1)
+    bone_name = {"test"}
+    ab:getHonMeshBoneName(impl_id, j-1, bone_name)
     MYBONENAME[impl_id+1] = MYBONENAME[impl_id+1] or {}
-    MYBONENAME[impl_id+1][j] = bone_name
+    MYBONENAME[impl_id+1][j] = bone_name[1]
   end
   
 
@@ -222,11 +228,12 @@ for i=1,msg_siz do
   
   anime_num = ab:getAnimeNum(impl_id)
   for j=1, anime_num do
-    anime_name = ab:getAnimeName(impl_id, j-1)
+    anime_name = {"test"}
+    ab:getAnimeName(impl_id, j-1, anime_name)
     MYANIMETABINDEX = MYANMETABINDEX or {}
     MYANIMETABINDEX[impl_id+1] = MYANIMETABINDEX[impl_id+1] or {}
     wind = gu:makeWindow(0,0,1000,800)
-    index = gu:setWindowToTab(MYANIMETAB[impl_id+1], wind, anime_name)
+    index = gu:setWindowToTab(MYANIMETAB[impl_id+1], wind, anime_name[1])
     MYANIMETABINDEX[impl_id+1][j] =  index
   end
   
