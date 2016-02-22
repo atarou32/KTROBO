@@ -80,6 +80,28 @@ void ActionEditor::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 
 }
 
+
+
+MeshInstanced* ActionCharacter::getInstanceIDOfOyaMesh(char* oya_filepath) {
+
+	int msize = this->meshs.size();
+	for (int m = 0; m<msize; m++) {
+		CharacterMesh* mc = meshs[m];
+		int mmsize = mc->mesh_filenames.size();
+		for (int mm=0;mm<mmsize;mm++) {
+			if (strcmp(oya_filepath, mc->mesh_filenames[mm].c_str()) ==0) {
+				if (mm>=0 && mm < mc->mesh_instanceds.size()) {
+					return mc->mesh_instanceds[mm];
+				}
+			}
+		}
+	}
+
+	throw new GameError(KTROBO::WARNING, "couldnt find oyamesh");
+}
+
+
+
 void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
 	// ここでロードとセーブを行う
 
@@ -117,7 +139,129 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS,"leave");
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	int im = characters.size();
+	if (im) {
+		for (int i=0;i<im;i++) {
+			ActionCharacter* ii = characters[i];
+			// CharacterMesh と Actionのロードを行う
+			int msize = ii->meshs.size();
+			for (int m=0;m<msize;m++){
+				CharacterMesh* mesh = ii->meshs[m];
+				int usize = mesh->mesh_has_loaded.size();
+				for (int u=0;u<usize;u++) {
+					if (!mesh->mesh_has_loaded[u]) {
+						
+						Mesh* mes = mesh->meshs[u];
+						string s = mesh->mesh_filenames[u];
+						char mesh_filename[128];
+						memset(mesh_filename,0,128);
+						sprintf_s(mesh_filename, 128,"%s.MESH", s.c_str());
 
+						CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+						mes->readMesh(g,mesh_filename,g->getTexLoader());
+						CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+						mesh->mesh_has_loaded[u] = true;
+					}
+				}
+
+				int skelsize = mesh->skeletons.size();
+				for (int s = 0;s<skelsize;s++) {
+					CharacterMeshSkeleton* skelton = mesh->skeletons[s];
+					if (!skelton->skeletons_loaded) {
+					char mesh_name[128];
+					memset(mesh_name,0,128);
+					sprintf_s(mesh_name,128,"%s.MESH",skelton->mesh_meshname);
+					CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+					skelton->skeleton->readMeshWithoutVertex(g, mesh_name, g->getTexLoader());
+					skelton->skeleton->readAnime(skelton->mesh_animename);
+					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+					skelton->loadAkat();
+					}
+				}
+
+
+
+			}
+
+			int asize = ii->actions.size();
+			for (int a=0;a<asize;a++) {
+				Action* act = ii->actions[a];
+				
+				if ((act->mesh_akat_pair_index_for_load.size() > act->mesh_akat_pair.size()) && act->mesh_akat_pair.size() ==0) {
+					// mesh_akat_pairに入れる
+					map<int,pair<int,int>>::iterator it = act->mesh_akat_pair_index_for_load.begin();
+					while( it != act->mesh_akat_pair_index_for_load.end()) {
+						pair<int,pair<int,int>> p = *it;
+						int charactermesh_index = p.first;
+						int skeleton_index = p.second.first;
+						int akat_index = p.second.second;
+						CharacterMesh* mes = ii->meshs[charactermesh_index];
+						Akat* akat = mes->skeletons[skeleton_index]->akats[akat_index];
+
+						act->mesh_akat_pair.insert(pair<CharacterMesh*, Akat*>(mes,akat));
+						it++;
+					}
+				}
+
+			}
+
+			// meshinstancedsに登録する
+
+			int mmmsize = ii->meshs.size();
+
+			for (int mmm=0; mmm < mmmsize;mmm++) {
+				CharacterMesh* mm = ii->meshs[mmm];
+				int mmsize = mm->mesh_has_loaded.size();
+				int misize = mm->mesh_instanceds.size();
+				for (int mi=misize;mi<mmsize;mi++) {
+
+					MeshInstanceds* mis = MyLuaGlueSingleton::getInstance()->getColMeshInstanceds(0);
+//	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, IMeshInstanced* iparent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
+//	{
+					Mesh* mess = mm->meshs[mi];
+					CS::instance()->leave(CS_RENDERDATA_CS,"leave");
+					CS::instance()->leave(CS_TASK_CS, "leave",TASKTHREADS_LOADDESTRUCT);
+					CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
+					CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+					CS::instance()->enter(CS_TASK_CS, "render lock",2);
+					CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
+					CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
+					CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+					try {
+					if (mm->has_oya_mesh) {
+						MeshInstanced* oya_instanceid = ii->getInstanceIDOfOyaMesh(mm->oya_meshfilename);
+						int bone_index = mis->getInstanceSkeletonBoneIndex(oya_instanceid->getInstanceIndex(), mm->oya_meshbonename);
+						MeshInstanced* instanced = mis->makeInstanced(mess,mm->skeletons[mm->now_skeleton]->skeleton,oya_instanceid, bone_index, mm->is_connect_without_material_local, &mm->matrix_kakeru);
+						mm->mesh_instanceds.push_back(instanced);
+					} else {
+						MeshInstanced* instanced = mis->makeInstanced(mess, mm->skeletons[mm->now_skeleton]->skeleton,NULL,0,true,&mm->matrix_kakeru);
+						mm->mesh_instanceds.push_back(instanced);
+					}
+					} catch(GameError* err) {
+						CS::instance()->leave(CS_TASK_CS, "atari lock",0);
+						CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+						CS::instance()->leave(CS_TASK_CS, "render lock",2);
+						CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+						CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+						CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+						//CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+						throw err;
+					}
+					CS::instance()->leave(CS_TASK_CS, "atari lock",0);
+					CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+					CS::instance()->leave(CS_TASK_CS, "render lock",2);
+					CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+					CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+					CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+					CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+				}
+			}
+			
+		}
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 int ActionEditor::createActionCharacter(char* name) {
@@ -131,7 +275,7 @@ int ActionEditor::createActionCharacter(char* name) {
 }
 
 
-int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat) {
+int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, char* oya_mesh_bonename,bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat) {
 
 	int ans;
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
@@ -140,8 +284,9 @@ int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_me
 		int ans = cha->getMeshs()->size();
 		CharacterMesh* mesh = new CharacterMesh();
 		hmystrcpy(mesh->oya_meshfilename,128,0,oya_mesh_filename);
+		hmystrcpy(mesh->oya_meshbonename,128,0,oya_mesh_bonename);
 		string filename = mesh_filename;
-		mesh->is_akat_loaded = false;
+		//mesh->is_akat_loaded = false;
 		mesh->is_connect_without_material_local = is_connect_without_matrial_local;
 		mesh->matrix_kakeru = *mat;
 		// Meshの作成とフラグをオフにしておく
@@ -829,9 +974,11 @@ void CharacterMesh::write(char* filename) {
 	if (has_oya_mesh) {
 		KTROBO::mylog::writelog(filename, "has_oya_mesh=1;\n");
 		KTROBO::mylog::writelog(filename, "oya_mesh=\"%s\";\n", oya_meshfilename);
+		KTROBO::mylog::writelog(filename, "oya_bone=\"%s\";\n", oya_meshbonename);
 	} else {
 		KTROBO::mylog::writelog(filename, "has_oya_mesh=0;\n");
 		KTROBO::mylog::writelog(filename, "oya_mesh=\"%s\";\n", "nomesh");
+		KTROBO::mylog::writelog(filename, "oya_bone=\"%s\";\n", "nobone");
 	}
 
 	if (is_connect_without_material_local) {
@@ -1127,19 +1274,26 @@ CharacterActionCommand* CharacterActionCommand::load(MyTokenAnalyzer* a) {
 	return c;
 }
 
-CharacterMesh* CharacterMesh::load(MyTokenAnalyzer* a) {
+CharacterMesh* CharacterMesh::load(MyTokenAnalyzer* a, int index) {
 	a->GetToken("CHARAMESH");
 	a->GetToken("{");
 	a->GetToken("myindex");
-	CharacterMesh* cm = new CharacterMesh();
+	CharacterMesh* cm = new CharacterMesh(index);
 	cm->myindex = a->GetIntToken();
 	a->GetToken("has_oya_mesh");
 	int has_oya_mesh = a->GetIntToken();
 	if (has_oya_mesh) {
 		a->GetToken();
+		a->GetToken();
 		hmystrcpy(cm->oya_meshfilename,128,0,a->Toke());
+		a->GetToken();
+		a->GetToken();
+		hmystrcpy(cm->oya_meshbonename,128,0,a->Toke());
 		cm->has_oya_mesh = true;
 	} else {
+		a->GetToken();
+		a->GetToken();
+		a->GetToken();
 		a->GetToken();
 		cm->has_oya_mesh = false;
 	}
@@ -1181,6 +1335,8 @@ CharacterMesh* CharacterMesh::load(MyTokenAnalyzer* a) {
 		a->GetToken();
 		string s = a->Toke();
 		cm->mesh_filenames.push_back(s);
+		cm->meshs.push_back(new Mesh());
+		cm->mesh_has_loaded.push_back(false);
 	}
 
 	a->GetToken("}");
@@ -1239,8 +1395,8 @@ ActionCharacter* ActionCharacter::load(MyTokenAnalyzer* a) {
 	a->GetToken("num");
 	int cnum = a->GetIntToken();
 	for (int i=0;i<cnum;i++) {
-		CharacterMesh* a = CharacterMesh::load(a);
-		ac->meshs.push_back(a);
+		CharacterMesh* at = CharacterMesh::load(a,i);
+		ac->meshs.push_back(at);
 	}
 	a->GetToken("}");
 

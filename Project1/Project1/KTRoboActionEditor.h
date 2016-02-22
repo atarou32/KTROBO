@@ -14,7 +14,7 @@ using namespace std;
 namespace KTROBO {
 interface IActionEditor {
 TO_LUA virtual int createActionCharacter(char* name)=0;
-TO_LUA virtual int setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat)=0;
+TO_LUA virtual int setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, char* oya_mesh_bonename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat)=0;
 TO_LUA virtual int setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename)=0;
 TO_LUA virtual void toggleMeshOptional(int character_id, int hon_mesh_id)=0;// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグルする
 TO_LUA virtual void toggleMeshRender(int character_id, int hon_mesh_id)=0;
@@ -166,6 +166,7 @@ public:
 	char mesh_animename[128]; // .ANIMEを含む
 
 	int now_akat_index;
+	void loadAkat();
 
 	void write(char* filename);
 	void setNowAkat(int index) {
@@ -215,18 +216,20 @@ public:
 	vector<Mesh*> meshs;
 	vector<bool> mesh_has_loaded;
 	vector<string> mesh_filenames;// .MESHを含まない
+	vector<MeshInstanced*> mesh_instanceds;
+
 	bool has_oya_mesh;
+	char oya_meshbonename[128];
 	char oya_meshfilename[128]; // .MESHを含まない
 	bool is_connect_without_material_local;
 	MYMATRIX matrix_kakeru;
-	bool is_akat_loaded;
 	vector<CharacterMeshSkeleton*> skeletons;
 	bool is_optional;
 	bool is_render;
 
 	int now_skeleton;
 	void write(char* filename);
-	static CharacterMesh* load(MyTokenAnalyzer* a);
+	static CharacterMesh* load(MyTokenAnalyzer* a, int ind);
 	void setNowSkeleton(int index) {
 		if (index >=0 && index < skeletons.size()) {
 			now_skeleton = index;
@@ -244,7 +247,7 @@ public:
 		is_render = false;
 		MyMatrixIdentity(matrix_kakeru);
 		memset(oya_meshfilename,0,128);
-		is_akat_loaded = false;
+		memset(oya_meshbonename,0,128);
 	}
 
 	~CharacterMesh() {
@@ -332,6 +335,8 @@ public:
 
 public:
 	static ActionCharacter* load(MyTokenAnalyzer* a);
+	
+	MeshInstanced* getInstanceIDOfOyaMesh(char* oya_filepath);
 
 	void write(char* filename);
 	vector<CharacterMesh*>* getMeshs() {return &meshs;};
@@ -532,7 +537,7 @@ public:
 	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
 
 	int createActionCharacter(char* name);
-	int setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat);
+	int setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, char* oya_mesh_bonename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat);
 	int setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename);
 	void toggleMeshOptional(int character_id, int hon_mesh_id);// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグル
 	

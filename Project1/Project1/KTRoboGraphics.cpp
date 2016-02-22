@@ -269,6 +269,7 @@ Graphics* Graphics::makeGraphicsOfNewDeviceContext() {
 	new_g->p_backbuffer = this->p_backbuffer;
 	new_g->p_swapchain = this->p_swapchain;
 	new_g->vp = this->vp;
+	new_g->tex_loader = this->tex_loader;
 	// デバイスコンテキストを作成する
 	HRESULT hr =  p_device->CreateDeferredContext(0, &new_g->p_devicecontext);
 	if (FAILED(hr)) {

@@ -120,12 +120,22 @@ private:
 	ID3D11Resource* p_backbuffer;
 	ID3D11RenderTargetView* p_rendertargetview;
 	D3D11_VIEWPORT vp;
+	MyTextureLoader* tex_loader;
 	bool createDeviceAndSwapChain();
 	bool createBackBuffer();
 	bool createViewPort();
 public:
 	bool Init(HWND hwnd);
 	void Release();
+
+	void setTexLoader(MyTextureLoader* tex) {
+		tex_loader = tex;
+	}
+
+	MyTextureLoader* getTexLoader() {
+		return tex_loader;
+	}
+
 	HWND getHWND() {return h;}
 	const D3D11_VIEWPORT* getViewPort() {return &vp;} 
 

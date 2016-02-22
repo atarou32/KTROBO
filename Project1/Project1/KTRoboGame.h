@@ -92,7 +92,7 @@ private:
 	Messages* messages;
 	MySound* sound;
 	TempInputShori* temp_input_shori;
-
+	
 public:
 	Game(void);
 	~Game(void);
@@ -109,6 +109,9 @@ public:
 	Task** getTask() {
 		return task_threads;
 	}
+
+	
+
 	// AIƒXƒŒƒbƒh‚©‚çŒÄ‚Ô‚±‚Æ
 	void setScene(Scene* scene) {
 

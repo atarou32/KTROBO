@@ -509,7 +509,17 @@ public:
 		return skeleton_size;
 	}
 
+	void changeInstanceSkeleton(int instance_id, Mesh* skeleton);// ロックが外部で必要
+	int getInstanceSkeletonBoneIndex(int oya_instance_id, char* bonename) {
+		if (oya_instance_id >= 0 && mesh_instanceds.size() > oya_instance_id) {
 
+			MeshInstanced* om = mesh_instanceds[oya_instance_id];
+			Mesh* skel = skeletons[om->getSkeletonIndex()];
+			return skel->BoneIndexes[bonename];
+		} else {
+			throw new GameError(KTROBO::WARNING, "oyaboneindex no");
+		}
+	}
 	int makeInstancedID(COLLECTED CMesh* cmesh, int mesh_index, int skeleton_index, COLLECTED MeshInstanced* parent_instance, int parent_bone_index, bool connect_without_matrix_local, YARITORI MYMATRIX* matrix_local_kakeru) {
 		if (cmesh == NULL) {
 			throw new GameError(KTROBO::WARNING, "error in make instanceid cmesh is null");
@@ -528,7 +538,16 @@ public:
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
 		// これ以降は考えなくてよい 当たり判定はどうしたらいいのか
-		MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
+		try {
+			MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
+		}catch (GameError* err) {
+			CS::instance()->leave(CS_TASK_CS, "atari lock",0);
+			CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+			CS::instance()->leave(CS_TASK_CS, "render lock",2);
+			CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+			throw err;
+		}
+		
 		CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 		CS::instance()->leave(CS_TASK_CS, "anime lock",1);
 		CS::instance()->leave(CS_TASK_CS, "render lock",2);

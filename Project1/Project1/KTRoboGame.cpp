@@ -189,21 +189,24 @@ bool Game::Init(HWND hwnd) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "graphics init error");
 	}
 
+	demo = new KTRoboDemoRender();
+	demo->Init(g);
 	
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {
 		task_threads[i] = Task::factory(hwnd);
 		if (i == TASKTHREADS_UPDATEMAINRENDER ) {
 			g_for_task_threads[i] = g;
+			g_for_task_threads[i]->setTexLoader(demo->tex_loader);
 		} else {
 			g_for_task_threads[i] = g->makeGraphicsOfNewDeviceContext();
+			g_for_task_threads[i]->setTexLoader(demo->tex_loader);
 		}
 	}
 
 	Mesh::Init(g);
 	MyTokenAnalyzer::Init();
 
-	demo = new KTRoboDemoRender();
-	demo->Init(g);
+
 	c = new Clock(0,0,0);
 	Text::Init(g, demo->font);
 

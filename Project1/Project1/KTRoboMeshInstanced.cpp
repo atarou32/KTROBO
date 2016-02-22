@@ -369,6 +369,20 @@ void MeshInstanceds::loadColorToTexture(Graphics* g) {
 	}
 }
 
+
+void MeshInstanceds::changeInstanceSkeleton(int instance_id, Mesh* new_skeleton) {
+
+	if (instance_id >=0 && instance_id < mesh_instanceds.size()) {
+
+		MeshInstanced *mm = mesh_instanceds[instance_id];
+		mm->setSkeletonIndex(this->getSkeletonIndexOrSet(new_skeleton));
+
+	} else {
+		throw new GameError(KTROBO::WARNING, "out side vector of change skeleton");
+	}
+}
+
+
 void MeshInstanceds::loadShaderForColor(Graphics* g) {
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{"INDEXSDAYO", 0, DXGI_FORMAT_R32G32B32A32_UINT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
