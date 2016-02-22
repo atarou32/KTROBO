@@ -13,15 +13,19 @@
 using namespace std;
 namespace KTROBO {
 interface IActionEditor {
+public:
 TO_LUA virtual int createActionCharacter(char* name)=0;
 TO_LUA virtual int setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, char* oya_mesh_bonename, bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat)=0;
 TO_LUA virtual int setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename)=0;
 TO_LUA virtual void toggleMeshOptional(int character_id, int hon_mesh_id)=0;// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグルする
 TO_LUA virtual void toggleMeshRender(int character_id, int hon_mesh_id)=0;
 TO_LUA virtual int setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename)=0;
+TO_LUA virtual int getSkeletonNum(int character_id, int hon_mesh_id)=0;
+TO_LUA virtual int getHonMeshNum(int character_id)=0;
 TO_LUA virtual int getAkatNum(int character_id, int hon_mesh_id, int skeleton_id)=0;
 TO_LUA virtual void getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index, OUT_ char* name)=0;
 TO_LUA virtual int makeAction(int character_id, char* action_name)=0;
+TO_LUA virtual int getActionNum(int character_id)=0;
 TO_LUA virtual void setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id,  int akat_index)=0;
 TO_LUA virtual void setNowCharacterId(int character_id)=0;
 TO_LUA virtual int getNowCharacterId()=0;
@@ -541,10 +545,14 @@ public:
 	int setOnajiMesh(int character_id, int hon_mesh_id, char* mesh_filename);
 	void toggleMeshOptional(int character_id, int hon_mesh_id);// そのキャラクターにとってメッシュが特定の状態でつけられるかどうかをトグル
 	
+
+	int getSkeletonNum(int character_id, int hon_mesh_id);
+	int getHonMeshNum(int character_id);
 	int setSkeleton(int character_id, int hon_mesh_id, char* anime_filename, char* akat_filename);
 	int getAkatNum(int character_id, int hon_mesh_id, int skeleton_id);
 	void getAkatName(int character_id, int hon_mesh_id, int skeleton_id, int akat_index, OUT_ char* name);
 	int makeAction(int character_id, char* action_name);
+	int getActionNum(int character_id);
 	void setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index);
 	void setNowCharacterId(int character_id);
 	int getNowCharacterId();

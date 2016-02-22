@@ -143,15 +143,17 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 	int im = characters.size();
 	if (im) {
 		for (int i=0;i<im;i++) {
+			bool is_loaded = false;
 			ActionCharacter* ii = characters[i];
 			// CharacterMesh ‚Æ Action‚Ìƒ[ƒh‚ðs‚¤
 			int msize = ii->meshs.size();
+			
 			for (int m=0;m<msize;m++){
 				CharacterMesh* mesh = ii->meshs[m];
 				int usize = mesh->mesh_has_loaded.size();
 				for (int u=0;u<usize;u++) {
 					if (!mesh->mesh_has_loaded[u]) {
-						
+						is_loaded = true;
 						Mesh* mes = mesh->meshs[u];
 						string s = mesh->mesh_filenames[u];
 						char mesh_filename[128];
@@ -169,6 +171,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 				for (int s = 0;s<skelsize;s++) {
 					CharacterMeshSkeleton* skelton = mesh->skeletons[s];
 					if (!skelton->skeletons_loaded) {
+						is_loaded = true;
 					char mesh_name[128];
 					memset(mesh_name,0,128);
 					sprintf_s(mesh_name,128,"%s.MESH",skelton->mesh_meshname);
@@ -202,6 +205,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 						act->mesh_akat_pair.insert(pair<CharacterMesh*, Akat*>(mes,akat));
 						it++;
 					}
+					is_loaded =true;
 				}
 
 			}
@@ -215,7 +219,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 				int mmsize = mm->mesh_has_loaded.size();
 				int misize = mm->mesh_instanceds.size();
 				for (int mi=misize;mi<mmsize;mi++) {
-
+					is_loaded =true;
 					MeshInstanceds* mis = MyLuaGlueSingleton::getInstance()->getColMeshInstanceds(0);
 //	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, IMeshInstanced* iparent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)
 //	{
@@ -257,13 +261,64 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 					CS::instance()->enter(CS_RENDERDATA_CS,"enter");
 				}
 			}
-			
+
+
+
+			if (is_loaded) {
+				CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+				MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(
+					KTROBO_MESSAGE_ID_ACTIONEDITOR_LOAD_AFTER,KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, i,0,true);
+				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AE_loadAfter.lua");
+					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+			}
 		}
 	}
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
+int ActionEditor::getActionNum(int character_id) {
 
+
+		int ans =0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && characters.size() > character_id) {
+		ActionCharacter* ac = characters[character_id];
+		ans = ac->actions.size();
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+	return ans;
+
+
+
+
+}
+int ActionEditor::getSkeletonNum(int character_id, int hon_mesh_id) {
+	int ans =0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && characters.size() > character_id) {
+		ActionCharacter* ac = characters[character_id];
+		if (hon_mesh_id >= 0 && hon_mesh_id < ac->meshs.size()) {
+			CharacterMesh* mm = ac->meshs[hon_mesh_id];
+			ans = mm->skeletons.size();
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+	return ans;
+}
+int ActionEditor::getHonMeshNum(int character_id) {
+
+		int ans =0;
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && characters.size() > character_id) {
+		ActionCharacter* ac = characters[character_id];
+		ans = ac->meshs.size();
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+	return ans;
+
+}
 int ActionEditor::createActionCharacter(char* name) {
 	int ans;
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");

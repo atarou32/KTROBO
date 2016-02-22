@@ -21,6 +21,7 @@ public:
 	TO_LUA virtual void enterTWOTAKU(char* yes_str, char* no_str, char* render_text)=0; // 二つのTWOTAKUがでていないようにすること
 	TO_LUA virtual void enterONEMESSAGE(char* mes)=0; // ふたつのメッセージがでていないようにすること
 	TO_LUA virtual void enterLOADTYUU()=0; 
+	TO_LUA virtual void enterAEScene(COLLECTED ActionEditor* a)=0;
 	TO_LUA virtual void makeAILua(bool is_lock_sita, char* lua_filename)=0;
 	TO_LUA virtual void makeButukariLua(bool is_lock, char* lua_filename)=0;
 	TO_LUA virtual void makeLoadLua(bool is_lock, char* lua_filename)=0;
@@ -50,6 +51,7 @@ public:
 	void makeRenderLua(bool is_lock, char* lua_filename);
 	void enterABScene(COLLECTED AnimationBuilder* a);
 	void enterABSceneWithoutLeave(COLLECTED AnimationBuilder* a);
+	void enterAEScene(COLLECTED ActionEditor* a);
 	void enterTWOTAKU(char* yes_str, char* no_str, char* render_text);
 	void enterONEMESSAGE(char* mes);
 	void removeScene();

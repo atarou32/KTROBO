@@ -35,6 +35,11 @@ void TextFromLua::enterABScene(COLLECTED AnimationBuilder* a) {
 	this->gdayo->setScene(a);
 }
 
+void TextFromLua::enterAEScene(COLLECTED ActionEditor* a) {
+	gdayo->removeScene();
+	this->gdayo->setScene(a);
+}
+
 void TextFromLua::enterTWOTAKU(char* yes_str, char* no_str, char* render_text) {
 	
 	two->setNoStr(no_str);

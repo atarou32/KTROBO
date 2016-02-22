@@ -79,6 +79,7 @@ Game::Game(void)
 	guis = 0;
 	sound = 0;
 	temp_input_shori = 0;
+	aes = 0;
 }
 
 
@@ -429,6 +430,8 @@ bool Game::Init(HWND hwnd) {
 	abs = new AnimationBuilders(demo->tex_loader);
 	cmeshs = new CMeshs(g, demo->tex_loader);
 	messages = new Messages();
+	aes = new ActionEditors(demo->tex_loader);
+	MyLuaGlueSingleton::getInstance()->setColActionEditors(aes);
 	MyLuaGlueSingleton::getInstance()->setColCMeshs(cmeshs);
 	MyLuaGlueSingleton::getInstance()->setColGUIs(guis);
 	MyLuaGlueSingleton::getInstance()->setColMessages(messages);
@@ -677,6 +680,11 @@ void Game::Del() {
 		delete abs;
 		abs = 0;
 	}
+	if (aes) {
+		delete aes;
+		aes = 0;
+	}
+
 	if(guis) {
 		delete guis;
 		guis = 0;

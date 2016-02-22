@@ -32,6 +32,8 @@
 #include "KTRoboMessage.h"
 #include "MySound.h"
 #include "MyDefine.h"
+#include "KTRoboActionEditor.h"
+
 
 namespace KTROBO {
 
@@ -92,7 +94,7 @@ private:
 	Messages* messages;
 	MySound* sound;
 	TempInputShori* temp_input_shori;
-	
+	ActionEditors* aes;
 public:
 	Game(void);
 	~Game(void);
