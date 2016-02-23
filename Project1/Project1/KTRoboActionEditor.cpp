@@ -7,15 +7,15 @@
 using namespace KTROBO;
 ActionEditor::ActionEditor(void) : Scene("action_editor", 13) 
 {
-	frame_of_action = 0;
+	akat_play_time = 0;
 	anime_action = false;
 
-	frame_of_akat = 0;
+	action_play_time = 0;
 	anime_akat = false;
 	now_character_index = 0;
 	now_character_text = 0;
 
-
+	kuru = new ae_kurukuru();
 
 
 	do_force_save = false;
@@ -29,13 +29,94 @@ ActionEditor::ActionEditor(void) : Scene("action_editor", 13)
 
 ActionEditor::~ActionEditor(void)
 {
+	if (kuru) {
+		delete kuru;
+		kuru = 0;
+	}
 }
 
+ActionCharacter* ActionEditor::getNowImpl() {
+
+	if (characters.size()) {
+		return characters[now_character_index];
+	}
+
+	return 0;
+}
+
+
+ bool ae_kurukuru::handleMessage(int msg, void* data, DWORD time) {
+
+	 a = 0.01f;
+	 CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	 if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSEMOVE ) {
+		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+		 if (input->getMOUSESTATE()->mouse_r_button_pressed) {
+			 MYMATRIX s;
+			 MyMatrixRotationZ(s,a);
+
+			 MYVECTOR3 fromat = from - at;
+			 MyVec3TransformNormal(fromat,fromat,s);
+			 from = at+fromat;
+
+			 MyMatrixLookAtRH(view,from,at,up);
+		 
+		 }
+	}
+	 if (!ae->getNowImpl()) {
+			 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			 return true;
+     }
+
+	 ActionCharacter* ac = ae->getNowImpl();
+
+	 if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+		 unsigned char* keystate = input->getKEYSTATE();
+		 if (keystate[VK_TAB] & KTROBO_INPUT_BUTTON_DOWN) {
+		
+		 }
+
+		 if (keystate['Q'] & KTROBO_INPUT_BUTTON_DOWN) {
+			
+		 }
+	 } else if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		 MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*)data;
+
+		
+
+		 if ((input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN)&& !(input->getKEYSTATE()[VK_LSHIFT] & KTROBO_INPUT_BUTTON_PRESSED)) {
+			 // ボタンが押されたので
+			 MYMATRIX mat;
+			 char bb[512];
+			 WCHAR buf[512];
+			 stringconverter sc;
+	
+
+
+		 }
+
+
+
+
+
+		 if (input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_R_DOWN) {
+		 }
+
+		 if ((input->getMOUSESTATE()->mouse_button & KTROBO_MOUSESTATE_L_DOWN) && (input->getKEYSTATE()[VK_LSHIFT] & KTROBO_INPUT_BUTTON_PRESSED)) {
+		 }
+
+	 }
+	 CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+	 return true;
+ }
+
 void ActionEditor::enter() {
-	frame_of_action = 0;
+	akat_play_time = 0;
 	anime_action = false;
 
-	frame_of_akat = 0;
+	action_play_time = 0;
 	anime_akat = false;
 	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 	now_character_index = 0;
@@ -43,13 +124,15 @@ void ActionEditor::enter() {
 		KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*32,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
 	LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, "resrc/script/AE_enter.lua");
 	Scene::enter();
+	kuru->setAE(this);
+	InputMessageDispatcher::registerImpl(kuru,NULL,NULL);
 }
 
 void ActionEditor::leave() {
-	frame_of_action = 0;
+	action_play_time = 0;
 	anime_action = false;
-
-	frame_of_akat = 0;
+	InputMessageDispatcher::unregisterImpl(kuru);
+	akat_play_time = 0;
 	anime_akat = false;
 	Scene::leave();
 	Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
@@ -66,12 +149,141 @@ void ActionEditor::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
 
 }
 
-void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+void CharacterMesh::setSiseiAkat(int max_frame, float now_frame) {
 
+
+
+	// 一番近いフレームかけらを見つけてくる
+	CharacterMeshSkeleton* skel  = this->skeletons[this->now_skeleton];
+	Akat* aka = skel->akats[skel->now_akat_index];
+	float fframe = now_frame/(float)max_frame * aka->all_frame;
+
+	AkatFrame* frame = aka->root_akat_frame;
+	if (!frame) return;
+
+	AkatFrame* min_frame = aka->root_akat_frame;
+	AkatFrame* maxx_frame = aka->root_akat_frame;
+	while(frame != 0) {
+		if (frame->akat_frame < fframe) {
+			min_frame = frame;
+			frame = frame->right;
+
+		} else if(frame->akat_frame > fframe) {
+			frame = frame->left;
+		} else {
+			min_frame = frame;
+			break;
+		}
+	}
+	
+	frame = aka->root_akat_frame;
+	while(frame != 0) {
+		if (frame->akat_frame < fframe) {
+			frame = frame->right;
+
+		} else if(frame->akat_frame > fframe) {
+			maxx_frame = frame;
+			frame = frame->left;
+		} else {
+			maxx_frame = frame;
+			break;
+		}
+	}
+
+	float now_frame_max = maxx_frame->akat_frame;
+	float now_frame_min = min_frame->akat_frame;
+
+
+	
+	float weightb = now_frame_max - now_frame_min;
+	float weight;
+	if(weightb ==0) {
+		weight = 1;
+	}else {
+	weight = (float)(now_frame_max - fframe)/(float)weightb;
+	}
+	
+	float instance_frame_max = maxx_frame->mesh_instanced_frame;
+	float instance_frame_min = min_frame->mesh_instanced_frame;
+
+	// 各meshinstancedに適用させる
+	int msize = mesh_instanceds.size();
+	unsigned short bones_anime_first_index[KTROBO_MESH_BONE_MAX];
+	unsigned short bones_anime_last_index[KTROBO_MESH_BONE_MAX];
+	float bones_anime_first_weight[KTROBO_MESH_BONE_MAX];
+	for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
+		bones_anime_first_index[i] = instance_frame_min;
+		bones_anime_last_index[i] = instance_frame_max;
+		bones_anime_first_weight[i] = weight;
+	}
+	for (int i=0;i<msize;i++) {
+		MeshInstanced* mmm = mesh_instanceds[i];
+		mmm->setBoneIndexInfo(bones_anime_first_index,bones_anime_last_index,bones_anime_first_weight);
+	}
+}
+
+
+
+
+void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	int num = characters.size();
+	if (num) {
+		if (anime_akat && characters[now_character_index]->meshs.size()) {
+			static float mae_FRAME = 0;
+			CharacterMesh* mes = characters[now_character_index]->meshs[characters[now_character_index]->now_mesh];
+			if (mes->skeletons.size() && mes->skeletons[mes->now_skeleton]->skeletons_loaded) {
+				DWORD dtime = timeGetTime() - akat_play_time+1;
+				CharacterMeshSkeleton* skel = mes->skeletons[mes->now_skeleton];
+				if (skel->akats.size()) {
+					Akat* aka = skel->akats[skel->now_akat_index];
+					if (aka->all_frame > 0) {
+						dtime = dtime % (int)(1000);//とりあえず１秒のakatとしてしまう actionのときに長さを調節できるようにする
+						float frame = dtime / (float)1000 * KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX;
+						if ( abs(frame - mae_FRAME) > 1) {
+							mae_FRAME = frame;
+							mes->setSiseiAkat(KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
+							
+						}
+					}
+				}
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 }
 
 void ActionEditor::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+	
+	CS::instance()->enter(CS_RENDERDATA_CS,"leave");
+	if (save_done && do_force_save) {
+		do_force_save = false;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+		if (save_result) {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("セーブしました");
+		} else {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("失敗しました");
+		}
+		CS::instance()->enter(CS_RENDERDATA_CS ,"ret");
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"enter");
 
+	CS::instance()->enter(CS_RENDERDATA_CS,"leave");
+	if (load_done && do_force_load) {
+		do_force_load = false;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+		MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->removeScene();
+		if (load_result) {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("ロードしました");
+		} else {
+			MyLuaGlueSingleton::getInstance()->getColTextFromLuas(0)->getInstance(0)->enterONEMESSAGE("失敗しました");
+		}
+		CS::instance()->enter(CS_RENDERDATA_CS ,"ret");
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS,"enter");
 
 }
 
@@ -145,7 +357,7 @@ void CharacterMeshSkeleton::loadAkat(int skeleton_index) {
 	}
 
 	a.GetToken("}");
-
+	this->skeletons_loaded = true;
 	a.deletedayo();
 }
 

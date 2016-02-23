@@ -18,6 +18,8 @@ gu:setEffect(inputtext_scene, true)
 gu:setRender(inputtext_scene, true)
 gu:setEffect(scene_but, true)
 gu:setRender(scene_but, true)
+gu:setRender(load_but, true)
+gu:setEffect(load_but, true)
 gu:setEffect(win4, true)
 gu:setRender(win4, true)
 
@@ -46,12 +48,7 @@ MYAKATS     = MYAKATS or {}
 MYACTIONS   = MYACTIONS or {}
 
 
-gu:setRender(inputtext_animename, true)
-gu:setEffect(inputtext_animename, true)
-gu:setRender(inputtext_animeframe, true)
-gu:setEffect(inputtext_animeframe, true)
-gu:setRender(anime_but, true)
-gu:setEffect(anime_but, true)
+
 
 
 win3 = gu:makeWindow(-10,-10,1,1)

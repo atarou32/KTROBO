@@ -39,9 +39,12 @@ BIGHONMESHS = BIGHONMESHS or {}
 --BIGACTIONS = BIGACTIONS or {}
 if MYSLIDERS == nil then
   MYSLIDERS = {}
-  MYSLIDERS[1] = gu:makeButton
-
-
+  MYSLIDERS[1] = gu:makeButton(300,400,60,40,"resrc/script/AE_playakatBut.lua", "playakat")
+  
+  
+  gu:setPartToWindow(win3, MYSLIDERS[1])
+  gu:setEffect(MYSLIDERS[1],true)
+  gu:setRender(MYSLIDERS[1],true)
 
 end
 for e=1,msg_siz do

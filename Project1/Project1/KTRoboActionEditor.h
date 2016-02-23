@@ -286,6 +286,8 @@ public:
 		}
 	}
 
+	void setSiseiAkat(int max_frame, float now_frame);
+
 
 	CharacterMesh(int myindex, Texture* tex) {
 		this->myindex = myindex;
@@ -550,6 +552,35 @@ public:
 	}
 };
 
+
+
+class ActionEditor;
+class ae_kurukuru : public INPUTSHORICLASS{
+public:
+	MYMATRIX view;
+	MYVECTOR3 at;
+	MYVECTOR3 from;
+	MYVECTOR3 up;
+	float a;
+	ActionEditor* ae;
+
+    bool handleMessage(int msg, void* data, DWORD time);
+	ae_kurukuru() {
+		at.float3.x = 0;
+		at.float3.y = 0;
+		at.float3.z = 0;
+		up = MYVECTOR3(0,0,1);
+		from = MYVECTOR3(3,-15,14);
+		a = 0;
+		MyMatrixLookAtRH(view,from,at,up);
+		ae = 0;
+	}
+	void setAE(ActionEditor* ad) {
+		ae = ad;
+	}
+
+};
+
 class ActionEditor : public Scene, public IActionEditor
 {
 private:
@@ -558,10 +589,10 @@ private:
 	int now_character_text;
 
 
-	float frame_of_action;
+	DWORD action_play_time;
 	bool anime_action;
 
-	float frame_of_akat;
+	DWORD akat_play_time;
 	bool anime_akat;
 
 
@@ -575,7 +606,7 @@ private:
 	string filename;
 	string load_filename;
 
-
+	ae_kurukuru* kuru;
 
 
 	void analyzeStrCommand(char* command, CharacterActionCommand* new_command);
@@ -586,7 +617,7 @@ public:
 
 	void enter();
 	void leave();
-
+	ActionCharacter* getNowImpl();
 	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game);
 	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
 	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
