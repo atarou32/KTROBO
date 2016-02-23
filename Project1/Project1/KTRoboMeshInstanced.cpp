@@ -1039,8 +1039,9 @@ void MeshInstanceds::loadAnimeMatrixBasisToTexture(Graphics* g) {
 	for (int te=0; te < size; te++) {
 		if (!skeleton_anime_is_loaded[te]) break;
 	}
-	if (te == size) return;
-
+	if (te == size) {
+		return;
+	}
 
 	ANIMETEXTURELOADSTRUCT st[KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE];
 	memset(st, 0, sizeof(ANIMETEXTURELOADSTRUCT) * KTROBO_MESH_INSTANCED_ANIMELOADSTRUCT_TEMPSIZE);
@@ -1148,20 +1149,30 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 
 	// max_depth ‚ðŒvŽZ‚·‚é
 
-	int isize = mesh_instanceds.size();
+	int isize = mesh_instanced_size;
 	
 	if (is_need_calc_max_depth) {
-		map_of_depth.clear();
+		
+		for (int i=0;i<KTROBO_MESH_INSTANCED_COMBINED_MATRIX_INSTANCE_SIZE;i++) {
+			for (int j=0;j<KTROBO_MAP_OF_DEPTH_DEPTH_MAX;j++) {
+				for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
+				map_of_depth[j][i][k] = KTROBO_MAP_OF_DEPTH_NULL;
+				}
+			}
+		}
 		for (int i = 0 ; i < isize; i++) {
 			MeshInstanced* instance = mesh_instanceds[i];
 			for (int bone_i=0; bone_i < KTROBO_MESH_INSTANCED_BONE_MAX; bone_i ++) {
 				int temp_depth = this->getDepth(instance, bone_i);
 				if (temp_depth == KTROBO_MESH_BONE_NULL) continue;
-				map_of_depth.insert(pair<pair<int,int>,int>(pair<int,int>(i,bone_i),temp_depth));
-
+				//map_of_depth.insert(pair<pair<int,int>,int>(pair<int,int>(i,bone_i),temp_depth));
+				map_of_depth[temp_depth][i][bone_i] = 1;
 				if (temp_depth != KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL) {
 					if (temp_depth > max_depth) {
 						max_depth = temp_depth;
+						if (max_depth >= KTROBO_MAP_OF_DEPTH_DEPTH_MAX) {
+							throw new GameError(KTROBO::WARNING, "errorof mesh depth");
+						}
 					}
 				}
 			}
@@ -1172,92 +1183,91 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 	int temp_max =  KTROBO_MESH_INSTANCED_COMBINED_MATRIX_CALC_STRUCT_TEMPSIZE;
 
 	for (int i=0; i <= max_depth; i++) {
-		map<pair<int,int>,int>::iterator it;
-		it = map_of_depth.begin();
-		while(it != map_of_depth.end()) {
-			if ((*it).second == i) {
+
+		for (int k=0;k<isize;k++) {
+			for (int j=0;j<KTROBO_MESH_BONE_MAX;j++) {
+			if (map_of_depth[i][k][j] == KTROBO_MAP_OF_DEPTH_NULL){ continue;}
+
+			//if (map_of_depth[k][p] == i) {
 
 				
 				// st ‚Éî•ñ‚ð“ü‚êž‚Þ
-				int instance_index = (*it).first.first;
-				int bone_index = (*it).first.second;
-				int skeleton_index=0;
-				int parent_bone_index=0;
-				int parent_skeleton_index=0;
-				int parent_instance_index=0;
+			int instance_index = k;
+			int bone_index = j;
+			int skeleton_index=0;
+			int parent_bone_index=0;
+			int parent_skeleton_index=0;
+			int parent_instance_index=0;
 				
-				MYMATRIX matrix_kakeru;
-				MyMatrixIdentity(matrix_kakeru);
-				int is_root_bone = 0;
-				int connect_without_matrix_local = 0;
+			MYMATRIX matrix_kakeru;
+			MyMatrixIdentity(matrix_kakeru);
+			int is_root_bone = 0;
+			int connect_without_matrix_local = 0;
 
-				MeshInstanced* instance = mesh_instanceds[instance_index];
-				if (!instance->getIsNeedCombinedMatrixLoad()) {it++;continue;}
+			MeshInstanced* instance = mesh_instanceds[instance_index];
+			if (!instance->getIsNeedCombinedMatrixLoad()) {continue;}
 
-				unsigned short anime_first[KTROBO_MESH_INSTANCED_BONE_MAX];
-				unsigned short anime_last[KTROBO_MESH_INSTANCED_BONE_MAX];
-				float anime_weight[KTROBO_MESH_INSTANCED_BONE_MAX];
-				memset(anime_first, 0, sizeof(anime_first));
-				memset(anime_last, 0, sizeof(anime_last));
-				memset(anime_weight, 0, sizeof(anime_weight));
+			unsigned short anime_first[KTROBO_MESH_INSTANCED_BONE_MAX];
+			unsigned short anime_last[KTROBO_MESH_INSTANCED_BONE_MAX];
+			float anime_weight[KTROBO_MESH_INSTANCED_BONE_MAX];
+			memset(anime_first, 0, sizeof(anime_first));
+			memset(anime_last, 0, sizeof(anime_last));
+			memset(anime_weight, 0, sizeof(anime_weight));
 
-				skeleton_index = instance->getSkeletonIndex();
-				Mesh* skeleton = skeletons[skeleton_index];
-				MeshBone* bone = skeleton->Bones[bone_index];
-				if (bone == skeleton->RootBone) {
-					is_root_bone = 1;
+			skeleton_index = instance->getSkeletonIndex();
+			Mesh* skeleton = skeletons[skeleton_index];
+			MeshBone* bone = skeleton->Bones[bone_index];
+			if (bone == skeleton->RootBone) {
+				is_root_bone = 1;
 
-					if (instance->getConnectWithoutMatrixLocal()) {
-						connect_without_matrix_local = 1;
-					}
-					matrix_kakeru = *instance->getRootBoneMatrixLocalKakeru();
+				if (instance->getConnectWithoutMatrixLocal()) {
+					connect_without_matrix_local = 1;
+				}
+				matrix_kakeru = *instance->getRootBoneMatrixLocalKakeru();
 
-					MeshInstanced* parent_instance = instance->getParentInstance();
-					if (parent_instance) {
-						parent_bone_index = instance->getParentBoneIndex();
-						parent_skeleton_index = parent_instance->getSkeletonIndex();
-						parent_instance_index = parent_instance->getInstanceIndex();
-					} else {
-						parent_bone_index = KTROBO_MESH_BONE_NULL;
-						parent_skeleton_index = skeleton_index;
-						parent_instance_index = instance_index;
-					}
+				MeshInstanced* parent_instance = instance->getParentInstance();
+				if (parent_instance) {
+					parent_bone_index = instance->getParentBoneIndex();
+					parent_skeleton_index = parent_instance->getSkeletonIndex();
+					parent_instance_index = parent_instance->getInstanceIndex();
 				} else {
-					is_root_bone = 0; connect_without_matrix_local = 0;
-					parent_bone_index = bone->parent_bone->bone_index;
+					parent_bone_index = KTROBO_MESH_BONE_NULL;
 					parent_skeleton_index = skeleton_index;
 					parent_instance_index = instance_index;
 				}
-				instance->getBoneIndexInfo(anime_first, anime_last, anime_weight);
-				
-
-					// \‘¢‘Ì‚É“ü‚êž‚Þ
-					COMBINEDMATRIXCALCSTRUCT* v = &stt[temp];
-					v->bone_index = (unsigned int)bone_index;
-					v->anime_first_index = anime_first[bone_index];
-					v->anime_last_index = anime_last[bone_index];
-					v->anime_first_weight = anime_weight[bone_index];
-					v->control_value = is_root_bone * KTROBO_COMBINED_MATRIX_CONTROL_VALUE_ROOT_BONE 
-					+ connect_without_matrix_local * KTROBO_COMBINED_MATRIX_CONTROL_VALUE_CONNECT_WITHOUT_MATRIX_LOCAL
-					;
-					v->instance_index = (unsigned int)instance_index;
-					v->matrix_kakeru = matrix_kakeru;
-					v->parent_bone_index = (unsigned int)parent_bone_index;
-					v->parent_instance_index = (unsigned int)parent_instance_index;
-					v->parent_skeleton_index = (unsigned int)parent_skeleton_index;
-					v->skeleton_index = (unsigned int )skeleton_index;
-					v->depth = i;
-					temp++;
-					if (temp >= temp_max) {
-						_calcCombinedMatrixToTexture(g, stt, temp,i);
-						temp = 0;
-						memset(stt, 0, sizeof(COMBINEDMATRIXCALCSTRUCT)* temp_max);
-
-					}
-				
-			
+			} else {
+				is_root_bone = 0; connect_without_matrix_local = 0;
+				parent_bone_index = bone->parent_bone->bone_index;
+				parent_skeleton_index = skeleton_index;
+				parent_instance_index = instance_index;
 			}
-			it++;
+			instance->getBoneIndexInfo(anime_first, anime_last, anime_weight);
+				
+
+			// \‘¢‘Ì‚É“ü‚êž‚Þ
+			COMBINEDMATRIXCALCSTRUCT* v = &stt[temp];
+			v->bone_index = (unsigned int)bone_index;
+			v->anime_first_index = anime_first[bone_index];
+			v->anime_last_index = anime_last[bone_index];
+			v->anime_first_weight = anime_weight[bone_index];
+			v->control_value = is_root_bone * KTROBO_COMBINED_MATRIX_CONTROL_VALUE_ROOT_BONE 
+			+ connect_without_matrix_local * KTROBO_COMBINED_MATRIX_CONTROL_VALUE_CONNECT_WITHOUT_MATRIX_LOCAL
+			;
+			v->instance_index = (unsigned int)instance_index;
+			v->matrix_kakeru = matrix_kakeru;
+			v->parent_bone_index = (unsigned int)parent_bone_index;
+			v->parent_instance_index = (unsigned int)parent_instance_index;
+			v->parent_skeleton_index = (unsigned int)parent_skeleton_index;
+			v->skeleton_index = (unsigned int )skeleton_index;
+			v->depth = i;
+			temp++;
+			if (temp >= temp_max) {
+				_calcCombinedMatrixToTexture(g, stt, temp,i);
+				temp = 0;
+				memset(stt, 0, sizeof(COMBINEDMATRIXCALCSTRUCT)* temp_max);
+
+			}
+			}
 		}
 
 		if (temp >0) {
@@ -1269,7 +1279,7 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 		memset(stt, 0, sizeof(COMBINEDMATRIXCALCSTRUCT)* temp_max);
 	}
 	//delete[] stt;
-
+	
 	for (int i = 0 ; i < isize; i++) {
 		MeshInstanced* instance = mesh_instanceds[i];
 		instance->setIsNeedCombinedMatrixLoad(false);

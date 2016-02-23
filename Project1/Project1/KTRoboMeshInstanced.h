@@ -301,8 +301,8 @@ struct MESHINSTANCED_CBUF3 {
 };
 
 #define KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL 0xFFFF
-
-
+#define KTROBO_MAP_OF_DEPTH_NULL 0xFF
+#define KTROBO_MAP_OF_DEPTH_DEPTH_MAX 0x20
 class MeshInstanceds{
 public:
 	void clearLoadState() {
@@ -326,9 +326,12 @@ public:
 	}
 
 private:
+	int mesh_instanced_size;
 	int max_depth;
 	bool is_need_calc_max_depth;
-	map<pair<int,int>,int> map_of_depth;
+//	map<pair<int,int>,int> map_of_depth;
+	unsigned char map_of_depth[KTROBO_MAP_OF_DEPTH_DEPTH_MAX][KTROBO_MESH_INSTANCED_COMBINED_MATRIX_INSTANCE_SIZE][KTROBO_MESH_BONE_MAX];
+
 	vector<MeshInstanced*> mesh_instanceds;
 	vector<Mesh*> meshs;
 	vector<Mesh*> skeletons;
@@ -372,6 +375,7 @@ public:
 		//MyMatrixIdentity(proj);
 		is_need_calc_max_depth = true;
 		max_depth=0;
+		mesh_instanced_size =0;
 	}
 
 	~MeshInstanceds() {
@@ -600,6 +604,7 @@ public:
 		mm->setInstanceIndex(instance_id);
 		mesh_instanceds.push_back(mm);
 		is_need_calc_max_depth = true;
+		mesh_instanced_size = mesh_instanceds.size();
 		return mm;
 	}
 
