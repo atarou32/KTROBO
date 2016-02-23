@@ -538,8 +538,10 @@ public:
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
 		// ‚±‚êˆÈ~‚Íl‚¦‚È‚­‚Ä‚æ‚¢ “–‚½‚è”»’è‚Í‚Ç‚¤‚µ‚½‚ç‚¢‚¢‚Ì‚©
+		int ans=0;
 		try {
 			MeshInstanced* m = this->makeInstanced(mesh,skeleton, parent_instance, parent_bone_index, connect_without_matrix_local, matrix_local_kakeru);
+			ans = m->getInstanceIndex();
 		}catch (GameError* err) {
 			CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 			CS::instance()->leave(CS_TASK_CS, "anime lock",1);
@@ -554,7 +556,7 @@ public:
 		CS::instance()->leave(CS_TASK_CS, "load lock", 3);
 	//	CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
 
-		return m->getInstanceIndex();
+		return ans;
 	}
 
 	MeshInstanced* makeInstanced(Mesh* mesh, Mesh* skeleton, IMeshInstanced* iparent_instance, int parent_bone_index, bool connect_without_matrix_local, MYMATRIX* matrix_local_kakeru)

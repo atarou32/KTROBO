@@ -11,6 +11,8 @@
 #include "D3DX11.h"
 #include "D3DX11core.h"
 #include "DxErr.h"
+//#include "MyTextureLoader.h"
+class MyTextureLoader;
 
 namespace KTROBO {
 

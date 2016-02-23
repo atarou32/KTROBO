@@ -37,7 +37,13 @@ BIGHONMESHS = BIGHONMESHS or {}
 --BIGSKELETONS = BIGSKELETONS or {}
 --BIGAKATS = BIGAKATS or {}
 --BIGACTIONS = BIGACTIONS or {}
+if MYSLIDERS == nil then
+  MYSLIDERS = {}
+  MYSLIDERS[1] = gu:makeButton
 
+
+
+end
 for e=1,msg_siz do
   -- now_index(character_id)‚Ímsgs‚É“ü‚Á‚Ä‚¢‚é
   character_id = tonumber(msgs[e])

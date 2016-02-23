@@ -691,7 +691,9 @@ bool AnimationBuilder::force_saveNowToFile(char* dfilename) {
 bool AnimationBuilder::_force_saveNowToFile(char* filename) {
 
 
-	this->force_saveAnimeAndFrameToFile(now_index, filename);
+	if (!this->force_saveAnimeAndFrameToFile(now_index, filename)) {
+		return false;
+	}
 
 
 	// ‚·‚×‚Ä‚Ì¡‚Ìó‘Ô‚ğ•Û‘¶‚·‚é
@@ -1039,13 +1041,13 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 	FILE* animef;
 	FILE* akatf;
 	fopen_s(&animef,animefile, "w");
-	if (animef != NULL) {
+	if (animef == NULL) {
 		//fclose(animef);
 		return false;
 	}
 	fclose(animef);
 	fopen_s(&akatf, akatfile, "w");
-	if (akatf != NULL) {
+	if (akatf == NULL) {
 //		fclose(animef);
 		return false;
 	}

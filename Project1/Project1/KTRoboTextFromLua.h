@@ -7,6 +7,7 @@
 #include "KTRoboGraphics.h"
 #include "KTRoboAnimationBuilder.h"
 #include "KTRoboScene.h"
+#include "KTRoboActionEditor.h"
 
 namespace KTROBO {
 

@@ -100,6 +100,54 @@ MeshInstanced* ActionCharacter::getInstanceIDOfOyaMesh(char* oya_filepath) {
 	throw new GameError(KTROBO::WARNING, "couldnt find oyamesh");
 }
 
+void CharacterMeshSkeleton::loadAkat(int skeleton_index) {
+
+
+	MyTokenAnalyzer a;
+	if (!a.load(akat_filename)) return;
+	a.GetToken("AKATS");
+	a.GetToken("{");
+	int num = a.GetIntToken();
+	for (int i=0;i<num;i++) {
+		Akat* new_akt = new Akat(skeleton_index,i);
+		a.GetToken("AKAT");
+		a.GetToken("{");
+		a.GetToken();a.GetToken();
+		a.GetToken("ALL_TIME");
+		new_akt->all_frame = floor(a.GetFloatToken());
+		a.GetToken();a.GetToken();
+		a.GetToken("ANIME_NAME");
+		a.GetToken();
+		hmystrcpy(new_akt->name,32,0,a.Toke());
+		a.GetToken();a.GetToken();
+		a.GetToken("FRAME_NUM");
+		int frame_num = a.GetIntToken();
+		for (int k=0;k<frame_num;k++) {
+			a.GetToken("FRAME");
+			a.GetToken("{");
+			a.GetToken("FR");
+			int fr = floor(a.GetFloatToken());
+			a.GetToken();a.GetToken();
+			a.GetToken("KAKERAFRAME");
+			int kakeraframe = a.GetIntToken();
+			a.GetToken();a.GetToken();
+			a.GetToken("}");
+			AkatFrame* fre = new AkatFrame();
+			fre->left = 0;
+			fre->right = 0;
+			fre->akat_frame = fr;
+			fre->mesh_instanced_frame = kakeraframe;
+			new_akt->setAkatFrame(fre);
+		}
+		// new_akt ‚ð“o˜^‚·‚é
+		this->akats.push_back(new_akt);
+		a.GetToken("}");
+	}
+
+	a.GetToken("}");
+
+	a.deletedayo();
+}
 
 
 void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
@@ -179,7 +227,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 					skelton->skeleton->readMeshWithoutVertex(g, mesh_name, g->getTexLoader());
 					skelton->skeleton->readAnime(skelton->mesh_animename);
 					CS::instance()->enter(CS_RENDERDATA_CS, "enter");
-					skelton->loadAkat();
+					skelton->loadAkat(s);
 					}
 				}
 
@@ -337,7 +385,8 @@ int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_me
 	if (character_id >=0 && character_id < characters.size()) {
 		ActionCharacter* cha = characters[character_id];
 		int ans = cha->getMeshs()->size();
-		CharacterMesh* mesh = new CharacterMesh();
+		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+		CharacterMesh* mesh = new CharacterMesh(ans, tex);
 		hmystrcpy(mesh->oya_meshfilename,128,0,oya_mesh_filename);
 		hmystrcpy(mesh->oya_meshbonename,128,0,oya_mesh_bonename);
 		string filename = mesh_filename;
@@ -594,8 +643,8 @@ void ActionEditor::getNowAkatIndex(int character_id,  int hon_mesh_id, int skele
 			CharacterMesh* m = mm->meshs[hon_mesh_id];
 			if (m->skeletons.size() > skeleton_id && skeleton_id >=0) {
 				CharacterMeshSkeleton* skel = m->skeletons[skeleton_id];
-				if (akat_index >= 0 && akat_index < skel->akats.size()) {
-					Akat* aka = skel->akats[akat_index];
+				if (*akat_index >= 0 && *akat_index < skel->akats.size()) {
+					Akat* aka = skel->akats[*akat_index];
 					mm->now_mesh = hon_mesh_id;
 					Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 					char filename[256];
@@ -1011,6 +1060,45 @@ KTROBO::mylog::writelog(filename, "}\n");
 
 KTROBO::mylog::writelog(filename, "}\n");
 }
+
+
+void ActionEditor::setNowHonMeshId(int character_id, int hon_mesh_id) {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		if (hon_mesh_id >=0 && hon_mesh_id < ac->meshs.size()) {
+			CharacterMesh* cm = ac->meshs[hon_mesh_id];
+			if (cm->mesh_filenames.size()) {
+				ac->setNowMesh(hon_mesh_id);
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+
+
+}
+
+
+void ActionEditor::setNowSkeletonId(int character_id, int hon_mesh_id, int skeleton_id) {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* ac = characters[character_id];
+		if (hon_mesh_id >=0 && hon_mesh_id < ac->meshs.size()) {
+			CharacterMesh* cm = ac->meshs[hon_mesh_id];
+			if (cm->mesh_filenames.size()) {
+				cm->setNowSkeleton(skeleton_id);
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+
+
 void CharacterMesh::write(char* filename) {
 	/*
 	int myindex;
@@ -1337,7 +1425,8 @@ CharacterMesh* CharacterMesh::load(MyTokenAnalyzer* a, int index) {
 	a->GetToken("CHARAMESH");
 	a->GetToken("{");
 	a->GetToken("myindex");
-	CharacterMesh* cm = new CharacterMesh(index);
+	Texture* teee = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
+	CharacterMesh* cm = new CharacterMesh(index,teee);
 	cm->myindex = a->GetIntToken();
 	a->GetToken("has_oya_mesh");
 	int has_oya_mesh = a->GetIntToken();
@@ -1497,10 +1586,10 @@ ActionCharacter* ActionCharacter::load(MyTokenAnalyzer* a) {
 	a->GetToken("COMMANDS");
 	a->GetToken("{");
 	a->GetToken("num");
-	int cnum = a->GetIntToken();
+	cnum = a->GetIntToken();
 	for (int i=0;i<cnum;i++) {
-		CharacterActionCommand* a = CharacterActionCommand::load(a);
-		ac->commands.push_back(a);
+		CharacterActionCommand* ab = CharacterActionCommand::load(a);
+		ac->commands.push_back(ab);
 	}
 	a->GetToken("}");
 
@@ -1545,7 +1634,7 @@ bool ActionEditor::_forceLoadFromFile(char* filename) {
 	a.deletedayo();
 
 	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_LOADDESTRUCT);
-
+	return true;
 }
 
 

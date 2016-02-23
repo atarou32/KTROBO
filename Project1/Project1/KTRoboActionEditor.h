@@ -8,6 +8,7 @@
 #include "KTRoboInput.h"
 #include "KTRoboTexture.h"
 #include "KTRoboGameError.h"
+#include "KTRoboMeshInstanced.h"
 
 #include "vector"
 using namespace std;
@@ -29,6 +30,8 @@ TO_LUA virtual int getActionNum(int character_id)=0;
 TO_LUA virtual void setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id,  int akat_index)=0;
 TO_LUA virtual void setNowCharacterId(int character_id)=0;
 TO_LUA virtual int getNowCharacterId()=0;
+TO_LUA virtual void setNowHonMeshId(int character_id, int hon_mesh_id)=0;
+TO_LUA virtual void setNowSkeletonId(int character_id, int hon_mesh_id, int skeleton_id)=0;
 TO_LUA virtual void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id, int akat_index)=0;
 TO_LUA virtual void getNowAkatIndex(int character_id, int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index)=0;
 TO_LUA virtual void setNowAction(int character_id, int action_id)=0;
@@ -102,7 +105,7 @@ public:
 	CharacterActionCommand() : MyCommand() {
 	}
 	~CharacterActionCommand() {
-		MyCommand::~MyCommand();
+		//MyCommand::~MyCommand();
 	}
 
 	void write(char* filename);
@@ -133,6 +136,41 @@ public:
 	AkatFrame* root_akat_frame;
 	vector<AkatFrame*> all_akat_frame;
 
+	void setAkatFrame(AkatFrame* fr) {
+
+		if (!root_akat_frame) {
+			root_akat_frame = fr;
+			all_akat_frame.push_back(fr);
+			return;
+		}
+
+		AkatFrame* temp_frame = root_akat_frame;
+		bool kimari = false;
+
+		while(!kimari) {
+
+			if (temp_frame->akat_frame < fr->akat_frame) {
+				if (temp_frame->right ==0) {
+					temp_frame->right = fr;
+					all_akat_frame.push_back(fr);
+					return;
+				} else {
+					temp_frame = temp_frame->right;
+				}
+
+			} else if(temp_frame->akat_frame > fr->akat_frame) {
+				if (temp_frame->left ==0) {
+					temp_frame->left = fr;
+					all_akat_frame.push_back(fr);
+					return;
+				} else {
+					temp_frame = temp_frame->left;
+				}
+			} else {
+				throw new GameError(KTROBO::WARNING, "onaji frame in akat");
+			}
+		}
+	}
 	Akat(int skeleton_index, int akat_index) {
 		this->skeleton_index = skeleton_index;
 		this->akat_index = akat_index;
@@ -170,7 +208,7 @@ public:
 	char mesh_animename[128]; // .ANIME‚ðŠÜ‚Þ
 
 	int now_akat_index;
-	void loadAkat();
+	void loadAkat(int skeleton_index);
 
 	void write(char* filename);
 	void setNowAkat(int index) {
@@ -213,6 +251,8 @@ public:
 	}
 
 };
+#define KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT 16
+
 
 class CharacterMesh {
 public:
@@ -230,28 +270,37 @@ public:
 	vector<CharacterMeshSkeleton*> skeletons;
 	bool is_optional;
 	bool is_render;
+	Texture* tex;
 
 	int now_skeleton;
+	int now_skeleton_text;
 	void write(char* filename);
 	static CharacterMesh* load(MyTokenAnalyzer* a, int ind);
 	void setNowSkeleton(int index) {
 		if (index >=0 && index < skeletons.size()) {
 			now_skeleton = index;
+			CharacterMeshSkeleton* skel = skeletons[index];
+			tex->setRenderTextChangeText(now_skeleton_text,skel->mesh_animename);
 		} else {
 			throw new GameError(KTROBO::WARNING, "out side vector of now skeleton");
 		}
 	}
 
 
-	CharacterMesh(int myindex) {
+	CharacterMesh(int myindex, Texture* tex) {
 		this->myindex = myindex;
 		has_oya_mesh = false;
 		is_connect_without_material_local = false;
 		is_optional = false;
 		is_render = false;
+		this->tex = tex;
 		MyMatrixIdentity(matrix_kakeru);
 		memset(oya_meshfilename,0,128);
 		memset(oya_meshbonename,0,128);
+		now_skeleton_text = tex->getRenderText("default", KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*6,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
+	
+
 	}
 
 	~CharacterMesh() {
@@ -278,10 +327,13 @@ public:
 			itt = itt +1;
 		}
 		skeletons.clear();
-
+		if (now_skeleton_text) {
+			tex->lightdeleteRenderText(now_skeleton_text);
+			now_skeleton_text= 0;
+		}
 	}
 };
-
+class ActionCharacter;
 
 class Action {
 public:
@@ -315,7 +367,7 @@ public:
 
 };
 
-#define KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT 16
+
 
 class ActionCharacter {
 public:
@@ -505,6 +557,7 @@ private:
 	int now_character_index;
 	int now_character_text;
 
+
 	float frame_of_action;
 	bool anime_action;
 
@@ -556,6 +609,8 @@ public:
 	void setAkatToAction(int character_id, int action_id, int hon_mesh_id, int skeleton_id, int akat_index);
 	void setNowCharacterId(int character_id);
 	int getNowCharacterId();
+	void setNowHonMeshId(int character_id, int hon_mesh_id);
+	void setNowSkeletonId(int character_id, int hon_mesh_id, int skeleton_id);
 	void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id,  int akat_index);
 	void getNowAkatIndex(int character_id,  int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index);
 	void setNowAction(int character_id, int action_id);
