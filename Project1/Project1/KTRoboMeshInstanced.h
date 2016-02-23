@@ -111,6 +111,7 @@ public:
 	
 	void setSkeletonIndex(int skeleton_index) {
 		this->skeleton_index = skeleton_index;
+		setIsNeedCombinedMatrixLoad(true);
 	}
 	int getSkeletonIndex() {return skeleton_index;}
 
@@ -325,7 +326,9 @@ public:
 	}
 
 private:
+	int max_depth;
 	bool is_need_calc_max_depth;
+	map<pair<int,int>,int> map_of_depth;
 	vector<MeshInstanced*> mesh_instanceds;
 	vector<Mesh*> meshs;
 	vector<Mesh*> skeletons;
@@ -368,6 +371,7 @@ public:
 		//MyMatrixIdentity(view);
 		//MyMatrixIdentity(proj);
 		is_need_calc_max_depth = true;
+		max_depth=0;
 	}
 
 	~MeshInstanceds() {
@@ -510,6 +514,7 @@ public:
 			}
 		}
 		setSkeleton(skeleton);
+		is_need_calc_max_depth = true;
 		return skeleton_size;
 	}
 
