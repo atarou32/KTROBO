@@ -53,6 +53,8 @@ private:
 	bool is_need_combined_matrix_load; // meshinstancedsのコンバインドメイトリクスのロードが必要かどうか
 	bool is_need_color_texture_load;
 
+	
+
 	bool is_render;
 public:
 	bool getIsRender() {
@@ -323,6 +325,7 @@ public:
 	}
 
 private:
+	bool is_need_calc_max_depth;
 	vector<MeshInstanced*> mesh_instanceds;
 	vector<Mesh*> meshs;
 	vector<Mesh*> skeletons;
@@ -364,6 +367,7 @@ public:
 		color_texture = tex_loader->makeClass(KTROBO_MESH_INSTANCED_COLOR_TEXTURE_WIDTH_HEIGHT, KTROBO_MESH_INSTANCED_COLOR_TEXTURE_WIDTH_HEIGHT);
 		//MyMatrixIdentity(view);
 		//MyMatrixIdentity(proj);
+		is_need_calc_max_depth = true;
 	}
 
 	~MeshInstanceds() {
@@ -590,6 +594,7 @@ public:
 		int instance_id = mesh_instanceds.size();
 		mm->setInstanceIndex(instance_id);
 		mesh_instanceds.push_back(mm);
+		is_need_calc_max_depth = true;
 		return mm;
 	}
 

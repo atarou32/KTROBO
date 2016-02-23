@@ -1074,7 +1074,7 @@ void Game::Run() {
 
 //	mesh_instanceds->calcCombinedMatrixToTexture(g);
 //	mesh_instanceds->loadColorToTexture(g);
-//	mesh_instanceds->render(g);
+	mesh_instanceds->render(g);
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);

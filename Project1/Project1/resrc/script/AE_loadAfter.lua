@@ -39,12 +39,15 @@ BIGHONMESHS = BIGHONMESHS or {}
 --BIGACTIONS = BIGACTIONS or {}
 if MYSLIDERS == nil then
   MYSLIDERS = {}
-  MYSLIDERS[1] = gu:makeButton(300,400,60,40,"resrc/script/AE_playakatBut.lua", "playakat")
-  
+  MYSLIDERS[1] = gu:makeButton("300","400","60","40","resrc/script/AE_playakatBut.lua",31, "playakat")
+  MYSLIDERS[2] = gu:makeButton("300","450","60","30","resrc/script/AE_playactionBut.lua",33, "playaction")
   
   gu:setPartToWindow(win3, MYSLIDERS[1])
-  gu:setEffect(MYSLIDERS[1],true)
-  gu:setRender(MYSLIDERS[1],true)
+  gu:setPartToWindow(win3, MYSLIDERS[2])
+  gu:setEffect(MYSLIDERS[1], true)
+  gu:setRender(MYSLIDERS[1], true)
+  gu:setEffect(MYSLIDERS[2], true)
+  gu:setRender(MYSLIDERS[2], true)
 
 end
 for e=1,msg_siz do
@@ -65,7 +68,7 @@ for e=1,msg_siz do
           BIGHONMESHS[character_id+1] = gu:makeWindow(0,0,1000,800)
           gu:setRender(BIGHONMESHS[character_id+1],true)
           gu:setEffect(BIGHONMESHS[character_id+1],true)
-          gu:setWindowToTab(MYTABIMPL, BIGHONMESHS[character_id+1],""..character_id)
+          gu:setWindowToTab(MYIMPLTAB, BIGHONMESHS[character_id+1],""..character_id)
         end
         gu:setPartToWindow(BIGHONMESHS[character_id+1], TABHONMESHS[character_id+1])
       end

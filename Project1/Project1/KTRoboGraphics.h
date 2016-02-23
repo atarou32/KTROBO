@@ -11,6 +11,7 @@
 #include "D3DX11.h"
 #include "D3DX11core.h"
 #include "DxErr.h"
+#include "MyDefine.h"
 //#include "MyTextureLoader.h"
 class MyTextureLoader;
 
@@ -126,7 +127,9 @@ private:
 	bool createDeviceAndSwapChain();
 	bool createBackBuffer();
 	bool createViewPort();
+	MYMATRIX proj;
 public:
+	MYMATRIX* getProj() {return &proj;}
 	bool Init(HWND hwnd);
 	void Release();
 

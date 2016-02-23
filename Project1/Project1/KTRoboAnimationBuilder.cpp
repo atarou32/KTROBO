@@ -1071,22 +1071,29 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 	AnimationBuilderImpl* im = impls[impl_id];
 	int bone_num = im->now_kakera->mesh_bone_name_index.size();
 	KTROBO::mylog::writelog(animefile, "%d;\n",bone_num);
+	
+	for (int i=0;i<bone_num;i++) {
 	map<string,int>::iterator it = im->now_kakera->mesh_bone_name_index.begin();// ‚Ù‚©‚Ìkakera‚Å‚à•Ï‚í‚ç‚È‚¢
+	
 	while (it != im->now_kakera->mesh_bone_name_index.end()) {
 		pair<string,int> p = *it;
+		int bone_index = p.second;
+		int bindex = im->hon_mesh->mesh->BoneIndexes[p.first.c_str()];
+		if (bindex != i) {it++;continue;};
 		KTROBO::mylog::writelog(animefile, "anim{\n");
-		KTROBO::mylog::writelog(animefile, "%s;\n",p.first);
+		KTROBO::mylog::writelog(animefile, "%s;\n",p.first.c_str());
 		KTROBO::mylog::writelog(animefile, "keys{\n");
 		int key_num = im->kakeras.size();
-		int bone_index = p.second;
-
+		
+		
+		KTROBO::mylog::writelog(animefile, "%d;\n",key_num);
 		for (int i=0;i<key_num;i++) {
 			AnimationMeshKakera* ka = im->kakeras[i];
 			KTROBO::mylog::writelog(animefile, "%d;\n",ka->frame);
 			KTROBO::mylog::writelog(animefile, "matrix;0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;\n");
 			KTROBO::mylog::writelog(animefile, "matrix_basis;");
 			for (int k=0;k<16;k++) {
-				KTROBO::mylog::writelog(animefile, "%f,",ka->mesh_offset_matrix[bone_index].m[k/4][k%4]);
+				KTROBO::mylog::writelog(animefile, "%f,",ka->mesh_offset_matrix[bone_index].m[k%4][k/4]);
 			}
 			KTROBO::mylog::writelog(animefile, ";\n");
 		}
@@ -1094,7 +1101,7 @@ bool AnimationBuilder::force_saveAnimeAndFrameToFile(int impl_id, char* filename
 		KTROBO::mylog::writelog(animefile, "}\n");
 		it++;
 	}
-
+	}
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 

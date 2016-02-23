@@ -9,7 +9,7 @@
 #include "KTRoboTexture.h"
 #include "KTRoboGameError.h"
 #include "KTRoboMeshInstanced.h"
-
+//#include "tolua_glue/tolua_glue.h"
 #include "vector"
 using namespace std;
 namespace KTROBO {
@@ -35,6 +35,7 @@ TO_LUA virtual void setNowSkeletonId(int character_id, int hon_mesh_id, int skel
 TO_LUA virtual void setNowAkat(int character_id, int hon_mesh_id, int skeleton_id, int akat_index)=0;
 TO_LUA virtual void getNowAkatIndex(int character_id, int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index)=0;
 TO_LUA virtual void setNowAction(int character_id, int action_id)=0;
+TO_LUA virtual void setNowActionFrame(int character_id, int frame)=0;
 TO_LUA virtual void togglePlayNowAction()=0;
 TO_LUA virtual void togglePlayNowAkat()=0;
 TO_LUA virtual void setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority,bool is_reset, int frame)=0;
@@ -226,6 +227,7 @@ public:
 		hmystrcpy(this->mesh_meshname, 128,0,mesh_meshname);
 		hmystrcpy(this->akat_filename, 128,0, akat_filename);
 		hmystrcpy(this->mesh_animename, 128,0, mesh_animename);
+		now_akat_index =0;
 	}
 
 	~CharacterMeshSkeleton() {
@@ -276,15 +278,18 @@ public:
 	int now_skeleton_text;
 	void write(char* filename);
 	static CharacterMesh* load(MyTokenAnalyzer* a, int ind);
-	void setNowSkeleton(int index) {
-		if (index >=0 && index < skeletons.size()) {
-			now_skeleton = index;
-			CharacterMeshSkeleton* skel = skeletons[index];
-			tex->setRenderTextChangeText(now_skeleton_text,skel->mesh_animename);
-		} else {
-			throw new GameError(KTROBO::WARNING, "out side vector of now skeleton");
+	void setNowSkeleton(int index);
+
+	void setFocus(bool t) {
+		vector<MeshInstanced*>::iterator it = mesh_instanceds.begin();
+		while (it != mesh_instanceds.end()) {
+			MeshInstanced* mi = *it;
+			mi->setIsRender(t);
+			it++;
 		}
 	}
+
+
 
 	void setSiseiAkat(int max_frame, float now_frame);
 
@@ -299,9 +304,9 @@ public:
 		MyMatrixIdentity(matrix_kakeru);
 		memset(oya_meshfilename,0,128);
 		memset(oya_meshbonename,0,128);
-		now_skeleton_text = tex->getRenderText("default", KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*6,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		now_skeleton_text = tex->getRenderText("default", KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*20,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
-	
+		now_skeleton=0;
 
 	}
 
@@ -446,15 +451,19 @@ public:
 		hmystrcpy(character_name,31,0,name);
 		now_mesh = 0;
 		now_action = 0;
-		now_mesh_text = tex->getRenderText(name,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		now_mesh_text = tex->getRenderText(name,0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*40,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
-		now_action_text = tex->getRenderText(name, KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*2,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		now_action_text = tex->getRenderText(name, KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*40,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
 
-		moto_action_text = tex->getRenderText(name, 0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*4,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		moto_action_text = tex->getRenderText(name, 0,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*34,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
 
-		saki_action_text = tex->getRenderText(name, KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*4,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
+		saki_action_text = tex->getRenderText(name, KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*19,
+			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*34,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT,
 			KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT*18,KTROBO_ACTIONEDITOR_TAB_TEXT_WIDTH_HEIGHT);
 		moto_action = 0;
 		saki_action = 0;
@@ -491,6 +500,12 @@ public:
 		tex->setRenderTextIsRender(now_action_text, true);
 		tex->setRenderTextIsRender(moto_action_text, true);
 		tex->setRenderTextIsRender(saki_action_text, true);
+		vector<CharacterMesh*>::iterator it = meshs.begin();
+		while(it != meshs.end()) {
+			CharacterMesh* mes = *it;
+			mes->setFocus(true);
+			it++;
+		}
 	}
 
 	void setUnFocus(Texture* tex) {
@@ -498,7 +513,12 @@ public:
 		tex->setRenderTextIsRender(now_action_text, false);
 		tex->setRenderTextIsRender(moto_action_text, false);
 		tex->setRenderTextIsRender(saki_action_text, false);
-
+		vector<CharacterMesh*>::iterator it = meshs.begin();
+		while(it != meshs.end()) {
+			CharacterMesh* mes = *it;
+			mes->setFocus(false);
+			it++;
+		}
 
 	}
 
@@ -580,7 +600,7 @@ public:
 	}
 
 };
-
+#define KTROBO_ACTIONEDITOR_DEFAULT_ACTION_FRAME 30
 class ActionEditor : public Scene, public IActionEditor
 {
 private:
@@ -651,7 +671,7 @@ public:
 	int makeActiontoAction(int character_id, int command_id);
 	void setSakiAction(int character_id, int action_id);
 	void setMotoAction(int character_id, int action_id);
-
+	void setNowActionFrame(int character_id, int frame);
 	void clearActionToAction(int character_id, int action_to_action_id);
 	void deleteAll();
 	bool saveNowToFile(char* filename);

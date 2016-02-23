@@ -229,6 +229,23 @@ void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	int num = characters.size();
 	if (num) {
+
+		MeshInstanceds* is = MyLuaGlueSingleton::getInstance()->getColMeshInstanceds(0);
+		MYVECTOR4 lightdir(0,0,-1,0);
+		
+		
+			CS::instance()->leave(CS_RENDERDATA_CS, "enter");
+			CS::instance()->enter(CS_DEVICECON_CS,"enter");
+			CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+			is->setViewProj(g,&kuru->view,g->getProj(),&lightdir);
+			CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+			CS::instance()->leave(CS_DEVICECON_CS, "leave");
+			CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+
+
+
+
+
 		if (anime_akat && characters[now_character_index]->meshs.size()) {
 			static float mae_FRAME = 0;
 			CharacterMesh* mes = characters[now_character_index]->meshs[characters[now_character_index]->now_mesh];
@@ -244,6 +261,34 @@ void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 							mae_FRAME = frame;
 							mes->setSiseiAkat(KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
 							
+						}
+					}
+				}
+			}
+		}
+
+		if (anime_action && characters[now_character_index]->meshs.size() && characters[now_character_index]->actions.size()) {
+			static float mae_FRAME = 0;
+			Action* act = characters[now_character_index]->actions[characters[now_character_index]->now_action];
+			
+			if (act->mesh_akat_pair.size()) {
+
+				map<CharacterMesh*, Akat*>::iterator it = act->mesh_akat_pair.begin();
+				while (it != act->mesh_akat_pair.end()) {
+					CharacterMesh* mes = (*it).first;
+					Akat* aka = (*it).second;
+					if (mes->skeletons.size() && mes->skeletons[mes->now_skeleton]->skeletons_loaded) {
+						DWORD dtime = timeGetTime() - akat_play_time+1;
+						CharacterMeshSkeleton* skel = mes->skeletons[mes->now_skeleton];
+						if (skel->akats.size()) {
+							if (act->all_max_frame > 0) {
+								dtime = dtime % (int)(act->all_max_frame*RENDERTIME_SETTIME);//‚Æ‚è‚ ‚¦‚¸‚P•b‚Ìakat‚Æ‚µ‚Ä‚µ‚Ü‚¤ action‚Ì‚Æ‚«‚É’·‚³‚ð’²ß‚Å‚«‚é‚æ‚¤‚É‚·‚é
+								float frame = dtime / (float)(act->all_max_frame*RENDERTIME_SETTIME) * KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX;
+								if ( abs(frame - mae_FRAME) > 1) {
+									mae_FRAME = frame;
+									mes->setSiseiAkat(KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
+								}
+							}
 						}
 					}
 				}
@@ -478,6 +523,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 				CharacterMesh* mm = ii->meshs[mmm];
 				int mmsize = mm->mesh_has_loaded.size();
 				int misize = mm->mesh_instanceds.size();
+				if (mm->skeletons.size()>mm->now_skeleton && mm->now_skeleton >=0 && mm->skeletons[mm->now_skeleton]->skeletons_loaded) {
 				for (int mi=misize;mi<mmsize;mi++) {
 					is_loaded =true;
 					MeshInstanceds* mis = MyLuaGlueSingleton::getInstance()->getColMeshInstanceds(0);
@@ -503,6 +549,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 						mm->mesh_instanceds.push_back(instanced);
 					}
 					} catch(GameError* err) {
+						CS::instance()->leave(CS_RENDERDATA_CS,"render");
 						CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 						CS::instance()->leave(CS_TASK_CS, "anime lock",1);
 						CS::instance()->leave(CS_TASK_CS, "render lock",2);
@@ -512,6 +559,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 						//CS::instance()->enter(CS_RENDERDATA_CS,"enter");
 						throw err;
 					}
+					CS::instance()->leave(CS_RENDERDATA_CS,"render");
 					CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 					CS::instance()->leave(CS_TASK_CS, "anime lock",1);
 					CS::instance()->leave(CS_TASK_CS, "render lock",2);
@@ -519,6 +567,7 @@ void ActionEditor::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_S
 					CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
 					CS::instance()->enter(CS_TASK_CS, "load lock", 3);
 					CS::instance()->enter(CS_RENDERDATA_CS,"enter");
+				}
 				}
 			}
 
@@ -592,11 +641,11 @@ int ActionEditor::createActionCharacter(char* name) {
 
 int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_mesh_filename, char* oya_mesh_bonename,bool is_connect_without_matrial_local, YARITORI MYMATRIX* mat) {
 
-	int ans;
+	int ans=0;
 	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
 	if (character_id >=0 && character_id < characters.size()) {
 		ActionCharacter* cha = characters[character_id];
-		int ans = cha->getMeshs()->size();
+		ans = cha->getMeshs()->size();
 		Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 		CharacterMesh* mesh = new CharacterMesh(ans, tex);
 		hmystrcpy(mesh->oya_meshfilename,128,0,oya_mesh_filename);
@@ -618,7 +667,7 @@ int ActionEditor::setHonMesh(int character_id, char* mesh_filename, char* oya_me
 		mesh->meshs.push_back(m);
 		mesh->mesh_filenames.push_back(filename);
 		mesh->mesh_has_loaded.push_back(mesh_has_loaded);
-
+		cha->meshs.push_back(mesh);
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return ans;
@@ -746,7 +795,19 @@ void ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_i
 	hmystrcpy(name, 8,0,"nullaka");
 }
 
+void ActionEditor::setNowActionFrame(int character_id, int frame) {
 
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* mm = characters[character_id];
+		if (mm->actions.size()) {
+			Action* act = mm->actions[mm->now_action];
+			act->all_max_frame = frame;
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
 int ActionEditor::makeAction(int character_id, char* action_name) {
 
 	int ans = 0;
@@ -758,6 +819,7 @@ int ActionEditor::makeAction(int character_id, char* action_name) {
 		hmystrcpy(act->action_name,32,0,action_name);
 		ans = mm->actions.size();
 		mm->actions.push_back(act);
+		act->all_max_frame = KTROBO_ACTIONEDITOR_DEFAULT_ACTION_FRAME;
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return ans;
@@ -1291,7 +1353,24 @@ void ActionEditor::setNowHonMeshId(int character_id, int hon_mesh_id) {
 
 
 }
-
+void CharacterMesh::setNowSkeleton(int index) {
+		if (index >=0 && index < skeletons.size()) {
+			now_skeleton = index;
+			CharacterMeshSkeleton* skel = skeletons[index];
+			vector<MeshInstanced*>::iterator it = mesh_instanceds.begin();
+			while(it != mesh_instanceds.end()) {
+				MeshInstanced* mm = *it;
+				MeshInstanceds* mmm = MyLuaGlueSingleton::getInstance()->getColMeshInstanceds(0);
+//				mmm->setSkeleton(skel->skeleton);
+				int skelinde = mmm->getSkeletonIndexOrSet(skel->skeleton);
+				mm->setSkeletonIndex(skelinde);
+				it++;
+			}
+			tex->setRenderTextChangeText(now_skeleton_text,skel->mesh_animename);
+		} else {
+			throw new GameError(KTROBO::WARNING, "out side vector of now skeleton");
+		}
+}
 
 void ActionEditor::setNowSkeletonId(int character_id, int hon_mesh_id, int skeleton_id) {
 

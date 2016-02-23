@@ -9,11 +9,16 @@ gu = GUI:getIS(0,0)
 if inputtext_scene ~= nil then
   test = gu:getStrFromInput(inputtext_scene)
   
-  MYHONMESHS =nil 
-  MYSKELETONS=nil 
-  MYAKATS    =nil 
-  MYACTIONS  =nil 
-  
+   MYSLIDERS=nil
+   MYHONMESHS=nil
+   MYSKELETONS=nil
+   MYAKATS=nil
+   MYACTIONS=nil
+   TABHONMESHS=nil
+   TABSKELETONS=nil
+   TABAKATS=nil
+   TABACTIONS=nil
+   BIGHONMESHS=nil
   
   ae:forceLoadFromFile(test)
   

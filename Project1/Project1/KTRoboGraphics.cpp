@@ -115,6 +115,8 @@ bool Graphics::Init(HWND hwnd) {
 
 	if (!r) return false;
 
+	MyMatrixPerspectiveFovRH(proj, 1, this->getScreenWidth() / (float)this->getScreenHeight(), 1, 1000);
+
 	return true;
 }
 
@@ -270,6 +272,7 @@ Graphics* Graphics::makeGraphicsOfNewDeviceContext() {
 	new_g->p_swapchain = this->p_swapchain;
 	new_g->vp = this->vp;
 	new_g->tex_loader = this->tex_loader;
+	new_g->proj = this->proj;
 	// デバイスコンテキストを作成する
 	HRESULT hr =  p_device->CreateDeferredContext(0, &new_g->p_devicecontext);
 	if (FAILED(hr)) {

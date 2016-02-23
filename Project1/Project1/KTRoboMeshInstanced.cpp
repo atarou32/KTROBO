@@ -360,6 +360,7 @@ void MeshInstanceds::loadColorToTexture(Graphics* g) {
 				}
 			}
 		}
+		mm->setIsNeedColorTextureLoad(false);
 	}
 
 	if (temp >0) {
@@ -1146,24 +1147,28 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 	memset(stt, 0 , sizeof(COMBINEDMATRIXCALCSTRUCT)*KTROBO_MESH_INSTANCED_COMBINED_MATRIX_CALC_STRUCT_TEMPSIZE);
 
 	// max_depth ‚ðŒvŽZ‚·‚é
-	map<pair<int,int>,int> map_of_depth;
+	static map<pair<int,int>,int> map_of_depth;
+
 	int isize = mesh_instanceds.size();
 	int max_depth = 0;
-	for (int i = 0 ; i < isize; i++) {
-		MeshInstanced* instance = mesh_instanceds[i];
-		for (int bone_i=0; bone_i < KTROBO_MESH_INSTANCED_BONE_MAX; bone_i ++) {
-			int temp_depth = this->getDepth(instance, bone_i);
-			if (temp_depth == KTROBO_MESH_BONE_NULL) continue;
-			map_of_depth.insert(pair<pair<int,int>,int>(pair<int,int>(i,bone_i),temp_depth));
+	if (is_need_calc_max_depth) {
+		map_of_depth.clear();
+		for (int i = 0 ; i < isize; i++) {
+			MeshInstanced* instance = mesh_instanceds[i];
+			for (int bone_i=0; bone_i < KTROBO_MESH_INSTANCED_BONE_MAX; bone_i ++) {
+				int temp_depth = this->getDepth(instance, bone_i);
+				if (temp_depth == KTROBO_MESH_BONE_NULL) continue;
+				map_of_depth.insert(pair<pair<int,int>,int>(pair<int,int>(i,bone_i),temp_depth));
 
-			if (temp_depth != KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL) {
-				if (temp_depth > max_depth) {
-					max_depth = temp_depth;
+				if (temp_depth != KTROBO_MESH_INSTANCED_BONE_DEPTH_NULL) {
+					if (temp_depth > max_depth) {
+						max_depth = temp_depth;
+					}
 				}
 			}
 		}
+		isizedayo = isize;
 	}
-
 	int temp = 0;
 	int temp_max =  KTROBO_MESH_INSTANCED_COMBINED_MATRIX_CALC_STRUCT_TEMPSIZE;
 
