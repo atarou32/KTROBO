@@ -568,7 +568,7 @@ void MeshInstanceds::loadShaderForCombinedMatrix(Graphics* g) {
 //	pDev->CreateUnorderedAccessView( m_pVertexBuffer, &uavDesc, &m_pVertexView );
 	if (FAILED(hr)) {
 		Del();
-		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "uav make error");;
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "uav make error");
 	}
 
 	

@@ -38,17 +38,37 @@ BIGHONMESHS = BIGHONMESHS or {}
 --BIGAKATS = BIGAKATS or {}
 --BIGACTIONS = BIGACTIONS or {}
 if MYSLIDERS == nil then
+
   MYSLIDERS = {}
   MYSLIDERS[1] = gu:makeButton("300","400","60","40","resrc/script/AE_playakatBut.lua",31, "playakat")
   MYSLIDERS[2] = gu:makeButton("300","450","60","30","resrc/script/AE_playactionBut.lua",33, "playaction")
+  MYSLIDERS[3] = gu:makeSliderH({"500","812","450","470"},"511","0","0","resrc/script/AE_setSisei.lua")
+  MYSLIDERS[4] = gu:makeButton("300","500","60","30","resrc/script/AE_makeactionBut.lua",33,"mkact")
+  MYSLIDERS[5] = gu:makeInputText("120","500","180","30")
+  MYSLIDERS[6] = gu:makeWindow(120,500,240,30)
+  MYSLIDERS[7] = gu:makeButton("380","500","40","20","resrc/script/AE_setAkatToActionBut.lua",35,"set")
   
+  gu:setPartToWindow(MYSLIDERS[6], MYSLIDERS[4])
+  gu:setPartToWindow(MYSLIDERS[6], MYSLIDERS[5])
   gu:setPartToWindow(win3, MYSLIDERS[1])
   gu:setPartToWindow(win3, MYSLIDERS[2])
+  gu:setPartToWindow(win3, MYSLIDERS[5])
+  gu:setPArtToWindow(MYSLIDERS[6],MYSLIDERS[7])
   gu:setEffect(MYSLIDERS[1], true)
   gu:setRender(MYSLIDERS[1], true)
   gu:setEffect(MYSLIDERS[2], true)
   gu:setRender(MYSLIDERS[2], true)
-
+  gu:setEffect(MYSLIDERS[3], true)
+  gu:setRender(MYSLIDERS[3], true)
+  gu:setEffect(MYSLIDERS[4], true)
+  gu:setRender(MYSLIDERS[4], true)
+  gu:setEffect(MYSLIDERS[5], true)
+  gu:setRender(MYSLIDERS[5], true)
+  gu:setEffect(MYSLIDERS[6], true)
+  gu:setRender(MYSLIDERS[6], true)
+  gu:setRender(MYSLIDERS[7], true)
+  gu:setEffect(MYSLIDERS[7], true)
+  
 end
 for e=1,msg_siz do
   -- now_index(character_id)‚Ímsgs‚É“ü‚Á‚Ä‚¢‚é

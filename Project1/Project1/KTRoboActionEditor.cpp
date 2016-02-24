@@ -148,14 +148,21 @@ void ActionEditor::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
 
 
 }
-
 void CharacterMesh::setSiseiAkat(int max_frame, float now_frame) {
-
-
 
 	// 一番近いフレームかけらを見つけてくる
 	CharacterMeshSkeleton* skel  = this->skeletons[this->now_skeleton];
 	Akat* aka = skel->akats[skel->now_akat_index];
+	setSiseiAkatSitei(aka, max_frame, now_frame);
+
+}
+void CharacterMesh::setSiseiAkatSitei(Akat* aka, int max_frame, float now_frame) {
+
+
+
+	// 一番近いフレームかけらを見つけてくる
+	CharacterMeshSkeleton* skel  = this->skeletons[aka->skeleton_index];
+//	Akat* aka = skel->akats[skel->now_akat_index];
 	float fframe = now_frame/(float)max_frame * aka->all_frame;
 
 	AkatFrame* frame = aka->root_akat_frame;
@@ -286,7 +293,7 @@ void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 								float frame = dtime / (float)(act->all_max_frame*RENDERTIME_SETTIME) * KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX;
 								if ( abs(frame - mae_FRAME) > 1) {
 									mae_FRAME = frame;
-									mes->setSiseiAkat(KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
+									mes->setSiseiAkatSitei(aka, KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
 								}
 							}
 						}
@@ -794,6 +801,32 @@ void ActionEditor::getAkatName(int character_id, int hon_mesh_id, int skeleton_i
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	hmystrcpy(name, 8,0,"nullaka");
 }
+
+
+void ActionEditor::setNowActionSisei(int character_id, float frame) {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	if (character_id >=0 && character_id < characters.size()) {
+		ActionCharacter* mm = characters[character_id];
+		if (mm->actions.size()) {
+			Action* act = mm->actions[mm->now_action];
+			if (act->mesh_akat_pair.size()) {
+				map<CharacterMesh*, Akat*>::iterator it = act->mesh_akat_pair.begin();
+				while (it != act->mesh_akat_pair.end()) {
+					CharacterMesh* mes = (*it).first;
+					Akat* aka = (*it).second;
+					if (mes->skeletons.size() && mes->skeletons[mes->now_skeleton]->skeletons_loaded) {
+						mes->setSiseiAkatSitei(aka, KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
+					}
+				}
+			}
+		}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+
+}
+
+
 
 void ActionEditor::setNowActionFrame(int character_id, int frame) {
 
@@ -1420,21 +1453,21 @@ void CharacterMesh::write(char* filename) {
 	}
 
 	if (is_connect_without_material_local) {
-		KTROBO::mylog::writelog(filename, "is_connect_without_material_local=1");
+		KTROBO::mylog::writelog(filename, "is_connect_without_material_local=1;\n");
 	} else {
-		KTROBO::mylog::writelog(filename, "is_connect_without_mateiral_local=0");
+		KTROBO::mylog::writelog(filename, "is_connect_without_mateiral_local=0;\n");
 	}
 
 	if (is_optional) {
-		KTROBO::mylog::writelog(filename, "is_optional=1");
+		KTROBO::mylog::writelog(filename, "is_optional=1;\n");
 	} else {
-		KTROBO::mylog::writelog(filename, "is_optional=0");
+		KTROBO::mylog::writelog(filename, "is_optional=0;\n");
 	}
 
 	if (is_render) {
-		KTROBO::mylog::writelog(filename, "is_render=1");
+		KTROBO::mylog::writelog(filename, "is_render=1;\n");
 	} else {
-		KTROBO::mylog::writelog(filename, "is_render=0");
+		KTROBO::mylog::writelog(filename, "is_render=0;\n");
 	}
 	KTROBO::mylog::writelog(filename, "kakeru=\n");
 	for (int i=0;i<16;i++) {
@@ -1772,6 +1805,7 @@ CharacterMesh* CharacterMesh::load(MyTokenAnalyzer* a, int index) {
 	int n = a->GetIntToken();
 	for (int i=0;i<n;i++) {
 		a->GetToken();
+		a->GetToken();
 		string s = a->Toke();
 		cm->mesh_filenames.push_back(s);
 		cm->meshs.push_back(new Mesh());
@@ -1901,11 +1935,21 @@ bool ActionEditor::_forceLoadFromFile(char* filename) {
 
 	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_AIDECISION);
 	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_UPDATEMAINRENDER);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_UPDATEANIMEFRAMENADO);
+	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_UPDATEPOSBUTUKARI);
+	CS::instance()->enter(CS_DEVICECON_CS, "enter");
 	deleteAll();
 	// ここでGUIのデストラクトとLUAのAB_ENTERの呼び出しを済ませておく
 	TCB test;
 	MyLuaGlueSingleton::getInstance()->getColGUIs(0)->getInstance(0)->deleteAll();
-	LuaTCBMaker::doTCBnow(TASKTHREADS_AIDECISION, true, "resrc/script/AB_enter.lua");
+	LuaTCBMaker::doTCBnow(TASKTHREADS_AIDECISION, true, "resrc/script/AE_enter.lua");
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_UPDATEPOSBUTUKARI);
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_UPDATEANIMEFRAMENADO);
+	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_UPDATEMAINRENDER);
+	
+	
 	CS::instance()->leave(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);
 	CS::instance()->leave(CS_TASK_CS, "leave", TASKTHREADS_AIDECISION);
 	CS::instance()->enter(CS_TASK_CS, "enter", TASKTHREADS_LOADDESTRUCT);

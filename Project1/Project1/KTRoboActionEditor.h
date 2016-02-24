@@ -36,6 +36,7 @@ TO_LUA virtual void setNowAkat(int character_id, int hon_mesh_id, int skeleton_i
 TO_LUA virtual void getNowAkatIndex(int character_id, int hon_mesh_id, int skeleton_id,  OUT_ int* akat_index)=0;
 TO_LUA virtual void setNowAction(int character_id, int action_id)=0;
 TO_LUA virtual void setNowActionFrame(int character_id, int frame)=0;
+TO_LUA virtual void setNowActionSisei(int character_id, float frame)=0;
 TO_LUA virtual void togglePlayNowAction()=0;
 TO_LUA virtual void togglePlayNowAkat()=0;
 TO_LUA virtual void setCommandToCharacter(int character_id, int command_id, char* command, char* name, int priority,bool is_reset, int frame)=0;
@@ -292,7 +293,7 @@ public:
 
 
 	void setSiseiAkat(int max_frame, float now_frame);
-
+	void setSiseiAkatSitei(Akat* akat, int max_frame, float now_frame);
 
 	CharacterMesh(int myindex, Texture* tex) {
 		this->myindex = myindex;
@@ -672,6 +673,7 @@ public:
 	void setSakiAction(int character_id, int action_id);
 	void setMotoAction(int character_id, int action_id);
 	void setNowActionFrame(int character_id, int frame);
+	void setNowActionSisei(int character_id, float frame);
 	void clearActionToAction(int character_id, int action_to_action_id);
 	void deleteAll();
 	bool saveNowToFile(char* filename);

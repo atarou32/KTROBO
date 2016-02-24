@@ -586,7 +586,7 @@ public:
 		namet[strlen(name.c_str())] = '\0';
 		int t = tex->getRenderText(namet, r.left,r.top,r.bottom-r.top, r.right-r.left, r.bottom - r. top); 
 		window_names.push_back(t);
-		setNowIndex(window_names.size()-1);
+		//setNowIndex(window_names.size()-1);
 		return window_names.size()-1;
 		
 	}
