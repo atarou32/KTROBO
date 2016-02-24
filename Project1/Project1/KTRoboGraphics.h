@@ -13,6 +13,8 @@
 #include "DxErr.h"
 #include "MyDefine.h"
 //#include "MyTextureLoader.h"
+#include "MyButukari3D.h"
+
 class MyTextureLoader;
 
 namespace KTROBO {
@@ -108,6 +110,28 @@ public:
 HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermodel, ID3DBlob** out, bool use_compiled=false);
 
 
+
+#define KTROBO_GRAPHICS_SHADER_FILENAME "resrc/shader/renderlinesimple.fx"
+#define KTROBO_GRAPHICS_SHADER_VS "VSFunc"
+#define KTROBO_GRAPHICS_SHADER_GS "GSFunc"
+#define KTROBO_GRAPHICS_SHADER_PS "PSFunc"
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 32
+
+class GRAPHICS_RENDER_STRUCT {
+public:
+	float x;
+	float y;
+	float z;
+	DWORD color;
+};
+
+class GRAPHICS_INFO_STRUCT {
+public:
+	MYMATRIX world;
+	MYMATRIX view;
+	MYMATRIX proj;
+};
+
 class Graphics
 {
 private:
@@ -124,11 +148,31 @@ private:
 	ID3D11RenderTargetView* p_rendertargetview;
 	D3D11_VIEWPORT vp;
 	MyTextureLoader* tex_loader;
+	
+
 	bool createDeviceAndSwapChain();
 	bool createBackBuffer();
 	bool createViewPort();
 	MYMATRIX proj;
 public:
+	static ID3D11SamplerState* p_sampler;
+	static MYSHADERSTRUCT mss;
+	static ID3D11Buffer* render_buffer;
+	static GRAPHICS_INFO_STRUCT info;
+	static ID3D11Buffer* info_buffer;
+
+	static void InitMSS(Graphics* g);
+	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
+								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
+								D3D11_INPUT_ELEMENT_DESC* layout, int numoflayout, bool blend_enable);
+	static void Del();
+
+	static void drawOBB(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, OBB* rec);
+	static void drawOBBFill(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX *view, MYMATRIX* proj, OBB* rec);
+	static void drawRAY(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, RAY* ray, int length);
+	static void drawTriangle(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* p, MYVECTOR3* q, MYVECTOR3* r);
+
+
 	MYMATRIX* getProj() {return &proj;}
 	bool Init(HWND hwnd);
 	void Release();

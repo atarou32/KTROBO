@@ -190,6 +190,8 @@ bool Game::Init(HWND hwnd) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "graphics init error");
 	}
 
+	Graphics::InitMSS(g);
+
 	demo = new KTRoboDemoRender();
 	demo->Init(g);
 	
@@ -753,6 +755,8 @@ void Game::Del() {
 		delete mesh_instanceds;
 		mesh_instanceds = 0;
 	}
+
+	Graphics::Del();
 
 	MeshInstanceds::Del();
 

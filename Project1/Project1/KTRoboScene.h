@@ -34,15 +34,18 @@ public:
 	static lua_State* Ls[TASKTHREAD_NUM];
 
 	static Game* game;
+
 protected:
 	TCB* looptcbs[TASKTHREAD_NUM];
 	bool send_remove_message;
+
 public:	
 	virtual void mainrenderIMPL(bool is_focused, Graphics* g, Game* game)=0;
 	virtual void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)=0;
 	virtual void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)=0;
 	virtual void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)=0;
 	virtual void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)=0;
+
 public:
 	virtual void enter(); // シーンに入るときに呼ばれる enter leave が呼ばれるのはAIスレッドから
 	//（一番上位のスレッド）で他のスレッド（インプット以外？）をロックして行う

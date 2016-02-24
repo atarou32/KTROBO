@@ -95,6 +95,8 @@ private:
 	MySound* sound;
 	TempInputShori* temp_input_shori;
 	ActionEditors* aes;
+
+
 public:
 	Game(void);
 	~Game(void);

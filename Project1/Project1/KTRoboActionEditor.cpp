@@ -146,6 +146,11 @@ void ActionEditor::leave() {
 
 void ActionEditor::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
 
+	MYMATRIX world;
+	MyMatrixIdentity(world);
+	OBB rec;
+
+	Graphics::drawOBB(g,0xFFFFFFFF,&world, &kuru->view, g->getProj(), &rec);
 
 }
 void CharacterMesh::setSiseiAkat(int max_frame, float now_frame) {
@@ -284,10 +289,10 @@ void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 				while (it != act->mesh_akat_pair.end()) {
 					CharacterMesh* mes = (*it).first;
 					Akat* aka = (*it).second;
-					if (mes->skeletons.size() && mes->skeletons[mes->now_skeleton]->skeletons_loaded) {
+					if (mes->skeletons.size()) {
 						DWORD dtime = timeGetTime() - akat_play_time+1;
-						CharacterMeshSkeleton* skel = mes->skeletons[mes->now_skeleton];
-						if (skel->akats.size()) {
+						CharacterMeshSkeleton* skel = mes->skeletons[aka->skeleton_index];
+						if (skel->akats.size() && skel->skeletons_loaded) {
 							if (act->all_max_frame > 0) {
 								dtime = dtime % (int)(act->all_max_frame*RENDERTIME_SETTIME);//‚Æ‚è‚ ‚¦‚¸‚P•b‚Ìakat‚Æ‚µ‚Ä‚µ‚Ü‚¤ action‚Ì‚Æ‚«‚É’·‚³‚ð’²ß‚Å‚«‚é‚æ‚¤‚É‚·‚é
 								float frame = dtime / (float)(act->all_max_frame*RENDERTIME_SETTIME) * KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX;
@@ -298,6 +303,7 @@ void ActionEditor::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 							}
 						}
 					}
+					it++;
 				}
 			}
 		}
@@ -818,6 +824,7 @@ void ActionEditor::setNowActionSisei(int character_id, float frame) {
 					if (mes->skeletons.size() && mes->skeletons[mes->now_skeleton]->skeletons_loaded) {
 						mes->setSiseiAkatSitei(aka, KTROBO_MESH_INSTANCED_ANIME_MATRIX_BASIS_NUM_MAX,frame);
 					}
+					it++;
 				}
 			}
 		}
@@ -853,6 +860,12 @@ int ActionEditor::makeAction(int character_id, char* action_name) {
 		ans = mm->actions.size();
 		mm->actions.push_back(act);
 		act->all_max_frame = KTROBO_ACTIONEDITOR_DEFAULT_ACTION_FRAME;
+		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+		MyLuaGlueSingleton::getInstance()->getColMessages(0)->getInstance(0)->makeMessage(
+				KTROBO_MESSAGE_ID_ACTIONEDITOR_LOAD_AFTER,KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, KTROBO_MESSAGE_RECEIVER_ID_SYSTEM, character_id,0,true);
+		LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION,true, "resrc/script/AE_loadAfter.lua");
+		CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+		
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	return ans;
@@ -979,6 +992,7 @@ void ActionEditor::setNowAction(int character_id, int action_id) {
 			Action* act = mm->actions[action_id];
 			Texture* tex = MyLuaGlueSingleton::getInstance()->getColTextures(0)->getInstance(0);
 			tex->setRenderTextChangeText(mm->now_action_text, act->action_name);
+			tex->setRenderTextIsRender(mm->now_action_text, true);
 		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
@@ -1383,8 +1397,6 @@ void ActionEditor::setNowHonMeshId(int character_id, int hon_mesh_id) {
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 
-
-
 }
 void CharacterMesh::setNowSkeleton(int index) {
 		if (index >=0 && index < skeletons.size()) {
@@ -1633,7 +1645,7 @@ bool ActionEditor::_forceSaveNowToFile(char* filename) {
 		CS::instance()->leave(CS_RENDERDATA_CS, "leave");
 	}
 	KTROBO::mylog::writelog(filename, "}\n");
-	
+	return true;
 }
 
 AtariHantei* AtariHantei::load(MyTokenAnalyzer* a) {
