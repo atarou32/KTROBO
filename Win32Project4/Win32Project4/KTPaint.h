@@ -22,6 +22,7 @@ private:
 	int now_paint_id;
 	KTROBO::Graphics* g;
 	KTPaintGUI gui;
+	HDC hdcMem;
 public:
 	float gradiation_circle_radius;
 	float gradiation_circle_theta;
@@ -29,9 +30,15 @@ public:
 	unsigned char now_gcolor_r;
 	unsigned char now_gcolor_g;
 	unsigned char now_gcolor_b;
+
+	unsigned char now_color_r;
+	unsigned char now_color_g;
+	unsigned char now_color_b;
 public:
+	HDC getHdcMem() {return hdcMem;}
 	KTPaintGUI* getGUI() {return &gui;}
-	void createKoWindow(HWND hWnd); 
+	void createKoWindow(HWND hWnd);
+	void paint();
 	KTPaint(HINSTANCE hins);
 	~KTPaint(void);
 	void Init(HWND hwnd);
@@ -41,8 +48,11 @@ public:
 	void setCursorToPen();
 	void setCursorToNuri();
 	void setCursorToEraser();
-
-
+	void setGColorTheta(ULONG mouse_x, ULONG mouse_y);
+	bool isInCircleColorPen(ULONG mouse_x, ULONG mouse_y);
+	bool isInTriangleColorPen(ULONG mouse_x, ULONG mouse_y);
+	void setNowColor(COLORREF c);
+	void setNowGColor(COLORREF c);
 
 };
 

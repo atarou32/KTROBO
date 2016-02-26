@@ -119,8 +119,22 @@ void KTPaintGUI::drawGradiationCircleToWindow(HDC hdc, POINT center, float radiu
 //	gdayo.FillRectangle(&pBrush,(int)(center.x-radius),(int)(center.y-radius),(int)(radius*2),(int)(radius*2));
 
 	float radiust = radius * 0.7;
+
+	
+
+
 	Ellipse(hdc,(int)(center.x-radiust), (int)(center.y-radiust), (int)(center.x+radiust),(int)(center.y+radiust));
 }
 
 
 
+void KTPaintGUI::clear(HDC hdc) {
+
+	Graphics g(hdc);
+	g.Clear(Color(255,128,128,128));
+
+
+
+
+
+}

@@ -91,6 +91,11 @@ void KTPaint::Init(HWND hwnd) {
 	parent_window = hwnd;
 	createKoWindow(hwnd);
 	setCursorToPen();
+
+
+
+
+
 }
 
 bool MyRegisterClass(HINSTANCE hInst, LPCSTR name) {
@@ -104,7 +109,7 @@ bool MyRegisterClass(HINSTANCE hInst, LPCSTR name) {
     wc.hInstance = hInst;
     wc.hIcon  = NULL;
     wc.hCursor  = NULL;
-    wc.hbrBackground= reinterpret_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)); //グレーにする
+    wc.hbrBackground = reinterpret_cast<HBRUSH>(GetStockObject( NULL_BRUSH));//reinterpret_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)); //グレーにする
     wc.lpszMenuName = NULL;  // 未サポート
     wc.lpszClassName=(LPCSTR)name;
 	return RegisterClass(&wc);
@@ -115,7 +120,7 @@ bool MyRegisterClass(HINSTANCE hInst, LPCSTR name) {
 
 void KTPaint::createKoWindow(HWND p_window) {
 	WNDCLASS wc;
-	wc.style  = CS_HREDRAW|CS_VREDRAW;
+	wc.style  = 0;// CS_HREDRAW|CS_VREDRAW;
 	wc.lpfnWndProc = ColorPenWindowProc ; // プロシージャ名
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
@@ -127,7 +132,7 @@ void KTPaint::createKoWindow(HWND p_window) {
     wc.lpszClassName=(LPCSTR) "colorpen";
 	bool t = RegisterClass(&wc);
 	colorpen_window = CreateWindow("colorpen", "colorpen", WS_OVERLAPPED,
-		1200, 0, 200,800,/*CW_USEDEFAULT, CW_USEDEFAULT,*/ NULL, NULL, hInst, NULL);
+		1200, 0, 220,800,/*CW_USEDEFAULT, CW_USEDEFAULT,*/ NULL, NULL, hInst, NULL);
 	DWORD tt = GetLastError();
 
 	if (!t || !colorpen_window)
@@ -217,7 +222,42 @@ void KTPaint::createKoWindow(HWND p_window) {
     hBitmap=LoadBitmap(hInst,MAKEINTRESOURCE(IDB_BITMAP4));
 	SendDlgItemMessage(colorpen_window,4,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
 
+
+
+	#ifndef HID_USAGE_PAGE_GENERIC
+    #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
+    #endif
+    #ifndef HID_USAGE_GENERIC_MOUSE
+    #define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
+    #endif
+    RAWINPUTDEVICE Rid[1];
+    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC; 
+    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
+    Rid[0].dwFlags = RIDEV_INPUTSINK;   
+    Rid[0].hwndTarget = colorpen_window;
+    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+
+
+	HDC hdc;
+	RECT rc;
+    hdc = GetDC(colorpen_window);                      	// ウインドウのDCを取得
+    GetClientRect(colorpen_window, &rc);  	// デスクトップのサイズを取得
+    hBitmap = CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
+    hdcMem = CreateCompatibleDC(NULL);		// カレントスクリーン互換
+    SelectObject(hdcMem, hBitmap);		// MDCにビットマップを割り付け
+	ReleaseDC(colorpen_window, hdc);
+	
+
+
+	InvalidateRect(colorpen_window, NULL,false);
+
+
+
+
 }
+
+
+
 void KTPaint::Release()  {
 	KTROBO::Graphics::Del();
 	if (g) {
@@ -229,21 +269,173 @@ void KTPaint::Release()  {
 }
 
 
+
+bool KTPaint::isInCircleColorPen(ULONG mouse_x, ULONG mouse_y) {
+
+	float dd = (mouse_x - 100)*(mouse_x-100) + (mouse_y - 200) * (mouse_y-200);
+	if (dd < KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT*KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT) {
+		if (dd > KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT*KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT*0.7*0.7) {
+			return true;
+		}
+	}
+
+
+	return false;
+}
+bool KTPaint::isInTriangleColorPen(ULONG mouse_x, ULONG mouse_y) {
+
+	float dd = (mouse_x - 100)*(mouse_x-100) + (mouse_y - 200) * (mouse_y-200);
+	if (dd < KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT*KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT) {
+		if (dd < KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT*KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT*0.7*0.7) {
+			
+			return true;
+		}
+	}
+
+
+
+
+	return false;
+}
+
+
 #define KTROBO_MOUSESTATE_L_DOWN 0x01
 #define KTROBO_MOUSESTATE_L_UP 0x02
 #define KTROBO_MOUSESTATE_R_DOWN 0x04
 #define KTROBO_MOUSESTATE_R_UP 0x08
+#define GET_X_LPARAM(lp)                        ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp)                        ((int)(short)HIWORD(lp))
+
+
+void KTPaint::setNowColor(COLORREF c) {
+	now_color_b = GetBValue(c);
+	now_color_g = GetGValue(c);
+	now_color_r = GetRValue(c);
+}
+
+void KTPaint::setNowGColor(COLORREF c) {
+	now_gcolor_b = GetBValue(c);
+	now_gcolor_g = GetGValue(c);
+	now_gcolor_r = GetRValue(c);
+}
+
+
+void KTPaint::setGColorTheta(ULONG mouse_x, ULONG mouse_y) {
+	POINT center;
+	center.x = 100;
+	center.y = 200;
+
+	int dy = mouse_y - center.y;
+	int dx = mouse_x - center.x;
+	int dx2dy2 = dy*dy+dx*dx;
+
+	if (dx2dy2) {
+		if (dy >0) {
+			float dq = sqrt(dx2dy2);
+			float theta = acos(dx/dq);
+			this->gradiation_circle_theta = theta;
+			this->gradiation_circle_radius = sqrt(dx2dy2);
+		} else {
+			float dq = sqrt(dx2dy2);
+			float theta = acos(dx/dq);
+			this->gradiation_circle_theta = 2*3.14-theta;
+			this->gradiation_circle_radius = sqrt(dx2dy2);
+		}
+	}
+}
+void KTPaint::paint() {
+
+
+	POINT center;
+	MYTRIANGLEPOINT points[3];
+
+/*	BOOL ExtFloodFill(
+  HDC hdc,          // デバイスコンテキストハンドル
+  int nXStart,      // 開始点の x 座標
+  int nYStart,      // 開始点の y 座標
+  COLORREF crColor, // 色
+  UINT fuFillType   // 種類
+);
+*/
+	getGUI()->clear(hdcMem);
+	center.x = 100;
+	center.y = 200;
+	getGUI()->drawGradiationCircleToWindow(hdcMem,center,KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT);
+	points[0].b = now_gcolor_b;
+	points[0].g = now_gcolor_g;
+	points[0].r = now_gcolor_r;
+	points[1].b = 0;
+	points[1].g = 0;
+	points[1].r = 0;
+	points[2].b = 0xFF;
+	points[2].g = 0xFF;
+	points[2].r = 0xFF;
+	points[0].x = center.x + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * cos(gradiation_circle_theta);
+	points[0].y = center.y + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * sin(gradiation_circle_theta);
+	points[1].x = center.x + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * cos(gradiation_circle_theta+2*3.14/3);
+	points[1].y = center.y + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * sin(gradiation_circle_theta+2*3.14/3);
+	points[2].x = center.x + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * cos(gradiation_circle_theta+2*3.14*2/3);
+	points[2].y = center.y + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * sin(gradiation_circle_theta+2*3.14*2/3);
+	getGUI()->drawGradiationTriangleToWindow(hdcMem,points);
+	// 現在の色を塗る
+	getGUI()->drawRectangleToWindow(hdcMem, now_color_r,now_color_g,now_color_b,0,50,200,100);
+}
+
 
 extern KTPaint* paint;
 LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	HDC hdc;
 	PAINTSTRUCT psPaint;
 	POINT center;
-	POINT mouse_xy;
-	ULONG mouse_button;
+	static ULONG mouse_button=0;
+	static bool mouse_l=false;
+	static RECT rcClient;
 	MYTRIANGLEPOINT points[3];
-
+	static ULONG xMousePos=0;
+	static ULONG yMousePos=0;
+	bool redraw = false;
 	switch(i) {
+	case WM_ERASEBKGND:
+		return 0;
+	case WM_MOUSEMOVE:
+			xMousePos = GET_X_LPARAM(l);
+			yMousePos = GET_Y_LPARAM(l);
+			if (mouse_l) {
+				if (paint->isInCircleColorPen(xMousePos, yMousePos)) {
+					hdc = GetDC(h);
+					COLORREF c = GetPixel(hdc,xMousePos,yMousePos);
+					paint->setNowGColor(c);
+					paint->setNowColor(c);
+					paint->setGColorTheta(xMousePos,yMousePos);
+					redraw = true;
+					ReleaseDC(h,hdc);
+				}
+
+				if (paint->isInTriangleColorPen(xMousePos, yMousePos)) {
+					hdc = GetDC(h);
+					COLORREF c = GetPixel(hdc,xMousePos,yMousePos);
+					paint->setNowColor(c);
+					redraw = true;	
+					ReleaseDC(h,hdc);
+					
+				}
+
+				if (redraw) {
+					RECT r;
+					r.left = 0;
+					r.right = 220;
+					r.top = 50;
+					r.bottom = 300;
+					InvalidateRect(h,&r,false);
+				}
+			}
+		break;
+	case WM_MOVE:
+	case WM_SIZE:
+		GetClientRect(h, &rcClient);
+		InvalidateRect(h, NULL, false);
+		break;
+
 	case WM_INPUT:
 		{
 		 UINT dwSize;
@@ -267,41 +459,62 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 
 		if (raw->header.dwType == RIM_TYPEMOUSE) 
         {
-				mouse_xy.x = raw->data.mouse.lLastX;
-				mouse_xy.y = raw->data.mouse.lLastY;
+				//mouse_xy.x = raw->data.mouse.lLastX;
+				//mouse_xy.y = raw->data.mouse.lLastY;
 				mouse_button = raw->data.mouse.ulButtons;
 			
 			}
 
 			delete[] lpb; 
 			}
-
+		if (mouse_button & KTROBO_MOUSESTATE_L_UP) {
+			mouse_l = false;
+		}
+		if (mouse_button & KTROBO_MOUSESTATE_L_DOWN) {
+			mouse_l = true;
+		}
 			if (mouse_button &KTROBO_MOUSESTATE_L_DOWN) {
+				// 円に入っているときは色を決定
+				// 三角形に入っているときも色を決定
+				//xMousePos = mouse_xy.x;
+				//yMousePos = mouse_xy.y;
+			if (mouse_button & KTROBO_MOUSESTATE_L_DOWN) {
+				if (paint->isInCircleColorPen(xMousePos, yMousePos)) {
+					hdc = GetDC(h);
+					COLORREF c = GetPixel(hdc,xMousePos,yMousePos);
+					paint->setNowGColor(c);
+					paint->setNowColor(c);
+					paint->setGColorTheta(xMousePos,yMousePos);
+					redraw = true;
+					ReleaseDC(h,hdc);
+				}
+
+				if (paint->isInTriangleColorPen(xMousePos, yMousePos)) {
+					hdc = GetDC(h);
+					COLORREF c = GetPixel(hdc,xMousePos,yMousePos);
+					paint->setNowColor(c);
+					redraw = true;
+				ReleaseDC(h,hdc);
+
+				}
+				if (redraw) {
+					RECT r;
+					r.left = 0;
+					r.right = 220;
+					r.top = 50;
+					r.bottom = 300;
+					InvalidateRect(h,&r,false);
+				}
+			}
 			}
 			break;
-
 	case WM_PAINT:
 		if (hdc = BeginPaint(h, &psPaint)) 
 		{
-			center.x = 100;
-			center.y = 200;
-			paint->getGUI()->drawGradiationCircleToWindow(hdc,center,KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT);
-			points[0].b = paint->now_gcolor_b;
-			points[0].g = paint->now_gcolor_g;
-			points[0].r = paint->now_gcolor_r;
-			points[1].b = 0;
-			points[1].g = 0;
-			points[1].r = 0;
-			points[2].b = 0xFF;
-			points[2].g = 0xFF;
-			points[2].r = 0xFF;
-			points[0].x = center.x + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * cos(paint->gradiation_circle_theta);
-			points[0].y = center.y + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * sin(paint->gradiation_circle_theta);
-			points[1].x = center.x + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * cos(paint->gradiation_circle_theta+2*3.14/3);
-			points[1].y = center.y + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * sin(paint->gradiation_circle_theta+2*3.14/3);
-			points[2].x = center.x + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * cos(paint->gradiation_circle_theta+2*3.14*2/3);
-			points[2].y = center.y + KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT * 0.7 * sin(paint->gradiation_circle_theta+2*3.14*2/3);
-			paint->getGUI()->drawGradiationTriangleToWindow(hdc,points);
+			paint->paint();
+		    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, paint->getHdcMem(), 0, 0, SRCCOPY);
+			
+			
 			EndPaint(h, &psPaint);
 		}
 	break;

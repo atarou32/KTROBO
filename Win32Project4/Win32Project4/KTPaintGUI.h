@@ -33,7 +33,7 @@ public:
 	void drawAkiRectangleToWindow(HDC hdc, int left, int top, int right, int bottom);
 	void drawGradiationTriangleToWindow(HDC hdc, MYTRIANGLEPOINT* points);
 	void drawGradiationCircleToWindow(HDC hdc, POINT center, float radius);
-
+	void clear(HDC hdc);
 };
 
 
