@@ -5,7 +5,12 @@
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 #include "KTRoboGraphics.h"
+#include "KTPaintGUI.h"
 
+#define KTPAINT_PEN_ID 1
+#define KTPAINT_PENCIL_ID 2
+#define KTPAINT_NURI_ID 3
+#define KTPAINT_ERASER_ID 4
 class KTPaint
 {
 private:
@@ -13,14 +18,25 @@ private:
 	HWND parent_window;
 	HWND colorpen_window;
 	HWND loadsave_window;
-
+	HCURSOR temp_cursor;
+	int now_paint_id;
 	KTROBO::Graphics* g;
+	KTPaintGUI gui;
 public:
+	float gradiation_circle_radius;
+	float gradiation_circle_theta;
+	POINT gradiation_triangle_pos;
+	unsigned char now_gcolor_r;
+	unsigned char now_gcolor_g;
+	unsigned char now_gcolor_b;
+public:
+	KTPaintGUI* getGUI() {return &gui;}
 	void createKoWindow(HWND hWnd); 
 	KTPaint(HINSTANCE hins);
 	~KTPaint(void);
 	void Init(HWND hwnd);
 	void Release();
+	void setCursorNow();
 	void setCursorToPencil();
 	void setCursorToPen();
 	void setCursorToNuri();
