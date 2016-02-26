@@ -391,6 +391,7 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	static bool mouse_l=false;
 	static RECT rcClient;
 	MYTRIANGLEPOINT points[3];
+	POINT mouse_pos;
 	static ULONG xMousePos=0;
 	static ULONG yMousePos=0;
 	bool redraw = false;
@@ -474,6 +475,11 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 			mouse_l = true;
 		}
 			if (mouse_button &KTROBO_MOUSESTATE_L_DOWN) {
+				GetCursorPos(&mouse_pos);
+				ScreenToClient(h,&mouse_pos);
+				xMousePos = mouse_pos.x;
+				yMousePos = mouse_pos.y;
+
 				// 円に入っているときは色を決定
 				// 三角形に入っているときも色を決定
 				//xMousePos = mouse_xy.x;
