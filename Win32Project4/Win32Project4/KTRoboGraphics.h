@@ -14,6 +14,7 @@
 #include "MyDefine.h"
 //#include "MyTextureLoader.h"
 #include "MyButukari3D.h"
+#include "KTPaintSheet.h"
 
 class MyTextureLoader;
 
@@ -117,12 +118,30 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_SHADER_PS "PSFunc"
 #define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 32
 
+#define KTROBO_GRAPHICS_SHADER_FILENAME_PEN "resrc/shader/renderlinepen.fx"
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN 1000
+
+
+
+
 class GRAPHICS_RENDER_STRUCT {
 public:
 	float x;
 	float y;
 	float z;
 	DWORD color;
+};
+
+class GRAPHICS_RENDER_PEN_STRUCT {
+public:
+	unsigned short x;
+	unsigned short y;
+	char dx;
+	char dy;
+	unsigned char width;
+	unsigned char nwidth;
+	int offset;
+	int offset2;
 };
 
 class GRAPHICS_INFO_STRUCT {
@@ -161,6 +180,12 @@ public:
 	static GRAPHICS_INFO_STRUCT info;
 	static ID3D11Buffer* info_buffer;
 
+
+	static MYSHADERSTRUCT mss_for_pen;
+	static ID3D11Buffer* render_buffer_pen;
+	static ID3D11Buffer* index_buffer_pen;
+
+
 	static void InitMSS(Graphics* g);
 	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
 								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
@@ -171,7 +196,7 @@ public:
 	static void drawOBBFill(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX *view, MYMATRIX* proj, OBB* rec);
 	static void drawRAY(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, RAY* ray, int length);
 	static void drawTriangle(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* p, MYVECTOR3* q, MYVECTOR3* r);
-
+	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 
 	MYMATRIX* getProj() {return &proj;}
 	bool Init(HWND hwnd);

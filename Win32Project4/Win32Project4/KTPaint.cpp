@@ -257,7 +257,23 @@ void KTPaint::createKoWindow(HWND p_window) {
 }
 
 
+void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new) {
 
+	sheet.setPline(mpo,po,3,3);
+
+}
+
+void KTPaint::render() {
+	float clearColor[4] = {
+		0.2f,0.2f,0.2f,1.0f};
+	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
+	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
+	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	KTROBO::Graphics::drawPen(g, this->sheet.getPline(),sheet.getPlineMax());
+
+	g->getSwapChain()->Present(NULL,NULL);
+	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
+}
 void KTPaint::Release()  {
 	KTROBO::Graphics::Del();
 	if (g) {

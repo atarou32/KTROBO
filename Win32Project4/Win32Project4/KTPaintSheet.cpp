@@ -85,6 +85,7 @@ void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned c
 	int tans;
 
 	if (pline_max >= 1000) {
+		pline_max = 0;
 		return;
 	}
 

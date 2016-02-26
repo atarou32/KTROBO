@@ -14,7 +14,9 @@ ID3D11Buffer* Graphics::render_buffer=0;
 GRAPHICS_INFO_STRUCT Graphics::info;
 ID3D11Buffer* Graphics::info_buffer=0;
 ID3D11SamplerState* Graphics::p_sampler=0;
-
+ID3D11Buffer* Graphics::render_buffer_pen = 0;
+MYSHADERSTRUCT Graphics::mss_for_pen;
+ID3D11Buffer* Graphics::index_buffer_pen=0;
 void Graphics::InitMSS(Graphics* g) {
 		// render‚Ì‚½‚ß‚Ìvertexbuffer‚ðì‚é
 
@@ -85,6 +87,73 @@ void Graphics::InitMSS(Graphics* g) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "sampler make error");;
 		
 	}
+
+
+
+
+
+	D3D11_INPUT_ELEMENT_DESC layout2[] = {
+		{"POSTEN", 0, DXGI_FORMAT_R16G16_UINT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"INFO1D",0,DXGI_FORMAT_R8G8_SINT, 0,4,D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"INFO2D",0,DXGI_FORMAT_R8G8_UINT,0,6,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"OFFSET",0,DXGI_FORMAT_R32G32_UINT, 0,8,D3D11_INPUT_PER_VERTEX_DATA,0}
+	};
+	
+	loadShader(g, &mss_for_pen, KTROBO_GRAPHICS_SHADER_FILENAME_PEN, KTROBO_GRAPHICS_SHADER_VS, KTROBO_GRAPHICS_SHADER_GS,
+		KTROBO_GRAPHICS_SHADER_PS, g->getScreenWidth(), g->getScreenHeight(),
+								layout2, 4, true);
+
+	bd;
+	memset(&bd,0,sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(GRAPHICS_RENDER_PEN_STRUCT)*KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+
+	hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(render_buffer_pen));
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
+	}
+
+
+	D3D11_BUFFER_DESC hBufferDesc;
+	hBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	hBufferDesc.ByteWidth = sizeof(unsigned short) * 1000*3;
+	hBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	hBufferDesc.CPUAccessFlags = 0;
+	hBufferDesc.MiscFlags = 0;
+	hBufferDesc.StructureByteStride = 0;
+	hSubResourceData;
+
+	unsigned short* indexs = new unsigned short[1000*3];
+	memset(indexs, 0, sizeof(unsigned short)*1000*3);
+	
+	int temp_count = 0;
+	for (int i=0;i<1000;i++) {
+		int now_id = i;
+		indexs[3*temp_count] = (unsigned short)now_id;
+		indexs[3*temp_count+1] = (unsigned short)now_id;
+		indexs[3*temp_count+2] = (unsigned short)now_id;
+		temp_count++;
+		if (temp_count >= 1000) {
+			// break;
+			break;
+		}
+	}
+
+    hSubResourceData.pSysMem = indexs;
+	hSubResourceData.SysMemPitch = 0;
+	hSubResourceData.SysMemSlicePitch = 0;
+	hr = g->getDevice()->CreateBuffer( &hBufferDesc, &hSubResourceData, &index_buffer_pen );
+	if( FAILED( hr ) ) {
+	   delete[] indexs;
+	   Del();
+	   throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "index buffer make error");
+    }
+
+	delete[] indexs;
 
 }
 
@@ -309,6 +378,77 @@ void Graphics::Del() {
 		p_sampler->Release();
 		p_sampler = 0;
 	}
+
+	mss_for_pen.Del();
+	if (render_buffer_pen) {
+		render_buffer_pen->Release();
+		render_buffer_pen = 0;
+	}
+
+	if (index_buffer_pen) {
+		index_buffer_pen->Release();
+		index_buffer_pen = 0;
+	}
+
+}
+
+void Graphics::drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {
+
+	CS::instance()->enter(CS_DEVICECON_CS, "render");
+
+	if (penline_max > KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN) {
+		CS::instance()->leave(CS_DEVICECON_CS, "render");
+		return;
+	}
+
+
+	unsigned int stride = sizeof(GRAPHICS_RENDER_PEN_STRUCT);
+	unsigned int offset = 0;
+	GRAPHICS_RENDER_PEN_STRUCT xdayo[KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN];
+	for (int i=0;i<penline_max;i++) {
+		xdayo[i].x = penlines[i].x;
+		xdayo[i].y = penlines[i].y;
+		xdayo[i].dx = penlines[i].dx;
+		xdayo[i].dy = penlines[i].dy;
+		xdayo[i].nwidth = penlines[i].nwidth;
+		xdayo[i].offset = 0;
+		xdayo[i].offset2 = 0;
+		xdayo[i].width = penlines[i].width;
+	}
+	//g->getDeviceContext()->UpdateSubresource(info_buffer,0,NULL,&info,0,0);
+	D3D11_MAPPED_SUBRESOURCE msr;
+	
+	g->getDeviceContext()->Map(render_buffer_pen, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	memcpy( msr.pData, &xdayo, sizeof(GRAPHICS_RENDER_PEN_STRUCT)*penline_max );
+	g->getDeviceContext()->Unmap(render_buffer_pen, 0);
+
+	g->getDeviceContext()->IASetInputLayout( mss_for_pen.vertexlayout );
+	//g->getDeviceContext()->VSSetConstantBuffers(0,1,&info_buffer);
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_buffer_pen, &stride, &offset );
+	g->getDeviceContext()->IASetIndexBuffer(index_buffer_pen,DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->RSSetState(mss_for_pen.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss_for_pen.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_pen.gs,NULL,0);
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&f->fonttextureviews[i]);//render_target_tex->view);
+	g->getDeviceContext()->PSSetSamplers(0,1,&p_sampler);
+		
+	g->getDeviceContext()->PSSetShader(mss_for_pen.ps, NULL, 0);
+			
+	g->getDeviceContext()->DrawIndexed(penline_max*3,0,0);//penline_max,0);
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
+
+
+
+
+
+
+
 
 }
 

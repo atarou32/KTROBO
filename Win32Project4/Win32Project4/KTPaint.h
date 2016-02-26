@@ -6,6 +6,7 @@
 #include "windows.h"
 #include "KTRoboGraphics.h"
 #include "KTPaintGUI.h"
+#include "KTPaintSheet.h"
 
 #define KTPAINT_PEN_ID 1
 #define KTPAINT_PENCIL_ID 2
@@ -22,6 +23,8 @@ private:
 	int now_paint_id;
 	KTROBO::Graphics* g;
 	KTPaintGUI gui;
+	KTPaintSheet sheet;
+
 	HDC hdcMem;
 public:
 	float gradiation_circle_radius;
@@ -53,6 +56,10 @@ public:
 	bool isInTriangleColorPen(ULONG mouse_x, ULONG mouse_y);
 	void setNowColor(COLORREF c);
 	void setNowGColor(COLORREF c);
+
+	void writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new);
+	void render();
+
 
 };
 
