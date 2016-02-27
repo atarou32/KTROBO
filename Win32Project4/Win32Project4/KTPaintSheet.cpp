@@ -6,8 +6,8 @@ KTPaintSheet::KTPaintSheet(void)
 {
 	eline_max = 0;
 	pline_max = 0;
-	memset(elines,0,sizeof(KTPAINT_enpituline)*1000);
-	memset(plines,0,sizeof(KTPAINT_penline)*1000);
+	memset(elines,0,sizeof(KTPAINT_enpituline)*KTPAINT_SHEET_LINE_MAX);
+	memset(plines,0,sizeof(KTPAINT_penline)*KTPAINT_SHEET_LINE_MAX);
 }
 
 
@@ -22,7 +22,7 @@ void KTPaintSheet::setEline(POINT mpo, POINT po, char alpha, unsigned char color
 	float ty = abs(dy) /127.0f;
 	int tans;
 
-	if (eline_max >= 1000) {
+	if (eline_max >= KTPAINT_SHEET_LINE_MAX) {
 		return;
 	}
 
@@ -45,7 +45,7 @@ void KTPaintSheet::setEline(POINT mpo, POINT po, char alpha, unsigned char color
 			elines[eline_max].color_index = color_index;
 			elines[eline_max].alpha = alpha;
 			eline_max++;
-			if (eline_max >= 1000) {
+			if (eline_max >= KTPAINT_SHEET_LINE_MAX) {
 				return;
 			}
 		}
@@ -57,7 +57,7 @@ void KTPaintSheet::setEline(POINT mpo, POINT po, char alpha, unsigned char color
 		elines[eline_max].color_index = color_index;
 		elines[eline_max].alpha = alpha;
 		eline_max++;
-		if (eline_max >= 1000) {
+		if (eline_max >= KTPAINT_SHEET_LINE_MAX) {
 			return;
 		}
 		return;
@@ -71,11 +71,11 @@ void KTPaintSheet::setEline(POINT mpo, POINT po, char alpha, unsigned char color
 	elines[eline_max].color_index = color_index;
 	elines[eline_max].alpha = alpha;
 	eline_max++;
-	if (eline_max >= 1000) {
+	if (eline_max >= KTPAINT_SHEET_LINE_MAX) {
 		return;
 	}
 }
-void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned char nwidth) {
+void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned char nwidth, unsigned char pen_index) {
 
 	short dx = po.x - mpo.x;
 	short dy = po.y - mpo.y;
@@ -84,7 +84,7 @@ void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned c
 	float dwidth = nwidth - width;
 	int tans;
 
-	if (pline_max >= 1000) {
+	if (pline_max >= KTPAINT_SHEET_LINE_MAX) {
 		pline_max = 0;
 		return;
 	}
@@ -105,22 +105,22 @@ void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned c
 			plines[pline_max].y = temp_y + dy / tans * i;
 			plines[pline_max].dx = dx / tans * (1);
 			plines[pline_max].dy = dy / tans * (1);
-			plines[pline_max].width = width + dwidth / tans * i;
-			plines[pline_max].nwidth = width + dwidth / tans*(i+1);
+			plines[pline_max].width_and_nwidth = floor(width + dwidth / tans * i) + ((int)floor(width + dwidth / tans*(i+1)) << 4) ;
+			plines[pline_max].pen_index = pen_index;
 			pline_max++;
-			if (pline_max >= 1000) {
+			if (pline_max >= KTPAINT_SHEET_LINE_MAX) {
 				return;
 			}
 		}
 
-		plines[eline_max].x = temp_x+dx/tans*(tans-1);
-		plines[eline_max].y = temp_y + dy/tans*(tans-1);
-		plines[eline_max].dx = mpo.x - (temp_x+dx/tans*(tans-1));
-		plines[eline_max].dy = mpo.y - (temp_y+dy/tans*(tans-1));
-		plines[eline_max].width = width + dwidth / tans * (tans-1);
-		plines[eline_max].nwidth = nwidth;
+		plines[pline_max].x = temp_x+dx/tans*(tans-1);
+		plines[pline_max].y = temp_y + dy/tans*(tans-1);
+		plines[pline_max].dx = po.x - (temp_x+dx/tans*(tans-1));
+		plines[pline_max].dy = po.y - (temp_y+dy/tans*(tans-1));
+		plines[pline_max].width_and_nwidth = floor(width + dwidth / tans * (tans-1)) + (nwidth << 4);
+		plines[pline_max].pen_index = pen_index;
 		pline_max++;
-		if (pline_max >= 1000) {
+		if (pline_max >= KTPAINT_SHEET_LINE_MAX) {
 			return;
 		}
 		return;
@@ -131,10 +131,11 @@ void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned c
 	plines[pline_max].y = mpo.y;
 	plines[pline_max].dx = po.x - mpo.x;
 	plines[pline_max].dy = po.y - mpo.y;
-	plines[pline_max].nwidth = nwidth;
-	plines[pline_max].width = width;
+	plines[pline_max].width_and_nwidth = nwidth + (width << 4);
+	plines[pline_max].pen_index = pen_index;
 	pline_max++;
-	if (pline_max >= 1000) {
+	if (pline_max >= KTPAINT_SHEET_LINE_MAX) {
 		return;
 	}
 }
+

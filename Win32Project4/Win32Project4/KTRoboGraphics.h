@@ -119,7 +119,7 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 32
 
 #define KTROBO_GRAPHICS_SHADER_FILENAME_PEN "resrc/shader/renderlinepen.fx"
-#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN 1000
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN KTPAINT_SHEET_LINE_MAX
 
 
 
@@ -132,14 +132,32 @@ public:
 	DWORD color;
 };
 
+
+
+class GRAPHICS_RENDER_PEN_INFO_STRUCT {
+public:
+	unsigned int screen_x;
+	unsigned int screen_y;
+	int transx;
+	int transy;
+	
+	MYMATRIX pen_width[KTPAINT_PEN_NUM_MAX];
+	float zoom;
+
+	float offset;
+	float offset2;
+	float offset3;
+};
+
+
 class GRAPHICS_RENDER_PEN_STRUCT {
 public:
 	unsigned short x;
 	unsigned short y;
 	char dx;
 	char dy;
-	unsigned char width;
-	unsigned char nwidth;
+	unsigned char width_and_nwidth;
+	unsigned char pen_index;
 	int offset;
 	int offset2;
 };
@@ -184,7 +202,7 @@ public:
 	static MYSHADERSTRUCT mss_for_pen;
 	static ID3D11Buffer* render_buffer_pen;
 	static ID3D11Buffer* index_buffer_pen;
-
+	static ID3D11Buffer* render_buffer_cbuf;
 
 	static void InitMSS(Graphics* g);
 	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
@@ -197,7 +215,7 @@ public:
 	static void drawRAY(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, RAY* ray, int length);
 	static void drawTriangle(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* p, MYVECTOR3* q, MYVECTOR3* r);
 	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
-
+	static void setPenInfo(KTROBO::Graphics* g, short transx, short transy, float zoom, KTPAINT_pen* pens);
 	MYMATRIX* getProj() {return &proj;}
 	bool Init(HWND hwnd);
 	void Release();

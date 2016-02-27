@@ -19,6 +19,12 @@ KTPaint::KTPaint(HINSTANCE hins)
 	now_gcolor_b = 0;
 	now_gcolor_g = 0;
 	now_gcolor_r = 0xFF;
+
+	transx=0;
+	transy=0;
+	zoom = 1;
+	now_pen_index = 0;// = pens[0];
+	is_activate = true;
 }
 
 
@@ -251,15 +257,70 @@ void KTPaint::createKoWindow(HWND p_window) {
 
 	InvalidateRect(colorpen_window, NULL,false);
 
-
-
+	g->setPenInfo(g,transx,transy,zoom,pens);
 
 }
 
 
-void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new) {
+void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new,bool reset) {
 
-	sheet.setPline(mpo,po,3,3);
+	static POINT mpo_c;
+	static POINT po_c;
+	static int count=0;
+	if (reset || !is_activate) {
+		if (count >0) {
+		count=0;
+		}
+		return;
+	}
+
+
+	float w = g->getScreenWidth()/2;
+	float h = g->getScreenHeight()/2;
+	
+
+
+
+
+	if (count > 0) {
+//	mpo_c.x = (mpo.x - w)/zoom-transx+w;
+//	mpo_c.y = (mpo.y - h)/zoom-transy+h;
+	po_c.x = (po.x - w)/zoom-transx+w;
+	po_c.y = (po.y - h)/zoom-transy+h;
+		count++;
+	} else {
+		mpo_c.x = (mpo.x - w)/zoom-transx+w;
+		mpo_c.y = (mpo.y - h)/zoom-transy+h;
+		po_c.x = (po.x - w)/zoom-transx+w;
+		po_c.y = (po.y - h)/zoom-transy+h;
+		
+	}
+
+
+
+	unsigned char width = pens[now_pen_index].getWidthIndexFromPressure(pressure_old);
+	unsigned char nwidth = pens[now_pen_index].getWidthIndexFromPressure(pressure_new);
+
+	if (mpo_c.x >=0 && mpo_c.x <= g->getScreenWidth()) {
+		if (po_c.x >= 0 && po_c.x <= g->getScreenWidth()) {
+			if (mpo_c.y >= 0 && mpo_c.y <= g->getScreenHeight()) {
+				if (po_c.y >= 0 && po_c.y <= g->getScreenHeight()) {
+					if (count > 6) {
+						sheet.setPline(mpo_c,po_c,width,nwidth,now_pen_index);
+						mpo_c = po_c;
+						count = 1;
+					} else {
+						count++;
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	if (count >0) {
+		count =0;
+	}
 
 }
 

@@ -29,6 +29,21 @@ return output;
 
 #define KTPAINT_SCREEN_WIDTH 994
 #define KTPAINT_SCREEN_HEIGHT 775
+#define KTPAINT_PEN_NUM_MAX 16
+
+cbuffer c0dayo :register(b0){
+uint screen_x;
+uint screen_y;
+int transx;
+int transy;
+column_major float4x4 pen_width[KTPAINT_PEN_NUM_MAX];
+float zoom;
+float offset;
+float offset2;
+float offset3;
+};
+
+
 
 [maxvertexcount(6)]
 void GSFunc( triangle GSPSInput input[3], inout TriangleStream<GSPSInput> stream) {
@@ -38,73 +53,84 @@ inp.MyInfo = int2(0,0);
 inp.MyInfo2 = uint2(0,0);
 inp.Pos = uint2(0,0);
 inp.TexCoord = float2(0.0f,0.0f);
+float W = screen_x;
+float H = screen_y;
+float PosX = zoom * (input[0].Pos.x + transx-W/2)+W/2;
+float PosY = zoom * (input[0].Pos.y + transy-H/2)+H/2;
+float MyX = zoom * (float)(input[0].MyInfo.x);
+float MyY = zoom * (float)(input[0].MyInfo.y);
+float x = -1 + 2 * (PosX)/(float)screen_x;
+float y = 1 - 2 * (PosY)/(float)screen_y;
+float dx = 2 * MyX / (float) screen_x;
+float dy = -2 * MyY / (float) screen_y;
+int nwidthidx = (input[0].MyInfo2.x >> 4);
+int widthidx = input[0].MyInfo2.x - (nwidthidx << 4);
+int pen_index = input[0].MyInfo2.y;
+float width = 40;//pen_width[pen_index][widthidx/4][widthidx%4];
+float nwidth = 40;//pen_width[pen_index][nwidthidx/4][nwidthidx%4];
+if (dx >0) {
+dx = dx + 1/(float)screen_x;
+}else {
+dx = dx -1/(float)screen_x;
+}
+if (dy >0) {
+dy = dy +1/(float)screen_y;
+}else {
+dy = dy -1/(float)screen_y;
+}
 
-float x = -1 + 2 * (input[0].Pos.x)/(float)KTPAINT_SCREEN_WIDTH;
-float y = 1 - 2 * (input[0].Pos.y)/(float)KTPAINT_SCREEN_HEIGHT;
-float dx = 2 * input[0].MyInfo.x / (float) KTPAINT_SCREEN_WIDTH;
-float dy = -2 * input[0].MyInfo.y / (float) KTPAINT_SCREEN_HEIGHT;
-float width = input[0].MyInfo2.x;
-float nwidth = input[0].MyInfo2.y;
-
-inp.Position = float4(x - width / (float)KTPAINT_SCREEN_WIDTH, y,0,1);
-	stream.Append(inp);
-	inp.Position = float4(x + width / (float)KTPAINT_SCREEN_WIDTH, y,0,1);
-	stream.Append(inp);
-	inp.Position = float4(x + dx - nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy, 0, 1);
-	stream.Append(inp);
-
-	inp.Position = float4(x +dx +  nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy,0,1);
-	stream.Append(inp);
-	inp.Position = float4(x + width / (float)KTPAINT_SCREEN_WIDTH, y,0,1);
-	stream.Append(inp);
-	inp.Position = float4(x + dx - nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy, 0, 1);
-	stream.Append(inp);
-
-stream.RestartStrip();
-return;
-if (abs(dx) < 0.000001) {
+if (abs(dx) < 0.000001 && abs(dy) > 0.999) {
 	// êÇíº
-	inp.Position = float4(x - width / (float)KTPAINT_SCREEN_WIDTH, y,0,1);
+	inp.Position = float4(x - width / (float)screen_x, y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + width / (float)KTPAINT_SCREEN_WIDTH, y,0,1);
+	inp.Position = float4(x + width / (float)screen_x, y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + dx - nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy, 0, 1);
+	inp.Position = float4(x + dx - nwidth / (float)screen_x, y+dy, 0, 1);
 	stream.Append(inp);
 
-	inp.Position = float4(x +dx +  nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy,0,1);
+	inp.Position = float4(x +dx +  nwidth / (float)screen_x, y+dy,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + width / (float)KTPAINT_SCREEN_WIDTH, y,0,1);
+	inp.Position = float4(x + width / (float)screen_x, y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + dx - nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy, 0, 1);
+	inp.Position = float4(x + dx - nwidth / (float)screen_x, y+dy, 0, 1);
 	stream.Append(inp);
 stream.RestartStrip();
 } else {
 	// atanÇ©ÇÁthetaÇÇ‡Ç∆ÇﬂÇÈ
-	float atantheta = atan(abs(dy)/abs(dx));
+	float dd = sqrt(dy*dy + dx*dx);
+	float atantheta = atan(abs(dy)/(float)abs(dx));
+	if (dx <0 && dy > 0) {
+		atantheta = 3.141592 + atantheta;
+	}else if(dx < 0 && dy < 0) {
+		atantheta = 3.14 + atantheta;
+	}
 	float ddx = sin(atantheta);
 	float ddy = cos(atantheta);
+
 	if (dx > 0 && dy >= 0) {
 		ddy = ddy * -1;		
 	} else if (dx >0 && dy < 0 ) {
-
+		
 	 } else if(dx <0 && dy >=0) {
-		ddx = ddx * -1;
+		
+
+ddx = ddx * -1;
 		ddy = ddy * -1;
 	} else if(dx < 0 && dy <0) { 
 		ddx = ddx * -1;
 	}
-	inp.Position = float4(x - ddx* width / (float)KTPAINT_SCREEN_WIDTH, y - ddy * width/(float)KTPAINT_SCREEN_HEIGHT,0,1);
+	inp.Position = float4(x - ddx* width / (float)screen_x, y - ddy * width/(float)screen_y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + ddx *width / (float)KTPAINT_SCREEN_WIDTH, y + ddy * width/(float)KTPAINT_SCREEN_HEIGHT,0,1);
+	inp.Position = float4(x + ddx *width / (float)screen_x, y + ddy * width/(float)screen_y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + dx - ddx * nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy -ddy * nwidth/(float)KTPAINT_SCREEN_HEIGHT, 0, 1);
+	inp.Position = float4(x + dx - ddx * nwidth / (float)screen_x, y+dy -ddy * nwidth/(float)screen_y, 0, 1);
 	stream.Append(inp);
-
-	inp.Position = float4(x +dx +  ddx* nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy + ddy*nwidth/(float)KTPAINT_SCREEN_HEIGHT,0,1);
+	
+	inp.Position = float4(x +dx +  ddx* nwidth / (float)screen_x, y+dy + ddy*nwidth/(float)screen_y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + ddx* width / (float)KTPAINT_SCREEN_WIDTH, y+ddy*width/(float)KTPAINT_SCREEN_HEIGHT,0,1);
+	inp.Position = float4(x + ddx* width / (float)screen_x, y+ddy*width/(float)screen_y,0,1);
 	stream.Append(inp);
-	inp.Position = float4(x + dx - ddx * nwidth / (float)KTPAINT_SCREEN_WIDTH, y+dy- ddy * nwidth/(float)KTPAINT_SCREEN_HEIGHT, 0, 1);
+	inp.Position = float4(x + dx - ddx * nwidth / (float)screen_x, y+dy- ddy * nwidth/(float)screen_y, 0, 1);
 	stream.Append(inp);
 stream.RestartStrip();
 	

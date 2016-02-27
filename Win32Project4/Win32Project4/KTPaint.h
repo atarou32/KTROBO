@@ -23,10 +23,22 @@ private:
 	int now_paint_id;
 	KTROBO::Graphics* g;
 	KTPaintGUI gui;
+	KTPAINT_pen pens[KTPAINT_PEN_NUM_MAX];
+	int now_pen_index;
 	KTPaintSheet sheet;
-
+	short transx;
+	short transy;
+	float zoom;
+	bool is_activate;
 	HDC hdcMem;
 public:
+	short getTransX() {return transx;}
+	short getTransY() {return transy;}
+	void setTransX(short x) {transx = x;g->setPenInfo(g,transx,transy,zoom,pens);}
+	void setTransY(short y) {transy = y;g->setPenInfo(g,transx,transy,zoom,pens);}
+	float getZoom() {return zoom;}
+	void setZoom(float z) {zoom = z;g->setPenInfo(g,transx,transy,zoom,pens);}
+
 	float gradiation_circle_radius;
 	float gradiation_circle_theta;
 	POINT gradiation_triangle_pos;
@@ -57,9 +69,10 @@ public:
 	void setNowColor(COLORREF c);
 	void setNowGColor(COLORREF c);
 
-	void writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new);
+	void writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new, bool reset);
 	void render();
-
+	void activate(){is_activate = true;}
+	void deactivate() {is_activate=false;}
 
 };
 
