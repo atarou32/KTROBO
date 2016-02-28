@@ -124,7 +124,9 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 
 #define KTROBO_GRAPHICS_SHADER_FILENAME_TEX "resrc/shader/rendertex.fx"
 
-
+#define KTROBO_GRAPHICS_SHADER_FILENAME_PEN_SPECIAL "resrc/shader/renderlinepenspecial.fx"
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL KTPAINT_SHEET_LINE_MAX
+#define KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU 4
 
 
 class GRAPHICS_RENDER_STRUCT {
@@ -159,6 +161,17 @@ public:
 	float offset3;
 };
 
+class GRAPHICS_RENDER_PEN_STRUCT_SPECIAL {
+public:
+	float x;
+	float y;
+	float dx;
+	float dy;
+	unsigned char width_and_nwidth;
+	unsigned char pen_index;
+	unsigned char offset;
+	unsigned char offset2;
+};
 
 class GRAPHICS_RENDER_PEN_STRUCT {
 public:
@@ -209,7 +222,10 @@ public:
 
 
 	static MYSHADERSTRUCT mss_for_pen;
+	static MYSHADERSTRUCT mss_for_pen_special;
 	static ID3D11Buffer* render_buffer_pen;
+	static ID3D11Buffer* render_buffer_pen_special;
+
 	static ID3D11Buffer* index_buffer_pen;
 	static ID3D11Buffer* render_buffer_cbuf;
 
@@ -228,8 +244,10 @@ public:
 	static void drawRAY(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, RAY* ray, int length);
 	static void drawTriangle(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* p, MYVECTOR3* q, MYVECTOR3* r);
 	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
-	static void setPenInfo(KTROBO::Graphics* g, short transx, short transy, float zoom, KTPAINT_pen* pens);
-	static void drawTex(KTROBO::Graphics* g, MyShaderResourceView tex_class, short transx, short transy, float zoom,KTPAINT_pen* pens);
+	static void drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
+	
+	static void setPenInfo(KTROBO::Graphics* g, unsigned short sc_x, unsigned short sc_y,short transx, short transy, float zoom, KTPAINT_pen* pens);
+	static void drawTex(KTROBO::Graphics* g, unsigned short tex_width, unsigned short tex_height, MyShaderResourceView tex_class, short transx, short transy, float zoom,KTPAINT_pen* pens);
 
 	MYMATRIX* getProj() {return &proj;}
 	bool Init(HWND hwnd);

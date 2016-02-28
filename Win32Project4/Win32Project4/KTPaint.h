@@ -14,7 +14,7 @@
 #define KTPAINT_NURI_ID 3
 #define KTPAINT_ERASER_ID 4
 
-#define KTPAINT_TEXTURE_BAI 2
+
 
 class KTPaint
 {
@@ -37,16 +37,17 @@ private:
 	HDC hdcMem;
 	MyTextureLoader loader;
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class;
+	MyTextureLoader::MY_TEXTURE_CLASS* tex_class_back_buffer;
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class2;
 	MyTextureLoader::MY_TEXTURE_CLASS* render_tex_class;
 	MyTextureLoader::MY_TEXTURE_CLASS* back_tex_class;
 public:
 	short getTransX() {return transx;}
 	short getTransY() {return transy;}
-	void setTransX(short x) {transx = x;g->setPenInfo(g,transx,transy,zoom,pens);}
-	void setTransY(short y) {transy = y;g->setPenInfo(g,transx,transy,zoom,pens);}
+	void setTransX(short x) {transx = x;g->setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),transx,transy,zoom,pens);}
+	void setTransY(short y) {transy = y;g->setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),transx,transy,zoom,pens);}
 	float getZoom() {return zoom;}
-	void setZoom(float z) {zoom = z;g->setPenInfo(g,transx,transy,zoom,pens);}
+	void setZoom(float z) {zoom = z;g->setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),transx,transy,zoom,pens);}
 
 	float gradiation_circle_radius;
 	float gradiation_circle_theta;

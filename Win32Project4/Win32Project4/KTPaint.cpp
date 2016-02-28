@@ -99,8 +99,9 @@ void KTPaint::Init(HWND hwnd) {
 	createKoWindow(hwnd);
 	setCursorToPen();
 
-	tex_class = loader.makeClass(g->getScreenWidth()*KTPAINT_TEXTURE_BAI,g->getScreenHeight()*KTPAINT_TEXTURE_BAI);
-	tex_class2 = loader.makeClass(g->getScreenWidth()*KTPAINT_TEXTURE_BAI,g->getScreenHeight()*KTPAINT_TEXTURE_BAI);
+	tex_class = loader.makeClass(g->getScreenWidth(),g->getScreenHeight());
+	tex_class2 = loader.makeClass(g->getScreenWidth(),g->getScreenHeight());
+	tex_class_back_buffer=  loader.makeClass(g->getScreenWidth(),g->getScreenHeight());
 	render_tex_class = tex_class;
 	back_tex_class = tex_class2;
 
@@ -110,7 +111,7 @@ void KTPaint::clearSheetTransInfoNado() {
 	transx = 0;
 	transy = 0;
 	zoom = 1;
-	KTROBO::Graphics::setPenInfo(g,transx,transy,zoom,pens);
+	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), transx,transy,zoom,pens);
 }
 void KTPaint::renderlineToTex() {
 
@@ -127,12 +128,12 @@ void KTPaint::renderlineToTex() {
 	viewport.MaxDepth=1.0f;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = g->getScreenWidth()*2;
-	viewport.Height = g->getScreenHeight()*2;
+	viewport.Width = g->getScreenWidth();
+	viewport.Height = g->getScreenHeight();
 	g->getDeviceContext()->RSSetViewports(1,&viewport);
 	this->clearSheetTransInfoNado();
-	KTROBO::Graphics::drawTex(g,back_tex_class->view,transx,transy,zoom,pens);
-	KTROBO::Graphics::drawPen(g, this->sheet.getPline(),sheet.getPlineMax());
+	KTROBO::Graphics::drawTex(g,back_tex_class->width,back_tex_class->height,back_tex_class->view,transx,transy,zoom,pens);
+	KTROBO::Graphics::drawPenSpecial(g, this->sheet.getPline(),sheet.getPlineMax());
 
 	g->getSwapChain()->Present(NULL,NULL);
 	ID3D11RenderTargetView* gg = g->getRenderTargetView();
@@ -299,7 +300,7 @@ void KTPaint::createKoWindow(HWND p_window) {
 
 	InvalidateRect(colorpen_window, NULL,false);
 
-	g->setPenInfo(g,transx,transy,zoom,pens);
+	g->setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),transx,transy,zoom,pens);
 
 }
 
@@ -317,8 +318,8 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 	}
 
 
-	float w = g->getScreenWidth()/2;
-	float h = g->getScreenHeight()/2;
+	float w = g->getScreenWidth()/2;///KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	float h = g->getScreenHeight()/2;///KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	
 
 
@@ -327,14 +328,14 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 	if (count > 0) {
 //	mpo_c.x = (mpo.x - w)/zoom-transx+w;
 //	mpo_c.y = (mpo.y - h)/zoom-transy+h;
-	po_c.x = (po.x - w)/zoom-transx+w;
-	po_c.y = (po.y - h)/zoom-transy+h;
+		po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+		po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
 		count++;
 	} else {
-		mpo_c.x = (mpo.x - w)/zoom-transx+w;
-		mpo_c.y = (mpo.y - h)/zoom-transy+h;
-		po_c.x = (po.x - w)/zoom-transx+w;
-		po_c.y = (po.y - h)/zoom-transy+h;
+		mpo_c.x = (mpo.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+		mpo_c.y = (mpo.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
+		po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+		po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
 		
 	}
 
@@ -369,12 +370,35 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 void KTPaint::render() {
 	float clearColor[4] = {
 		1.0f,1.0f,1.0f,1.0f};
-	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
-	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
-	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
-	KTROBO::Graphics::drawTex(g,back_tex_class->view,transx,transy,zoom,pens);
-	KTROBO::Graphics::drawPen(g, this->sheet.getPline(),sheet.getPlineMax());
+	float clearColor2[4] = {
+		0.7f,0.7f,0.7f,1.0f};
 
+	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
+	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),transx*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU, transy*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,zoom*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,pens);
+	D3D11_VIEWPORT viewport;
+	viewport.MinDepth=0.0f;
+	viewport.MaxDepth=1.0f;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = g->getScreenWidth();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	viewport.Height = g->getScreenHeight();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	g->getDeviceContext()->RSSetViewports(1,&viewport);
+//	g->getDeviceContext()->OMSetRenderTargets(1,&tex_class_back_buffer->target_view, NULL);
+	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
+//	g->getDeviceContext()->ClearRenderTargetView(tex_class_back_buffer->target_view, clearColor2);
+	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,transx,transy,zoom,pens);
+	KTROBO::Graphics::drawPenSpecial(g, this->sheet.getPline(),sheet.getPlineMax());
+	ID3D11RenderTargetView* tt = g->getRenderTargetView();
+//	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
+//	viewport.MinDepth=0.0f;
+//	viewport.MaxDepth=1.0f;
+//	viewport.TopLeftX = 0;
+//	viewport.TopLeftY = 0;
+//	viewport.Width = g->getScreenWidth();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+//	viewport.Height = g->getScreenHeight();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+//	g->getDeviceContext()->RSSetViewports(1,&viewport);
+//	KTROBO::Graphics::drawTex(g,g->getScreenWidth(),g->getScreenHeight(),/*tex_class_back_buffer->width,tex_class_back_buffer->height,*/tex_class_back_buffer->view,transx,transy,zoom,pens);
 	g->getSwapChain()->Present(NULL,NULL);
 	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
 }
