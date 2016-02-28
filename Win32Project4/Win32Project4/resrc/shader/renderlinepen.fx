@@ -66,18 +66,8 @@ float dy = -2 * MyY / (float) screen_y;
 int nwidthidx = (input[0].MyInfo2.x >> 4);
 int widthidx = input[0].MyInfo2.x - (nwidthidx << 4);
 int pen_index = input[0].MyInfo2.y;
-float width = 40;//pen_width[pen_index][widthidx/4][widthidx%4];
-float nwidth = 40;//pen_width[pen_index][nwidthidx/4][nwidthidx%4];
-if (dx >0) {
-dx = dx + 1/(float)screen_x;
-}else {
-dx = dx -1/(float)screen_x;
-}
-if (dy >0) {
-dy = dy +1/(float)screen_y;
-}else {
-dy = dy -1/(float)screen_y;
-}
+float width = zoom*pen_width[pen_index][widthidx%4][widthidx/4];
+float nwidth = zoom*pen_width[pen_index][nwidthidx%4][nwidthidx/4];
 
 if (abs(dx) < 0.000001 && abs(dy) > 0.999) {
 	// êÇíº
@@ -94,7 +84,32 @@ if (abs(dx) < 0.000001 && abs(dy) > 0.999) {
 	stream.Append(inp);
 	inp.Position = float4(x + dx - nwidth / (float)screen_x, y+dy, 0, 1);
 	stream.Append(inp);
+
+
+stream.RestartStrip();/*
+} else if (abs(dy) <0.00001 && abs(dx) >0.9999) {
+
+	inp.Position = float4(x , y-width/(float)screen_y,0,1);
+	stream.Append(inp);
+	inp.Position = float4(x , y+width/(float)screen_y,0,1);
+	stream.Append(inp);
+	inp.Position = float4(x + dx, y+dy-nwidth/(float)screen_y, 0, 1);
+	stream.Append(inp);
+
+	inp.Position = float4(x +dx, y+dy+nwidth/(float)screen_x,0,1);
+	stream.Append(inp);
+	inp.Position = float4(x, y+width/(float)screen_x,0,1);
+	stream.Append(inp);
+	inp.Position = float4(x + dx, y+dy- nwidth/(float)screen_x, 0, 1);
+	stream.Append(inp);
+
+
 stream.RestartStrip();
+
+
+
+
+*/
 } else {
 	// atanÇ©ÇÁthetaÇÇ‡Ç∆ÇﬂÇÈ
 	float dd = sqrt(dy*dy + dx*dx);
@@ -108,15 +123,21 @@ stream.RestartStrip();
 	float ddy = cos(atantheta);
 
 	if (dx > 0 && dy >= 0) {
+		//dx = dx + cos(atantheta)*1/(float)screen_x;
+		//dy = dy + sin(atantheta)*1/(float)screen_y;
 		ddy = ddy * -1;		
 	} else if (dx >0 && dy < 0 ) {
-		
+		//dx = dx + cos(atantheta)*1/(float)screen_x;
+		//dy = dy - sin(atantheta)*1/(float)screen_y;
 	 } else if(dx <0 && dy >=0) {
-		
+		//dx = dx;// + cos(atantheta)*1/(float)screen_x;
+		//dy = dy - sin(atantheta)*1/(float)screen_y;
 
-ddx = ddx * -1;
+		ddx = ddx * -1;
 		ddy = ddy * -1;
 	} else if(dx < 0 && dy <0) { 
+		//dx = dx;// + cos(atantheta)*1/(float)screen_x;
+		//dy = dy + sin(atantheta)*1/(float)screen_y;
 		ddx = ddx * -1;
 	}
 	inp.Position = float4(x - ddx* width / (float)screen_x, y - ddy * width/(float)screen_y,0,1);
@@ -132,10 +153,13 @@ ddx = ddx * -1;
 	stream.Append(inp);
 	inp.Position = float4(x + dx - ddx * nwidth / (float)screen_x, y+dy- ddy * nwidth/(float)screen_y, 0, 1);
 	stream.Append(inp);
+
+
 stream.RestartStrip();
 	
 
 }
+
 }
 
 
@@ -143,6 +167,6 @@ stream.RestartStrip();
 sampler texSmp : register(s0);
 
 float4 PSFunc(GSPSInput input ) : SV_Target {
-return float4(1,1,1,1);
+return float4(0,0,0,1);
 //return input.Color;
 }

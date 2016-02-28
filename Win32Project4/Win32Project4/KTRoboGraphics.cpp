@@ -18,7 +18,10 @@ ID3D11Buffer* Graphics::render_buffer_pen = 0;
 MYSHADERSTRUCT Graphics::mss_for_pen;
 ID3D11Buffer* Graphics::index_buffer_pen=0;
 ID3D11Buffer* Graphics::render_buffer_cbuf=0;
-
+MYSHADERSTRUCT Graphics::mss_for_tex;
+ID3D11Buffer* Graphics::render_buffer_tex=0;
+ID3D11DepthStencilView* Graphics::pDepthStencilView = 0;
+ID3D11Texture2D* Graphics::pDepthStencil=0;
 
 void Graphics::InitMSS(Graphics* g) {
 		// render‚Ì‚½‚ß‚Ìvertexbuffer‚ðì‚é
@@ -190,6 +193,60 @@ void Graphics::InitMSS(Graphics* g) {
 		Del();
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
 	}
+
+	D3D11_INPUT_ELEMENT_DESC layout3[] = {
+		{"POS", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT, 0,12,D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+	
+	loadShader(g, &mss_for_tex, KTROBO_GRAPHICS_SHADER_FILENAME_TEX, KTROBO_GRAPHICS_SHADER_VS, KTROBO_GRAPHICS_SHADER_GS,
+		KTROBO_GRAPHICS_SHADER_PS, g->getScreenWidth(), g->getScreenHeight(),
+								layout3, 2, true);
+
+	memset(&bd,0,sizeof(bd));
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.ByteWidth = sizeof(GRAPHICS_RENDER_TEX_STRUCT)*KTROBO_GRAPHICS_RENDER_STRUCT_SIZE;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bd.MiscFlags = 0;
+
+	hr = g->getDevice()->CreateBuffer(&bd, NULL ,&(render_buffer_tex));
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
+	}
+
+
+
+	D3D11_TEXTURE2D_DESC descDepth;
+	ZeroMemory( &descDepth, sizeof(descDepth) );
+	descDepth.Width = g->getScreenWidth(); descDepth.Height = g->getScreenHeight();
+	descDepth.MipLevels = 1;
+	descDepth.ArraySize = 1;
+	descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	descDepth.SampleDesc.Count = 1; descDepth.SampleDesc.Quality = 0;
+	descDepth.Usage = D3D11_USAGE_DEFAULT;
+	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+ 
+	//ID3D11Texture2D* pDepthStencil = 0;
+	hr = g->getDevice()->CreateTexture2D( &descDepth, NULL, &pDepthStencil );
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "depth stencil make error");
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDepthStencilView;
+	ZeroMemory( &descDepthStencilView, sizeof(descDepthStencilView) );
+	descDepthStencilView.Format = descDepth.Format;
+	descDepthStencilView.ViewDimension =  D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDepthStencilView.Texture2D.MipSlice = 0;
+	//ID3D11DepthStencilView* pDepthStencilView = 0;
+	hr = g->getDevice()->CreateDepthStencilView( pDepthStencil, &descDepthStencilView, &pDepthStencilView );
+	if (FAILED(hr)) {
+		Del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "depth stencil make error");
+	}
+
 
 
 
@@ -454,6 +511,20 @@ void Graphics::Del() {
 		render_buffer_cbuf = 0;
 	}
 
+	mss_for_tex.Del();
+	if (render_buffer_tex) {
+		render_buffer_tex->Release();
+		render_buffer_tex = 0;
+	}
+
+	if (pDepthStencil) {
+		pDepthStencil->Release();
+		pDepthStencil = 0;
+	}
+	if (pDepthStencilView) {
+		pDepthStencilView->Release();
+		pDepthStencilView = 0;
+	}
 }
 
 void Graphics::drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {
@@ -513,6 +584,53 @@ void Graphics::drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penli
 
 
 
+
+}
+
+void Graphics::drawTex(KTROBO::Graphics* g, MyShaderResourceView tex_class, short transx, short transy, float zoom, KTPAINT_pen* pens) {
+
+	GRAPHICS_RENDER_TEX_STRUCT stt[] = {
+		{0,0,0,0,0},
+		{g->getScreenWidth(),0,0,1,0},
+		{0,g->getScreenHeight(),0,0,1},
+
+		{g->getScreenWidth(),0,0,1,0},
+		{0,g->getScreenHeight(),0,0,1},
+		{g->getScreenWidth(),g->getScreenHeight(),0,1,1}
+	};
+	Graphics::setPenInfo(g,transx,transy,zoom,pens);
+	CS::instance()->enter(CS_DEVICECON_CS, "render");
+
+	unsigned int stride = sizeof(GRAPHICS_RENDER_TEX_STRUCT);
+	unsigned int offset = 0;
+	
+	//g->getDeviceContext()->UpdateSubresource(info_buffer,0,NULL,&info,0,0);
+	D3D11_MAPPED_SUBRESOURCE msr;
+	
+	g->getDeviceContext()->Map(render_buffer_tex, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	memcpy( msr.pData, &stt, sizeof(GRAPHICS_RENDER_TEX_STRUCT)*6 );
+	g->getDeviceContext()->Unmap(render_buffer_tex, 0);
+
+	g->getDeviceContext()->IASetInputLayout( mss_for_tex.vertexlayout );
+	g->getDeviceContext()->VSSetConstantBuffers(0,1,&render_buffer_cbuf);
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_buffer_tex, &stride, &offset );
+	//g->getDeviceContext()->IASetIndexBuffer(index_buffer_tex,DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->RSSetState(mss_for_tex.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss_for_tex.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
+	g->getDeviceContext()->PSSetShaderResources(0,1,&tex_class);//render_target_tex->view);
+	g->getDeviceContext()->PSSetSamplers(0,1,&p_sampler);
+		
+	g->getDeviceContext()->PSSetShader(mss_for_tex.ps, NULL, 0);
+			
+	g->getDeviceContext()->Draw(6,0);//penline_max,0);
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
 
 }
 

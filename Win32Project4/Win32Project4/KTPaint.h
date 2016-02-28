@@ -7,11 +7,15 @@
 #include "KTRoboGraphics.h"
 #include "KTPaintGUI.h"
 #include "KTPaintSheet.h"
+#include "MyTextureLoader.h"
 
 #define KTPAINT_PEN_ID 1
 #define KTPAINT_PENCIL_ID 2
 #define KTPAINT_NURI_ID 3
 #define KTPAINT_ERASER_ID 4
+
+#define KTPAINT_TEXTURE_BAI 2
+
 class KTPaint
 {
 private:
@@ -31,6 +35,11 @@ private:
 	float zoom;
 	bool is_activate;
 	HDC hdcMem;
+	MyTextureLoader loader;
+	MyTextureLoader::MY_TEXTURE_CLASS* tex_class;
+	MyTextureLoader::MY_TEXTURE_CLASS* tex_class2;
+	MyTextureLoader::MY_TEXTURE_CLASS* render_tex_class;
+	MyTextureLoader::MY_TEXTURE_CLASS* back_tex_class;
 public:
 	short getTransX() {return transx;}
 	short getTransY() {return transy;}
@@ -69,8 +78,17 @@ public:
 	void setNowColor(COLORREF c);
 	void setNowGColor(COLORREF c);
 
+	void startDrawLine() {
+		sheet.setPlineStart();
+	}
 	void writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new, bool reset);
+	void endDrawLine() {
+		sheet.setPlineEnd();
+		sheet.heikinPline();
+	}
 	void render();
+	void renderlineToTex();
+	void clearSheetTransInfoNado();
 	void activate(){is_activate = true;}
 	void deactivate() {is_activate=false;}
 

@@ -122,6 +122,9 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN KTPAINT_SHEET_LINE_MAX
 
 
+#define KTROBO_GRAPHICS_SHADER_FILENAME_TEX "resrc/shader/rendertex.fx"
+
+
 
 
 class GRAPHICS_RENDER_STRUCT {
@@ -132,7 +135,14 @@ public:
 	DWORD color;
 };
 
-
+class GRAPHICS_RENDER_TEX_STRUCT {
+public:
+	float x;
+	float y;
+	float z;
+	float tex_x;
+	float tex_y;
+};
 
 class GRAPHICS_RENDER_PEN_INFO_STRUCT {
 public:
@@ -186,7 +196,6 @@ private:
 	D3D11_VIEWPORT vp;
 	MyTextureLoader* tex_loader;
 	
-
 	bool createDeviceAndSwapChain();
 	bool createBackBuffer();
 	bool createViewPort();
@@ -204,6 +213,10 @@ public:
 	static ID3D11Buffer* index_buffer_pen;
 	static ID3D11Buffer* render_buffer_cbuf;
 
+	static MYSHADERSTRUCT mss_for_tex;
+	static ID3D11Buffer* render_buffer_tex;
+	static ID3D11DepthStencilView* pDepthStencilView;
+	static ID3D11Texture2D* pDepthStencil;
 	static void InitMSS(Graphics* g);
 	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
 								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
@@ -216,6 +229,8 @@ public:
 	static void drawTriangle(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* p, MYVECTOR3* q, MYVECTOR3* r);
 	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 	static void setPenInfo(KTROBO::Graphics* g, short transx, short transy, float zoom, KTPAINT_pen* pens);
+	static void drawTex(KTROBO::Graphics* g, MyShaderResourceView tex_class, short transx, short transy, float zoom,KTPAINT_pen* pens);
+
 	MYMATRIX* getProj() {return &proj;}
 	bool Init(HWND hwnd);
 	void Release();

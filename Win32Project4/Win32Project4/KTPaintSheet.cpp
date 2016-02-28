@@ -15,6 +15,38 @@ KTPaintSheet::~KTPaintSheet(void)
 {
 }
 
+#define KTPAINT_SHEET_HEIKIN_LAST_NUM 10
+
+void KTPaintSheet::heikinPline() {
+	/*
+	double x;
+	double y;
+	for (int i=pline_start_index+KTPAINT_SHEET_HEIKIN_LAST_NUM;i<pline_end_index;i++) {
+		x = 0;
+		y = 0;
+		for (int k=0;k<KTPAINT_SHEET_HEIKIN_LAST_NUM;k++) {
+			KTPAINT_penline* l = &this->plines[i-k];
+			x += l->dx;
+			y += l->dy;
+		}
+		x /= (KTPAINT_SHEET_HEIKIN_LAST_NUM+1);
+		y /= (KTPAINT_SHEET_HEIKIN_LAST_NUM+1);
+		KTPAINT_penline* ll = &this->plines[i];
+		ll->x += floor(x);
+		ll->y += floor(y);
+	}
+
+	for (int i=pline_start_index;i<pline_end_index-1;i++) {
+		KTPAINT_penline* l = &this->plines[i];
+		KTPAINT_penline* l2 = &this->plines[1+i];
+		l->dx = l2->x - l->x;
+		l->dy = l2->y - l->y;
+	}
+
+	*/
+}
+
+
 void KTPaintSheet::setEline(POINT mpo, POINT po, char alpha, unsigned char color_index) {
 	short dx = po.x - mpo.x;
 	short dy = po.y - mpo.y;

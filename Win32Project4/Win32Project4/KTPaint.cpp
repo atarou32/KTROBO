@@ -5,7 +5,7 @@
 #include "../../../../../ResEditProjects/ForKTPaint/resource.h"
 #include "KTRoboGameError.h"
 #include "KTRoboCS.h"
-
+#include "KTRoboGraphics.h"
 
 
 #define KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT 95
@@ -69,7 +69,8 @@ void KTPaint::setCursorToNuri() {
 	temp_cursor = hCursor;
 	now_paint_id = KTPAINT_NURI_ID;
 	SetCursor(hCursor);
-
+	renderlineToTex();
+	
 	
 }
 
@@ -93,17 +94,58 @@ void KTPaint::Init(HWND hwnd) {
 	g->Init(hwnd);
 	KTROBO::Graphics::InitMSS(g);
 
-
+	loader.init(g);
 	parent_window = hwnd;
 	createKoWindow(hwnd);
 	setCursorToPen();
 
-
-
-
+	tex_class = loader.makeClass(g->getScreenWidth()*KTPAINT_TEXTURE_BAI,g->getScreenHeight()*KTPAINT_TEXTURE_BAI);
+	tex_class2 = loader.makeClass(g->getScreenWidth()*KTPAINT_TEXTURE_BAI,g->getScreenHeight()*KTPAINT_TEXTURE_BAI);
+	render_tex_class = tex_class;
+	back_tex_class = tex_class2;
 
 }
 
+void KTPaint::clearSheetTransInfoNado() {
+	transx = 0;
+	transy = 0;
+	zoom = 1;
+	KTROBO::Graphics::setPenInfo(g,transx,transy,zoom,pens);
+}
+void KTPaint::renderlineToTex() {
+
+	//float clearColor[4] = {
+	//	1.0f,0.6f,0.0f,1.0f};
+	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
+	//g->getDeviceContext()->ClearRenderTargetView(tex_class->target_view,clearColor);
+	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	ID3D11ShaderResourceView* null_view = NULL;
+	g->getDeviceContext()->PSSetShaderResources(0,1,&null_view);
+	g->getDeviceContext()->OMSetRenderTargets(1,&render_tex_class->target_view,NULL);//KTROBO::Graphics::pDepthStencilView);
+	D3D11_VIEWPORT viewport;
+	viewport.MinDepth=0.0f;
+	viewport.MaxDepth=1.0f;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = g->getScreenWidth()*2;
+	viewport.Height = g->getScreenHeight()*2;
+	g->getDeviceContext()->RSSetViewports(1,&viewport);
+	this->clearSheetTransInfoNado();
+	KTROBO::Graphics::drawTex(g,back_tex_class->view,transx,transy,zoom,pens);
+	KTROBO::Graphics::drawPen(g, this->sheet.getPline(),sheet.getPlineMax());
+
+	g->getSwapChain()->Present(NULL,NULL);
+	ID3D11RenderTargetView* gg = g->getRenderTargetView();
+	g->getDeviceContext()->OMSetRenderTargets(1, &gg,NULL);
+	g->getDeviceContext()->RSSetViewports(1,g->getViewPort());
+	sheet.clearP();
+	MyTextureLoader::MY_TEXTURE_CLASS* temp;
+	temp = render_tex_class;
+	render_tex_class = back_tex_class;
+	back_tex_class = temp;
+	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
+	
+}
 bool MyRegisterClass(HINSTANCE hInst, LPCSTR name) {
 
 
@@ -305,7 +347,7 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 		if (po_c.x >= 0 && po_c.x <= g->getScreenWidth()) {
 			if (mpo_c.y >= 0 && mpo_c.y <= g->getScreenHeight()) {
 				if (po_c.y >= 0 && po_c.y <= g->getScreenHeight()) {
-					if (count > 6) {
+					if (count > 2) {
 						sheet.setPline(mpo_c,po_c,width,nwidth,now_pen_index);
 						mpo_c = po_c;
 						count = 1;
@@ -326,10 +368,11 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 
 void KTPaint::render() {
 	float clearColor[4] = {
-		0.2f,0.2f,0.2f,1.0f};
+		1.0f,1.0f,1.0f,1.0f};
 	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
 	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	KTROBO::Graphics::drawTex(g,back_tex_class->view,transx,transy,zoom,pens);
 	KTROBO::Graphics::drawPen(g, this->sheet.getPline(),sheet.getPlineMax());
 
 	g->getSwapChain()->Present(NULL,NULL);
@@ -343,6 +386,7 @@ void KTPaint::Release()  {
 		g = 0;
 	}
 	KTROBO::CS::instance()->Del();
+	loader.del();
 }
 
 
