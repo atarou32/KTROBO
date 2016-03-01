@@ -699,14 +699,14 @@ void Graphics::drawTex(KTROBO::Graphics* g, unsigned short tex_width, unsigned s
 
 	GRAPHICS_RENDER_TEX_STRUCT stt[] = {
 		{0,0,0,0,0},
-		{g->getScreenWidth(),0,0,1,0},
-		{0,g->getScreenHeight(),0,0,1},
+		{tex_width,0,0,1,0},
+		{0,tex_height,0,0,1},
 
-		{g->getScreenWidth(),0,0,1,0},
-		{0,g->getScreenHeight(),0,0,1},
-		{g->getScreenWidth(),g->getScreenHeight(),0,1,1}
+		{tex_width,0,0,1,0},
+		{0,tex_height,0,0,1},
+		{tex_width,tex_height,0,1,1}
 	};
-	Graphics::setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),transx,transy,zoom,pens);
+	Graphics::setPenInfo(g,tex_width,tex_height,transx,transy,zoom,pens);
 	CS::instance()->enter(CS_DEVICECON_CS, "render");
 
 	unsigned int stride = sizeof(GRAPHICS_RENDER_TEX_STRUCT);

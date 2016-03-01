@@ -33,6 +33,7 @@ KTPaint::KTPaint(HINSTANCE hins)
 	now_sheet->now_sheet = new KTPaintSheet();
 	root_sheet = now_sheet;
 	sheets.push_back(now_sheet);
+	now_count = 0;
 }
 
 
@@ -121,13 +122,9 @@ void KTPaint::clearSheetTransInfoNado() {
 	now_sheet->transx = 0;
 	now_sheet->transy = 0;
 	now_sheet->zoom = 1;
-	float clearColor[4] = {
-		1.0f,1.0f,1.0f,1.0f};
+
 	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	KTROBO::CS::instance()->enter(CS_DEVICECON_CS,"enter");
-	g->getDeviceContext()->ClearRenderTargetView(this->tex_class->target_view, clearColor);
-	g->getDeviceContext()->ClearRenderTargetView(this->tex_class2->target_view, clearColor);
-	KTROBO::CS::instance()->leave(CS_DEVICECON_CS, "leave");
+	
 }
 void KTPaint::renderlineToTex() {
 
@@ -155,7 +152,7 @@ void KTPaint::renderlineToTex() {
 	ID3D11RenderTargetView* gg = g->getRenderTargetView();
 	g->getDeviceContext()->OMSetRenderTargets(1, &gg,NULL);
 	g->getDeviceContext()->RSSetViewports(1,g->getViewPort());
-	now_sheet->now_sheet->clearP();
+	//now_sheet->now_sheet->clearP();
 	MyTextureLoader::MY_TEXTURE_CLASS* temp;
 	temp = render_tex_class;
 	render_tex_class = back_tex_class;
@@ -439,7 +436,7 @@ void KTPaint::render() {
 //	viewport.Height = g->getScreenHeight();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 //	g->getDeviceContext()->RSSetViewports(1,&viewport);
 //	KTROBO::Graphics::drawTex(g,g->getScreenWidth(),g->getScreenHeight(),/*tex_class_back_buffer->width,tex_class_back_buffer->height,*/tex_class_back_buffer->view,transx,transy,zoom,pens);
-	g->getSwapChain()->Present(NULL,NULL);
+	g->getSwapChain()->Present(1,NULL);
 	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
 }
 void KTPaint::Release()  {
@@ -838,6 +835,14 @@ void KTPaint::makeNewSheet() {
 	now_sheet = sheetlist;
 	sheets.push_back(sheetlist);
 	clearSheetTransInfoNado();
+	float clearColor[4] = {
+		1.0f,1.0f,1.0f,1.0f};
+
+	KTROBO::CS::instance()->enter(CS_DEVICECON_CS,"enter");
+	g->getDeviceContext()->ClearRenderTargetView(this->tex_class->target_view, clearColor);
+	g->getDeviceContext()->ClearRenderTargetView(this->tex_class2->target_view, clearColor);
+	KTROBO::CS::instance()->leave(CS_DEVICECON_CS, "leave");
+
 	updateDispLineNum();
 }
 

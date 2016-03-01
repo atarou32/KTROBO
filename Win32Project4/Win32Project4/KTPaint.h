@@ -19,6 +19,7 @@ public:
 	short transx;
 	short transy;
 	float zoom;
+	int count;
 	KTPaintSheet* now_sheet;
 	KTPaintSheetList* mae_sheet;
 	KTPaintSheetList* next_sheet;
@@ -29,6 +30,7 @@ public:
 		now_sheet = 0;
 		mae_sheet =0;
 		next_sheet = 0;
+		count = 1;
 	}
 };
 
@@ -51,7 +53,7 @@ private:
 	bool is_activate;
 	bool is_render_next_sheet;
 	bool is_render_before_sheet;
-
+	int now_count;
 	HDC hdcMem;
 	MyTextureLoader loader;
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class;
@@ -141,15 +143,23 @@ public:
 	void activate(){is_activate = true;}
 	void deactivate() {is_activate=false;}
 
-	void setSheetNext() {
+	
+	bool setSheetNext() {
+		
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
+			now_count = 0;
+			return true;
 		}
+		return false;
 	}
-	void setSheetBefore() {
+	bool setSheetBefore() {
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
+			now_count = 0;
+			return true;
 		}
+		return false;
 	}
 
 	void makeNewSheet();
