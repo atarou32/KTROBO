@@ -619,8 +619,94 @@ void Graphics::drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penli
 
 }
 
+MYVECTOR3 getPosOfDaen(MYVECTOR3 center, float yoko, float tate, float theta_from_x, float theta) {
+	MYVECTOR3 ans = center;
+
+	ans.float3.x += (yoko * cos(theta)) * cos(theta_from_x) - tate * sin(theta) * sin(theta_from_x);
+	ans.float3.y += (yoko * cos(theta)) * sin(theta_from_x) + tate * sin(theta) * cos(theta_from_x);
+	ans.float3.z = 0;
+	return MYVECTOR3(ans.float3.x, ans.float3.y, ans.float3.z);
+}
+
+void Graphics::drawDaen(KTROBO::Graphics* g, MYVECTOR3 center,float yoko, float tate, float theta_from_x) {
 
 
+	
+
+	CS::instance()->enter(CS_DEVICECON_CS, "render");
+	DWORD FontColor = 0xFF000000;
+	MYVECTOR3 points[32];
+
+	for (int i=0;i<32;i++) {
+		points[i] = getPosOfDaen(center, yoko, tate, theta_from_x, 3.14/2/2/4*i);
+	}
+
+
+
+
+
+
+GRAPHICS_RENDER_STRUCT sttr[64];
+int temp=0;
+for (int i=0;i<64;) {
+	sttr[i].color = FontColor;
+	sttr[i].x = -1 + 2*points[temp].float3.x / (float)g->getScreenWidth() * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].y = 1 - 2*points[temp].float3.y / (float)g->getScreenHeight() * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].z = points[temp].float3.z;
+	sttr[i+1].color = FontColor;
+	sttr[i+1].x = -1 + 2*points[(temp+1) % 32].float3.x/ (float)g->getScreenWidth() * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].y = 1 - 2*points[(temp+1) % 32].float3.y/ (float)g->getScreenHeight() * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].z = points[(temp+1) % 32].float3.z;
+	i += 2;
+	temp += 1;
+
+}
+	MYMATRIX proj;
+	MYMATRIX view;
+	MYMATRIX world;
+	MyMatrixIdentity(proj);
+	MyMatrixIdentity(view);
+	MyMatrixIdentity(world);
+	info.proj = proj;
+	info.view = view;
+	info.world = world;
+	unsigned int stride = sizeof(GRAPHICS_RENDER_STRUCT);
+	unsigned int offset = 0;
+	
+	g->getDeviceContext()->UpdateSubresource(info_buffer,0,NULL,&info,0,0);
+	D3D11_MAPPED_SUBRESOURCE msr;
+	
+	g->getDeviceContext()->Map(render_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	memcpy( msr.pData, &sttr, sizeof(GRAPHICS_RENDER_STRUCT)*64 );
+	g->getDeviceContext()->Unmap(render_buffer, 0);
+
+	g->getDeviceContext()->IASetInputLayout( mss.vertexlayout );
+	g->getDeviceContext()->VSSetConstantBuffers(0,1,&info_buffer);
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_buffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
+	g->getDeviceContext()->RSSetState(mss.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&f->fonttextureviews[i]);//render_target_tex->view);
+	g->getDeviceContext()->PSSetSamplers(0,1,&p_sampler);
+		
+	g->getDeviceContext()->PSSetShader(mss.ps, NULL, 0);
+			
+	g->getDeviceContext()->Draw(64,0);
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
+
+
+
+
+
+
+
+}
 
 
 void Graphics::drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {

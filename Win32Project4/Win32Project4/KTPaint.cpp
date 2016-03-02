@@ -427,6 +427,11 @@ void KTPaint::render() {
 	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	KTROBO::Graphics::drawPenSpecial(g, now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
 	ID3D11RenderTargetView* tt = g->getRenderTargetView();
+	MYVECTOR3 center;
+	center.float3.x = 400;
+	center.float3.y = 500;
+	center.float3.z = 0;
+	KTROBO::Graphics::drawDaen(g, center,100,200,0);
 //	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
 //	viewport.MinDepth=0.0f;
 //	viewport.MaxDepth=1.0f;

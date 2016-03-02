@@ -54,16 +54,26 @@ public:
 	unsigned char pen_index;
 };
 
+class KTPAINT_penkyokuline {
+public:
+	unsigned short kyoku_index;
+	unsigned short start_index;
+	unsigned short end_index;
+	unsigned short kyoku_id;
+};
+
 #define KTPAINT_SHEET_LINE_MAX 50000
+#define KTPAINT_SHEET_KYOKULINE_MAX 2048
 
 class KTPaintSheet
 {
 private:
 	KTPAINT_enpituline elines[KTPAINT_SHEET_LINE_MAX];
 	KTPAINT_penline plines[KTPAINT_SHEET_LINE_MAX];
+	KTPAINT_penkyokuline kyoku_plines[KTPAINT_SHEET_KYOKULINE_MAX];
 	int eline_max;
 	int pline_max;
-
+	int kyokupline_max;
 	int pline_start_index;
 	int pline_end_index;
 public:
@@ -74,6 +84,13 @@ public:
 	}
 	void setPlineEnd() {
 		pline_end_index = pline_max;
+		if (kyokupline_max < KTPAINT_SHEET_KYOKULINE_MAX) {
+			kyoku_plines[kyokupline_max].start_index = pline_start_index;
+			kyoku_plines[kyokupline_max].end_index = pline_end_index;
+			kyoku_plines[kyokupline_max].kyoku_index = 0;//bigline‚Í‚O‚É‚·‚é
+			kyoku_plines[kyokupline_max].kyoku_id = kyokupline_max;
+			kyokupline_max++;
+		}
 	}
 	void heikinPline();
 	int getElineMax() {return eline_max;}

@@ -8,6 +8,8 @@ KTPaintSheet::KTPaintSheet(void)
 	pline_max = 0;
 	memset(elines,0,sizeof(KTPAINT_enpituline)*KTPAINT_SHEET_LINE_MAX);
 	memset(plines,0,sizeof(KTPAINT_penline)*KTPAINT_SHEET_LINE_MAX);
+	memset(kyoku_plines, 0, sizeof(KTPAINT_penkyokuline)*KTPAINT_SHEET_KYOKULINE_MAX);
+	kyokupline_max = 0;
 }
 
 
