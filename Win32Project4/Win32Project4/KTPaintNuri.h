@@ -7,6 +7,7 @@
 #include "KTPaintSheet.h"
 #include <set>
 #include <vector>
+#include <map>
 using namespace std;
 
 #define OUT_
@@ -15,16 +16,23 @@ using namespace std;
 
 
 class KTPAINT_kouten {
-	set<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>> keiros;
-	set<KTPAINT_penkyokuline*, int> iti; // penkyokulineはbigline, ２個目のintは bigline内のインデックス
+public:
+	int index;
+	set<pair<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>>> keiros;
+	set<pair<KTPAINT_penkyokuline*, int>> iti; // penkyokulineはbigline, ２個目のintは bigline内のインデックス
+	KTPAINT_kouten() {
+		index =0 ;
+	}
 };
 
 
 class KTPAINT_koutens {
-
+public:
 	int bigline_id;
 	vector<KTPAINT_kouten*> ks;
-
+	KTPAINT_koutens() {
+		bigline_id = 0;
+	}
 };
 
 #define KTPAINT_SHEET_KOUTEN_MAX KTPAINT_SHEET_KYOKULINE_MAX
@@ -32,6 +40,7 @@ class KTPAINT_koutens {
 class KTPaintNuri
 {
 private:
+	void addNewKoutenOfKeiro(int kouten_index, int line1_index,  KTPAINT_penkyokuline* line); 
 	bool isKousaLine(KTPAINT_penline* line1, KTPAINT_penline* line2);
 	bool isKousaLine2(KTPAINT_penline* line1_mae,KTPAINT_penline* line1_ato, KTPAINT_penline* line2_mae, KTPAINT_penline* line2_ato);
 	void makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokuline* bigline1, KTPAINT_penkyokuline* bigline2);
