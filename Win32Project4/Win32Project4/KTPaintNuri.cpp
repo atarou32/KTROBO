@@ -14,6 +14,28 @@ KTPaintNuri::~KTPaintNuri(void)
 {
 }
 
+void KTPaintNuri::koutenShoriLinePlus(KTPAINT_penkyokuline* new_line, KTPAINT_penkyokuline* lines, int penkyoku_line_max, KTPAINT_penline* line_infos) {
+
+	int tarinai_size = penkyoku_line_max - koutenss.size();
+	int tt = koutenss.size();
+	if (tarinai_size) {
+		for (int i=0;i<tarinai_size;i++) {
+			KTPAINT_koutens* kk = new KTPAINT_koutens();
+			kk->bigline_id = i+tt;
+			koutenss.push_back(kk);
+		}
+	}
+	
+	// 自己ループがある場合を考えて判定する
+	kousaKyokusenAndMakeKouten(new_line,new_line,line_infos);
+
+	for (int i=0;i<penkyoku_line_max;i++) {
+		
+		if (&lines[i] == new_line) continue;
+		kousaKyokusenAndMakeKouten(new_line, &lines[i], line_infos);
+
+	}
+}
 
 void KTPaintNuri::koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_max, KTPAINT_penline* line_infos) {
 
@@ -23,14 +45,24 @@ void KTPaintNuri::koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_max
 		kk->ks.clear();
 		it++;
 	}
+	for (int i=0;i<KTPAINT_SHEET_KOUTEN_MAX;i++) {
+		koutens[i].iti.clear();
+		koutens[i].keiros.clear();
+		koutens[i].x = 0;
+		koutens[i].y = 0;
+		koutens[i].index = i;
+	}
+
 	int tarinai_size = penkyoku_line_max - koutenss.size();
+	int tt = koutenss.size();
 	if (tarinai_size) {
-		for (int i=tarinai_size;i<penkyoku_line_max;i++) {
+		for (int i=0;i<tarinai_size;i++) {
 			KTPAINT_koutens* kk = new KTPAINT_koutens();
-			kk->bigline_id = i;
+			kk->bigline_id = i+tt;
 			koutenss.push_back(kk);
 		}
 	}
+
 	kouten_max = 0;
 	// 自己ループがある場合を考えて判定する
 	for (int i=0;i<penkyoku_line_max;i++) {
@@ -102,6 +134,7 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 			bool is_roop=true;
 			while(is_roop) {
 				is_roop = false;
+				it = littlek->keiros.begin();
 				while(it != littlek->keiros.end()) {
 					KTPAINT_kouten* kk = (*it).first;
 					if ((kk == bigk)) {
@@ -115,12 +148,13 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 						}
 						// end_indeを書き換える
 						end_inde = line1_index;
+						littlek->keiros.erase(it);
 						littlek->keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(&koutens[kouten_index],
 						pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(start_inde,end_inde))));
 						// k にも登録する
 						koutens[kouten_index].keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(littlek,
 						pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(start_inde,end_inde))));
-						littlek->keiros.erase(it);
+						
 						is_roop = true;
 						break;
 					}	
@@ -135,6 +169,7 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 			bool is_roop=true;
 			while(is_roop) {
 				is_roop = false;
+				it = bigk->keiros.begin();
 				while(it != bigk->keiros.end()) {
 					KTPAINT_kouten* kk = (*it).first;
 					if (kk == littlek) {
@@ -148,12 +183,13 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 						}
 						// statr_indeを書き換える
 						start_inde = line1_index;
+						bigk->keiros.erase(it);
 						bigk->keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(&koutens[kouten_index],
 						pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(start_inde,end_inde))));
 						// k にも登録する
 						koutens[kouten_index].keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(bigk,
 						pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(start_inde,end_inde))));
-						bigk->keiros.erase(it);
+						
 						is_roop = true;
 						break;
 					}
@@ -190,7 +226,7 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 }
 
 
-void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokuline* bigline1, KTPAINT_penkyokuline* bigline2) {
+void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokuline* bigline1, KTPAINT_penkyokuline* bigline2, KTPAINT_penline* linesdayo) {
 
 
 	// 交点をつくるということ
@@ -209,7 +245,9 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 				if ((p == bigline1) && (inde == line1_index)) {
 					kouten_index = kouten->index;
 				}
+				itt++;
 			}
+			it++;
 		}
 	}
 
@@ -224,7 +262,9 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 				if ((p == bigline2) && (inde == line2_index)) {
 					kouten_index = kouten->index;
 				}
+				itt++;
 			}
+			it++;
 		}
 	}
 
@@ -244,7 +284,7 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 		koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline2,line2_index));
 		koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_index]);
 	//	koutenss[bigline2->kyoku_id]->ks.push_back(&koutens[kouten_index]);
-		return;
+		goto SUPER_POINTDAYO;
 	}
 
 	addNewKoutenOfKeiro(kouten_index, line1_index, bigline1);
@@ -254,6 +294,53 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 	koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline2,line2_index));
 	koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_index]);
 	koutenss[bigline2->kyoku_id]->ks.push_back(&koutens[kouten_index]);
+SUPER_POINTDAYO:
+
+	KTPAINT_penline* pointA = &linesdayo[line1_index];
+	KTPAINT_penline* pointB = &linesdayo[bigline1->end_index];
+	if (line1_index < bigline1->end_index) {
+		pointB = &linesdayo[line1_index+1];
+	}
+	KTPAINT_penline* pointC = &linesdayo[line2_index];
+	KTPAINT_penline* pointD = &linesdayo[bigline2->end_index];
+	if (line2_index < bigline2->end_index) {
+		pointD = &linesdayo[line2_index+1];
+	}
+
+
+
+	double dBunbo	= ( pointB->x - pointA->x )
+					* ( pointD->y - pointC->y )
+					- ( pointB->y - pointA->y )
+					* ( pointD->x - pointC->x );
+	if( 0 == dBunbo )
+	{	// 平行
+		return;
+	}
+
+	MYVECTOR2 vectorAC;
+	vectorAC.x = pointC->x - pointA->x;
+	vectorAC.y = pointC->y - pointA->y;
+
+	double dR = ( ( pointD->y - pointC->y ) * vectorAC.x
+		 - ( pointD->x - pointC->x ) * vectorAC.y ) / dBunbo;
+	double dS = ( ( pointB->y - pointA->y ) * vectorAC.x
+		 - ( pointB->x - pointA->x ) * vectorAC.y ) / dBunbo;
+
+	if (koutens[kouten_index].x) {
+		// 原点でない場合はすでにある点を使っているので中天をとる
+		koutens[kouten_index].x = (koutens[kouten_index].x + pointA->x + dR * ( pointB->x - pointA->x ))/2;
+		
+	} else {
+		koutens[kouten_index].x =pointA->x + dR * ( pointB->x - pointA->x );
+	}
+	if (koutens[kouten_index].y) {
+		koutens[kouten_index].y = (koutens[kouten_index].y + pointA->y + dR * ( pointB->y - pointA->y ))/2;
+	} else {
+		koutens[kouten_index].y =pointA->y + dR * ( pointB->y - pointA->y );
+	}
+	return;
+
 }
 
 
@@ -267,8 +354,10 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 
 	for (int i=line1->start_index;i<line1->end_index;i+=1) {
 		for (int j=line2->start_index;j<line2->end_index;j+=1) {
-			if (isKousaLine(&lines[i],&lines[j])) {
-				makeKouTen(i,j,line1,line2);
+			if ((i != j) && (i!= j+1) && (j != i+1)) {
+				if (isKousaLine(&lines[i],&lines[j])) {
+					makeKouTen(i,j,line1,line2,lines);
+				}
 			}
 		}
 	}
@@ -370,5 +459,36 @@ bool KTPaintNuri::isKousaLine(KTPAINT_penline* line1, KTPAINT_penline* line2) {
 			return false;
 	}
 	return true;
+
+}
+
+
+void KTPaintNuri::printKouten(KTROBO::Graphics* g,KTPAINT_penline* line_infos) {
+
+	for (int i=0;i<kouten_max;i++) {
+		KTPAINT_kouten* kk = &koutens[i];
+			
+		KTROBO::Graphics::drawDaen(g,0xFF000000, MYVECTOR3(kk->x/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,
+				kk->y/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,0), 16,16,0);
+
+		set<pair<KTPAINT_penkyokuline*,int>>::iterator it = kk->iti.begin();
+		while (it != kk->iti.end()) {
+			pair<KTPAINT_penkyokuline*,int> tt = *it;
+			KTPAINT_penkyokuline* l = tt.first;
+			int inde = tt.second;
+			KTPAINT_penline* pp = &line_infos[inde];
+			
+			KTROBO::Graphics::drawDaen(g,0xFF0000FF, MYVECTOR3(pp->x/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,
+				pp->y/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,0), 5,5,0);
+			KTPAINT_penline* pp2 = &line_infos[inde+1];
+			KTROBO::Graphics::drawDaen(g,0xFFFF0000, MYVECTOR3(pp2->x/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,
+				pp2->y/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,0), 5,5,0);
+		
+
+
+			it++;
+		}
+	
+	}
 
 }

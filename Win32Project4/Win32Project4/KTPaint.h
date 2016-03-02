@@ -8,6 +8,7 @@
 #include "KTPaintGUI.h"
 #include "KTPaintSheet.h"
 #include "MyTextureLoader.h"
+#include "KTPaintNuri.h"
 
 #define KTPAINT_PEN_ID 1
 #define KTPAINT_PENCIL_ID 2
@@ -61,6 +62,7 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class2;
 	MyTextureLoader::MY_TEXTURE_CLASS* render_tex_class;
 	MyTextureLoader::MY_TEXTURE_CLASS* back_tex_class;
+	KTPaintNuri nuridayo;
 public:
 	bool getIsRenderNextSheet() {
 		return is_render_next_sheet;
@@ -136,6 +138,8 @@ public:
 	void endDrawLine() {
 		now_sheet->now_sheet->setPlineEnd();
 		now_sheet->now_sheet->heikinPline();
+	//	nuridayo.koutenShoriLinePlus(now_sheet->now_sheet->getLastKyokuPLine(), now_sheet->now_sheet->getKyokuPLines(), 
+	//		now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
 	}
 	void render();
 	void renderlineToTex();

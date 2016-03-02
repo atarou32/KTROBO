@@ -628,13 +628,13 @@ MYVECTOR3 getPosOfDaen(MYVECTOR3 center, float yoko, float tate, float theta_fro
 	return MYVECTOR3(ans.float3.x, ans.float3.y, ans.float3.z);
 }
 
-void Graphics::drawDaen(KTROBO::Graphics* g, MYVECTOR3 center,float yoko, float tate, float theta_from_x) {
+void Graphics::drawDaen(KTROBO::Graphics* g, DWORD color,  MYVECTOR3 center,float yoko, float tate, float theta_from_x) {
 
 
 	
 
 	CS::instance()->enter(CS_DEVICECON_CS, "render");
-	DWORD FontColor = 0xFF000000;
+	DWORD FontColor = color;//0xFF000000;
 	MYVECTOR3 points[32];
 
 	for (int i=0;i<32;i++) {

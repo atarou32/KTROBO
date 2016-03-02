@@ -245,7 +245,7 @@ public:
 	static void drawTriangle(KTROBO::Graphics* g, DWORD color, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj, MYVECTOR3* p, MYVECTOR3* q, MYVECTOR3* r);
 	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 	static void drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
-	static void drawDaen(KTROBO::Graphics* g, MYVECTOR3 center,float yoko, float tate, float theta_from_x);
+	static void drawDaen(KTROBO::Graphics* g,DWORD color, MYVECTOR3 center,float yoko, float tate, float theta_from_x);
 
 	static void setPenInfo(KTROBO::Graphics* g, unsigned short sc_x, unsigned short sc_y,short transx, short transy, float zoom, KTPAINT_pen* pens);
 	static void drawTex(KTROBO::Graphics* g, unsigned short tex_width, unsigned short tex_height, MyShaderResourceView tex_class, short transx, short transy, float zoom,KTPAINT_pen* pens);

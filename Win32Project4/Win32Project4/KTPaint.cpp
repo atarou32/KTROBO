@@ -79,7 +79,8 @@ void KTPaint::setCursorToNuri() {
 	now_paint_id = KTPAINT_NURI_ID;
 	SetCursor(hCursor);
 	renderlineToTex();
-	
+	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
+
 	
 }
 
@@ -314,7 +315,7 @@ void KTPaint::createKoWindow(HWND p_window) {
 	InvalidateRect(colorpen_window, NULL,false);
 
 	g->setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-
+	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(),now_sheet->now_sheet->getKyokuPLineMax(),now_sheet->now_sheet->getPline());
 }
 
 
@@ -363,7 +364,7 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 		if (po_c.x >= 0 && po_c.x <= g->getScreenWidth()) {
 			if (mpo_c.y >= 0 && mpo_c.y <= g->getScreenHeight()) {
 				if (po_c.y >= 0 && po_c.y <= g->getScreenHeight()) {
-					if (count > 2) {
+					if (count > 1) {
 						now_sheet->now_sheet->setPline(mpo_c,po_c,width,nwidth,now_pen_index);
 						mpo_c = po_c;
 						count = 1;
@@ -431,7 +432,7 @@ void KTPaint::render() {
 	center.float3.x = 400;
 	center.float3.y = 500;
 	center.float3.z = 0;
-	KTROBO::Graphics::drawDaen(g, center,100,200,0);
+	nuridayo.printKouten(g, now_sheet->now_sheet->getPline());
 //	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
 //	viewport.MinDepth=0.0f;
 //	viewport.MaxDepth=1.0f;

@@ -79,6 +79,15 @@ private:
 public:
 	KTPaintSheet(void);
 	~KTPaintSheet(void);
+	KTPAINT_penkyokuline* getKyokuPLines() {return kyoku_plines;}
+	int getKyokuPLineMax() {return kyokupline_max;}
+	KTPAINT_penkyokuline* getLastKyokuPLine() {
+		if (kyokupline_max) {
+			return &kyoku_plines[kyokupline_max-1];
+		} else {
+			return &kyoku_plines[0];
+		}
+	}
 	void setPlineStart() {
 		pline_start_index = pline_max;
 	}
