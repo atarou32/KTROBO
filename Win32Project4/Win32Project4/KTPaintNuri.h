@@ -47,7 +47,9 @@ class KTPaintNuri
 private:
 	void addNewKoutenOfKeiro(int kouten_index, int line1_index,  KTPAINT_penkyokuline* line); 
 	bool isKousaLine(KTPAINT_penline* line1, KTPAINT_penline* line2);
+public:
 	bool isKousaLine2(KTPAINT_penline* line1_mae,KTPAINT_penline* line1_ato, KTPAINT_penline* line2_mae, KTPAINT_penline* line2_ato);
+private:
 	void makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokuline* bigline1, KTPAINT_penkyokuline* bigline2, KTPAINT_penline* linesdayo);
 	void kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAINT_penkyokuline* line2, KTPAINT_penline* lines);
 
@@ -62,7 +64,9 @@ public:
 	void koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_max, KTPAINT_penline* line_infos);
 	void printKouten(KTROBO::Graphics* g, KTPAINT_penline* line_infos);
 	void koutenShoriLinePlus(KTPAINT_penkyokuline* new_line, KTPAINT_penkyokuline* lines, int penkyoku_line_max, KTPAINT_penline* line_infos);
-
+	int getKoutenMax() {return kouten_max;}
+	vector<KTPAINT_koutens*>* getKoutenss() {return &koutenss;}
+	KTPAINT_kouten* getKoutens() {return koutens;}
 
 
 };

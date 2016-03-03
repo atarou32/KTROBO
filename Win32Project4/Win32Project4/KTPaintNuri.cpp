@@ -356,7 +356,14 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 		for (int j=line2->start_index;j<line2->end_index;j+=1) {
 			if ((i != j) && (i!= j+1) && (j != i+1)) {
 				if (isKousaLine(&lines[i],&lines[j])) {
-					makeKouTen(i,j,line1,line2,lines);
+					if (line1->kyoku_id == line2->kyoku_id) {
+						//if (abs(line1->start_index-i) < 10 && abs(line1->start_index-j) < 10    &&  abs(i-j) < 10) {
+						//} else {
+							makeKouTen(i,j,line1,line2,lines);
+						//}
+					}else {
+							makeKouTen(i,j,line1,line2,lines);
+					}
 				}
 			}
 		}
@@ -467,7 +474,7 @@ void KTPaintNuri::printKouten(KTROBO::Graphics* g,KTPAINT_penline* line_infos) {
 
 	for (int i=0;i<kouten_max;i++) {
 		KTPAINT_kouten* kk = &koutens[i];
-			
+		if ((kk->x ==0) && (kk->y ==0)) continue;
 		KTROBO::Graphics::drawDaen(g,0xFF000000, MYVECTOR3(kk->x/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,
 				kk->y/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,0), 16,16,0);
 
