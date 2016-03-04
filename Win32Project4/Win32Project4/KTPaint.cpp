@@ -80,7 +80,7 @@ void KTPaint::setCursorToNuri() {
 	SetCursor(hCursor);
 	renderlineToTex();
 	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
-
+	now_sheet->now_sheet->calcHeiryouiki(&nuridayo);
 	
 }
 
@@ -403,7 +403,12 @@ void KTPaint::render() {
 	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 
 	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-
+	int hei_max = now_sheet->now_sheet->getHeiMax();
+	for (int i=0;i<hei_max;i++) {
+	KTROBO::Graphics::drawHeiryouiki(g,0xFF0000FF,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
+		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
+	
+	}
 	if (this->is_render_next_sheet) {
 		if (now_sheet->next_sheet) {
 			KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), 

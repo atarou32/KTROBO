@@ -8,6 +8,8 @@
 #include <map>
 using namespace std;
 class KTPaintNuri;
+class KTPAINT_kouten;
+
 class KTPAINT_enpituline {
 public:
 	unsigned short x;
@@ -125,13 +127,14 @@ private:
 	int pline_start_index;
 	int pline_end_index;
 
-	bool oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPAINT_penheiryouiki* ryou3, KTPAINT_penheiryouiki* out_oya_ryou, KTPaintNuri* nuri);
+	bool oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPAINT_penheiryouiki* ryou3, KTPAINT_penheiryouiki** out_oya_ryou, KTPaintNuri* nuri);
 	void motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen);
 	bool addTempPartsCount(KTPAINT_penheiryouikipart* temp_parts,int* temp_c,int maxx,KTPAINT_penheiryouiki* ryou1);
 	int karuiOyakoHantei(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPaintNuri* nuri);
 	bool isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri); 
 	void insertOyakoKankei(int te12, KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2);
 	int getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID);
+	void tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart);
 public:
 	KTPaintSheet(void);
 	~KTPaintSheet(void);
@@ -173,7 +176,10 @@ public:
 	}
 	void calcHeiryouiki(KTPaintNuri* nuri);
 	int bunkatuDaenWithLine(int hei_index, int start_index, int end_index,int start_daen_index, int end_daen_index);
-
+	KTPAINT_penheiryouiki* getHei() {return hei;}
+	KTPAINT_penheiryouikipart* getHeiPart() {return hei_part;}
+	KTPAINT_penheiryouikidaen* getHeiDaen() {return hei_daen;}
+	int getHeiMax() {return hei_max;}
 };
 
 

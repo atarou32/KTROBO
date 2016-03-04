@@ -357,10 +357,11 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 			if ((i != j) && (i!= j+1) && (j != i+1) &&( abs(i-j) > 4)) {
 				if (isKousaLine(&lines[i],&lines[j])) {
 					if (line1->kyoku_id == line2->kyoku_id) {
-						//if (abs(line1->start_index-i) < 10 && abs(line1->start_index-j) < 10    &&  abs(i-j) < 10) {
-						//} else {
+						if ((lines[line1->start_index].x ==0) && (lines[line1->end_index].x ==0)
+							&&(lines[line1->start_index].y==0) && (lines[line1->end_index].y ==0)) {
+						} else {
 							makeKouTen(i,j,line1,line2,lines);
-						//}
+						}
 					}else {
 							makeKouTen(i,j,line1,line2,lines);
 					}

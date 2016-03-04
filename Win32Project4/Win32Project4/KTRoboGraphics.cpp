@@ -709,6 +709,101 @@ for (int i=0;i<64;) {
 }
 
 
+void Graphics::drawHeiryouiki(KTROBO::Graphics* g, DWORD color, KTPAINT_penheiryouiki* hei, 
+							  KTPAINT_penheiryouikipart* heipart, KTPAINT_penline* lines,
+							  KTPAINT_penheiryouikidaen* daens) {
+
+
+	
+
+GRAPHICS_RENDER_STRUCT sttr[256*3];
+memset(sttr,0,sizeof(GRAPHICS_RENDER_STRUCT)*256*3);
+int temp=0;
+int i=0;
+for (int temp=0;temp<heipart[hei->startheiryouiki].keiro_last_index-heipart[hei->startheiryouiki].keiro_first_index;) {
+	if (!heipart[hei->startheiryouiki].keiro_last_index) {
+		temp++;continue;}
+
+	unsigned short x2 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].x;
+	unsigned short x1 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].x;
+	unsigned short x3 = daens[hei->daen_index].x;
+	unsigned short y2 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].y;
+	unsigned short y1 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].y;
+	unsigned short y3 = daens[hei->daen_index].y;
+	
+	sttr[i].color = color;
+	sttr[i].x = -1 + 2*x1 / (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].y = 1 - 2*y1 / (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].z = 0;
+	sttr[i+1].color = color;
+	sttr[i+1].x = -1 + 2*x2/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].y = 1 - 2*y2/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].z = 0;
+	sttr[i+2].color = color;
+	sttr[i+2].x =  -1 + 2*x3/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+2].y = 1 - 2*y3/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+2].z = 0;
+	i += 3;
+	temp += 1;
+
+}
+	MYMATRIX proj;
+	MYMATRIX view;
+	MYMATRIX world;
+	MyMatrixIdentity(proj);
+	MyMatrixIdentity(view);
+	MyMatrixIdentity(world);
+	info.proj = proj;
+	info.view = view;
+	info.world = world;
+	unsigned int stride = sizeof(GRAPHICS_RENDER_STRUCT);
+	unsigned int offset = 0;
+	
+	g->getDeviceContext()->UpdateSubresource(info_buffer,0,NULL,&info,0,0);
+	D3D11_MAPPED_SUBRESOURCE msr;
+	
+	g->getDeviceContext()->Map(render_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	memcpy( msr.pData, &sttr, sizeof(GRAPHICS_RENDER_STRUCT)*64 );
+	g->getDeviceContext()->Unmap(render_buffer, 0);
+
+	g->getDeviceContext()->IASetInputLayout( mss.vertexlayout );
+	g->getDeviceContext()->VSSetConstantBuffers(0,1,&info_buffer);
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_buffer, &stride, &offset );
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->RSSetState(mss.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(NULL,NULL,0);
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&f->fonttextureviews[i]);//render_target_tex->view);
+	g->getDeviceContext()->PSSetSamplers(0,1,&p_sampler);
+		
+	g->getDeviceContext()->PSSetShader(mss.ps, NULL, 0);
+			
+	g->getDeviceContext()->Draw(temp*3,0);
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
 void Graphics::drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {
 
 	CS::instance()->enter(CS_DEVICECON_CS, "render");

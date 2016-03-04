@@ -116,7 +116,7 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_SHADER_VS "VSFunc"
 #define KTROBO_GRAPHICS_SHADER_GS "GSFunc"
 #define KTROBO_GRAPHICS_SHADER_PS "PSFunc"
-#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 128
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 4096*8
 
 #define KTROBO_GRAPHICS_SHADER_FILENAME_PEN "resrc/shader/renderlinepen.fx"
 #define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN KTPAINT_SHEET_LINE_MAX
@@ -246,6 +246,8 @@ public:
 	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 	static void drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 	static void drawDaen(KTROBO::Graphics* g,DWORD color, MYVECTOR3 center,float yoko, float tate, float theta_from_x);
+	static void drawHeiryouiki(KTROBO::Graphics* g, DWORD color, KTPAINT_penheiryouiki* hei, 
+		KTPAINT_penheiryouikipart* heipart, KTPAINT_penline* lines, KTPAINT_penheiryouikidaen* daens);
 
 	static void setPenInfo(KTROBO::Graphics* g, unsigned short sc_x, unsigned short sc_y,short transx, short transy, float zoom, KTPAINT_pen* pens);
 	static void drawTex(KTROBO::Graphics* g, unsigned short tex_width, unsigned short tex_height, MyShaderResourceView tex_class, short transx, short transy, float zoom,KTPAINT_pen* pens);
