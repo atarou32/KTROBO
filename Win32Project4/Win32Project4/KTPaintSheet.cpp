@@ -471,7 +471,7 @@ void KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 
 		}
 		if (!temp_hei->daen_calced) {
-			motomeruJyusin(&hei[hei_max], &hei_daen[hei_daen_max]);
+			motomeruJyusin(&hei[hei_max], &hei_daen[hei_daen_max], hei_part);
 			hei[hei_max].daen_calced = 1;
 			hei[hei_max].daen_index = hei_daen_max;
 			hei_daen_max++;
@@ -573,7 +573,7 @@ void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri) {
 					if ( i > p ) continue;
 
 					KTPAINT_penheiryouiki* oyahei=NULL;
-					if (this->oyakoKankeiHeiryouiki(&temp_hei[i],&temp_hei[j],&temp_hei[p], &oyahei, nuri)) {
+					if (this->oyakoKankeiHeiryouiki(&temp_hei[i],&temp_hei[j],&temp_hei[p], &oyahei, nuri, temp_heipart)) {
 						// きれいな親子関係があったので除く
 						temp_hei_use[oyahei->hen_id] = false;
 					}
@@ -593,7 +593,7 @@ void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri) {
 	}
 }
 
-void KTPaintSheet::motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen) {
+void KTPaintSheet::motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen, KTPAINT_penheiryouikipart* parts) {
 
 	daen->height = 0;
 	daen->index=0;
@@ -606,12 +606,12 @@ void KTPaintSheet::motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryo
 	double y =0;
 	int t_count=0;
 	for (int i=ryou->startheiryouiki; i<=ryou->endheiryouiki;i++) {
-		x += this->hei_part[i].kouten_x;
-		y += this->hei_part[i].kouten_y;
+		x += parts[i].kouten_x;
+		y += parts[i].kouten_y;
 		t_count++;
-		for (int k=hei_part[i].keiro_first_index;k<=hei_part[i].keiro_last_index;k++) {
+		for (int k=parts[i].keiro_first_index;k<=parts[i].keiro_last_index;k++) {
 			x += this->plines[k].x;
-			y += this->plines[i].y;
+			y += this->plines[k].y;
 			t_count++;
 		}
 	}
@@ -624,12 +624,12 @@ void KTPaintSheet::motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryo
 	float radius2 = 0;
 
 	for (int i=ryou->startheiryouiki; i<=ryou->endheiryouiki;i++) {
-		float rad = (hei_part[i].kouten_x-x)*(hei_part[i].kouten_x-x)+
-			(hei_part[i].kouten_y-y)*(hei_part[i].kouten_y-y);
+		float rad = (parts[i].kouten_x-x)*(parts[i].kouten_x-x)+
+			(parts[i].kouten_y-y)*(parts[i].kouten_y-y);
 		if (rad > radius2) {
 			radius2 = rad;
 		}
-		for (int k=hei_part[i].keiro_first_index;k<=hei_part[i].keiro_last_index;k++) {
+		for (int k=parts[i].keiro_first_index;k<=parts[i].keiro_last_index;k++) {
 			float rad = (plines[k].x-x)*(plines[k].x-x)+(plines[i].y-y)*(plines[i].y-y);
 			if (rad > radius2) {
 				radius2 = rad;
@@ -695,23 +695,24 @@ void KTPaintSheet::insertOyakoKankei(int te12, KTPAINT_penheiryouiki* ryou1, KTP
 }
 
 
-bool KTPaintSheet::oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPAINT_penheiryouiki* ryou3, KTPAINT_penheiryouiki** out_oya_ryou, KTPaintNuri* nuri) {
+bool KTPaintSheet::oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPAINT_penheiryouiki* ryou3,
+										 KTPAINT_penheiryouiki** out_oya_ryou, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts) {
 
 	// 各領域の重心を求める
 	if (!ryou1->daen_calced) {
-		motomeruJyusin(ryou1,&hei_daen[hei_daen_max]);
+		motomeruJyusin(ryou1,&hei_daen[hei_daen_max], parts);
 		ryou1->daen_index = hei_daen_max;
 		ryou1->daen_calced = 1;
 		hei_daen_max++;
 	}
 	if (!ryou2->daen_calced) {
-		motomeruJyusin(ryou2,&hei_daen[hei_daen_max]);
+		motomeruJyusin(ryou2,&hei_daen[hei_daen_max], parts);
 		ryou2->daen_index = hei_daen_max;
 		ryou2->daen_calced = 1;
 		hei_daen_max++;
 	}
 	if (!ryou3->daen_calced) {
-		motomeruJyusin(ryou3,&hei_daen[hei_daen_max]);
+		motomeruJyusin(ryou3,&hei_daen[hei_daen_max], parts);
 		ryou3->daen_index = hei_daen_max;
 		ryou3->daen_calced = 1;
 		hei_daen_max++;

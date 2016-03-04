@@ -134,7 +134,7 @@ public:
 	float x;
 	float y;
 	float z;
-	DWORD color;
+	unsigned int color;
 };
 
 class GRAPHICS_RENDER_TEX_STRUCT {

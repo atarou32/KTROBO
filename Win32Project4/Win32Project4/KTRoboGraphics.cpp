@@ -721,32 +721,62 @@ memset(sttr,0,sizeof(GRAPHICS_RENDER_STRUCT)*1024);
 int temp=0;
 int i=0;
 //drawDaen(g, 0xFF0000FF,MYVECTOR3(daens[hei->daen_index].x, daens[hei->daen_index].y,0),100,100,0);
-
-for (int temp=0;temp<heipart[hei->startheiryouiki].keiro_last_index-heipart[hei->startheiryouiki].keiro_first_index;) {
+for (int k=hei->startheiryouiki;k<=hei->endheiryouiki;k++) {
+for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	
-
-	float x1 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].x;
-	float x2 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].x;
+	
+	float x1 = lines[heipart[k].keiro_first_index+tt].x;
+	float x2 = lines[heipart[k].keiro_first_index+1+tt].x;
 	float x3 = daens[hei->daen_index].x;
-	float y1 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].y;
-	float y2 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].y;
+	float y1 = lines[heipart[k].keiro_first_index+tt].y;
+	if ((tt ==0)) {
+		x1 = heipart[k].kouten_x;
+		y1 = heipart[k].kouten_y;
+	}
+
+	float y2 = lines[heipart[k].keiro_first_index+1+tt].y;
+
+	if (tt == heipart[k].keiro_last_index-heipart[k].keiro_first_index) {
+		if (k == hei->endheiryouiki) {
+			x2 = heipart[hei->startheiryouiki].kouten_x;
+			y2 = heipart[hei->startheiryouiki].kouten_y;
+		} else {
+			x2 = heipart[k+1].kouten_x;
+			y2 = heipart[k+1].kouten_y;
+		}
+	}
+
+
 	float y3 = daens[hei->daen_index].y;
-	
+/*	MYVECTOR3 center;
+	center.float3.x = x1/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	center.float3.y = y1/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	center.float3.z = 0;
+	drawDaen(g,0xFFFF00FF,center, 10,10,0);
+	center.float3.x = 0.3+x2/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	center.float3.y = 0.3+y2/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	center.float3.z = 0;
+	drawDaen(g,0xFFFFFF00,center, 10,10,0);
+	center.float3.x = x3/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	center.float3.y = y3/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	center.float3.z = 0;
+	drawDaen(g,0xFFFF0000,center, 10,10,0);*/
 	sttr[i].color = 0xFFFFFFFF;//color;
-	sttr[i].x = 0;//-1 + 2*x1 / (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	sttr[i].y = 0;//1 - 2*y1 / (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].x = -1 + 2*x1 / (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].y = 1 - 2*y1 / (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i].z = 0;
 	sttr[i+1].color = 0xFFFFFFFF;//color;
-	sttr[i+1].x = -1;// + 2*x2/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	sttr[i+1].y = -1;// - 2*y2/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].x = -1 + 2*x2/ (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].y = 1 - 2*y2/ (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+1].z = 0;
 	sttr[i+2].color = 0xFFFFFFFF;//color;
-	sttr[i+2].x =  1;// + 2*x3/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	sttr[i+2].y = 1;// - 2*y3/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+2].x =  -1 + 2*x3/ (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+2].y = 1 - 2*y3/ (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].z = 0;
 	i += 3;
-	temp += 1;
-
+	tt += 1;
+	temp+=1;
+}
 }
 	MYMATRIX proj;
 	MYMATRIX view;

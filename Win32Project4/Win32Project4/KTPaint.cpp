@@ -387,7 +387,7 @@ void KTPaint::render() {
 	float clearColor[4] = {
 		1.0f,1.0f,1.0f,1.0f};
 	float clearColor2[4] = {
-		0.7f,0.7f,0.7f,1.0f};
+		0.9f,0.9f,0.9f,1.0f};
 
 	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
 	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),now_sheet->transx*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU, now_sheet->transy*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,now_sheet->zoom*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,pens);
@@ -409,6 +409,15 @@ void KTPaint::render() {
 
 //	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 	
+	int hei_max = now_sheet->now_sheet->getHeiMax();
+	for (int i=0;i<hei_max;i++) {
+	KTROBO::Graphics::drawHeiryouiki(g,0xFF0000FF,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
+		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
+	//KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
+	}
+
+
+
 	if (this->is_render_next_sheet) {
 		if (now_sheet->next_sheet) {
 			KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), 
@@ -427,7 +436,7 @@ void KTPaint::render() {
 	}
 	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), 
 				now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-		
+	
 
 //	g->getDeviceContext()->ClearRenderTargetView(tex_class_back_buffer->target_view, clearColor2);
 	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
@@ -439,12 +448,7 @@ void KTPaint::render() {
 	center.float3.z = 0;
 	nuridayo.printKouten(g, now_sheet->now_sheet->getPline());
 
-	int hei_max = now_sheet->now_sheet->getHeiMax();
-	for (int i=0;i<hei_max;i++) {
-	KTROBO::Graphics::drawHeiryouiki(g,0xFF0000FF,now_sheet->now_sheet->getHei(), now_sheet->now_sheet->getHeiPart(), 
-		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
-	KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
-	}
+	
 
 //	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
 //	viewport.MinDepth=0.0f;
