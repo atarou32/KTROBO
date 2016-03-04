@@ -450,15 +450,7 @@ void KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 	// “o˜^‚·‚é
 
 	if ((hei_max < KTPAINT_PENHEIRYOUIKI_MAX) && hei_part_max + temp_hei->endheiryouiki - temp_hei->startheiryouiki+1 < KTPAINT_PENHEIRYOUIKI_PART_MAX) { 
-		if (!hei[hei_max].daen_calced) {
-			motomeruJyusin(&hei[hei_max], &hei_daen[hei_daen_max]);
-			hei[hei_max].daen_calced = 1;
-			hei[hei_max].daen_index = hei_daen_max;
-			hei_daen_max++;
-		} else {
-			hei[hei_max].daen_calced = temp_hei->daen_calced;
-			hei[hei_max].daen_index = temp_hei->daen_index;
-		}
+		
 		hei[hei_max].daen_many_end = temp_hei->daen_many_end;
 		hei[hei_max].daen_many_start = temp_hei->daen_many_start;
 	
@@ -478,6 +470,16 @@ void KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 
 
 		}
+		if (!temp_hei->daen_calced) {
+			motomeruJyusin(&hei[hei_max], &hei_daen[hei_daen_max]);
+			hei[hei_max].daen_calced = 1;
+			hei[hei_max].daen_index = hei_daen_max;
+			hei_daen_max++;
+		} else {
+			hei[hei_max].daen_calced = temp_hei->daen_calced;
+			hei[hei_max].daen_index = temp_hei->daen_index;
+		}
+
 		hei_max++;
 	}
 
@@ -496,7 +498,7 @@ void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri) {
 	static bool temp_hei_use[KTPAINT_PENHEIRYOUIKI_MAX];
 	static int keiro_indexs[KTPAINT_PENHEIRYOUIKI_MAX];// max_depth
 	int max_depth = KTPAINT_PENHEIRYOUIKI_MAX-1;
-
+	oyakokankei.clear();
 	static KTPAINT_penheiryouikipart temp_heipart[KTPAINT_PENHEIRYOUIKI_PART_MAX];
 	memset(temp_hei,0,sizeof(KTPAINT_penheiryouiki)*KTPAINT_PENHEIRYOUIKI_MAX);
 	for (int i=0;i<KTPAINT_PENHEIRYOUIKI_MAX*8;i++) {

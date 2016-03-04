@@ -123,21 +123,21 @@ stream.RestartStrip();
 	float ddy = cos(atantheta);
 
 	if (dx > 0 && dy >= 0) {
-		//dx = dx + cos(atantheta)*1/(float)screen_x;
-		//dy = dy + sin(atantheta)*1/(float)screen_y;
+		dx = dx + cos(atantheta)*1/(float)screen_x;
+		dy = dy + sin(atantheta)*1/(float)screen_y;
 		ddy = ddy * -1;		
 	} else if (dx >0 && dy < 0 ) {
-		//dx = dx + cos(atantheta)*1/(float)screen_x;
-		//dy = dy - sin(atantheta)*1/(float)screen_y;
+		dx = dx + cos(atantheta)*1/(float)screen_x;
+		dy = dy - sin(atantheta)*1/(float)screen_y;
 	 } else if(dx <0 && dy >=0) {
-		//dx = dx;// + cos(atantheta)*1/(float)screen_x;
-		//dy = dy - sin(atantheta)*1/(float)screen_y;
+		dx = dx;// + cos(atantheta)*1/(float)screen_x;
+		dy = dy - sin(atantheta)*1/(float)screen_y;
 
 		ddx = ddx * -1;
 		ddy = ddy * -1;
 	} else if(dx < 0 && dy <0) { 
-		//dx = dx;// + cos(atantheta)*1/(float)screen_x;
-		//dy = dy + sin(atantheta)*1/(float)screen_y;
+		dx = dx;// + cos(atantheta)*1/(float)screen_x;
+		dy = dy + sin(atantheta)*1/(float)screen_y;
 		ddx = ddx * -1;
 	}
 	inp.Position = float4(x - ddx* width / (float)screen_x, y - ddy * width/(float)screen_y,0,1);

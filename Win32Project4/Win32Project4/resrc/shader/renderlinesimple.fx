@@ -51,6 +51,5 @@ stream.RestartStrip();
 sampler texSmp : register(s0);
 
 float4 PSFunc(GSPSInput input ) : SV_Target {
-return float4(1,1,1,1);
-//return input.Color;
+return input.Color;
 }

@@ -716,32 +716,33 @@ void Graphics::drawHeiryouiki(KTROBO::Graphics* g, DWORD color, KTPAINT_penheiry
 
 	
 
-GRAPHICS_RENDER_STRUCT sttr[256*3];
-memset(sttr,0,sizeof(GRAPHICS_RENDER_STRUCT)*256*3);
+GRAPHICS_RENDER_STRUCT sttr[1024];
+memset(sttr,0,sizeof(GRAPHICS_RENDER_STRUCT)*1024);
 int temp=0;
 int i=0;
-for (int temp=0;temp<heipart[hei->startheiryouiki].keiro_last_index-heipart[hei->startheiryouiki].keiro_first_index;) {
-	if (!heipart[hei->startheiryouiki].keiro_last_index) {
-		temp++;continue;}
+//drawDaen(g, 0xFF0000FF,MYVECTOR3(daens[hei->daen_index].x, daens[hei->daen_index].y,0),100,100,0);
 
-	unsigned short x2 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].x;
-	unsigned short x1 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].x;
-	unsigned short x3 = daens[hei->daen_index].x;
-	unsigned short y2 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].y;
-	unsigned short y1 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].y;
-	unsigned short y3 = daens[hei->daen_index].y;
+for (int temp=0;temp<heipart[hei->startheiryouiki].keiro_last_index-heipart[hei->startheiryouiki].keiro_first_index;) {
 	
-	sttr[i].color = color;
-	sttr[i].x = -1 + 2*x1 / (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	sttr[i].y = 1 - 2*y1 / (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+
+	float x1 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].x;
+	float x2 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].x;
+	float x3 = daens[hei->daen_index].x;
+	float y1 = lines[heipart[hei->startheiryouiki].keiro_first_index+temp].y;
+	float y2 = lines[heipart[hei->startheiryouiki].keiro_first_index+1+temp].y;
+	float y3 = daens[hei->daen_index].y;
+	
+	sttr[i].color = 0xFFFFFFFF;//color;
+	sttr[i].x = 0;//-1 + 2*x1 / (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i].y = 0;//1 - 2*y1 / (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i].z = 0;
-	sttr[i+1].color = color;
-	sttr[i+1].x = -1 + 2*x2/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	sttr[i+1].y = 1 - 2*y2/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].color = 0xFFFFFFFF;//color;
+	sttr[i+1].x = -1;// + 2*x2/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+1].y = -1;// - 2*y2/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+1].z = 0;
-	sttr[i+2].color = color;
-	sttr[i+2].x =  -1 + 2*x3/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	sttr[i+2].y = 1 - 2*y3/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+2].color = 0xFFFFFFFF;//color;
+	sttr[i+2].x =  1;// + 2*x3/ (float)g->getScreenWidth();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	sttr[i+2].y = 1;// - 2*y3/ (float)g->getScreenHeight();// * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].z = 0;
 	i += 3;
 	temp += 1;
@@ -763,7 +764,7 @@ for (int temp=0;temp<heipart[hei->startheiryouiki].keiro_last_index-heipart[hei-
 	D3D11_MAPPED_SUBRESOURCE msr;
 	
 	g->getDeviceContext()->Map(render_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy( msr.pData, &sttr, sizeof(GRAPHICS_RENDER_STRUCT)*64 );
+	memcpy( msr.pData, &sttr, sizeof(GRAPHICS_RENDER_STRUCT)*temp*3 );
 	g->getDeviceContext()->Unmap(render_buffer, 0);
 
 	g->getDeviceContext()->IASetInputLayout( mss.vertexlayout );

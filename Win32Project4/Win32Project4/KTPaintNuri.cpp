@@ -271,21 +271,33 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 
 
 	if (kouten_max+4 > KTPAINT_SHEET_KOUTEN_MAX) return;
-	if (kouten_max == temp_max) {
+	
+	if (kouten_index == temp_max) {
 		kouten_max++;
 	}
 
 	if (bigline1 == bigline2) {
 		// ©•ª©g‚ÅŒğ‚í‚Á‚Ä‚¢‚éê‡‚Íˆµ‚¢‚ªˆÙ‚È‚é(ˆÙ‚È‚ç‚È‚­‚Ä‚·‚Ş‚©‚à‚µ‚ê‚È‚¢)
 		addNewKoutenOfKeiro(kouten_index, line1_index, bigline1);
+		koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_index]);
+		koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,line1_index));
 		addNewKoutenOfKeiro(kouten_index, line2_index, bigline2);
 
-		koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,line1_index));
-		koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline2,line2_index));
-		koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_index]);
+		/*
+		if (kouten_index == temp_max) {
+			kouten_index = kouten_max;
+			kouten_max++;
+		}
+		*/
+
+	
+	//	koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline2,line2_index));
+	
 	//	koutenss[bigline2->kyoku_id]->ks.push_back(&koutens[kouten_index]);
 		goto SUPER_POINTDAYO;
 	}
+
+	
 
 	addNewKoutenOfKeiro(kouten_index, line1_index, bigline1);
 	addNewKoutenOfKeiro(kouten_index, line2_index, bigline2);
@@ -295,6 +307,9 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 	koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_index]);
 	koutenss[bigline2->kyoku_id]->ks.push_back(&koutens[kouten_index]);
 SUPER_POINTDAYO:
+
+
+	
 
 	KTPAINT_penline* pointA = &linesdayo[line1_index];
 	KTPAINT_penline* pointB = &linesdayo[bigline1->end_index];
@@ -357,11 +372,11 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 			if ((i != j) && (i!= j+1) && (j != i+1) &&( abs(i-j) > 4)) {
 				if (isKousaLine(&lines[i],&lines[j])) {
 					if (line1->kyoku_id == line2->kyoku_id) {
-						if ((lines[line1->start_index].x ==0) && (lines[line1->end_index].x ==0)
-							&&(lines[line1->start_index].y==0) && (lines[line1->end_index].y ==0)) {
-						} else {
+					//	if ((lines[line1->start_index].x ==0) && (lines[line1->end_index].x ==0)
+					//		&&(lines[line1->start_index].y==0) && (lines[line1->end_index].y ==0)) {
+					//	} else {
 							makeKouTen(i,j,line1,line2,lines);
-						}
+					//	}
 					}else {
 							makeKouTen(i,j,line1,line2,lines);
 					}

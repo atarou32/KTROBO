@@ -399,16 +399,16 @@ void KTPaint::render() {
 	viewport.Width = g->getScreenWidth();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	viewport.Height = g->getScreenHeight();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	g->getDeviceContext()->RSSetViewports(1,&viewport);
-//	g->getDeviceContext()->OMSetRenderTargets(1,&tex_class_back_buffer->target_view, NULL);
-	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
+	ID3D11RenderTargetView* vv = g->getRenderTargetView();
+//	g->getDeviceContext()->OMSetRenderTargets(1,&vv/*&tex_class_back_buffer->target_view*/, KTROBO::Graphics::pDepthStencilView);
+	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor2);
+//	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,
+//		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+ //       1.0f,
+  //      0 );
 
-	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	int hei_max = now_sheet->now_sheet->getHeiMax();
-	for (int i=0;i<hei_max;i++) {
-	KTROBO::Graphics::drawHeiryouiki(g,0xFF0000FF,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
-		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
+//	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 	
-	}
 	if (this->is_render_next_sheet) {
 		if (now_sheet->next_sheet) {
 			KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), 
@@ -438,6 +438,14 @@ void KTPaint::render() {
 	center.float3.y = 500;
 	center.float3.z = 0;
 	nuridayo.printKouten(g, now_sheet->now_sheet->getPline());
+
+	int hei_max = now_sheet->now_sheet->getHeiMax();
+	for (int i=0;i<hei_max;i++) {
+	KTROBO::Graphics::drawHeiryouiki(g,0xFF0000FF,now_sheet->now_sheet->getHei(), now_sheet->now_sheet->getHeiPart(), 
+		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
+	KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
+	}
+
 //	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
 //	viewport.MinDepth=0.0f;
 //	viewport.MaxDepth=1.0f;
