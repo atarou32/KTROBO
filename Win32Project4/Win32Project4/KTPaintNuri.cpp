@@ -354,7 +354,7 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 
 	for (int i=line1->start_index;i<line1->end_index;i+=1) {
 		for (int j=line2->start_index;j<line2->end_index;j+=1) {
-			if ((i != j) && (i!= j+1) && (j != i+1)) {
+			if ((i != j) && (i!= j+1) && (j != i+1) &&( abs(i-j) > 4)) {
 				if (isKousaLine(&lines[i],&lines[j])) {
 					if (line1->kyoku_id == line2->kyoku_id) {
 						//if (abs(line1->start_index-i) < 10 && abs(line1->start_index-j) < 10    &&  abs(i-j) < 10) {
@@ -370,7 +370,7 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 	}
 }
 
-bool isKousaLine2(KTPAINT_penline* line1_mae,KTPAINT_penline* line1_ato, KTPAINT_penline* line2_mae, KTPAINT_penline* line2_ato) {
+bool KTPaintNuri::isKousaLine2(KTPAINT_penline* line1_mae,KTPAINT_penline* line1_ato, KTPAINT_penline* line2_mae, KTPAINT_penline* line2_ato) {
 
 	unsigned short x1 = line1_mae->x;
 	unsigned short x2 = line1_ato->x;// + line1->dx;

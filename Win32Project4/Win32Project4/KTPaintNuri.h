@@ -21,12 +21,14 @@ public:
 	int index;
 	unsigned short x;
 	unsigned short y;
+	bool is_tuuka;
 	set<pair<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>>> keiros;
 	set<pair<KTPAINT_penkyokuline*, int>> iti; // penkyokulineはbigline, ２個目のintは bigline内のインデックス
 	KTPAINT_kouten() {
 		index =0 ;
 		x = 0;
 		y = 0;
+		is_tuuka = false;
 	}
 };
 

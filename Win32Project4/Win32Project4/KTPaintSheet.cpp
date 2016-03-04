@@ -18,7 +18,9 @@ KTPaintSheet::KTPaintSheet(void)
 
 	memset(hei_daen, 0, sizeof(KTPAINT_penheiryouikidaen)* KTPAINT_PENHEIRYOUIKI_DAEN_MAX);
 	hei_daen_max =0;
-
+	for (int i=0;i<KTPAINT_PENHEIRYOUIKI_MAX;i++) {
+		hei[i].hen_id = i;
+	}
 }
 
 
@@ -182,19 +184,173 @@ void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned c
 	}
 }
 
+// end_daen_index を返す
+int KTPaintSheet::bunkatuDaenWithLine(int hei_index, int start_index, int end_index,int start_daen_index, int end_daen_index) {
 
+	KTPAINT_penheiryouiki* pl = &this->hei[hei_index];
+	int end_new_daen_index = end_daen_index;
+	// 楕円の計算
+
+	// 楕円のインデックス　が０でかつ線分と交差している楕円を見つける
+	// 
+
+
+
+	// 閉領域に反映
+
+	pl->daen_many_start = start_daen_index;
+	pl->daen_many_end = end_new_daen_index;
+
+	return end_new_daen_index;
+
+}
+
+#define KTPAINT_SHEET_TEMPHEI_NOHEI 1
+#define KTPAINT_SHEET_TEMPHEI_HEI 2
+#define KTPAINT_SHEET_TEMPHEI_NOMOREHEI 3
+KTPAINT_kouten* getDepthKouten(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs, int now_depth) {
+	int nn_depth = 0;
+	KTPAINT_kouten* ans = siten;
+	set<pair<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>>>::iterator it;
+	for (int i=0;i<now_depth;i++) {
+		int index = keiro_indexs[i];
+		it = ans->keiros.begin();
+		for (int i=0;i<index;i++) {
+			it++;
+		}
+		if (it != ans->keiros.end()) {
+			ans = (*it).first;
+		} else {
+			return NULL;
+		}
+	}
+	return ans;
+}
+
+int KTPaintSheet::getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID) {
+
+	int now_ID=0;
+	int now_depth =0;
+	KTPAINT_kouten* kk = siten;
+	set<pair<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>>>::iterator it;
+	bool is_finish = false;
+	int count_max = KTPAINT_PENHEIRYOUIKI_MAX*8;
+	int count=0;
+	while(count < count_max) {
+		int now_depth_index = keiro_indexs[now_depth];
+		kk = getDepthKouten(siten,koutens,keiro_indexs,now_depth);
+		if (kk == NULL) return KTPAINT_SHEET_TEMPHEI_NOMOREHEI;
+
+		it = kk->keiros.begin();
+		if (it == kk->keiros.end()) return KTPAINT_SHEET_TEMPHEI_NOHEI; 
+		
+	
+		for (int i=0;i<now_depth_index;i++) {
+			it++;
+		}
+		if (it == kk->keiros.end()) {
+			// もう経路がない場合は
+			if (now_depth) {
+				// ひとつ上にしてみる
+				now_depth--;
+				keiro_indexs[now_depth]++;
+				continue;
+				
+
+			} else {
+				// ほんとうにもう経路がない
+				return KTPAINT_SHEET_TEMPHEI_NOMOREHEI; 
+			}
+		}
+
+		KTPAINT_kouten* ikisaki = (*it).first;
+		bool konomama_ikeru = true;
+		if (ikisaki->is_tuuka && ikisaki != siten) {
+			// 別の点でループした
+			konomama_ikeru = false;
+			now_ID++;
+			if (now_ID == keiro_ID) return KTPAINT_SHEET_TEMPHEI_NOHEI;
+		} else if(ikisaki->is_tuuka && ikisaki == siten) {
+			konomama_ikeru = false;
+			now_ID++;
+			// 同じ経路を通る場合も含まれることに注意する
+			if (now_ID == keiro_ID) return KTPAINT_SHEET_TEMPHEI_HEI;
+		}
+
+
+		if (konomama_ikeru) {
+			kk = ikisaki;
+			now_depth++;
+			
+		} else {
+			// このままいけない場合は次の経路にいくかもしくは前の経路に戻る
+			keiro_indexs[now_depth]++;
+		}
+		count++;
+	}
+
+
+	return KTPAINT_SHEET_TEMPHEI_NOHEI;
+}
 void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri) {
 
 	vector<KTPAINT_koutens*>* koutenss = nuri->getKoutenss();
 	KTPAINT_kouten* koutens = nuri->getKoutens();
+	int kouten_max = nuri->getKoutenMax();
+	static KTPAINT_penheiryouiki temp_hei[KTPAINT_PENHEIRYOUIKI_MAX];
+	//static bool temp_is_hei[KTPAINT_PENHEIRYOUIKI_MAX];
+	static int keiro_indexs[KTPAINT_PENHEIRYOUIKI_MAX];// max_depth
+	int max_depth = KTPAINT_PENHEIRYOUIKI_MAX-1;
+
+	static KTPAINT_penheiryouikipart temp_heipart[KTPAINT_PENHEIRYOUIKI_PART_MAX];
+	memset(temp_hei,0,sizeof(KTPAINT_penheiryouiki)*KTPAINT_PENHEIRYOUIKI_MAX);
+	for (int i=0;i<KTPAINT_PENHEIRYOUIKI_MAX*8;i++) {
+		//temp_is_hei[i] = false;
+		keiro_indexs[i] = 0;
+	}
+
+	memset(temp_heipart,0, sizeof(KTPAINT_penheiryouikipart)*KTPAINT_PENHEIRYOUIKI_PART_MAX);
+	int temp_hei_count=0;
+	int temp_heipart_count = 0;
+
+	// すべての交点に対して走査する
+	for (int k=0;k<kouten_max;k++) {
+
+		KTPAINT_kouten* siten = &koutens[k];
+		int temp_heipart_start_count = temp_heipart_count;
+		int temp_heipart_end_count = temp_heipart_count;
+		int keiro_ID = 0;
+		bool is_has_more_keiro = true;
+		for (int i=0;i<KTPAINT_PENHEIRYOUIKI_MAX;i++) {
+			keiro_indexs[i] = 0;
+		}
+
+		while(is_has_more_keiro || (keiro_ID >= KTPAINT_PENHEIRYOUIKI_MAX)) {
+			for (int l=0;l<kouten_max;l++) {
+				koutens[l].is_tuuka = false;
+			}
+			siten->is_tuuka = true;
+			// 最初はsitenから始まって　0,0,0,0,0,0,0,0,0... の経路をたどる(ID=1)
+			// 次はsitenから始まって　0,0,0,0,0,0,....,0,1 の経路をたどる(ID=2) 1karaIDはじまることに注意
+			// 個々の経路が閉集合をなしているかどうかを判定するのは行わなくてはならない
+			// 経路がsiten以外でループを作っていたり、同じ経路をたどることになってしまっていたり
+			// する場合もIDに数えるが　ループや同じ経路の場合は次の深さを走査しない
+			int kekka  = getTempHeiFromSitenAndID(siten,koutens,keiro_indexs,keiro_ID);
+			if (kekka == KTPAINT_SHEET_TEMPHEI_NOMOREHEI) {
+				is_has_more_keiro = false;
+			} else if(kekka == KTPAINT_SHEET_TEMPHEI_HEI) {
+			// 閉集合をなしている
+				// keiro_indexsに経路のインデックスの情報が入っているのでそれをもとにtemp_heipartに
+				// 情報を入れ込む
 
 
 
 
+			}
+			keiro_ID++;
+		}
 
-
-
-
+	}
 }
 
 void KTPaintSheet::motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen) {
@@ -282,6 +438,21 @@ bool KTPaintSheet::addTempPartsCount(KTPAINT_penheiryouikipart* temp_parts, int*
 
 }
 
+void KTPaintSheet::insertOyakoKankei(int te12, KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2) {
+	if (ryou1->hen_id < ryou2->hen_id) {
+	oyakokankei.insert(pair<pair<int,int>,int>(
+		pair<int,int>(ryou1->hen_id,ryou2->hen_id),te12));
+
+	} else {
+		if (te12 == 0) {
+			te12 = 1;
+		} else if(te12 == 1) {
+			te12 = 0;
+		}
+			oyakokankei.insert(pair<pair<int,int>,int>(
+		pair<int,int>(ryou2->hen_id,ryou1->hen_id),te12));
+	}
+}
 
 
 bool KTPaintSheet::oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPAINT_penheiryouiki* ryou3, KTPAINT_penheiryouiki* out_oya_ryou, KTPaintNuri* nuri) {
@@ -332,59 +503,57 @@ bool KTPaintSheet::oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_p
 	//map<pair<KTPAINT_penheiryouiki*, KTPAINT_penheiryouiki*>, int> oyakokankei; 
 	// int 0 最初 がoya  1 最後がoya 2 不明 3が身計算
 	int te12=3;
-	if (ryou1->startheiryouiki < ryou2->startheiryouiki) {
-		if (oyakokankei.find(pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou1,ryou2)) != oyakokankei.end()) {
-			te12 = oyakokankei[pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou1,ryou2)];
+	if (ryou1->hen_id < ryou2->hen_id) {
+		if (oyakokankei.find(pair<int,int>(ryou1->hen_id,ryou2->hen_id)) != oyakokankei.end()) {
+			te12 = oyakokankei[pair<int,int>(ryou1->hen_id,ryou2->hen_id)];
 		}
 	} else {
-		if (oyakokankei.find(pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou2,ryou1)) != oyakokankei.end()) {
-			te12 = oyakokankei[pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou2,ryou1)];
+		if (oyakokankei.find(pair<int,int>(ryou2->hen_id,ryou1->hen_id)) != oyakokankei.end()) {
+			te12 = oyakokankei[pair<int,int>(ryou2->hen_id,ryou1->hen_id)];
 		}
 	}
 
 	int te13 =3;
 	if (ryou1->startheiryouiki < ryou3->startheiryouiki) {
-		if (oyakokankei.find(pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou1,ryou3)) != oyakokankei.end()) {
-			te13 = oyakokankei[pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou1,ryou3)];
+		if (oyakokankei.find(pair<int,int>(ryou1->hen_id,ryou3->hen_id)) != oyakokankei.end()) {
+			te13 = oyakokankei[pair<int,int>(ryou1->hen_id,ryou3->hen_id)];
 		}
 	} else {
-		if (oyakokankei.find(pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou3,ryou1)) != oyakokankei.end()) {
-			te13 = oyakokankei[pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou3,ryou1)];
+		if (oyakokankei.find(pair<int,int>(ryou3->hen_id,ryou1->hen_id)) != oyakokankei.end()) {
+			te13 = oyakokankei[pair<int,int>(ryou3->hen_id,ryou1->hen_id)];
 		}
 	}
 
 	int te23 =3;
 	if (ryou2->startheiryouiki < ryou3->startheiryouiki) {
-		if (oyakokankei.find(pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou2,ryou3)) != oyakokankei.end()) {
-			te23 = oyakokankei[pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou2,ryou3)];
+		if (oyakokankei.find(pair<int,int>(ryou2->hen_id,ryou3->hen_id)) != oyakokankei.end()) {
+			te23 = oyakokankei[pair<int,int>(ryou2->hen_id,ryou3->hen_id)];
 		}
 	} else {
-		if (oyakokankei.find(pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou3,ryou2)) != oyakokankei.end()) {
-			te23 = oyakokankei[pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou3,ryou2)];
+		if (oyakokankei.find(pair<int,int>(ryou3->hen_id,ryou2->hen_id)) != oyakokankei.end()) {
+			te23 = oyakokankei[pair<int,int>(ryou3->hen_id,ryou2->hen_id)];
 		}
 	}
 
 	if (te12 == 3) {
 		// oyakohanteiを行って入れ込む
+		
 		te12 = karuiOyakoHantei(ryou1,ryou2,nuri);
-		oyakokankei.insert(pair<pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>,int>(
-			pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou1,ryou2),te12));
-
+		insertOyakoKankei(te12, ryou1,ryou2);
+			
 	}
 
 	if (te23 == 3) {
 		// oyakohanteiを行って入れ込む
 		te23 = karuiOyakoHantei(ryou2,ryou3,nuri);
-		oyakokankei.insert(pair<pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>,int>(
-			pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou2,ryou3),te23));
+		insertOyakoKankei(te23,ryou2,ryou3);
 
 	}
 
 	if (te13 == 3) {
 		// oyakohanteiを行って入れ込む
 		te13 = karuiOyakoHantei(ryou1,ryou3,nuri);
-		oyakokankei.insert(pair<pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>,int>(
-			pair<KTPAINT_penheiryouiki*,KTPAINT_penheiryouiki*>(ryou1,ryou3),te13));
+		insertOyakoKankei(te13,ryou1,ryou3);
 
 	}
 

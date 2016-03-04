@@ -5,7 +5,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 #include "MyDefine.h"
-
+#include <map>
+using namespace std;
 class KTPaintNuri;
 class KTPAINT_enpituline {
 public:
@@ -73,7 +74,7 @@ public:
 	unsigned short keiro_first_index;
 	unsigned short keiro_last_index;
 	unsigned short kouten_index;
-	unsigned short keiro_kyokuline_index;
+	unsigned short keiro_index;// kouten の何番目の経路かということ　kyokuline_indexは keiro_first_index, keiro_last_index から推測できるはず？
 };
 
 class KTPAINT_penheiryouiki {
@@ -82,6 +83,10 @@ public:
 	unsigned short endheiryouiki;
 	unsigned short daen_index;
 	unsigned short daen_calced;//0 mada 1 sudeni
+	unsigned short daen_many_start;
+	unsigned short daen_many_end;
+	unsigned short hen_id;
+	unsigned short offset;
 };
 
 class KTPAINT_penheiryouikidaen {
@@ -105,7 +110,7 @@ private:
 	KTPAINT_penheiryouikipart hei_part[KTPAINT_PENHEIRYOUIKI_PART_MAX];
 	KTPAINT_penheiryouiki hei[KTPAINT_PENHEIRYOUIKI_MAX];
 	KTPAINT_penheiryouikidaen hei_daen[KTPAINT_PENHEIRYOUIKI_DAEN_MAX];
-	map<pair<KTPAINT_penheiryouiki*, KTPAINT_penheiryouiki*>, int> oyakokankei;
+	map<pair<int, int>, int> oyakokankei;// KTPAINT_HEI* KTPAINT_HEI* int
 	// int 0 最初 がoya  1 最後がoya 2 不明
 
 	int hei_daen_max;
@@ -125,6 +130,8 @@ private:
 	bool addTempPartsCount(KTPAINT_penheiryouikipart* temp_parts,int* temp_c,int maxx,KTPAINT_penheiryouiki* ryou1);
 	int karuiOyakoHantei(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPaintNuri* nuri);
 	bool isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri); 
+	void insertOyakoKankei(int te12, KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2);
+	int getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID);
 public:
 	KTPaintSheet(void);
 	~KTPaintSheet(void);
@@ -165,6 +172,7 @@ public:
 		pline_max = 0;
 	}
 	void calcHeiryouiki(KTPaintNuri* nuri);
+	int bunkatuDaenWithLine(int hei_index, int start_index, int end_index,int start_daen_index, int end_daen_index);
 
 };
 
