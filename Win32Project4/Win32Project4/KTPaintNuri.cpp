@@ -388,15 +388,15 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 
 bool KTPaintNuri::isKousaLine2(KTPAINT_penline* line1_mae,KTPAINT_penline* line1_ato, KTPAINT_penline* line2_mae, KTPAINT_penline* line2_ato) {
 
-	unsigned short x1 = line1_mae->x;
-	unsigned short x2 = line1_ato->x;// + line1->dx;
-	unsigned short x3 = line2_mae->x;
-	unsigned short x4 = line2_ato->x;// + line2->dx;
+	float x1 = line1_mae->x;
+	float x2 = line1_ato->x;// + line1->dx;
+	float x3 = line2_mae->x;
+	float x4 = line2_ato->x;// + line2->dx;
 
-	unsigned short y1 = line1_mae->y;
-	unsigned short y2 = line1_ato->y;// + line1->dy;
-	unsigned short y3 = line2_mae->y;
-	unsigned short y4 = line2_ato->y;//+ line2->dy;
+	float y1 = line1_mae->y;
+	float y2 = line1_ato->y;// + line1->dy;
+	float y3 = line2_mae->y;
+	float y4 = line2_ato->y;//+ line2->dy;
 
 	// x check
 	if (x1 >= x2 ) {

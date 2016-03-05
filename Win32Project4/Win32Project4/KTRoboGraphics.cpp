@@ -757,10 +757,14 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	center.float3.y = 0.3+y2/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	center.float3.z = 0;
 	drawDaen(g,0xFFFFFF00,center, 10,10,0);
+	*/
+	MYVECTOR3 center;
 	center.float3.x = x3/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	center.float3.y = y3/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	center.float3.z = 0;
-	drawDaen(g,0xFFFF0000,center, 10,10,0);*/
+	drawDaen(g,0xFFFF0000,center, 10,10,0);
+	tt++;
+	continue;
 	sttr[i].color = 0xFFFFFFFF;//color;
 	sttr[i].x = -1 + 2*x1 / (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i].y = 1 - 2*y1 / (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
