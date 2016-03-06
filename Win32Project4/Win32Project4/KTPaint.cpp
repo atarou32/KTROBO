@@ -34,6 +34,14 @@ KTPaint::KTPaint(HINSTANCE hins)
 	root_sheet = now_sheet;
 	sheets.push_back(now_sheet);
 	now_count = 0;
+
+	for (int i=0;i<3000;i++) {
+	KTPaintSheetList* lis = new KTPaintSheetList();
+	lis->now_sheet = new KTPaintSheet();
+	sheets.push_back(lis);
+	}
+	
+	now_penkyokuline_start = 0;
 }
 
 
@@ -45,6 +53,19 @@ KTPaint::~KTPaint(void)
 void KTPaint::setCursorNow() {
 	SetCursor(temp_cursor);
 }
+
+void KTPaint::setCursorToHeipen() {
+	static HCURSOR hCursor = NULL;
+	if (!hCursor) {
+		hCursor = LoadCursor(hInst, (LPCSTR)IDI_CURSOR1);
+	}
+	
+	temp_cursor = hCursor;
+	now_paint_id = KTPAINT_HEIPEN_ID;
+	SetCursor(hCursor);
+	this->now_penkyokuline_start = now_sheet->now_sheet->getHeiKyokuPLineMax();
+}
+
 void KTPaint::setCursorToPencil() {
 	static HCURSOR hCursor=NULL;
 	if (!hCursor) {
@@ -79,8 +100,8 @@ void KTPaint::setCursorToNuri() {
 	now_paint_id = KTPAINT_NURI_ID;
 	SetCursor(hCursor);
 	renderlineToTex();
-	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
-	now_sheet->now_sheet->calcHeiryouiki(&nuridayo);
+//	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
+//	now_sheet->now_sheet->calcHeiryouiki(&nuridayo);
 	
 }
 
@@ -147,7 +168,10 @@ void KTPaint::renderlineToTex() {
 	g->getDeviceContext()->RSSetViewports(1,&viewport);
 	this->clearSheetTransInfoNado();
 	KTROBO::Graphics::drawTex(g,back_tex_class->width,back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	KTROBO::Graphics::drawPenSpecial(g, this->now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
+	
+	
+	
+	//KTROBO::Graphics::drawPenSpecial(g, this->now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
 
 	g->getSwapChain()->Present(NULL,NULL);
 	ID3D11RenderTargetView* gg = g->getRenderTargetView();
@@ -285,6 +309,16 @@ void KTPaint::createKoWindow(HWND p_window) {
     hBitmap=LoadBitmap(hInst,MAKEINTRESOURCE(IDB_BITMAP4));
 	SendDlgItemMessage(colorpen_window,4,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
 
+	CreateWindow(TEXT("BUTTON"), "HEIPENBUT",
+                 WS_CHILD|WS_VISIBLE|BS_BITMAP,
+                 120,0,30,30,
+                 colorpen_window,
+                 (HMENU)5,
+                 hInst,
+                 NULL);
+    hBitmap=LoadBitmap(hInst,MAKEINTRESOURCE(IDB_BITMAP5));
+	SendDlgItemMessage(colorpen_window,5,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
+
 
 
 	#ifndef HID_USAGE_PAGE_GENERIC
@@ -315,7 +349,12 @@ void KTPaint::createKoWindow(HWND p_window) {
 	InvalidateRect(colorpen_window, NULL,false);
 
 	g->setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(),now_sheet->now_sheet->getKyokuPLineMax(),now_sheet->now_sheet->getPline());
+	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(),now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getKyokuPLineMax(),now_sheet->now_sheet->getPline());
+
+	now_sheet->now_sheet->simulationStepStart(g->getScreenWidth(), g->getScreenHeight(), &nuridayo);
+
+
+
 }
 
 
@@ -364,14 +403,28 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 		if (po_c.x >= 0 && po_c.x <= g->getScreenWidth()) {
 			if (mpo_c.y >= 0 && mpo_c.y <= g->getScreenHeight()) {
 				if (po_c.y >= 0 && po_c.y <= g->getScreenHeight()) {
-					if (count > 1) {
-						now_sheet->now_sheet->setPline(mpo_c,po_c,width,nwidth,now_pen_index);
-						mpo_c = po_c;
-						count = 1;
-					} else {
-						count++;
-						return;
-					}
+					
+
+						if (this->now_paint_id == KTPAINT_PEN_ID) {
+							if (count > 1) {
+							now_sheet->now_sheet->setPline(mpo_c,po_c,width,nwidth,now_pen_index);
+								mpo_c = po_c;
+								count = 1;
+							} else {
+								count++;
+								return;
+							}
+						} else if(this->now_paint_id == KTPAINT_HEIPEN_ID) {
+							if (count > 5) {
+								now_sheet->now_sheet->setHeiPline(mpo_c,po_c,width,nwidth,now_pen_index);
+								mpo_c = po_c;
+								count = 1;
+							} else {
+								count++;
+								return;
+							}
+						}
+						
 				}
 			}
 		}
@@ -411,8 +464,8 @@ void KTPaint::render() {
 	
 	int hei_max = now_sheet->now_sheet->getHeiMax();
 	for (int i=0;i<hei_max;i++) {
-	KTROBO::Graphics::drawHeiryouiki(g,0xFF0000FF,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
-		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
+	KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
+		now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiDaen());
 	//KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
 	}
 
@@ -440,14 +493,32 @@ void KTPaint::render() {
 
 //	g->getDeviceContext()->ClearRenderTargetView(tex_class_back_buffer->target_view, clearColor2);
 	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+
+	if (now_paint_id == KTPAINT_HEIPEN_ID) {
+		KTROBO::Graphics::drawPenSpecialSitei(g, now_sheet->now_sheet->getHeiKyokuPLine(), this->now_penkyokuline_start,
+			now_sheet->now_sheet->getHeiKyokuPLineMax(),now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiPLineMax());
+	}
 	KTROBO::Graphics::drawPenSpecial(g, now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
 	ID3D11RenderTargetView* tt = g->getRenderTargetView();
 	MYVECTOR3 center;
 	center.float3.x = 400;
 	center.float3.y = 500;
 	center.float3.z = 0;
-	nuridayo.printKouten(g, now_sheet->now_sheet->getPline());
+	nuridayo.printKouten(g, now_sheet->now_sheet->getHeiPLine());
+	
 
+
+
+/*
+	KTPAINT_bubble* bubbles = nuridayo.getBubble();
+	int bubble_max = nuridayo.getBubbleMax();
+
+	for (int i=0;i<bubble_max;i++) {
+		MYVECTOR3 center(bubbles[i].x,bubbles[i].y,0);
+		float radius = bubbles[i].radius;
+		KTROBO::Graphics::drawDaen(g,0xFFFFFF00,center,radius,radius,0);
+	}
+*/
 	
 
 //	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
@@ -764,8 +835,9 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 				paint->setCursorToPencil();
 				break;
 
-
-
+			case 5:
+				paint->setCursorToHeipen();
+				break;
 			}
 		}
 		break;

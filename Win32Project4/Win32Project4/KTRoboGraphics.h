@@ -246,8 +246,11 @@ public:
 	static void drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 	static void drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max);
 	static void drawDaen(KTROBO::Graphics* g,DWORD color, MYVECTOR3 center,float yoko, float tate, float theta_from_x);
-	static void drawHeiryouiki(KTROBO::Graphics* g, DWORD color, KTPAINT_penheiryouiki* hei, 
+	static void drawHeiryouiki(KTROBO::Graphics* g, KTPAINT_penheiryouiki* hei, 
 		KTPAINT_penheiryouikipart* heipart, KTPAINT_penline* lines, KTPAINT_penheiryouikidaen* daens);
+	
+	static void drawPenSpecialSitei(KTROBO::Graphics* g, KTPAINT_penkyokuline* kyoku_line, int now_penkyokuline_start,
+			int pline_max , KTPAINT_penline* pline , int penline_max);
 
 	static void setPenInfo(KTROBO::Graphics* g, unsigned short sc_x, unsigned short sc_y,short transx, short transy, float zoom, KTPAINT_pen* pens);
 	static void drawTex(KTROBO::Graphics* g, unsigned short tex_width, unsigned short tex_height, MyShaderResourceView tex_class, short transx, short transy, float zoom,KTPAINT_pen* pens);

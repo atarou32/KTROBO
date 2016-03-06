@@ -7,6 +7,9 @@ KTPaintNuri::KTPaintNuri(void)
 	for (int i=0;i<KTPAINT_SHEET_KOUTEN_MAX;i++) {
 		koutens[i].index = i;
 	}
+
+	memset(bubbles,0, sizeof(KTPAINT_bubble)*KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX);
+	bubble_max = 0;
 }
 
 
@@ -14,7 +17,7 @@ KTPaintNuri::~KTPaintNuri(void)
 {
 }
 
-void KTPaintNuri::koutenShoriLinePlus(KTPAINT_penkyokuline* new_line, KTPAINT_penkyokuline* lines, int penkyoku_line_max, KTPAINT_penline* line_infos) {
+void KTPaintNuri::koutenShoriLinePlus(KTPAINT_penkyokuline* new_line, KTPAINT_penkyokuline* lines, int penkyoku_line_start, int penkyoku_line_max, KTPAINT_penline* line_infos) {
 
 	int tarinai_size = penkyoku_line_max - koutenss.size();
 	int tt = koutenss.size();
@@ -29,7 +32,7 @@ void KTPaintNuri::koutenShoriLinePlus(KTPAINT_penkyokuline* new_line, KTPAINT_pe
 	// 自己ループがある場合を考えて判定する
 	kousaKyokusenAndMakeKouten(new_line,new_line,line_infos);
 
-	for (int i=0;i<penkyoku_line_max;i++) {
+	for (int i=penkyoku_line_start;i<penkyoku_line_max;i++) {
 		
 		if (&lines[i] == new_line) continue;
 		kousaKyokusenAndMakeKouten(new_line, &lines[i], line_infos);
@@ -37,7 +40,7 @@ void KTPaintNuri::koutenShoriLinePlus(KTPAINT_penkyokuline* new_line, KTPAINT_pe
 	}
 }
 
-void KTPaintNuri::koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_max, KTPAINT_penline* line_infos) {
+void KTPaintNuri::koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_start, int penkyoku_line_max, KTPAINT_penline* line_infos) {
 
 	vector<KTPAINT_koutens*>::iterator it = koutenss.begin();
 	while(it != koutenss.end()) {
@@ -65,11 +68,11 @@ void KTPaintNuri::koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_max
 
 	kouten_max = 0;
 	// 自己ループがある場合を考えて判定する
-	for (int i=0;i<penkyoku_line_max;i++) {
+	for (int i=penkyoku_line_start;i<penkyoku_line_max;i++) {
 		kousaKyokusenAndMakeKouten(&lines[i],&lines[i],line_infos);
 	}
-	for (int i=0;i<penkyoku_line_max;i++) {
-		for (int j=0;j<penkyoku_line_max;j++) {
+	for (int i=penkyoku_line_start;i<penkyoku_line_max;i++) {
+		for (int j=penkyoku_line_start;j<penkyoku_line_max;j++) {
 			if (i == j) continue;
 			kousaKyokusenAndMakeKouten(&lines[i], &lines[j], line_infos);
 		}

@@ -10,6 +10,7 @@ using namespace std;
 class KTPaintNuri;
 class KTPAINT_kouten;
 
+
 class KTPAINT_enpituline {
 public:
 	unsigned short x;
@@ -40,8 +41,8 @@ public:
 
 	KTPAINT_pen() {
 		for (int i=0;i<16;i++) {
-			pen_width.m[i/4][i%4] = 1+1*(i+1)/8.0f;
-			pen_width_calcurator.m[i/4][i%4] = 300+100*i;
+			pen_width.m[i/4][i%4] = 2+1*(i+1)/8.0f;
+			pen_width_calcurator.m[i/4][i%4] = 300+(400+i*100)*i;
 		}
 	}
 
@@ -66,7 +67,9 @@ public:
 	unsigned short kyoku_id;
 };
 
-#define KTPAINT_SHEET_LINE_MAX 50000
+#define KTPAINT_SHEET_HEILINE_MAX 4096*6
+#define KTPAINT_SHEET_LINE_MAX 4096*6
+#define KTPAINT_SHEET_DUMMY_MAX 4096
 #define KTPAINT_SHEET_KYOKULINE_MAX 2048
 
 class KTPAINT_penheiryouikipart {
@@ -84,11 +87,8 @@ public:
 	unsigned short startheiryouiki;
 	unsigned short endheiryouiki;
 	unsigned short daen_index;
-	unsigned short daen_calced;//0 mada 1 sudeni
-	unsigned short daen_many_start;
-	unsigned short daen_many_end;
 	unsigned short hen_id;
-	unsigned short offset;
+	DWORD color;
 };
 
 class KTPAINT_penheiryouikidaen {
@@ -102,13 +102,40 @@ public:
 	float theta;
 };
 
-#define KTPAINT_PENHEIRYOUIKI_MAX 4096
-#define KTPAINT_PENHEIRYOUIKI_PART_MAX 4096*4
-#define KTPAINT_PENHEIRYOUIKI_DAEN_MAX 4096
+#define KTPAINT_PENHEIRYOUIKI_MAX 512
+#define KTPAINT_PENHEIRYOUIKI_PART_MAX 2048
+#define KTPAINT_PENHEIRYOUIKI_DAEN_MAX 512
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX 4096*2
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX 16
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_RADIUS_SAISHO 10
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_FUKUMANAI 65535
+
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_UNUSE 0
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_MAIN 1
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_SUB 2
+
+class KTPAINT_bubble {
+public:
+	unsigned short x;
+	unsigned short y;
+	float radius;
+	KTPAINT_bubble* ketugou[8];
+	unsigned short fukumuten[KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX];
+	unsigned short oya_ketugou;
+	unsigned short status;
+};
+
+
+
+
+
+
 
 class KTPaintSheet
 {
 private:
+
+
 	KTPAINT_penheiryouikipart hei_part[KTPAINT_PENHEIRYOUIKI_PART_MAX];
 	KTPAINT_penheiryouiki hei[KTPAINT_PENHEIRYOUIKI_MAX];
 	KTPAINT_penheiryouikidaen hei_daen[KTPAINT_PENHEIRYOUIKI_DAEN_MAX];
@@ -118,7 +145,11 @@ private:
 	int hei_daen_max;
 	int hei_part_max;
 	int hei_max;
-	KTPAINT_enpituline elines[KTPAINT_SHEET_LINE_MAX];
+	int hei_pline_max;
+	int hei_kyokupline_max;
+	KTPAINT_penline hei_plines[KTPAINT_SHEET_HEILINE_MAX];
+	KTPAINT_penkyokuline hei_kyoku_plines[KTPAINT_SHEET_KYOKULINE_MAX];
+	KTPAINT_enpituline elines[KTPAINT_SHEET_DUMMY_MAX];
 	KTPAINT_penline plines[KTPAINT_SHEET_LINE_MAX];
 	KTPAINT_penkyokuline kyoku_plines[KTPAINT_SHEET_KYOKULINE_MAX];
 	int eline_max;
@@ -137,7 +168,12 @@ private:
 	int getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID);
 	int getTempHeiFromSitenAndID2(KTPAINT_kouten* siten, KTPAINT_kouten** mae_k, KTPAINT_kouten** kk,  KTPAINT_kouten* koutens, 
 		int* keiro_indexs,KTPAINT_kouten** temp_koutens,int* keiro_depth);
-	void tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart);
+	bool tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart, DWORD color, bool onaji_check=true);
+
+public:
+	void simulationStepStart(unsigned short width, unsigned short height,KTPaintNuri* nuri);
+	void simulationBubbleStep(short min_d, short max_d, float radius_d, KTPaintNuri* nuri);
+
 public:
 	KTPaintSheet(void);
 	~KTPaintSheet(void);
@@ -166,6 +202,26 @@ public:
 			kyokupline_max++;
 		}
 	}
+	void setHeiPlineStart() {
+		pline_start_index = hei_pline_max;
+	}
+	int getHeiPlineStart() {
+		return pline_start_index;
+	}
+
+	void setHeiPlineEnd() {
+		pline_end_index = hei_pline_max;
+		if (hei_kyokupline_max < KTPAINT_SHEET_KYOKULINE_MAX) {
+			hei_kyoku_plines[hei_kyokupline_max].start_index = pline_start_index;
+			hei_kyoku_plines[hei_kyokupline_max].end_index = pline_end_index;
+			if (hei_kyoku_plines[hei_kyokupline_max].end_index) {
+				hei_kyoku_plines[hei_kyokupline_max].end_index--;
+			}
+			hei_kyoku_plines[hei_kyokupline_max].kyoku_index = 0;//bigline‚Í‚O‚É‚·‚é
+			hei_kyoku_plines[hei_kyokupline_max].kyoku_id = hei_kyokupline_max;
+			hei_kyokupline_max++;
+		}
+	}
 	void heikinPline();
 	int getElineMax() {return eline_max;}
 	int getPlineMax() {return pline_max;}
@@ -174,15 +230,21 @@ public:
 	void setEline(POINT mpo, POINT po, char alpha, unsigned char color_index);
 	// ‘¾‚³‚Í16’iŠK‚É•ª‚©‚ê‚é
 	void setPline(POINT mpo, POINT po, unsigned char width, unsigned char nwidth, unsigned char pen_index);
+	void setHeiPline(POINT mpo, POINT po, unsigned char width, unsigned char nwidth, unsigned char pen_index);
 	void clearP() {
 		pline_max = 0;
 	}
-	void calcHeiryouiki(KTPaintNuri* nuri);
+	void calcHeiryouiki(KTPaintNuri* nuri, DWORD color);
+	bool calcHeiryouikiPlus(KTPaintNuri* nuri, DWORD color);// true‚È‚ç•Â—Ìˆæ‚ª‘‚¦‚½‚±‚Æ‚ðˆÓ–¡‚·‚é
 	int bunkatuDaenWithLine(int hei_index, int start_index, int end_index,int start_daen_index, int end_daen_index);
 	KTPAINT_penheiryouiki* getHei() {return hei;}
 	KTPAINT_penheiryouikipart* getHeiPart() {return hei_part;}
 	KTPAINT_penheiryouikidaen* getHeiDaen() {return hei_daen;}
 	int getHeiMax() {return hei_max;}
+	int getHeiKyokuPLineMax() {return hei_kyokupline_max;}
+	int getHeiPLineMax() {return hei_pline_max;}
+	KTPAINT_penline* getHeiPLine() {return hei_plines;}
+	KTPAINT_penkyokuline* getHeiKyokuPLine() {return hei_kyoku_plines;}
 };
 
 

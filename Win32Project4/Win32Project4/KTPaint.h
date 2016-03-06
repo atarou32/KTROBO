@@ -14,6 +14,7 @@
 #define KTPAINT_PENCIL_ID 2
 #define KTPAINT_NURI_ID 3
 #define KTPAINT_ERASER_ID 4
+#define KTPAINT_HEIPEN_ID 5
 
 class KTPaintSheetList {
 public:
@@ -48,6 +49,7 @@ private:
 	KTPaintGUI gui;
 	KTPAINT_pen pens[KTPAINT_PEN_NUM_MAX];
 	int now_pen_index;
+	int now_penkyokuline_start;
 	vector<KTPaintSheetList*> sheets;
 	KTPaintSheetList* now_sheet;
 	KTPaintSheetList* root_sheet;
@@ -120,6 +122,7 @@ public:
 	void setCursorToPen();
 	void setCursorToNuri();
 	void setCursorToEraser();
+	void setCursorToHeipen();
 	void setGColorTheta(ULONG mouse_x, ULONG mouse_y);
 	bool isInCircleColorPen(ULONG mouse_x, ULONG mouse_y);
 	bool isInTriangleColorPen(ULONG mouse_x, ULONG mouse_y);
@@ -132,12 +135,30 @@ public:
 	void updateDispLineNum();
 
 	void startDrawLine() {
+		if (this->now_paint_id == KTPAINT_PEN_ID) {
 		now_sheet->now_sheet->setPlineStart();
+		} else if(now_paint_id == KTPAINT_HEIPEN_ID) {
+			now_sheet->now_sheet->setHeiPlineStart();
+			//now_penkyokuline_start = now_sheet->now_sheet->getHeiKyokuPLineMax();
+		}
 	}
 	void writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new, bool reset);
 	void endDrawLine() {
+		if (this->now_paint_id == KTPAINT_PEN_ID) {
+
 		now_sheet->now_sheet->setPlineEnd();
 		now_sheet->now_sheet->heikinPline();
+		} else if(now_paint_id == KTPAINT_HEIPEN_ID) {
+			now_sheet->now_sheet->setHeiPlineEnd();
+			nuridayo.koutenShori(now_sheet->now_sheet->getHeiKyokuPLine(), now_penkyokuline_start, now_sheet->now_sheet->getHeiKyokuPLineMax(),
+				now_sheet->now_sheet->getHeiPLine());
+			DWORD color = (0xFF << 24) + (now_color_r << 16) + (now_color_g << 8) + now_color_b;
+			if (now_sheet->now_sheet->calcHeiryouikiPlus(&nuridayo,color)) {
+				// ‚¢‚Ü‚Ü‚Å‚Ìheiü‚ðÁ‚·
+				now_penkyokuline_start = now_sheet->now_sheet->getHeiKyokuPLineMax();
+			}
+		}
+
 	//	nuridayo.koutenShoriLinePlus(now_sheet->now_sheet->getLastKyokuPLine(), now_sheet->now_sheet->getKyokuPLines(), 
 	//		now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
 	}
@@ -150,6 +171,7 @@ public:
 	
 	bool setSheetNext() {
 		
+	
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
 			now_count = 0;

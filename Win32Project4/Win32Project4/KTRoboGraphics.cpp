@@ -709,7 +709,7 @@ for (int i=0;i<64;) {
 }
 
 
-void Graphics::drawHeiryouiki(KTROBO::Graphics* g, DWORD color, KTPAINT_penheiryouiki* hei, 
+void Graphics::drawHeiryouiki(KTROBO::Graphics* g, KTPAINT_penheiryouiki* hei, 
 							  KTPAINT_penheiryouikipart* heipart, KTPAINT_penline* lines,
 							  KTPAINT_penheiryouikidaen* daens) {
 
@@ -724,9 +724,14 @@ int i=0;
 for (int k=hei->startheiryouiki;k<=hei->endheiryouiki;k++) {
 for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	
-	
+	bool tug_last = false;
 	float x1 = lines[heipart[k].keiro_first_index+tt].x;
-	float x2 = lines[heipart[k].keiro_first_index+1+tt].x;
+	int tugi_index = heipart[k].keiro_first_index+tt+10;
+	if (tugi_index >= heipart[k].keiro_last_index) {
+		tugi_index = heipart[k].keiro_last_index;
+		tug_last = true;
+	}
+	float x2 = lines[tugi_index].x;
 	float x3 = daens[hei->daen_index].x;
 	float y1 = lines[heipart[k].keiro_first_index+tt].y;
 	if ((tt ==0)) {
@@ -734,7 +739,7 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 		y1 = heipart[k].kouten_y;
 	}
 
-	float y2 = lines[heipart[k].keiro_first_index+1+tt].y;
+	float y2 = lines[tugi_index].y;
 
 	if (tt == heipart[k].keiro_last_index-heipart[k].keiro_first_index) {
 		if (k == hei->endheiryouiki) {
@@ -763,23 +768,31 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	center.float3.y = y3/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	center.float3.z = 0;
 	drawDaen(g,0xFFFF0000,center, 10,10,0);
-	tt++;
-	continue;
-	sttr[i].color = 0xFFFFFFFF;//color;
+	
+	sttr[i].color = hei->color;//color;
 	sttr[i].x = -1 + 2*x1 / (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i].y = 1 - 2*y1 / (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i].z = 0;
-	sttr[i+1].color = 0xFFFFFFFF;//color;
+	sttr[i+1].color = hei->color;
 	sttr[i+1].x = -1 + 2*x2/ (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+1].y = 1 - 2*y2/ (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+1].z = 0;
-	sttr[i+2].color = 0xFFFFFFFF;//color;
+	sttr[i+2].color = hei->color;
 	sttr[i+2].x =  -1 + 2*x3/ (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].y = 1 - 2*y3/ (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].z = 0;
 	i += 3;
-	tt += 1;
+	tt += 10;
 	temp+=1;
+	if (temp >= 1024) {
+		break;
+	}
+	if (tug_last) {
+		break;
+	}
+}
+if (temp >= 1024) {
+	break;
 }
 }
 	MYMATRIX proj;
@@ -821,10 +834,72 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	
 	CS::instance()->leave(CS_DEVICECON_CS, "leave");
 
+}
 
 
+void Graphics::drawPenSpecialSitei(KTROBO::Graphics* g, KTPAINT_penkyokuline* kyoku_line, int now_penkyokuline_start,
+			int pline_max , KTPAINT_penline* penlines , int penline_max) {
+
+	CS::instance()->enter(CS_DEVICECON_CS, "render");
+
+	if (penline_max > KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL) {
+		CS::instance()->leave(CS_DEVICECON_CS, "render");
+		return;
+	}
 
 
+	unsigned int stride = sizeof(GRAPHICS_RENDER_PEN_STRUCT_SPECIAL);
+	unsigned int offset = 0;
+	GRAPHICS_RENDER_PEN_STRUCT_SPECIAL xdayo[KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL];
+	for (int k=now_penkyokuline_start;k<pline_max;k++) {
+		KTPAINT_penkyokuline* pp = &kyoku_line[k];
+
+		for (int i=pp->start_index;i<=pp->end_index;i++) {
+	//	if ( (i<penline_max-1)) {
+			xdayo[i].x = (penlines[i].x);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+			xdayo[i].y = (penlines[i].y);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+			xdayo[i].dx = (penlines[i].dx);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+			xdayo[i].dy = (penlines[i].dy);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	//	} else {
+		//	xdayo[i].x = penlines[i].x;
+		//	xdayo[i].y = penlines[i].y;
+		//	xdayo[i].dx = penlines[i].dx;
+		//	xdayo[i].dy = penlines[i].dy;
+	//	}
+		xdayo[i].width_and_nwidth = penlines[i].width_and_nwidth;
+		xdayo[i].offset = 0;
+		xdayo[i].offset2 = 0;
+		xdayo[i].pen_index = penlines[i].pen_index;
+		}
+	}
+	
+	//g->getDeviceContext()->UpdateSubresource(info_buffer,0,NULL,&info,0,0);
+	D3D11_MAPPED_SUBRESOURCE msr;
+	
+	g->getDeviceContext()->Map(render_buffer_pen_special, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	memcpy( msr.pData, &xdayo, sizeof(GRAPHICS_RENDER_PEN_STRUCT_SPECIAL)*penline_max );
+	g->getDeviceContext()->Unmap(render_buffer_pen_special, 0);
+
+	g->getDeviceContext()->IASetInputLayout( mss_for_pen_special.vertexlayout );
+	g->getDeviceContext()->GSSetConstantBuffers(0,1,&render_buffer_cbuf);
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_buffer_pen_special, &stride, &offset );
+	g->getDeviceContext()->IASetIndexBuffer(index_buffer_pen,DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->RSSetState(mss_for_pen_special.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss_for_pen_special.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_pen_special.gs,NULL,0);
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&f->fonttextureviews[i]);//render_target_tex->view);
+	g->getDeviceContext()->PSSetSamplers(0,1,&p_sampler);
+		
+	g->getDeviceContext()->PSSetShader(mss_for_pen_special.ps, NULL, 0);
+			
+	g->getDeviceContext()->DrawIndexed(penline_max*3,0,0);//penline_max,0);
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
 
 
 
@@ -835,8 +910,6 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 
 
 }
-
-
 
 
 void Graphics::drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {
