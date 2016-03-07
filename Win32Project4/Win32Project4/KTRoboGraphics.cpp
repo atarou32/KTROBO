@@ -21,6 +21,7 @@ MYSHADERSTRUCT Graphics::mss_for_pen_special;
 ID3D11Buffer* Graphics::index_buffer_pen=0;
 ID3D11Buffer* Graphics::render_buffer_cbuf=0;
 MYSHADERSTRUCT Graphics::mss_for_tex;
+MYSHADERSTRUCT Graphics::mss_for_pencil;
 ID3D11Buffer* Graphics::render_buffer_tex=0;
 ID3D11DepthStencilView* Graphics::pDepthStencilView = 0;
 ID3D11Texture2D* Graphics::pDepthStencil=0;
@@ -54,6 +55,8 @@ void Graphics::InitMSS(Graphics* g) {
 	loadShader(g, &mss, KTROBO_GRAPHICS_SHADER_FILENAME, KTROBO_GRAPHICS_SHADER_VS, KTROBO_GRAPHICS_SHADER_GS,
 		KTROBO_GRAPHICS_SHADER_PS, g->getScreenWidth(), g->getScreenHeight(),
 								layout, 2, true);
+
+	
 
 	memset(&info, 0,  sizeof(GRAPHICS_INFO_STRUCT));
 	D3D11_BUFFER_DESC des;
@@ -229,7 +232,9 @@ void Graphics::InitMSS(Graphics* g) {
 	descDepth.SampleDesc.Count = 1; descDepth.SampleDesc.Quality = 0;
 	descDepth.Usage = D3D11_USAGE_DEFAULT;
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
- 
+	descDepth.CPUAccessFlags = 0;
+	descDepth.MiscFlags = 0;
+
 	//ID3D11Texture2D* pDepthStencil = 0;
 	hr = g->getDevice()->CreateTexture2D( &descDepth, NULL, &pDepthStencil );
 	if (FAILED(hr)) {
@@ -240,8 +245,9 @@ void Graphics::InitMSS(Graphics* g) {
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDepthStencilView;
 	ZeroMemory( &descDepthStencilView, sizeof(descDepthStencilView) );
 	descDepthStencilView.Format = descDepth.Format;
-	descDepthStencilView.ViewDimension =  D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDepthStencilView.ViewDimension =  D3D11_DSV_DIMENSION_TEXTURE2DMS;
 	descDepthStencilView.Texture2D.MipSlice = 0;
+	descDepthStencilView.Flags = 0;
 	//ID3D11DepthStencilView* pDepthStencilView = 0;
 	hr = g->getDevice()->CreateDepthStencilView( pDepthStencil, &descDepthStencilView, &pDepthStencilView );
 	if (FAILED(hr)) {
@@ -275,6 +281,23 @@ void Graphics::InitMSS(Graphics* g) {
 		Del();
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "vertex buffer make error");;
 	}
+
+
+
+
+
+	
+	D3D11_INPUT_ELEMENT_DESC layout5[] = {
+		{"POSTEN", 0, DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"INFO1D",0,DXGI_FORMAT_R32G32_FLOAT, 0,8,D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"INFO2D",0,DXGI_FORMAT_R8G8_UINT,0,16,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"OFFSET",0,DXGI_FORMAT_R8G8_UINT, 0,18,D3D11_INPUT_PER_VERTEX_DATA,0}
+	};
+
+
+	loadShader(g, &mss_for_pencil, KTROBO_GRAPHICS_SHADER_FILENAME_PENCIL, KTROBO_GRAPHICS_SHADER_VS, KTROBO_GRAPHICS_SHADER_GS,
+		KTROBO_GRAPHICS_SHADER_PS, g->getScreenWidth(), g->getScreenHeight(),
+								layout5, 4, true);
 
 
 
@@ -557,6 +580,8 @@ void Graphics::Del() {
 		pDepthStencilView->Release();
 		pDepthStencilView = 0;
 	}
+
+	mss_for_pencil.Del();
 }
 
 void Graphics::drawPen(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {
@@ -726,31 +751,84 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	
 	bool tug_last = false;
 	float x1 = lines[heipart[k].keiro_first_index+tt].x;
-	int tugi_index = heipart[k].keiro_first_index+tt+10;
+	int tugi_index = heipart[k].keiro_first_index+tt+1;
+	
 	if (tugi_index >= heipart[k].keiro_last_index) {
 		tugi_index = heipart[k].keiro_last_index;
-		tug_last = true;
+	//	tug_last = true;
 	}
+	
 	float x2 = lines[tugi_index].x;
 	float x3 = daens[hei->daen_index].x;
 	float y1 = lines[heipart[k].keiro_first_index+tt].y;
+	float y2 = lines[tugi_index].y;
+	
 	if ((tt ==0)) {
 		x1 = heipart[k].kouten_x;
 		y1 = heipart[k].kouten_y;
-	}
+		// start end ‚ª‹t‚É‚È‚Á‚Ä‚¢‚éê‡‚Ík+1
 
-	float y2 = lines[tugi_index].y;
-
-	if (tt == heipart[k].keiro_last_index-heipart[k].keiro_first_index) {
-		if (k == hei->endheiryouiki) {
-			x2 = heipart[hei->startheiryouiki].kouten_x;
-			y2 = heipart[hei->startheiryouiki].kouten_y;
+		float xx1 = lines[heipart[k].keiro_last_index].x;
+		float yy1 = lines[heipart[k].keiro_last_index].y;
+		float xxx1 = lines[heipart[k].keiro_first_index].x;
+		float yyy1 = lines[heipart[k].keiro_first_index].y;
+		float dd = (x1-xx1)*(x1-xx1) + (y1-yy1)*(y1-yy1);
+		float dd2 = (x1-xxx1)*(x1-xxx1) + (y1-yyy1)*(y1-yyy1);
+		if (dd > dd2) {
+			// ok
 		} else {
-			x2 = heipart[k+1].kouten_x;
-			y2 = heipart[k+1].kouten_y;
+			if ((k == hei->endheiryouiki)) {
+				x1 = heipart[hei->startheiryouiki].kouten_x;
+				y1 = heipart[hei->startheiryouiki].kouten_y;
+			} else {
+				x1 = heipart[k+1].kouten_x;
+				y1 = heipart[k+1].kouten_y;
+			}
 		}
 	}
 
+	
+	if (tt == heipart[k].keiro_last_index-heipart[k].keiro_first_index) {
+	
+		x2 = heipart[k].kouten_x;
+		y2 = heipart[k].kouten_y;
+
+
+		float xx2 = lines[heipart[k].keiro_last_index].x;
+		float yy2 = lines[heipart[k].keiro_last_index].y;
+		float xxx2 = lines[heipart[k].keiro_first_index].x;
+		float yyy2 = lines[heipart[k].keiro_first_index].y;
+		float dd = (x2-xx2)*(x2-xx2) + (y2-yy2)*(y2-yy2);
+		float dd2 = (x2-xxx2)*(x2-xxx2) + (y2-yyy2)*(y2-yyy2);
+		if (dd > dd2) {
+			if ((k == hei->endheiryouiki)) {
+				x2 = heipart[hei->startheiryouiki].kouten_x;
+				y2 = heipart[hei->startheiryouiki].kouten_y;
+			} else {
+			x2 = heipart[k+1].kouten_x;
+			y2 = heipart[k+1].kouten_y;
+			}
+		} else {
+			// ok
+			// ok
+			
+				x2 = heipart[k].kouten_x;
+				y2 = heipart[k].kouten_y;
+			
+		}
+
+		/*
+		if ((k == hei->endheiryouiki)) {
+			x2 = heipart[hei->startheiryouiki].kouten_x;
+			y2 = heipart[hei->startheiryouiki].kouten_y;
+		} else {
+		
+			x2 = heipart[k+1].kouten_x;
+			y2 = heipart[k+1].kouten_y;
+		}
+		*/
+	}
+	
 
 	float y3 = daens[hei->daen_index].y;
 /*	MYVECTOR3 center;
@@ -782,7 +860,7 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	sttr[i+2].y = 1 - 2*y3/ (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].z = 0;
 	i += 3;
-	tt += 10;
+	tt += 1;
 	temp+=1;
 	if (temp >= 1024) {
 		break;
@@ -851,7 +929,7 @@ void Graphics::drawPenSpecialSitei(KTROBO::Graphics* g, KTPAINT_penkyokuline* ky
 	unsigned int stride = sizeof(GRAPHICS_RENDER_PEN_STRUCT_SPECIAL);
 	unsigned int offset = 0;
 	GRAPHICS_RENDER_PEN_STRUCT_SPECIAL xdayo[KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL];
-	for (int k=now_penkyokuline_start;k<pline_max;k++) {
+	for (int k=now_penkyokuline_start;k<=pline_max;k++) {
 		KTPAINT_penkyokuline* pp = &kyoku_line[k];
 
 		for (int i=pp->start_index;i<=pp->end_index;i++) {
@@ -911,12 +989,78 @@ void Graphics::drawPenSpecialSitei(KTROBO::Graphics* g, KTPAINT_penkyokuline* ky
 
 }
 
+void Graphics::drawPencil(KTROBO::Graphics* g, KTPAINT_enpituline* lines, int line_max, unsigned char r,unsigned char gg, unsigned char b, unsigned char a) {
+	CS::instance()->enter(CS_DEVICECON_CS, "render");
+
+	if (line_max > KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL || line_max <= 0) {
+		CS::instance()->leave(CS_DEVICECON_CS, "render");
+		return;
+	}
+
+
+	unsigned int stride = sizeof(GRAPHICS_RENDER_PEN_STRUCT_SPECIAL);
+	unsigned int offset = 0;
+	GRAPHICS_RENDER_PEN_STRUCT_SPECIAL xdayo[KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL];
+	for (int i=0;i<line_max;i++) {
+	//	if ( (i<penline_max-1)) {
+			xdayo[i].x = (lines[i].x);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+			xdayo[i].y = (lines[i].y);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+			xdayo[i].dx = (lines[i].dx);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+			xdayo[i].dy = (lines[i].dy);//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	//	} else {
+		//	xdayo[i].x = penlines[i].x;
+		//	xdayo[i].y = penlines[i].y;
+		//	xdayo[i].dx = penlines[i].dx;
+		//	xdayo[i].dy = penlines[i].dy;
+	//	}
+		xdayo[i].width_and_nwidth = r;
+		xdayo[i].offset = b;
+		xdayo[i].offset2 = a;
+		xdayo[i].pen_index = gg;
+	}
+	
+	//g->getDeviceContext()->UpdateSubresource(info_buffer,0,NULL,&info,0,0);
+	D3D11_MAPPED_SUBRESOURCE msr;
+	
+	g->getDeviceContext()->Map(render_buffer_pen_special, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	memcpy( msr.pData, &xdayo, sizeof(GRAPHICS_RENDER_PEN_STRUCT_SPECIAL)*line_max );
+	g->getDeviceContext()->Unmap(render_buffer_pen_special, 0);
+
+	g->getDeviceContext()->IASetInputLayout( mss_for_pencil.vertexlayout );
+	g->getDeviceContext()->GSSetConstantBuffers(0,1,&render_buffer_cbuf);
+	g->getDeviceContext()->IASetVertexBuffers( 0, 1, &render_buffer_pen_special, &stride, &offset );
+	g->getDeviceContext()->IASetIndexBuffer(index_buffer_pen,DXGI_FORMAT_R16_UINT,0);
+	g->getDeviceContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	g->getDeviceContext()->RSSetState(mss_for_pencil.rasterstate);
+
+	float blendFactor[4] = {1.0f,1.0f,1.0f,1.0f};
+
+	g->getDeviceContext()->OMSetBlendState(mss_for_pencil.blendstate, blendFactor,0xFFFFFFFF/*0xFFFFFFFF*/);
+	g->getDeviceContext()->VSSetShader(mss_for_pencil.vs, NULL, 0);
+	g->getDeviceContext()->GSSetShader(mss_for_pencil.gs,NULL,0);
+//	g->getDeviceContext()->PSSetShaderResources(0,1,&f->fonttextureviews[i]);//render_target_tex->view);
+	g->getDeviceContext()->PSSetSamplers(0,1,&p_sampler);
+		
+	g->getDeviceContext()->PSSetShader(mss_for_pencil.ps, NULL, 0);
+			
+	g->getDeviceContext()->DrawIndexed(line_max*3,0,0);//penline_max,0);
+	
+	CS::instance()->leave(CS_DEVICECON_CS, "leave");
+
+
+
+
+
+
+
+
+}
 
 void Graphics::drawPenSpecial(KTROBO::Graphics* g, KTPAINT_penline* penlines, int penline_max) {
 
 	CS::instance()->enter(CS_DEVICECON_CS, "render");
 
-	if (penline_max > KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL) {
+	if (penline_max > KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL || penline_max <= 0) {
 		CS::instance()->leave(CS_DEVICECON_CS, "render");
 		return;
 	}

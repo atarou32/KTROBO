@@ -116,7 +116,7 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_SHADER_VS "VSFunc"
 #define KTROBO_GRAPHICS_SHADER_GS "GSFunc"
 #define KTROBO_GRAPHICS_SHADER_PS "PSFunc"
-#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 1024
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 4096
 
 #define KTROBO_GRAPHICS_SHADER_FILENAME_PEN "resrc/shader/renderlinepen.fx"
 #define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN KTPAINT_SHEET_LINE_MAX
@@ -128,6 +128,7 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE_PEN_SPECIAL KTPAINT_SHEET_LINE_MAX
 #define KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU 2
 
+#define KTROBO_GRAPHICS_SHADER_FILENAME_PENCIL "resrc/shader/renderlinepencil.fx"
 
 class GRAPHICS_RENDER_STRUCT {
 public:
@@ -233,6 +234,9 @@ public:
 	static ID3D11Buffer* render_buffer_tex;
 	static ID3D11DepthStencilView* pDepthStencilView;
 	static ID3D11Texture2D* pDepthStencil;
+
+	static MYSHADERSTRUCT mss_for_pencil;
+
 	static void InitMSS(Graphics* g);
 	static void loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename, char* vs_func_name, char* gs_func_name,
 								char* ps_func_name, unsigned int ds_width,unsigned int ds_height,
@@ -248,7 +252,8 @@ public:
 	static void drawDaen(KTROBO::Graphics* g,DWORD color, MYVECTOR3 center,float yoko, float tate, float theta_from_x);
 	static void drawHeiryouiki(KTROBO::Graphics* g, KTPAINT_penheiryouiki* hei, 
 		KTPAINT_penheiryouikipart* heipart, KTPAINT_penline* lines, KTPAINT_penheiryouikidaen* daens);
-	
+	static void drawPencil(KTROBO::Graphics* g, KTPAINT_enpituline* lines, int line_max 
+		, unsigned char r,unsigned char gg, unsigned char b, unsigned char a);
 	static void drawPenSpecialSitei(KTROBO::Graphics* g, KTPAINT_penkyokuline* kyoku_line, int now_penkyokuline_start,
 			int pline_max , KTPAINT_penline* pline , int penline_max);
 

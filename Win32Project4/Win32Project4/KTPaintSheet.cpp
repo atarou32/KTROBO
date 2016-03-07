@@ -68,7 +68,7 @@ void KTPaintSheet::heikinPline() {
 }
 
 
-void KTPaintSheet::setEline(POINT mpo, POINT po, char alpha, unsigned char color_index) {
+void KTPaintSheet::setEline(POINT mpo, POINT po, unsigned char alpha, unsigned char color_index) {
 	short dx = po.x - mpo.x;
 	short dy = po.y - mpo.y;
 	float tx = abs(dx) /127.0f;
@@ -633,10 +633,17 @@ bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 		if (temp_heid_len == heid_len) {
 			// temp_heid‚ÍŽn“_‚ð‚Æ‚¨‚é‚©
 			int hei_kouten_index = hei_part[heid->startheiryouiki].kouten_index;
-
+			int hei_kouten_first_index = hei_part[heid->startheiryouiki].keiro_first_index;
+			int hei_kouten_last_index = hei_part[heid->startheiryouiki].keiro_last_index;
 			int temp_hei_ryouiki_index = KTPAINT_SHEET_KOUTEN_MAX;
 			for (int k = temp_hei->startheiryouiki;k<= temp_hei->endheiryouiki;k++) {
-				if ((temp_heipart[k].kouten_index == hei_kouten_index)) {
+				if ((/*temp_heipart[k].kouten_index == hei_kouten_index*/
+					(temp_heipart[k].keiro_first_index == hei_kouten_first_index)
+				&&(temp_heipart[k].keiro_last_index == hei_kouten_last_index)
+					
+					
+					
+					)) {
 					temp_hei_ryouiki_index = k-temp_hei->startheiryouiki;
 					break;
 				}
@@ -652,10 +659,10 @@ bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 						indee = indee - (temp_hei->endheiryouiki - temp_hei->startheiryouiki)-1;
 					}
 					int hei_inde = k + heid->startheiryouiki;
-					if (/*(hei_part[hei_inde].keiro_first_index == temp_heipart[indee].keiro_first_index) && 
-						(hei_part[hei_inde].keiro_last_index == temp_heipart[indee].keiro_last_index) */
+					if ((hei_part[hei_inde].keiro_first_index == temp_heipart[indee].keiro_first_index) && 
+						(hei_part[hei_inde].keiro_last_index == temp_heipart[indee].keiro_last_index) 
 						//(hei_part[hei_inde].keiro_index == temp_heipart[indee].keiro_index)/* &&
-						(hei_part[hei_inde].kouten_index == temp_heipart[indee].kouten_index)) {
+						/*(hei_part[hei_inde].kouten_index == temp_heipart[indee].kouten_index)*/) {
 					} else {
 						//if (indee = temp_hei->endheiryouiki) continue;
 						jyun_is_onaji = false;
@@ -675,10 +682,10 @@ bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 						hei_inde = heid->startheiryouiki;
 					}
 
-					if (//(hei_part[hei_inde].keiro_first_index == temp_heipart[indee].keiro_first_index) && 
-						//(hei_part[hei_inde].keiro_last_index == temp_heipart[indee].keiro_last_index) 
+					if ((hei_part[hei_inde].keiro_first_index == temp_heipart[indee].keiro_first_index) && 
+						(hei_part[hei_inde].keiro_last_index == temp_heipart[indee].keiro_last_index) 
 						/*(hei_part[hei_inde].keiro_index == temp_heipart[indee].keiro_index) &&*/
-						(hei_part[hei_inde].kouten_index == temp_heipart[indee].kouten_index)) {
+						/*(hei_part[hei_inde].kouten_index == temp_heipart[indee].kouten_index)*/) {
 					} else {
 						//if (indee = temp_hei->endheiryouiki) continue;
 						gyaku_is_onaji = false;
@@ -938,7 +945,7 @@ bool KTPaintSheet::calcHeiryouikiPlus(KTPaintNuri* nuri, DWORD color) {
 
 		for (int i=0;i<temp_hei_count;i++) {
 			if (temp_hei_use[i]) {
-				if (tryTourokuTempHeiToHei(&temp_hei[i], temp_heipart, color,false)) {
+				if (tryTourokuTempHeiToHei(&temp_hei[i], temp_heipart, color,true)) {
 					// ˆêŒÂ“o˜^‚Å‚«‚½‚ç\•ª
 					ans = true;
 				}

@@ -35,13 +35,16 @@ KTPaint::KTPaint(HINSTANCE hins)
 	sheets.push_back(now_sheet);
 	now_count = 0;
 
+	/*
 	for (int i=0;i<3000;i++) {
 	KTPaintSheetList* lis = new KTPaintSheetList();
 	lis->now_sheet = new KTPaintSheet();
 	sheets.push_back(lis);
 	}
-	
+	*/
 	now_penkyokuline_start = 0;
+	temp_pressure = 0;
+	is_render_pencil_line = false;
 }
 
 
@@ -135,7 +138,7 @@ void KTPaint::Init(HWND hwnd) {
 	tex_class_back_buffer=  loader.makeClass(g->getScreenWidth(),g->getScreenHeight());
 	render_tex_class = tex_class;
 	back_tex_class = tex_class2;
-
+	exam_class = loader.loadClass("resrc/gui.png");
 
 
 }
@@ -148,13 +151,14 @@ void KTPaint::clearSheetTransInfoNado() {
 	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 	
 }
+
 void KTPaint::renderlineToTex() {
 
-	//float clearColor[4] = {
-	//	1.0f,0.6f,0.0f,1.0f};
+	float clearColor[4] = {
+		1.0f,0.6f,0.0f,1.0f};
 	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
-	//g->getDeviceContext()->ClearRenderTargetView(tex_class->target_view,clearColor);
-	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	g->getDeviceContext()->ClearRenderTargetView(render_tex_class->target_view,clearColor);
+//	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	ID3D11ShaderResourceView* null_view = NULL;
 	g->getDeviceContext()->PSSetShaderResources(0,1,&null_view);
 	g->getDeviceContext()->OMSetRenderTargets(1,&render_tex_class->target_view,NULL);//KTROBO::Graphics::pDepthStencilView);
@@ -166,12 +170,24 @@ void KTPaint::renderlineToTex() {
 	viewport.Width = g->getScreenWidth();
 	viewport.Height = g->getScreenHeight();
 	g->getDeviceContext()->RSSetViewports(1,&viewport);
+	short ttransx = getTransX();
+	short ttransy = getTransY();
+	float zzoom = getZoom();
+
 	this->clearSheetTransInfoNado();
 	KTROBO::Graphics::drawTex(g,back_tex_class->width,back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+//	KTROBO::Graphics::drawTex(g,exam_class->width, exam_class->height, exam_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+	
+	int hei_max = now_sheet->now_sheet->getHeiMax();
+	for (int i=0;i<hei_max;i++) {
+	KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
+		now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiDaen());
+	///KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
+	}
+
 	
 	
-	
-	//KTROBO::Graphics::drawPenSpecial(g, this->now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
+	KTROBO::Graphics::drawPenSpecial(g, this->now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
 
 	g->getSwapChain()->Present(NULL,NULL);
 	ID3D11RenderTargetView* gg = g->getRenderTargetView();
@@ -183,7 +199,10 @@ void KTPaint::renderlineToTex() {
 	render_tex_class = back_tex_class;
 	back_tex_class = temp;
 	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
-	
+	setTransX(ttransx);
+	setTransY(ttransy);
+	setZoom(zzoom);
+
 }
 bool MyRegisterClass(HINSTANCE hInst, LPCSTR name) {
 
@@ -319,7 +338,16 @@ void KTPaint::createKoWindow(HWND p_window) {
     hBitmap=LoadBitmap(hInst,MAKEINTRESOURCE(IDB_BITMAP5));
 	SendDlgItemMessage(colorpen_window,5,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
 
-
+	HWND enpi = CreateWindow(TEXT("BUTTON"), "‰”•Mü•`‰æ",
+                 WS_CHILD|WS_VISIBLE|BS_CHECKBOX,
+                 0,500,30*4,30,
+                 colorpen_window,
+                 (HMENU)6,
+                 hInst,
+                 NULL);
+    
+	SendMessage(enpi, BM_SETCHECK , BST_CHECKED , 0);
+	is_render_pencil_line = true;
 
 	#ifndef HID_USAGE_PAGE_GENERIC
     #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -423,8 +451,16 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 								count++;
 								return;
 							}
+						} else if(this->now_paint_id == KTPAINT_PENCIL_ID) {
+							if (count > 2) {
+								now_sheet->now_sheet->setEline(mpo_c,po_c,0xFF, 0);
+								mpo_c = po_c;
+								count=1;
+							} else {
+								count++;
+								return;
+							}
 						}
-						
 				}
 			}
 		}
@@ -433,7 +469,8 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 	if (count >0) {
 		count =0;
 	}
-
+	temp_pressure = pressure_new;
+	updateDispLineNum();
 }
 
 void KTPaint::render() {
@@ -460,16 +497,12 @@ void KTPaint::render() {
  //       1.0f,
   //      0 );
 
-//	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 	
-	int hei_max = now_sheet->now_sheet->getHeiMax();
-	for (int i=0;i<hei_max;i++) {
-	KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
-		now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiDaen());
-	//KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
+	if (is_render_pencil_line || now_paint_id == KTPAINT_PENCIL_ID) {
+	KTROBO::Graphics::drawPencil(g,now_sheet->now_sheet->getEline(),now_sheet->now_sheet->getElineMax(),
+		now_color_r,now_color_g,now_color_b,0xFF);
 	}
-
-
 
 	if (this->is_render_next_sheet) {
 		if (now_sheet->next_sheet) {
@@ -495,8 +528,32 @@ void KTPaint::render() {
 	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 
 	if (now_paint_id == KTPAINT_HEIPEN_ID) {
-		KTROBO::Graphics::drawPenSpecialSitei(g, now_sheet->now_sheet->getHeiKyokuPLine(), this->now_penkyokuline_start,
+		if (now_penkyokuline_start) {
+			int temp_now = now_penkyokuline_start;
+			if (now_sheet->now_sheet->getHeiKyokuPLine()[now_penkyokuline_start].start_index ==0) {
+				temp_now = now_penkyokuline_start-1;
+
+				KTROBO::Graphics::drawPenSpecial(g, 
+				&now_sheet->now_sheet->getHeiPLine()[now_sheet->now_sheet->getHeiKyokuPLine()[temp_now].end_index+1],
+				now_sheet->now_sheet->getHeiPLineMax()-now_sheet->now_sheet->getHeiKyokuPLine()[temp_now].end_index-1);
+		
+
+			} else {
+			KTROBO::Graphics::drawPenSpecial(g, 
+			&now_sheet->now_sheet->getHeiPLine()[now_sheet->now_sheet->getHeiKyokuPLine()[temp_now].start_index],
+			now_sheet->now_sheet->getHeiPLineMax()-now_sheet->now_sheet->getHeiKyokuPLine()[temp_now].start_index);
+			}
+		} else {
+
+			KTROBO::Graphics::drawPenSpecial(g, 
+			&now_sheet->now_sheet->getHeiPLine()[now_sheet->now_sheet->getHeiKyokuPLine()[now_penkyokuline_start].start_index],
+			now_sheet->now_sheet->getHeiPLineMax()-now_sheet->now_sheet->getHeiKyokuPLine()[now_penkyokuline_start].start_index);
+	
+			/*
+				KTROBO::Graphics::drawPenSpecialSitei(g, now_sheet->now_sheet->getHeiKyokuPLine(), this->now_penkyokuline_start,
 			now_sheet->now_sheet->getHeiKyokuPLineMax(),now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiPLineMax());
+			*/
+		}
 	}
 	KTROBO::Graphics::drawPenSpecial(g, now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
 	ID3D11RenderTargetView* tt = g->getRenderTargetView();
@@ -688,7 +745,9 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	static ULONG xMousePos=0;
 	static ULONG yMousePos=0;
 	bool redraw = false;
+	int checkbox =0;
 	switch(i) {
+	
 	case WM_ERASEBKGND:
 		return 0;
 	case WM_MOUSEMOVE:
@@ -838,6 +897,17 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 			case 5:
 				paint->setCursorToHeipen();
 				break;
+			case 6:
+				 checkbox = SendMessage( GetDlgItem(h, 6), BM_GETCHECK, 0, 0 );
+				 if (checkbox) {
+					 	 paint->setIsRenderPencilLine(false);
+					 SendMessage(GetDlgItem(h,6) , BM_SETCHECK , BST_UNCHECKED , 0);
+				 } else {
+				
+					 paint->setIsRenderPencilLine(true);
+		 		 	SendMessage(GetDlgItem(h,6) , BM_SETCHECK , BST_CHECKED , 0);
+				 }
+				 break;
 			}
 		}
 		break;
@@ -945,9 +1015,11 @@ void KTPaint::makeNewSheet() {
 void KTPaint::updateDispLineNum() {
 	char labeltext[1024];
 	memset(labeltext,0,1024);
-	sprintf_s(labeltext ,1024, "line” = %d\n‘I‘ð€–Ú = %d" ,
+	sprintf_s(labeltext ,1024, "line” = %d\n‘I‘ð€–Ú = %d\n •Mˆ³=%d\nhline”=%d" ,
 				getNowSheetLineNum() ,
-				SendMessage(combo , CB_GETCURSEL , 0 , 0)
+				SendMessage(combo , CB_GETCURSEL , 0 , 0),
+				temp_pressure,
+				now_sheet->now_sheet->getHeiPLineMax()
 			);
 	SetWindowText(sheet_index_label , labeltext);
 

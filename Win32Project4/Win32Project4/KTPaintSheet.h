@@ -39,11 +39,45 @@ public:
 		return ans;
 	}
 
-	KTPAINT_pen() {
+	KTPAINT_pen(int index) {
+
+		if (index ==1) {
+			for (int i=0;i<16;i++) {
+			pen_width.m[i/4][i%4] = 4+4*(i+1)/8.0f;
+			pen_width_calcurator.m[i/4][i%4] = 300+(400+i*100)*i;
+			}
+			return;
+		}
+
 		for (int i=0;i<16;i++) {
 			pen_width.m[i/4][i%4] = 2+1*(i+1)/8.0f;
-			pen_width_calcurator.m[i/4][i%4] = 300+(400+i*100)*i;
+			pen_width_calcurator.m[i/4][i%4] = 300+(100)*i;
 		}
+	}
+
+	KTPAINT_pen() {
+
+		for (int i=0;i<16;i++) {
+			pen_width.m[i/4][i%4] = 2+0.8*i/4.00f;//2+1*(i+1)/8.0f;
+			pen_width_calcurator.m[i/4][i%4] = 300+(30)*i;
+		}
+			pen_width_calcurator.m[0][0] = 400;
+			pen_width_calcurator.m[0][1] = 500;
+			pen_width_calcurator.m[0][2] = 550;
+			pen_width_calcurator.m[0][3] = 570;
+			pen_width_calcurator.m[1][0] = 590;
+			pen_width_calcurator.m[1][1] = 610;
+			pen_width_calcurator.m[1][2] = 630;
+			pen_width_calcurator.m[1][3] = 650;
+			pen_width_calcurator.m[2][0] = 700;
+			pen_width_calcurator.m[2][1] = 730;
+			pen_width_calcurator.m[2][2] = 760;
+			pen_width_calcurator.m[2][3] = 790;
+			pen_width_calcurator.m[3][0] = 820;
+			pen_width_calcurator.m[3][1] = 850;
+			pen_width_calcurator.m[3][2] = 880;
+			pen_width_calcurator.m[3][3] = 1024;
+		
 	}
 
 };
@@ -227,7 +261,7 @@ public:
 	int getPlineMax() {return pline_max;}
 	KTPAINT_enpituline* getEline() {return elines;}
 	KTPAINT_penline* getPline() {return plines;}
-	void setEline(POINT mpo, POINT po, char alpha, unsigned char color_index);
+	void setEline(POINT mpo, POINT po, unsigned char alpha, unsigned char color_index);
 	// ‘¾‚³‚Í16’iŠK‚É•ª‚©‚ê‚é
 	void setPline(POINT mpo, POINT po, unsigned char width, unsigned char nwidth, unsigned char pen_index);
 	void setHeiPline(POINT mpo, POINT po, unsigned char width, unsigned char nwidth, unsigned char pen_index);

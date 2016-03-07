@@ -50,12 +50,14 @@ private:
 	KTPAINT_pen pens[KTPAINT_PEN_NUM_MAX];
 	int now_pen_index;
 	int now_penkyokuline_start;
+	int temp_pressure;
 	vector<KTPaintSheetList*> sheets;
 	KTPaintSheetList* now_sheet;
 	KTPaintSheetList* root_sheet;
 	bool is_activate;
 	bool is_render_next_sheet;
 	bool is_render_before_sheet;
+	bool is_render_pencil_line;
 	int now_count;
 	HDC hdcMem;
 	MyTextureLoader loader;
@@ -64,8 +66,13 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* tex_class2;
 	MyTextureLoader::MY_TEXTURE_CLASS* render_tex_class;
 	MyTextureLoader::MY_TEXTURE_CLASS* back_tex_class;
+	MyTextureLoader::MY_TEXTURE_CLASS* exam_class;
 	KTPaintNuri nuridayo;
 public:
+	void setIsRenderPencilLine(bool t) {
+		is_render_pencil_line = t;
+	}
+
 	bool getIsRenderNextSheet() {
 		return is_render_next_sheet;
 	}
@@ -155,6 +162,7 @@ public:
 			DWORD color = (0xFF << 24) + (now_color_r << 16) + (now_color_g << 8) + now_color_b;
 			if (now_sheet->now_sheet->calcHeiryouikiPlus(&nuridayo,color)) {
 				// ‚¢‚Ü‚Ü‚Å‚Ìheiü‚ðÁ‚·
+				renderlineToTex();
 				now_penkyokuline_start = now_sheet->now_sheet->getHeiKyokuPLineMax();
 			}
 		}
