@@ -24,7 +24,9 @@ KTPaintDouga::KTPaintDouga(void)
 
 	pimex = NULL;
 	pims  = NULL;	 
-
+	is_canseekabsolute = false;
+	is_canseekforward= false;
+	is_canseekbackward = false;
 }
 
 
@@ -776,7 +778,7 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
                 return false;
         }
 
-		Sleep(1000);
+		
         HBITMAP hbOld = ( HBITMAP )SelectObject( hdcMem, hBitmap );
         if( hbOld ) {
                 DeleteObject( hbOld );
@@ -932,7 +934,56 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	}
 	//Sleep(10000);*/
 
-	pims -> SetTimeFormat(&(TIME_FORMAT_FRAME));
+//	pims -> SetTimeFormat(&(TIME_FORMAT_FRAME));
+	hr = pims->IsFormatSupported(&TIME_FORMAT_FRAME);
+if (hr == S_OK)
+{
+    hr = pims->SetTimeFormat(&TIME_FORMAT_FRAME);
+    if (SUCCEEDED(hr))
+    {
+        // フレーム番号 20 にシークする。
+        LONGLONG rtNow = 20;
+        hr = pims->SetPositions(
+            &rtNow, AM_SEEKING_AbsolutePositioning, 
+            0, AM_SEEKING_NoPositioning);
+    }
+}
+
+
+DWORD dwCaps = AM_SEEKING_CanSeekAbsolute | 
+               AM_SEEKING_CanSeekForwards |
+               AM_SEEKING_CanSeekBackwards;
+{
+ HRESULT hr = pims->CheckCapabilities(&dwCaps);
+if(FAILED(hr)) {
+    // The stream cannot seek.
+}
+else if (hr == S_OK) 
+{   
+	is_canseekabsolute = true;
+	is_canseekforward = true;
+	is_canseekbackward = true;
+    // The stream can seek forward, backward, and to an absolute position.
+}
+else if (hr == S_FALSE) // The stream has some of the capabilities.
+{
+    if (dwCaps & AM_SEEKING_CanSeekAbsolute)
+    {
+		is_canseekabsolute = true;
+        // The stream can seek to an absolute position.
+    }
+    if (dwCaps & AM_SEEKING_CanSeekForwards)
+    {
+        // The stream can seek forward.
+		is_canseekforward = true;
+    }
+    if (dwCaps & AM_SEEKING_CanSeekBackwards)
+    {
+        // The stream can seek backward.
+		is_canseekbackward = true;
+    }
+}
+}
 
 
 	//REFERENCE_TIME mm = Fps2FrameLength(DEFAULT_FRAME_RATE);
@@ -1059,7 +1110,9 @@ if (pMediaCont) {
 					&nn,AM_SEEKING_NoPositioning);
 	/*
 			LONGLONG llAbsoluteTime = 0;
-		HRESULT hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,NULL,AM_SEEKING_NoPositioning);
+			LONGLONG lla;
+			
+		 hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,NULL,AM_SEEKING_NoPositioning);
 		*/Cont->RepaintVideo(hwnd, hdc);
 }
 
@@ -1097,10 +1150,28 @@ void KTPaintDouga::Run(HWND hwnd,HDC hdc){
 	}
 
 
+void KTPaintDouga::copyBufferOfVideoFrame(HWND hWnd) {
+	if (pMediaCont) {
+		 pSampleGrabber->SetBufferSamples( TRUE );
+		 long nBufferSize = 0;
+         pSampleGrabber->GetCurrentBuffer( &nBufferSize, NULL );
+         // 現在表示されている映像を静止画として取得 ( CreateDIBSection() が返した pBuffer に書き込む )
+         pSampleGrabber->GetCurrentBuffer( &nBufferSize, pBuffer );
+         RECT rect;
+         GetClientRect( hWnd, &rect );
+         InvalidateRect( hWnd, &rect, FALSE );  // 画面リフレッシュ ( WM_PAINT が送れれてくるようにする )
 
-void KTPaintDouga::setFrame(HWND hwnd, HDC hdc, LONGLONG frame) {
+		 pSampleGrabber->SetBufferSamples(FALSE);
+	}
+}
+
+void KTPaintDouga::setFrame(HWND hwnd, HDC hdc, PSTR textframe, int offset) {
 	if (pMediaCont) {
 		pMediaCont->Stop();
+
+		LONGLONG frame = atoi(textframe);
+		LONG one_second = 100000;
+		LONG offsetdayo = 75000;
 		LONGLONG nn = frame;
 		if (nn <0) {
 			nn = 0;
@@ -1108,13 +1179,41 @@ void KTPaintDouga::setFrame(HWND hwnd, HDC hdc, LONGLONG frame) {
 		if (nn >= frame_length) {
 			nn = frame_length;
 		}
+			LONGLONG lla2;
+			LONGLONG lla;
+			HRESULT hr = pims->GetPositions(&lla,&lla2);
 
-		pims ->SetPositions(&nn,AM_SEEKING_AbsolutePositioning,
-					&nn,AM_SEEKING_NoPositioning);
+		LONGLONG llAbsoluteTime = nn*one_second+offset*offsetdayo;
+		long evcode;
+		 hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&llAbsoluteTime,AM_SEEKING_AbsolutePositioning);
+		 pMediaCont->Run();
+		 pimex -> WaitForCompletion(100, &evcode);
+		 Cont->RepaintVideo(hwnd, hdc);
+		 copyBufferOfVideoFrame(hwnd);
+		 pMediaCont->Stop();
+		  hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&lla2,AM_SEEKING_AbsolutePositioning);
+		
+
+	/*
+		pims ->SetPositions(&nn,AM_SEEKING_SeekToKeyFrame,
+					NULL,AM_SEEKING_NoPositioning);
+	*/	
+		/*pMediaCont -> Run();				// レンダリング	
+		//printf("run at %d\n", nn);
+		//pimex -> WaitForCompletion(100, &evcode);
+		
+		RECT Cl;
+		GetClientRect(hwnd, &Cl);
+		RedrawWindow(hwnd, &Cl, NULL, RDW_ERASENOW);
+		pMediaCont->Stop();
+	*/
+
+
 	/*
 			LONGLONG llAbsoluteTime = 0;
 		HRESULT hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,NULL,AM_SEEKING_NoPositioning);
-		*/Cont->RepaintVideo(hwnd, hdc);
+		*/
+		//
 }
 	}
 

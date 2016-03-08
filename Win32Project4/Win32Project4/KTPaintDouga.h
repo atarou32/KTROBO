@@ -42,7 +42,9 @@ private:
 	LONGLONG frame_length;
 	IMediaEvent   *pimex;
 	IMediaSeeking *pims;	 
-
+	bool is_canseekabsolute;
+	bool is_canseekforward;
+	bool is_canseekbackward;
 public:
 
 	long *pBuffer;       // Å© í«â¡
@@ -61,7 +63,8 @@ public:
 		return frame_length;
 	}
 
-	void setFrame(HWND hwnd, HDC hdc, LONGLONG frame);
+	void copyBufferOfVideoFrame(HWND hWnd);
+	void setFrame(HWND hwnd, HDC hdc, PSTR text_frame, int offset);
 	void Pause();
 	void Stop(HWND hwnd, HDC hdc);
 

@@ -64,6 +64,9 @@ private:
 	bool is_render_next_sheet;
 	bool is_render_before_sheet;
 	bool is_render_pencil_line;
+public:
+	bool is_mode_dougasaisei;
+private:
 	int now_count;
 	HDC hdcMem;
 	MyTextureLoader loader;
@@ -182,10 +185,11 @@ public:
 	void activate(){is_activate = true;}
 	void deactivate() {is_activate=false;}
 
-	
+	bool is_dougasaisei() {return is_mode_dougasaisei;}
 	bool setSheetNext() {
 		HDC hdc = GetDC(parent_window);
 		douga.Run(parent_window,hdc);
+		is_mode_dougasaisei = true;
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
 			now_count = 0;
@@ -198,6 +202,8 @@ public:
 	bool setSheetBefore() {
 		HDC hdc = GetDC(parent_window);
 		douga.Stop(parent_window, hdc);
+		is_mode_dougasaisei = false;
+
 		ReleaseDC(parent_window, hdc);
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;

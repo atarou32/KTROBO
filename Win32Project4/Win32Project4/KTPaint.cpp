@@ -6,6 +6,7 @@
 #include "KTRoboGameError.h"
 #include "KTRoboCS.h"
 #include "KTRoboGraphics.h"
+#include "CommCtrl.h"
 
 
 #define KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT 95
@@ -45,6 +46,7 @@ KTPaint::KTPaint(HINSTANCE hins)
 	now_penkyokuline_start = 0;
 	temp_pressure = 0;
 	is_render_pencil_line = false;
+	is_mode_dougasaisei = false;
 }
 
 
@@ -759,11 +761,15 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	case WM_ERASEBKGND:
 		return 0;
 	case WM_PAINT:
-			if (hdc = BeginPaint(h, &psPaint)) 
+		if (hdc = BeginPaint(h, &psPaint)) 
 		{
 			paint->paint();
-			 EndPaint(h, &psPaint);
+		    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, paint->getHdcMem(), 0, 0, SRCCOPY);
+			
+						EndPaint(h, &psPaint);
 		}
+	break;
+
 	case WM_MOUSEMOVE:
 			xMousePos = GET_X_LPARAM(l);
 			yMousePos = GET_Y_LPARAM(l);
@@ -927,14 +933,20 @@ LPCSTR strItem[] = {
 	"text3",
 	"text4"
 };
+
+WNDPROC OrgTrackProc; //元々のトラックバーのプロシージャ
+
 LRESULT CALLBACK LoadSaveWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 static HWND combo;
 static HWND makesheet_button;
 static HWND sheet_index_label;
 static HWND sheet_linenum_label;
+static HWND sheet_frame;
+static HWND hTrack;
 static char labeltext[1024];
 static PAINTSTRUCT ps;
 static HDC hdc;
+char strtext[1024];
 	switch (i) {
 	case WM_PAINT:
 		hdc = BeginPaint(h, &ps);
@@ -956,7 +968,7 @@ static HDC hdc;
 		sheet_index_label = CreateWindow(
 			TEXT("STATIC") , NULL , 
 			WS_CHILD | WS_VISIBLE , 
-			0 , 50 , 200 , 300 , h , (HMENU)3 ,
+			0 , 50 , 200 , 250 , h , (HMENU)3 ,
 			paint->getHInst() , NULL
 		);
 		paint->setSheetIndexLabel(sheet_index_label);
@@ -972,21 +984,23 @@ static HDC hdc;
 		
 
 		   
-		CreateWindow(
+		sheet_frame =CreateWindow(
                 TEXT("EDIT"),             //ウィンドウクラス名
                 NULL,                   //キャプション
                 WS_CHILD | WS_VISIBLE | WS_BORDER //|
                     /*    WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL |*/
                      //   ES_LEFT | ES_MULTILINE,         //スタイル指定
-                ,0,600,                  //位置 ｘ、ｙ
-                100,0,                //幅、高さ
+                ,0,500,                  //位置 ｘ、ｙ
+                100,20,                //幅、高さ
                 h,                   //親ウィンドウ
                 (HMENU)10,               // メニューハンドルまたは子ウィンドウID
                 paint->getHInst(),                  //インスタンスハンドル
                 NULL);                  //その他の作成データ
 
 
-
+		CreateWindow(
+			TEXT("BUTTON"), TEXT("SETFRAME"), WS_CHILD | WS_VISIBLE|BS_DEFPUSHBUTTON,100,500,80,50,h,(HMENU)11,paint->getHInst(),NULL);
+	
 
 
 
@@ -998,17 +1012,79 @@ static HDC hdc;
 		for (i = 0 ; i < 5 ; i++)
 			SendMessage(combo , CB_ADDSTRING , 0 , (LPARAM)strItem[i]);
 
-		return 0;		
 
+
+
+
+		hTrack = CreateWindowEx(0,TRACKBAR_CLASS,//拡張ウィンドウスタイル
+                //ウィンドウクラス
+                "",WS_CHILD | WS_VISIBLE //|
+               // TBS_AUTOTICKS | TBS_ENABLESELRANGE,//ウィンドウスタイル
+                ,0, 550, 150, 20,//位置、大きさ
+                h,//親ウィンドウ
+                (HMENU)12,//コントロールID
+                paint->getHInst(),//インスタンスハンドル
+                NULL);
+            //元々のプロシージャを保存してトラックバーをサブクラス化
+           // OrgTrackProc = (WNDPROC)GetWindowLong(hTrack, GWL_WNDPROC);
+           // SetWindowLong(hTrack, GWL_WNDPROC, (LONG)MyTrackProc);
+            //トラックバーの範囲設定
+            SendMessage(hTrack, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELPARAM(0, 200));
+			SendMessage(hTrack, TBM_SETTICFREQ, 1, 0);   // 目盛りの増分
+			   SendMessage(hTrack, TBM_SETPAGESIZE, 0, 1); // クリック時の移動量
+			//OrgTrackProc = (WNDPROC)GetWindowLong(hTrack, GWL_WNDPROC);
+            //SetWindowLong(hTrack, GWL_WNDPROC, (LONG)MyTrackProc);
+         
+
+
+
+
+
+
+
+		return 0;		
+		case WM_HSCROLL:
+            if(hTrack == (HWND)l)
+            {
+                int pos = SendMessage(hTrack, TBM_GETPOS, NULL, NULL); // 現在の値の取得
+				hdc = GetDC(paint->parent_window);
+				memset(strtext,0,1024);
+				GetWindowText(sheet_frame , strtext , 1024);
+				paint->douga.setFrame(paint->parent_window,hdc,strtext,pos);
+				paint->is_mode_dougasaisei = false;
+				//paint->douga.copyBufferOfVideoFrame(paint->parent_window);
+				//free(strtext);
+				ReleaseDC(paint->parent_window,hdc);
+            }
+            //_stprintf_s(str,10,TEXT("%d ％"), Pos);
+            //SetWindowText(GetDlgItem(hWnd, IDC_STATIC1), (LPCTSTR)str); 
+            break;
 		case WM_COMMAND:
 		if (HIWORD(w) == CBN_SELCHANGE) {
 			paint->updateDispLineNum();
 		}
-
-		if (LOWORD(w) == 10) {
+		/*
+		if (LOWORD(w) == 12) {
+			int pos =  SendDlgItemMessage(hTrack, 13, TBM_GETPOS, 0, 0 );
+			hdc = GetDC(paint->parent_window);
+			memset(strtext,0,1024);
+			GetWindowText(sheet_frame , strtext , 1024);
+			paint->douga.setFrame(paint->parent_window,hdc,strtext,pos);
+			paint->is_mode_dougasaisei = false;
+			//paint->douga.copyBufferOfVideoFrame(paint->parent_window);
+			//free(strtext);
+			ReleaseDC(paint->parent_window,hdc);
+		}
+		*/
+		if (LOWORD(w) == 11) {
 			// テキスト
 			hdc = GetDC(paint->parent_window);
-			paint->douga.setFrame(paint->parent_window,hdc,HIWORD(w));
+			memset(strtext,0,1024);
+			GetWindowText(sheet_frame , strtext , 1024);
+			paint->douga.setFrame(paint->parent_window,hdc,strtext,0);
+			paint->is_mode_dougasaisei = false;
+			//paint->douga.copyBufferOfVideoFrame(paint->parent_window);
+			//free(strtext);
 			ReleaseDC(paint->parent_window,hdc);
 		}
 		if (HIWORD(w) == BN_CLICKED) {
