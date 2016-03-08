@@ -293,7 +293,10 @@ void KTPaint::createKoWindow(HWND p_window) {
 	
 	DWORD last = GetLastError();
 	
-   
+
+
+
+
 //	ShowWindow(hw,SW_SHOW);
 //	UpdateWindow(hw);
 	
@@ -755,6 +758,12 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	
 	case WM_ERASEBKGND:
 		return 0;
+	case WM_PAINT:
+			if (hdc = BeginPaint(h, &psPaint)) 
+		{
+			paint->paint();
+			 EndPaint(h, &psPaint);
+		}
 	case WM_MOUSEMOVE:
 			xMousePos = GET_X_LPARAM(l);
 			yMousePos = GET_Y_LPARAM(l);
@@ -927,12 +936,12 @@ static char labeltext[1024];
 static PAINTSTRUCT ps;
 static HDC hdc;
 	switch (i) {
-/*	case WM_PAINT:
+	case WM_PAINT:
 		hdc = BeginPaint(h, &ps);
 		// CreateDIBSection() によって作成されたビットマップを描画
 		  BitBlt(hdc, 0, 0, paint->douga.bmi.bmiHeader.biWidth, paint->douga.bmi.bmiHeader.biHeight, paint->douga.hdcMem, 0, 0, SRCCOPY );
 		  EndPaint(h, &ps);
-		  break;*/
+		  break;
 	case WM_CREATE:
 		combo = CreateWindow(
 			TEXT("COMBOBOX") , NULL , 
@@ -951,14 +960,37 @@ static HDC hdc;
 			paint->getHInst() , NULL
 		);
 		paint->setSheetIndexLabel(sheet_index_label);
+		/*
 		sheet_linenum_label = 
 			CreateWindow(
 			TEXT("STATIC") , NULL , 
 			WS_CHILD | WS_VISIBLE , 
 			0 , 350 , 200 , 250 , h , (HMENU)4 ,
 			paint->getHInst() , NULL
-		);
+		);*/
 		SendMessage(combo , CB_SETCURSEL , 0 , 0);
+		
+
+		   
+		CreateWindow(
+                TEXT("EDIT"),             //ウィンドウクラス名
+                NULL,                   //キャプション
+                WS_CHILD | WS_VISIBLE | WS_BORDER //|
+                    /*    WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL |*/
+                     //   ES_LEFT | ES_MULTILINE,         //スタイル指定
+                ,0,600,                  //位置 ｘ、ｙ
+                100,0,                //幅、高さ
+                h,                   //親ウィンドウ
+                (HMENU)10,               // メニューハンドルまたは子ウィンドウID
+                paint->getHInst(),                  //インスタンスハンドル
+                NULL);                  //その他の作成データ
+
+
+
+
+
+
+
 
 		paint->updateDispLineNum();
 		
@@ -973,6 +1005,12 @@ static HDC hdc;
 			paint->updateDispLineNum();
 		}
 
+		if (LOWORD(w) == 10) {
+			// テキスト
+			hdc = GetDC(paint->parent_window);
+			paint->douga.setFrame(paint->parent_window,hdc,HIWORD(w));
+			ReleaseDC(paint->parent_window,hdc);
+		}
 		if (HIWORD(w) == BN_CLICKED) {
 			switch(LOWORD(w)) {
 			
@@ -1019,14 +1057,15 @@ void KTPaint::makeNewSheet() {
 void KTPaint::updateDispLineNum() {
 	char labeltext[1024];
 	memset(labeltext,0,1024);
-	sprintf_s(labeltext ,1024, "line数 = %d/%d\n選択項目 = %d\n筆圧=%d\nhline数=%d/%d\nぬり領域数=%d/%d\n曲line数=%d/%d\n鉛筆line数%d/%d" ,
+	sprintf_s(labeltext ,1024, "line数 = %d/%d\n選択項目 = %d\n筆圧=%d\nhline数=%d/%d\nぬり領域数=%d/%d\n曲line数=%d/%d\n鉛筆line数%d/%d\n\n動画フレーム数=%d" ,
 		getNowSheetLineNum() , KTPAINT_SHEET_LINE_MAX,
 				SendMessage(combo , CB_GETCURSEL , 0 , 0),
 				temp_pressure,
 				now_sheet->now_sheet->getHeiPLineMax(), KTPAINT_SHEET_HEILINE_MAX,
 				now_sheet->now_sheet->getHeiMax(), KTPAINT_SHEET_KYOKULINE_MAX,
 				now_sheet->now_sheet->getKyokuPLineMax(), KTPAINT_SHEET_KYOKULINE_MAX,
-				now_sheet->now_sheet->getElineMax(), KTPAINT_SHEET_DUMMY_MAX
+				now_sheet->now_sheet->getElineMax(), KTPAINT_SHEET_DUMMY_MAX,
+				douga.getAllFrame()
 			);
 	SetWindowText(sheet_index_label , labeltext);
 

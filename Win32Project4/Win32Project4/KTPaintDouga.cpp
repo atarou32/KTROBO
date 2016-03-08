@@ -19,6 +19,12 @@ KTPaintDouga::KTPaintDouga(void)
     pSampleGrabber=0;
 	pVideoWindow = NULL;
 	Cont = 0;
+	length = 0;
+	frame_length = 0;
+
+	pimex = NULL;
+	pims  = NULL;	 
+
 }
 
 
@@ -656,9 +662,14 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	  CoCreateInstance( CLSID_SampleGrabber, NULL, CLSCTX_INPROC, IID_IBaseFilter, ( LPVOID * )&pSampleGrabberFilter );
         // FilterからISampleGrabberインターフェースを取得します
         pSampleGrabberFilter->QueryInterface( IID_ISampleGrabber, ( LPVOID * )&pSampleGrabber );
+		IMediaPosition *pMediaPosition;
 
+ 
 
-
+  pGB->QueryInterface(IID_IMediaPosition,
+	(LPVOID *)&pMediaPosition);
+		pGB -> QueryInterface( IID_IMediaEvent, (void **)&pimex);
+		pGB -> QueryInterface( IID_IMediaSeeking, (void **)&pims);
 
   hr = pGB->QueryInterface(IID_IVideoWindow, (LPVOID*)&pVideoWindow);
  
@@ -724,7 +735,12 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		
 		
 		
-		pMediaControl->RenderFile( L"resrc/hundred.wmv" );
+	//	pMediaControl->RenderFile( L"resrc/hundred.wmv" );
+		hr = pGB->RenderFile( L"resrc/hundred.wmv",NULL );
+		pMediaPosition->get_Duration(&length);
+			// printf("%lf\n", length);
+
+		pMediaPosition->Release();
         // 接続情報取得。
         // この処理はRenderFileによりGraphが構成された後に
         // 行う必要があります。
@@ -753,6 +769,7 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   // ビットマップ情報を保存
   memcpy( &bmi.bmiHeader, &pVideoInfoHeader->bmiHeader, sizeof( BITMAPINFOHEADER ) );
   // ビットマップを作成
+  REFERENCE_TIME mm = pVideoInfoHeader->AvgTimePerFrame;
   hBitmap = CreateDIBSection( 0, &bmi, DIB_RGB_COLORS, ( VOID ** )&pBuffer, NULL, 0 );
         if( !hBitmap ) {
                 MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );
@@ -770,7 +787,7 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
         // 不必要に負荷をかけたくない場合にはFALSEにしておいて、
         // データを取得したくなったら、TRUEに変える
         // という方法もできます。
-        pSampleGrabber->SetBufferSamples( TRUE );
+        pSampleGrabber->SetBufferSamples( FALSE );
       
 	
 
@@ -914,16 +931,38 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		//pMediaCont->Run();
 	}
 	//Sleep(10000);*/
+
+	pims -> SetTimeFormat(&(TIME_FORMAT_FRAME));
+
+
+	//REFERENCE_TIME mm = Fps2FrameLength(DEFAULT_FRAME_RATE);
+
+	if (mm) {
+	frame_length = length*1000;//mm;
+	} else {
+		frame_length = length*1000;
+	}
 	inited = true;
 	return true;
 }
 
 void KTPaintDouga::Del() {
+
 	if (pMediaEventEx) {
 		pMediaEventEx->Release();
 		pMediaEventEx = 0;
 	}
-	
+
+	if(pimex) {
+		pimex->Release();
+		pimex = NULL;
+	}
+
+	if (pims) {
+		pims->Release();
+		pims = NULL;	 
+	}
+
 	if (pMediaCont) {
 		pMediaCont->Stop();
 		pMediaCont->Release();
@@ -1006,8 +1045,46 @@ KTPaintDouga::OnGraphNotify(WPARAM wParam, LPARAM lParam)
  return NOERROR;
 }
 
+
+void KTPaintDouga::Stop(HWND hwnd, HDC hdc) {
+
+
+
+
+if (pMediaCont) {
+		pMediaCont->Stop();
+		LONGLONG nn;
+		nn = 0;
+		pims ->SetPositions(&nn,AM_SEEKING_AbsolutePositioning,
+					&nn,AM_SEEKING_NoPositioning);
+	/*
+			LONGLONG llAbsoluteTime = 0;
+		HRESULT hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,NULL,AM_SEEKING_NoPositioning);
+		*/Cont->RepaintVideo(hwnd, hdc);
+}
+
+
+
+}
+
+void KTPaintDouga::Pause() {
+
+	
+	if (pMediaCont) {
+		pMediaCont->Stop();
+		//	Cont->RepaintVideo(hwnd, hdc);
+	}
+}
+
+
+
+
+
+
+
 void KTPaintDouga::Run(HWND hwnd,HDC hdc){
 		if (pMediaCont) {
+	
 		HRESULT hr = pMediaCont->Run();
 	//	HWND child_window=GetWindow(hwnd, GW_CHILD);//hwndは親ウィンドウ
 	//	pVideoWindow->rePaint(child_window);
@@ -1018,3 +1095,32 @@ void KTPaintDouga::Run(HWND hwnd,HDC hdc){
 		}
 		}
 	}
+
+
+
+void KTPaintDouga::setFrame(HWND hwnd, HDC hdc, LONGLONG frame) {
+	if (pMediaCont) {
+		pMediaCont->Stop();
+		LONGLONG nn = frame;
+		if (nn <0) {
+			nn = 0;
+		}
+		if (nn >= frame_length) {
+			nn = frame_length;
+		}
+
+		pims ->SetPositions(&nn,AM_SEEKING_AbsolutePositioning,
+					&nn,AM_SEEKING_NoPositioning);
+	/*
+			LONGLONG llAbsoluteTime = 0;
+		HRESULT hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,NULL,AM_SEEKING_NoPositioning);
+		*/Cont->RepaintVideo(hwnd, hdc);
+}
+	}
+
+
+
+
+
+
+

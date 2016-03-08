@@ -196,7 +196,9 @@ public:
 		return false;
 	}
 	bool setSheetBefore() {
-		douga.Stop();
+		HDC hdc = GetDC(parent_window);
+		douga.Stop(parent_window, hdc);
+		ReleaseDC(parent_window, hdc);
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
 			now_count = 0;

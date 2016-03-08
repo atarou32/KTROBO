@@ -36,7 +36,13 @@ private:
 	IBaseFilter *pSampleGrabberFilter;
     ISampleGrabber *pSampleGrabber;
 	IVideoWindow  *pVideoWindow;
-	IVMRWindowlessControl *Cont; 
+	IVMRWindowlessControl *Cont;
+
+	REFTIME length;
+	LONGLONG frame_length;
+	IMediaEvent   *pimex;
+	IMediaSeeking *pims;	 
+
 public:
 
 	long *pBuffer;       // © ’Ç‰Á
@@ -51,11 +57,14 @@ public:
 	void Init3(HWND hwnd, int nCmdShow);
 	void Del();
 	void Run(HWND hwnd, HDC hdc);
-	
-
-	void Stop() {
-		pMediaCont->Stop();
+	LONGLONG getAllFrame() {
+		return frame_length;
 	}
+
+	void setFrame(HWND hwnd, HDC hdc, LONGLONG frame);
+	void Pause();
+	void Stop(HWND hwnd, HDC hdc);
+
 
 	LRESULT OnGraphNotify(WPARAM wParam, LPARAM lParam);
 };
