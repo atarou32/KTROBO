@@ -122,7 +122,7 @@ void KTPaint::setCursorToEraser() {
 
 }
 
-void KTPaint::Init(HWND hwnd) {
+void KTPaint::Init(HWND hwnd,HINSTANCE hInst, int nCmdShow) {
 	KTROBO::CS::instance()->Init();
 	g = new KTROBO::Graphics();
 	g->Init(hwnd);
@@ -139,8 +139,12 @@ void KTPaint::Init(HWND hwnd) {
 	render_tex_class = tex_class;
 	back_tex_class = tex_class2;
 	exam_class = loader.loadClass("resrc/gui.png");
-
-
+	
+	if (!douga.Init(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow)) {
+		douga.Del();
+	}
+	
+	//douga.Init3(hwnd,nCmdShow);
 }
 
 void KTPaint::clearSheetTransInfoNado() {
@@ -616,6 +620,7 @@ void KTPaint::Release()  {
 		it++;
 	}
 	sheets.clear();
+	douga.Del();
 }
 
 
@@ -866,16 +871,7 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 			}
 			}
 			break;
-	case WM_PAINT:
-		if (hdc = BeginPaint(h, &psPaint)) 
-		{
-			paint->paint();
-		    BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, paint->getHdcMem(), 0, 0, SRCCOPY);
-			
-			
-			EndPaint(h, &psPaint);
-		}
-	break;
+	
 
 	case WM_COMMAND:
 
@@ -928,7 +924,15 @@ static HWND makesheet_button;
 static HWND sheet_index_label;
 static HWND sheet_linenum_label;
 static char labeltext[1024];
+static PAINTSTRUCT ps;
+static HDC hdc;
 	switch (i) {
+/*	case WM_PAINT:
+		hdc = BeginPaint(h, &ps);
+		// CreateDIBSection() ‚É‚æ‚Á‚Äì¬‚³‚ê‚½ƒrƒbƒgƒ}ƒbƒv‚ð•`‰æ
+		  BitBlt(hdc, 0, 0, paint->douga.bmi.bmiHeader.biWidth, paint->douga.bmi.bmiHeader.biHeight, paint->douga.hdcMem, 0, 0, SRCCOPY );
+		  EndPaint(h, &ps);
+		  break;*/
 	case WM_CREATE:
 		combo = CreateWindow(
 			TEXT("COMBOBOX") , NULL , 
@@ -943,7 +947,7 @@ static char labeltext[1024];
 		sheet_index_label = CreateWindow(
 			TEXT("STATIC") , NULL , 
 			WS_CHILD | WS_VISIBLE , 
-			0 , 50 , 200 , 100 , h , (HMENU)3 ,
+			0 , 50 , 200 , 300 , h , (HMENU)3 ,
 			paint->getHInst() , NULL
 		);
 		paint->setSheetIndexLabel(sheet_index_label);
@@ -951,7 +955,7 @@ static char labeltext[1024];
 			CreateWindow(
 			TEXT("STATIC") , NULL , 
 			WS_CHILD | WS_VISIBLE , 
-			0 , 150 , 200 , 50 , h , (HMENU)4 ,
+			0 , 350 , 200 , 250 , h , (HMENU)4 ,
 			paint->getHInst() , NULL
 		);
 		SendMessage(combo , CB_SETCURSEL , 0 , 0);
@@ -1015,11 +1019,14 @@ void KTPaint::makeNewSheet() {
 void KTPaint::updateDispLineNum() {
 	char labeltext[1024];
 	memset(labeltext,0,1024);
-	sprintf_s(labeltext ,1024, "line” = %d\n‘I‘ð€–Ú = %d\n •Mˆ³=%d\nhline”=%d" ,
-				getNowSheetLineNum() ,
+	sprintf_s(labeltext ,1024, "line” = %d/%d\n‘I‘ð€–Ú = %d\n•Mˆ³=%d\nhline”=%d/%d\n‚Ê‚è—Ìˆæ”=%d/%d\n‹Èline”=%d/%d\n‰”•Mline”%d/%d" ,
+		getNowSheetLineNum() , KTPAINT_SHEET_LINE_MAX,
 				SendMessage(combo , CB_GETCURSEL , 0 , 0),
 				temp_pressure,
-				now_sheet->now_sheet->getHeiPLineMax()
+				now_sheet->now_sheet->getHeiPLineMax(), KTPAINT_SHEET_HEILINE_MAX,
+				now_sheet->now_sheet->getHeiMax(), KTPAINT_SHEET_KYOKULINE_MAX,
+				now_sheet->now_sheet->getKyokuPLineMax(), KTPAINT_SHEET_KYOKULINE_MAX,
+				now_sheet->now_sheet->getElineMax(), KTPAINT_SHEET_DUMMY_MAX
 			);
 	SetWindowText(sheet_index_label , labeltext);
 

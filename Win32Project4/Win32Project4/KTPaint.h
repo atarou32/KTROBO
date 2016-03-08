@@ -9,6 +9,7 @@
 #include "KTPaintSheet.h"
 #include "MyTextureLoader.h"
 #include "KTPaintNuri.h"
+#include "KTPaintDouga.h"
 
 #define KTPAINT_PEN_ID 1
 #define KTPAINT_PENCIL_ID 2
@@ -40,13 +41,18 @@ class KTPaint
 {
 private:
 	HINSTANCE hInst;
+public:
 	HWND parent_window;
 	HWND colorpen_window;
 	HWND loadsave_window;
+private:
 	HCURSOR temp_cursor;
 	int now_paint_id;
 	KTROBO::Graphics* g;
 	KTPaintGUI gui;
+public:
+	KTPaintDouga douga;
+private:
 	KTPAINT_pen pens[KTPAINT_PEN_NUM_MAX];
 	int now_pen_index;
 	int now_penkyokuline_start;
@@ -122,7 +128,7 @@ public:
 	void paint();
 	KTPaint(HINSTANCE hins);
 	~KTPaint(void);
-	void Init(HWND hwnd);
+	void Init(HWND hwnd,HINSTANCE hInst,int nCmdShow);
 	void Release();
 	void setCursorNow();
 	void setCursorToPencil();
@@ -178,16 +184,19 @@ public:
 
 	
 	bool setSheetNext() {
-		
-	
+		HDC hdc = GetDC(parent_window);
+		douga.Run(parent_window,hdc);
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
 			now_count = 0;
+			ReleaseDC(parent_window, hdc);
 			return true;
 		}
+		ReleaseDC(parent_window, hdc);
 		return false;
 	}
 	bool setSheetBefore() {
+		douga.Stop();
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
 			now_count = 0;
