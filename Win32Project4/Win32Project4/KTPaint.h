@@ -194,6 +194,7 @@ public:
 	void clearSheetTransInfoNado();
 	void activate(){is_activate = true;}
 	void deactivate() {is_activate=false;}
+	KTROBO::Graphics* getGraphics() {return g;}
 
 	bool is_dougasaisei() {return is_mode_dougasaisei;}
 	bool setSheetNext() {

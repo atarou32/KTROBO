@@ -143,7 +143,7 @@ void KTPaint::Init(HWND hwnd,HINSTANCE hInst, int nCmdShow) {
 	back_tex_class = tex_class2;
 	exam_class = loader.loadClass("resrc/gui.png");
 	
-	if (!douga.Init(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow)) {
+	if (!douga.Init(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow, g)) {
 		douga.Del();
 	}
 	
@@ -484,7 +484,7 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 }
 
 void KTPaint::render() {
-	return;
+
 	float clearColor[4] = {
 		1.0f,1.0f,1.0f,1.0f};
 	float clearColor2[4] = {
@@ -512,7 +512,15 @@ void KTPaint::render() {
   //      0 );
 
 		KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	}
+	} else {
+			g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor2);
+	//	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,
+	//		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+	 //       1.0f,
+	  //      0 );
+
+			KTROBO::Graphics::drawTex(g,douga.getBitmapClass()->width, douga.getBitmapClass()->height,douga.getBitmapClass()->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+	}	
 	if (is_render_pencil_line || now_paint_id == KTPAINT_PENCIL_ID) {
 	KTROBO::Graphics::drawPencil(g,now_sheet->now_sheet->getEline(),now_sheet->now_sheet->getElineMax(),
 		now_color_r,now_color_g,now_color_b,0xFF);
@@ -948,6 +956,7 @@ static HWND sheet_index_label;
 static HWND sheet_linenum_label;
 static HWND sheet_frame;
 static HWND hTrack;
+static HWND hTrack2;
 static HWND dougad;
 static char labeltext[1024];
 static PAINTSTRUCT ps;
@@ -1031,7 +1040,28 @@ char strtext[1024];
 
 
 
-		hTrack = CreateWindowEx(0,TRACKBAR_CLASS,//拡張ウィンドウスタイル
+		hTrack2 = CreateWindowEx(0,TRACKBAR_CLASS,//拡張ウィンドウスタイル
+                //ウィンドウクラス
+                "",WS_CHILD | WS_VISIBLE //|
+               // TBS_AUTOTICKS | TBS_ENABLESELRANGE,//ウィンドウスタイル
+                ,0, 650, 150, 20,//位置、大きさ
+                h,//親ウィンドウ
+                (HMENU)15,//コントロールID
+                paint->getHInst(),//インスタンスハンドル
+                NULL);
+            //元々のプロシージャを保存してトラックバーをサブクラス化
+           // OrgTrackProc = (WNDPROC)GetWindowLong(hTrack, GWL_WNDPROC);
+           // SetWindowLong(hTrack, GWL_WNDPROC, (LONG)MyTrackProc);
+            //トラックバーの範囲設定
+            SendMessage(hTrack2, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELPARAM(0, 255));
+			SendMessage(hTrack2, TBM_SETTICFREQ, 1, 0);   // 目盛りの増分
+			   SendMessage(hTrack2, TBM_SETPAGESIZE, 0, 1); // クリック時の移動量
+			//OrgTrackProc = (WNDPROC)GetWindowLong(hTrack, GWL_WNDPROC);
+            //SetWindowLong(hTrack, GWL_WNDPROC, (LONG)MyTrackProc);
+         
+
+
+			   hTrack = CreateWindowEx(0,TRACKBAR_CLASS,//拡張ウィンドウスタイル
                 //ウィンドウクラス
                 "",WS_CHILD | WS_VISIBLE //|
                // TBS_AUTOTICKS | TBS_ENABLESELRANGE,//ウィンドウスタイル
@@ -1049,8 +1079,7 @@ char strtext[1024];
 			   SendMessage(hTrack, TBM_SETPAGESIZE, 0, 1); // クリック時の移動量
 			//OrgTrackProc = (WNDPROC)GetWindowLong(hTrack, GWL_WNDPROC);
             //SetWindowLong(hTrack, GWL_WNDPROC, (LONG)MyTrackProc);
-         
-
+        
 
 
 
@@ -1066,7 +1095,23 @@ char strtext[1024];
 				memset(strtext,0,1024);
 				GetWindowText(sheet_frame , strtext , 1024);
 				paint->douga.setFrame(paint->parent_window,hdc,strtext,pos);
+				paint->douga.transportBitmapToTextureClass(paint->getGraphics());
 				paint->is_mode_dougasaisei = false;
+				//paint->douga.copyBufferOfVideoFrame(paint->parent_window);
+				//free(strtext);
+				ReleaseDC(paint->parent_window,hdc);
+            }
+
+			 if(hTrack2 == (HWND)l)
+            {
+                int pos = SendMessage(hTrack2, TBM_GETPOS, NULL, NULL); // 現在の値の取得
+				//hdc = GetDC(paint->parent_window);
+				//memset(strtext,0,1024);
+				//GetWindowText(sheet_frame , strtext , 1024);
+				//paint->douga.setFrame(paint->parent_window,hdc,strtext,pos);
+				paint->douga.setAlpha((unsigned char)pos);
+				paint->douga.transportBitmapToTextureClass(paint->getGraphics());
+				//paint->is_mode_dougasaisei = false;
 				//paint->douga.copyBufferOfVideoFrame(paint->parent_window);
 				//free(strtext);
 				ReleaseDC(paint->parent_window,hdc);
@@ -1111,6 +1156,7 @@ char strtext[1024];
 			memset(strtext,0,1024);
 			GetWindowText(sheet_frame , strtext , 1024);
 			paint->douga.setFrame(paint->parent_window,hdc,strtext,0);
+			paint->douga.transportBitmapToTextureClass(paint->getGraphics());
 			paint->is_mode_dougasaisei = false;
 			//paint->douga.copyBufferOfVideoFrame(paint->parent_window);
 			//free(strtext);

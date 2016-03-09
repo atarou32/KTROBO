@@ -64,13 +64,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	KTPaintGUI::startUp();
 	KTROBO::CS::instance()->Init();
 	// Perform application initialization:
+
+	try {
 	if (!InitInstance (hInstance, nCmdShow))
 	{
 		return FALSE;
 	}
-
+	} catch (KTROBO::GameError* err) {
+		KTROBO::mylog::writelog(err->getErrorCode(), err->getMessage());
+		delete err;
+		return FALSE;
+	}
 	//hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PRESSURETEST));
-
+	try {
 	while( WM_QUIT != msg.message ){
 		if( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) ){
 			TranslateMessage( &msg );
@@ -82,6 +88,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			Sleep(1);
 			
 		}
+	}
+	} catch (KTROBO::GameError* err) {
+		KTROBO::mylog::writelog(err->getErrorCode(), err->getMessage());
+		delete err;
+	//	return FALSE;
 	}
 
 	if (paint) {
@@ -213,6 +224,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	float zo;
 	static bool is_rdragged=false;
 	static POINT dragpoint;
+	POINT po;
+	POINT mpo;
 	switch (message)
 	{
 	case WM_CREATE:
@@ -332,12 +345,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// Draw ellipse at cross intersection.
 			Ellipse(hdc, scrPoint.x - prsNew, scrPoint.y - prsNew,
 				scrPoint.x + prsNew, scrPoint.y + prsNew);*/
+		/*	if (!paint->is_mode_dougasaisei && paint->is_mode_pausedougabyouga) {
 			SetStretchBltMode(hdc , COLORONCOLOR);
 			StretchBlt(
 				hdc , 0 , 0 , clientRect.right , clientRect.bottom ,
 				paint->douga.hdcMem , 0,0,
 				paint->douga.bmi.bmiHeader.biWidth,paint->douga.bmi.bmiHeader.biHeight , SRCCOPY
 			);
+			}
+			*/
 			/*
 			BitBlt(hdc,0,0,,paint->douga.hdcMem,0,0,SRCCOPY);*/
 			EndPaint(hWnd, &psPaint);
@@ -384,10 +400,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				ptNew.y != ptOld.y //||
 				/*prsNew != prsOld*/) 
 			{
+				po = ptNew;
+				ScreenToClient(hWnd, &po);
+				po.x;// *= KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+				po.y;// *= KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+				mpo = ptOld;
+				ScreenToClient(hWnd, &mpo);
+				mpo.x;// *= KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+				mpo.y;// *= KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 				if (prsNew > 300) {
-					paint->writeWithPen(ptOld,ptNew,prsOld,prsNew,false);
+					paint->writeWithPen(mpo,po,prsOld,prsNew,false);
 				} else {
-					paint->writeWithPen(ptOld,ptNew,prsOld,prsNew,true);
+					paint->writeWithPen(mpo,po,prsOld,prsNew,true);
 				}
 				//InvalidateRect(hWnd, NULL, TRUE);
 			}

@@ -11,6 +11,8 @@
 #include "dshow.h"
 #include "d3d9.h"
 #include "vmr9.h"
+#include "KTRoboGraphics.h"
+#include "MyTextureLoader.h"
 #pragma include_alias( "dxtrans.h", "qedit.h" )
 #define __IDxtCompositor_INTERFACE_DEFINED__
 #define __IDxtAlphaSetter_INTERFACE_DEFINED__
@@ -45,6 +47,13 @@ private:
 	bool is_canseekabsolute;
 	bool is_canseekforward;
 	bool is_canseekbackward;
+	MyTextureLoader* loader;
+	MyTextureLoader::MY_TEXTURE_CLASS* bitmap_class;
+	unsigned char alpha;
+public:
+	void transportBitmapToTextureClass(KTROBO::Graphics* g);
+	void setAlpha(unsigned char g) {alpha = g;}
+	MyTextureLoader::MY_TEXTURE_CLASS* getBitmapClass() {return bitmap_class;}
 public:
 
 	long *pBuffer;       // Å© í«â¡
@@ -54,7 +63,7 @@ public:
 
 	KTPaintDouga(void);
 	~KTPaintDouga(void);
-	bool Init(HWND hwnd,HWND loadsave, int width, int height,int nCmdShow);
+	bool Init(HWND hwnd,HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g);
 	bool Init2(HWND hwnd,HINSTANCE hinst);
 	void Init3(HWND hwnd, int nCmdShow);
 	void Del();
