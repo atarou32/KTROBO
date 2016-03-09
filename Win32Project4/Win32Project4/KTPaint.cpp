@@ -47,6 +47,7 @@ KTPaint::KTPaint(HINSTANCE hins)
 	temp_pressure = 0;
 	is_render_pencil_line = false;
 	is_mode_dougasaisei = false;
+	is_mode_pausedougabyouga = true;
 }
 
 
@@ -483,6 +484,7 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 }
 
 void KTPaint::render() {
+	return;
 	float clearColor[4] = {
 		1.0f,1.0f,1.0f,1.0f};
 	float clearColor2[4] = {
@@ -497,17 +499,20 @@ void KTPaint::render() {
 	viewport.TopLeftY = 0;
 	viewport.Width = g->getScreenWidth();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	viewport.Height = g->getScreenHeight();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
-	g->getDeviceContext()->RSSetViewports(1,&viewport);
+	//Sleep(5000);
+//	g->getDeviceContext()->RSSetViewports(1,&viewport);
 	ID3D11RenderTargetView* vv = g->getRenderTargetView();
-//	g->getDeviceContext()->OMSetRenderTargets(1,&vv/*&tex_class_back_buffer->target_view*/, KTROBO::Graphics::pDepthStencilView);
+	//	g->getDeviceContext()->OMSetRenderTargets(1,&vv/*&tex_class_back_buffer->target_view*/, KTROBO::Graphics::pDepthStencilView);
+
+	if (!is_mode_pausedougabyouga) {
 	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor2);
 //	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,
 //		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
  //       1.0f,
   //      0 );
 
-	KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	
+		KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+	}
 	if (is_render_pencil_line || now_paint_id == KTPAINT_PENCIL_ID) {
 	KTROBO::Graphics::drawPencil(g,now_sheet->now_sheet->getEline(),now_sheet->now_sheet->getElineMax(),
 		now_color_r,now_color_g,now_color_b,0xFF);
@@ -943,6 +948,7 @@ static HWND sheet_index_label;
 static HWND sheet_linenum_label;
 static HWND sheet_frame;
 static HWND hTrack;
+static HWND dougad;
 static char labeltext[1024];
 static PAINTSTRUCT ps;
 static HDC hdc;
@@ -1001,7 +1007,16 @@ char strtext[1024];
 		CreateWindow(
 			TEXT("BUTTON"), TEXT("SETFRAME"), WS_CHILD | WS_VISIBLE|BS_DEFPUSHBUTTON,100,500,80,50,h,(HMENU)11,paint->getHInst(),NULL);
 	
-
+		dougad = CreateWindow(TEXT("BUTTON"), "“®‰æÃŽ~Žž•`‰æ",
+                 WS_CHILD|WS_VISIBLE|BS_CHECKBOX,
+                 0,700,30*4,30,
+                 h,
+                 (HMENU)14,
+                 paint->getHInst(),
+                 NULL);
+    
+		SendMessage(dougad, BM_SETCHECK , BST_CHECKED , 0);
+	
 
 
 
@@ -1076,6 +1091,20 @@ char strtext[1024];
 			ReleaseDC(paint->parent_window,hdc);
 		}
 		*/
+
+		if (LOWORD(w) == 14) {
+			
+			int checkbox = SendMessage( GetDlgItem(h, 14), BM_GETCHECK, 0, 0 );
+			if (checkbox) {
+				paint->setModeByougaSeisiDouga(false);
+				SendMessage(GetDlgItem(h,14) , BM_SETCHECK , BST_UNCHECKED , 0);
+			} else {
+				
+				paint->setModeByougaSeisiDouga(true);
+		 		SendMessage(GetDlgItem(h,14) , BM_SETCHECK , BST_CHECKED , 0);
+			}
+		
+		}
 		if (LOWORD(w) == 11) {
 			// ƒeƒLƒXƒg
 			hdc = GetDC(paint->parent_window);

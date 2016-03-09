@@ -66,6 +66,16 @@ private:
 	bool is_render_pencil_line;
 public:
 	bool is_mode_dougasaisei;
+	bool is_mode_pausedougabyouga;
+	void setModeByougaSeisiDouga(bool t) {
+		is_mode_pausedougabyouga = t;
+		if (t) {
+			// Ã~“®‰æ‚ğ•`‰æ‚³‚¹‚é
+			SendMessage(parent_window, WM_PAINT,0,0);
+		}
+		
+	}
+	
 private:
 	int now_count;
 	HDC hdcMem;
