@@ -199,7 +199,7 @@ public:
 	bool is_dougasaisei() {return is_mode_dougasaisei;}
 	bool setSheetNext() {
 		HDC hdc = GetDC(parent_window);
-		douga.Run(parent_window,hdc);
+		//douga.Run(parent_window,hdc);
 		is_mode_dougasaisei = true;
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;

@@ -862,14 +862,14 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	i += 3;
 	tt += 1;
 	temp+=1;
-	if (temp >= 1024) {
+	if (i >= 1024) {
 		break;
 	}
 	if (tug_last) {
 		break;
 	}
 }
-if (temp >= 1024) {
+if (i >= 1024) {
 	break;
 }
 }

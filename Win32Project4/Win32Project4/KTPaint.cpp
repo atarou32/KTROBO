@@ -518,8 +518,13 @@ void KTPaint::render() {
 	//		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 	 //       1.0f,
 	  //      0 );
+			
+			
+			KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 
 			KTROBO::Graphics::drawTex(g,douga.getBitmapClass()->width, douga.getBitmapClass()->height,douga.getBitmapClass()->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+	
+	
 	}	
 	if (is_render_pencil_line || now_paint_id == KTPAINT_PENCIL_ID) {
 	KTROBO::Graphics::drawPencil(g,now_sheet->now_sheet->getEline(),now_sheet->now_sheet->getElineMax(),
