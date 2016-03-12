@@ -129,7 +129,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
+	wcex.style			= 0;//CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc	= WndProc;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
@@ -266,7 +266,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_KEYDOWN:
 			if (GetKeyboardState(keys)) {
-				for (int i=0;i<256;i++) {
+				//for (int i=0;i<256;i++) {
 					if (keys[VK_LEFT] & 0x80) {
 						paint->setSheetBefore();
 
@@ -291,7 +291,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 							paint->setIsRenderNextSheet(true);
 						}
 					}
-				}
+				//}
 			}
 			
 			break;

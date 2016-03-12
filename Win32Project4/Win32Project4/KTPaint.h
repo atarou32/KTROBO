@@ -197,25 +197,49 @@ public:
 	KTROBO::Graphics* getGraphics() {return g;}
 
 	bool is_dougasaisei() {return is_mode_dougasaisei;}
-	bool setSheetNext() {
-		HDC hdc = GetDC(parent_window);
-		//douga.Run(parent_window,hdc);
+	void playdouga() {
 		is_mode_dougasaisei = true;
+		HDC hdc = GetDC(parent_window);
+		douga.Run(parent_window,hdc);
+		DeleteDC(hdc);
+	}
+	void stopdouga() {
+		HDC hdc = GetDC(parent_window);
+		douga.Stop(parent_window,hdc);
+		pausedouga();
+		DeleteDC(hdc);
+	}
+	void pausedouga() {
+		HDC hdc = GetDC(parent_window);
+		LONGLONG frametime = douga.Pause(parent_window, hdc);
+		char str[1024];
+		memset(str,0,1024);
+		sprintf_s(str,1024,"%d",frametime/100000);
+		SetWindowText(GetDlgItem(loadsave_window, 10) , str);
+		douga.transportBitmapToTextureClass(getGraphics());
+		is_mode_dougasaisei = false;
+		DeleteDC(hdc);
+	}
+	bool setSheetNext() {
+		//HDC hdc = GetDC(parent_window);
+		//douga.Run(parent_window,hdc);
+		//is_mode_dougasaisei = true;
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
 			now_count = 0;
-			ReleaseDC(parent_window, hdc);
+			//ReleaseDC(parent_window, hdc);
 			return true;
 		}
-		ReleaseDC(parent_window, hdc);
+
+		//ReleaseDC(parent_window, hdc);
 		return false;
 	}
 	bool setSheetBefore() {
-		HDC hdc = GetDC(parent_window);
-		douga.Stop(parent_window, hdc);
-		is_mode_dougasaisei = false;
+		//HDC hdc = GetDC(parent_window);
+		//douga.Stop(parent_window, hdc);
+		//is_mode_dougasaisei = false;
 
-		ReleaseDC(parent_window, hdc);
+		//ReleaseDC(parent_window, hdc);
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
 			now_count = 0;

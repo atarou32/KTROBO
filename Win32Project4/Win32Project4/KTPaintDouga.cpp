@@ -33,6 +33,10 @@ KTPaintDouga::KTPaintDouga(void)
 	hdcMem=0;
 	loader = 0;
 	alpha = 0xFF;
+	teefil = 0;
+	nr = 0;
+	alt = 0;
+	alt2 = 0;
 }
 
 
@@ -718,7 +722,7 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		hr = pGB->RenderFile( L"resrc/hundred.wmv",NULL );
 		pMediaPosition->get_Duration(&length);
 			// printf("%lf\n", length);
-
+		alt2 = length;
 		pMediaPosition->Release();
         // 接続情報取得。
         // この処理はRenderFileによりGraphが構成された後に
@@ -997,6 +1001,16 @@ void KTPaintDouga::Del() {
 		loader = 0;
 	}
 
+	if (nr) {
+		nr->Release();
+		nr = 0;
+	}
+
+	if (teefil) {
+		teefil->Release();
+		teefil = 0;
+	}
+
 	if (pims) {
 		pims->Release();
 		pims = NULL;	 
@@ -1011,7 +1025,15 @@ void KTPaintDouga::Del() {
 		pVideoWindow->Release();
 		pVideoWindow = 0;
 	}
+	if (hBitmap) {
+		DeleteObject(hBitmap);
+		hBitmap=0;
+	}
 
+	if (hdcMem) {
+		DeleteDC(hdcMem);
+		hdcMem = 0;
+	}
 	if (pSampleGrabberFilter) {
 		pSampleGrabberFilter->Release();
 		pSampleGrabberFilter =0;
@@ -1096,7 +1118,8 @@ if (pMediaCont) {
 		nn = 0;
 		pims ->SetPositions(&nn,AM_SEEKING_AbsolutePositioning,
 					&nn,AM_SEEKING_NoPositioning);
-	/*
+	alt = 0;
+		/*
 			LONGLONG llAbsoluteTime = 0;
 			LONGLONG lla;
 			
@@ -1108,13 +1131,60 @@ if (pMediaCont) {
 
 }
 
-void KTPaintDouga::Pause() {
+LONGLONG KTPaintDouga::Pause(HWND hwnd, HDC hdc) {
 
 	
 	if (pMediaCont) {
-		pMediaCont->Stop();
+		//pMediaCont->Stop();
 		//	Cont->RepaintVideo(hwnd, hdc);
+
+		/*
+			LONGLONG llAbsoluteTime = 0;
+			LONGLONG stop = 0;
+		long evcode;
+		pSampleGrabber->SetBufferSamples( TRUE );
+		 HRESULT hr = pims->GetPositions(&llAbsoluteTime,&stop);
+		 Cont->RepaintVideo(hwnd, hdc);
+		 copyBufferOfVideoFrame(hwnd);
+		  pSampleGrabber->SetBufferSamples(FALSE);
+
+		  */
+
+
+
+
+		  	LONGLONG lla2;
+			LONGLONG lla;
+			HRESULT hr = pims->GetPositions(&lla,&lla2);
+
+		LONGLONG llAbsoluteTime = lla;//nn*one_second+offset*offsetdayo;
+		LONGLONG llAbsoluteTime2 = lla;//nn +offset+1;
+		long evcode;
+		alt = llAbsoluteTime;
+		 pSampleGrabber->SetOneShot(TRUE);
+		pSampleGrabber->SetBufferSamples( TRUE );
+		 hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&llAbsoluteTime2,AM_SEEKING_AbsolutePositioning);
+		 pMediaCont->Run();
+		 pimex -> WaitForCompletion(20000, &evcode);
+		 Cont->RepaintVideo(hwnd, hdc);
+		 copyBufferOfVideoFrame(hwnd);
+		 pMediaCont->Stop();
+		  pSampleGrabber->SetOneShot(FALSE);
+		//  pSampleGrabber->SetBufferSamples(FALSE);
+	//	  hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&lla2,AM_SEEKING_AbsolutePositioning);
+		
+
+
+
+
+
+
+
+
+		
+		  return llAbsoluteTime;
 	}
+	return 0;
 }
 
 
@@ -1126,6 +1196,8 @@ void KTPaintDouga::Pause() {
 void KTPaintDouga::Run(HWND hwnd,HDC hdc){
 		if (pMediaCont) {
 	
+		pims->SetPositions(&alt,AM_SEEKING_AbsolutePositioning,&alt2,AM_SEEKING_AbsolutePositioning);
+		
 		HRESULT hr = pMediaCont->Run();
 	//	HWND child_window=GetWindow(hwnd, GW_CHILD);//hwndは親ウィンドウ
 	//	pVideoWindow->rePaint(child_window);
@@ -1143,10 +1215,13 @@ void KTPaintDouga::copyBufferOfVideoFrame(HWND hWnd) {
 		 
 		 long nBufferSize = 0;
 		 //Cont->GetCurrentImage((BYTE**)pBuffer);
-
+		
+		 //pSampleGrabber->SetBufferSamples(TRUE);
          pSampleGrabber->GetCurrentBuffer( &nBufferSize, NULL );
          // 現在表示されている映像を静止画として取得 ( CreateDIBSection() が返した pBuffer に書き込む )
          pSampleGrabber->GetCurrentBuffer( &nBufferSize, pBuffer );
+//		 Cont->GetCurrentImage((BYTE**)&pBuffer);
+		 
          RECT rect;
          GetClientRect( hWnd, &rect );
          InvalidateRect( hWnd, &rect, FALSE );  // 画面リフレッシュ ( WM_PAINT が送れれてくるようにする )
@@ -1174,16 +1249,20 @@ void KTPaintDouga::setFrame(HWND hwnd, HDC hdc, PSTR textframe, int offset) {
 			HRESULT hr = pims->GetPositions(&lla,&lla2);
 
 		LONGLONG llAbsoluteTime = nn*one_second+offset*offsetdayo;
+		LONGLONG llAbsoluteTime2 = llAbsoluteTime;//nn +offset+1;
+		alt = llAbsoluteTime;
 		long evcode;
+		 pSampleGrabber->SetOneShot(TRUE);
 		pSampleGrabber->SetBufferSamples( TRUE );
-		 hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&llAbsoluteTime,AM_SEEKING_AbsolutePositioning);
+		 hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&llAbsoluteTime2,AM_SEEKING_AbsolutePositioning);
 		 pMediaCont->Run();
-		 pimex -> WaitForCompletion(100, &evcode);
+		 pimex -> WaitForCompletion(20000, &evcode);
 		 Cont->RepaintVideo(hwnd, hdc);
 		 copyBufferOfVideoFrame(hwnd);
 		 pMediaCont->Stop();
-		  pSampleGrabber->SetBufferSamples(FALSE);
-		  hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&lla2,AM_SEEKING_AbsolutePositioning);
+		//  pSampleGrabber->SetBufferSamples(FALSE);
+		  pSampleGrabber->SetOneShot(FALSE);
+	//	  hr = pims->SetPositions(&llAbsoluteTime,AM_SEEKING_AbsolutePositioning,&lla2,AM_SEEKING_AbsolutePositioning);
 		
 
 	/*
@@ -1218,9 +1297,10 @@ void KTPaintDouga::transportBitmapToTextureClass(KTROBO::Graphics* g) {
 
 
 	D3D11_MAPPED_SUBRESOURCE msr;
-	if (bitmap_class) {
+	if (bitmap_class && pMediaCont) {
 
 		unsigned char* datas = new unsigned char[bmi.bmiHeader.biWidth*bmi.bmiHeader.biHeight*4];
+		memset(datas,0,bmi.bmiHeader.biWidth*bmi.bmiHeader.biHeight*4);
 		int count = bmi.bmiHeader.biWidth*bmi.bmiHeader.biHeight*4-4;
 		for (int i=0;i<bmi.bmiHeader.biHeight;i++) {
 			for (int j=bmi.bmiHeader.biWidth-1;j>=0;j-=1) {
@@ -1242,12 +1322,362 @@ void KTPaintDouga::transportBitmapToTextureClass(KTROBO::Graphics* g) {
 		ZeroMemory(&box, sizeof(box));
 		box.right = bmi.bmiHeader.biWidth;
 		box.bottom = bmi.bmiHeader.biHeight;
-		box.back = 4;
+		box.back = 1;
 		g->getDeviceContext()->UpdateSubresource(bitmap_class->tex,0,0,datas,bmi.bmiHeader.biWidth*4,0);
+		g->getDeviceContext()->Flush();
 		delete[] datas;
 	}
 
 	KTROBO::CS::instance()->leave(CS_DEVICECON_CS, "tran");
 
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool KTPaintDouga::Init5(HWND hwnd, HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g) {
+	UpdateWindow(hwnd);
+	loader = new MyTextureLoader();
+	loader->init(g);
+	alt=0;
+	IMediaControl *pMediaControl;
+	AM_MEDIA_TYPE am_media_type;
+
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+	HRESULT hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, IID_IGraphBuilder, (void**)&pGB);
+	if (FAILED(hr)) return false;
+
+
+	hr = CoCreateInstance(CLSID_VideoMixingRenderer, NULL,CLSCTX_INPROC,IID_IBaseFilter, (void**)&pBF);
+	
+	if (FAILED(hr)) return false;
+	  CoCreateInstance( CLSID_SampleGrabber, NULL, CLSCTX_INPROC, IID_IBaseFilter, ( LPVOID * )&pSampleGrabberFilter );
+   if (FAILED(hr)) return false;
+   
+   CoCreateInstance(CLSID_NullRenderer, NULL,CLSCTX_INPROC, IID_IBaseFilter, (void**)&nr);
+
+   /*
+	IBaseFilter* teefil;
+	hr = CoCreateInstance(CLSID_SmartTee,NULL,CLSCTX_INPROC,IID_IBaseFilter,(void**)&teefil);
+	if (FAILED(hr)) return false;
+	IPin* cap_pii;
+	IPin* rend_pii;
+	hr = teefil->FindPin(L"Capture",&cap_pii);
+	if (FAILED(hr)) return false;
+	hr = teefil->FindPin(L"Preview",&rend_pii);
+	if (FAILED(hr)) return false;
+	IPin* samp_grab_in;
+	IEnumPins* enumpp;
+	pSampleGrabberFilter->EnumPins(&enumpp);
+	enumpp->Next(1,&samp_grab_in,NULL);
+	*/
+   /*
+	//hr = pSampleGrabberFilter->FindPin(L"Input", &samp_grab_in);
+	if (FAILED(hr)) return false;
+	//pGB->Connect(cap_pii,samp_grab_in);
+	PIN_INFO ppinfo;
+	samp_grab_in->QueryPinInfo(&ppinfo);
+
+	IPin* samp_grab_out;
+	//hr = pSampleGrabberFilter->FindPin(L"Output", &samp_grab_out);
+	enumpp->Next(1,&samp_grab_out,NULL);
+
+	if (FAILED(hr)) return false;
+	IPin* video_pin;
+	hr = pBF->FindPin(L"VMR Input0", &video_pin);
+	if (FAILED(hr)) return false;
+	//pGB->Connect(rend_pii,video_pin);
+
+	IPin* nr_pin;
+	hr = nr->FindPin(L"In", &nr_pin);
+	//pGB->Connect(samp_grab_out, nr_pin);
+	*/IVMRFilterConfig* pConfig = 0;
+	  // レンダリング モードとストリームの数を設定する。
+  
+	// *Cont = NULL;
+	int dwNumStreams = 1;
+	bool fBlendAppImage = false;
+	pGB->AddFilter(pBF,L"BF");
+    hr = pBF->QueryInterface(IID_IVMRFilterConfig, (void**)&pConfig);
+    if (SUCCEEDED(hr)) 
+    {
+        pConfig->SetRenderingMode(VMR9Mode_Windowless);
+
+        // 複数のビデオ ストリームが必要な場合、または静的ビットマップをビデオ上に
+        // ミキシングする場合は、VMR-7 をミキシング モードに設定する。
+        // (VMR-9 はデフォルトで 4 つの入力を持つミキシング モードになる。)
+        if (dwNumStreams > 1 || fBlendAppImage) 
+        {
+            pConfig->SetNumberOfStreams(dwNumStreams);
+        }
+        pConfig->Release();
+
+        hr = pBF->QueryInterface(IID_IVMRWindowlessControl, (void**)&Cont);
+        if (SUCCEEDED(hr)) 
+        {
+            Cont->SetVideoClippingWindow(hwnd);
+            
+        }
+    }
+ //   pConfig->Release();
+	if (!Cont) return false;
+	
+	
+
+
+	WCHAR filename[] = L"resrc/hundred.wmv";
+	IBaseFilter* psource = 0;
+
+	     // FilterからISampleGrabberインターフェースを取得します
+        pSampleGrabberFilter->QueryInterface( IID_ISampleGrabber, ( LPVOID * )&pSampleGrabber );
+		IMediaPosition *pMediaPosition;
+
+ 
+
+  pGB->QueryInterface(IID_IMediaPosition,
+	(LPVOID *)&pMediaPosition);
+		pGB -> QueryInterface( IID_IMediaEvent, (void **)&pimex);
+		pGB -> QueryInterface( IID_IMediaSeeking, (void **)&pims);
+
+  hr = pGB->QueryInterface(IID_IVideoWindow, (LPVOID*)&pVideoWindow);
+
+    hr = pVideoWindow->put_Owner((OAHWND)hwnd);
+    hr = pVideoWindow->put_WindowStyle(WS_CHILD|WS_CLIPSIBLINGS);
+    hr = pVideoWindow->put_Visible(OATRUE);
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+        // SampleGrabberを接続するフォーマットを指定。
+        // ここがポイントです。
+        // ここの指定の仕方によりSampleGrabberの挿入箇所を
+        // 決定できます。このサンプルのような指定をすると
+        // 画面出力の寸前でサンプルを取得できます。
+        ZeroMemory(&am_media_type, sizeof(am_media_type));
+        am_media_type.majortype = MEDIATYPE_Video;
+        am_media_type.subtype = MEDIASUBTYPE_RGB24;
+        am_media_type.formattype = FORMAT_VideoInfo;
+        pSampleGrabber->SetMediaType(&am_media_type);
+		 HANDLE hFile = CreateFile("GraphLog.txt", GENERIC_WRITE, 0, NULL, 
+OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); 
+		pGB->SetLogFile((DWORD_PTR)hFile);
+        // GraphにSampleGrabber Filterを追加
+       
+	
+		
+		
+			pGB->QueryInterface(IID_IMediaEventEx,
+		(LPVOID *)&pMediaEventEx);
+	pMediaEventEx->SetNotifyWindow((OAHWND)hwnd,
+					WM_GRAPH_NOTIFY, NULL);
+
+		
+		
+		hr = pGB->QueryInterface(IID_IVideoWindow, (LPVOID*)&pVideoWindow);
+		 if (FAILED(hr)) {
+			MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );
+            return false;
+     }
+	  IBaseFilter *pSource;
+	// hr = pGB->AddSourceFilter(L"resrc/smile2.wmv", L"Source", &pSource);
+	 if (FAILED(hr)) {
+			MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );
+            return false;
+     }	
+	 IEnumPins* ppi;
+	 IPin* pinn;
+	 /*
+	 pSource->EnumPins(&ppi);
+	 ppi->Next(1,&pinn,NULL);
+	 ppi->Release();
+	 */
+	// pGB->AddFilter(teefil,L"teefil");
+	   
+	  // hr = pGB->AddFilter(pBF,L"VMR9");
+	   pGB->AddFilter( pSampleGrabberFilter, L"Sample Grabber" );
+        // MediaControlインターフェース取得
+        pGB->QueryInterface( IID_IMediaControl, (LPVOID *)&pMediaControl );
+        // Graphを生成。
+        // ここでSampleGrabberを含んだGraphが自動的に作成されます。
+    
+
+
+	// pGB->Render(pinn);	
+		hr = pGB->RenderFile( L"resrc/smile3.wmv",NULL );
+		pMediaPosition->get_Duration(&length);
+	
+		pMediaPosition->Release();
+
+		  // 描画先ウィンドウの設定
+    hr = pVideoWindow->put_Owner((OAHWND)hwnd);
+   hr = pVideoWindow->put_Visible(OATRUE);
+       pSampleGrabber->GetConnectedMediaType(&am_media_type);
+		if (FAILED(CheckMediaType(&am_media_type))) {
+			  MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );
+                return false;
+        }
+        VIDEOINFOHEADER *pVideoInfoHeader = (VIDEOINFOHEADER *)am_media_type.pbFormat;
+  // ビットマップ情報を保存
+  memcpy( &bmi.bmiHeader, &pVideoInfoHeader->bmiHeader, sizeof( BITMAPINFOHEADER ) );
+  // ビットマップを作成
+  REFERENCE_TIME mm = pVideoInfoHeader->AvgTimePerFrame;
+  HDC hdc = GetDC(hwnd);
+  if (hdcMem) {
+	  DeleteDC(hdcMem);
+  }
+
+  hdcMem = CreateCompatibleDC(hdc);
+  DeleteDC(hdc);
+  hBitmap = CreateDIBSection( hdcMem, &bmi, DIB_RGB_COLORS, ( VOID ** )&pBuffer, NULL, 0 );
+        if( !hBitmap ) {
+                MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );
+                return false;
+        }
+		bitmap_class = loader->makeClass(bmi.bmiHeader.biWidth,bmi.bmiHeader.biHeight);
+		
+        HBITMAP hbOld = ( HBITMAP )SelectObject( hdcMem, hBitmap );
+        if( hbOld ) {
+                DeleteObject( hbOld );
+        }
+        // Grabを行う事を設定
+        // SetBufferSamplesを行わないとバッファから
+        // データを取得できません。
+        // 不必要に負荷をかけたくない場合にはFALSEにしておいて、
+        // データを取得したくなったら、TRUEに変える
+        // という方法もできます。
+        pSampleGrabber->SetBufferSamples( TRUE );
+      
+	
+
+
+	
+
+	
+		SetForegroundWindow(hwnd);
+
+	
+		#ifdef _DEBUG
+		DumpGraph(pGB);
+		#endif
+        // OKが押されるとBITMAPを保存する
+        // バッファを用意
+        // 必要なバッファサイズを取得
+
+	
+        pMediaControl->Release();
+	
+	
+	LONG W=994;
+	LONG H=775;
+	RECT SrcR, DestR;
+	hr = Cont->GetNativeVideoSize(&W, &H, NULL, NULL);
+	if (FAILED(hr)) {
+		Cont->Release();
+		return false;
+	}
+
+	SetRect(&SrcR, 0, 0, W, H);
+	GetClientRect(hwnd, &DestR);
+	hr = Cont->SetVideoPosition(&SrcR, &DestR);
+	if (FAILED(hr)) {
+		Cont->Release();
+		return false;
+	}
+
+	//Cont->Release();
+	pGB->QueryInterface( IID_IMediaControl, (void**)&pMediaCont );
+	/*
+	while(!pMediaCont->Run()) {
+	Sleep(100);
+		//pMediaCont->Run();
+	}
+	//Sleep(10000);*/
+
+//	pims -> SetTimeFormat(&(TIME_FORMAT_FRAME));
+	hr = pims->IsFormatSupported(&TIME_FORMAT_MEDIA_TIME);
+if (hr == S_OK)
+{
+    hr = pims->SetTimeFormat(&TIME_FORMAT_MEDIA_TIME);
+    if (SUCCEEDED(hr))
+    {
+        //0 にシークする。
+        LONGLONG rtNow = 0;
+        hr = pims->SetPositions(
+            &rtNow, AM_SEEKING_AbsolutePositioning, 
+            0, AM_SEEKING_NoPositioning);
+    }
+}
+
+
+DWORD dwCaps = AM_SEEKING_CanSeekAbsolute | 
+               AM_SEEKING_CanSeekForwards |
+               AM_SEEKING_CanSeekBackwards;
+{
+ HRESULT hr = pims->CheckCapabilities(&dwCaps);
+if(FAILED(hr)) {
+    // The stream cannot seek.
+}
+else if (hr == S_OK) 
+{   
+	is_canseekabsolute = true;
+	is_canseekforward = true;
+	is_canseekbackward = true;
+    // The stream can seek forward, backward, and to an absolute position.
+}
+else if (hr == S_FALSE) // The stream has some of the capabilities.
+{
+    if (dwCaps & AM_SEEKING_CanSeekAbsolute)
+    {
+		is_canseekabsolute = true;
+        // The stream can seek to an absolute position.
+    }
+    if (dwCaps & AM_SEEKING_CanSeekForwards)
+    {
+        // The stream can seek forward.
+		is_canseekforward = true;
+    }
+    if (dwCaps & AM_SEEKING_CanSeekBackwards)
+    {
+        // The stream can seek backward.
+		is_canseekbackward = true;
+    }
+}
+}
+
+
+	//REFERENCE_TIME mm = Fps2FrameLength(DEFAULT_FRAME_RATE);
+mm=0;
+	if (mm) {
+	frame_length = length*1000;//mm;
+	} else {
+		frame_length = length*1000;
+	}
+	pims->GetStopPosition(&alt2);
+	inited = true;
+	return true;
 }

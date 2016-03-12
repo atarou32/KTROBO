@@ -143,10 +143,11 @@ void KTPaint::Init(HWND hwnd,HINSTANCE hInst, int nCmdShow) {
 	back_tex_class = tex_class2;
 	exam_class = loader.loadClass("resrc/gui.png");
 	
-	if (!douga.Init(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow, g)) {
+	if (!douga.Init5(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow, g)) {
 		douga.Del();
 	}
 	
+	updateDispLineNum();
 	//douga.Init3(hwnd,nCmdShow);
 }
 
@@ -484,13 +485,16 @@ void KTPaint::writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure
 }
 
 void KTPaint::render() {
-
+	
 	float clearColor[4] = {
 		1.0f,1.0f,1.0f,1.0f};
 	float clearColor2[4] = {
 		0.9f,0.9f,0.9f,1.0f};
 
 	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
+	
+
+
 	KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(),g->getScreenHeight(),now_sheet->transx*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU, now_sheet->transy*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,now_sheet->zoom*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU,pens);
 	D3D11_VIEWPORT viewport;
 	viewport.MinDepth=0.0f;
@@ -518,18 +522,31 @@ void KTPaint::render() {
 	//		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 	 //       1.0f,
 	  //      0 );
-			
-			
+
+			/*
+			PAINTSTRUCT psPaint;
+			HDC hdc = BeginPaint(parent_window, &psPaint);
+			BitBlt(hdc,0,0,douga.getBitmapClass()->width,douga.getBitmapClass()->height,douga.hdcMem,0,0,SRCCOPY);
+			EndPaint(parent_window, &psPaint);
+			*/
+
+
 			KTROBO::Graphics::drawTex(g,back_tex_class->width, back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 
-			KTROBO::Graphics::drawTex(g,douga.getBitmapClass()->width, douga.getBitmapClass()->height,douga.getBitmapClass()->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
-	
+			if (douga.getInited()) {
+				KTROBO::Graphics::drawTex(g,douga.getBitmapClass()->width, douga.getBitmapClass()->height,douga.getBitmapClass()->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+			}
 	
 	}	
 	if (is_render_pencil_line || now_paint_id == KTPAINT_PENCIL_ID) {
 	KTROBO::Graphics::drawPencil(g,now_sheet->now_sheet->getEline(),now_sheet->now_sheet->getElineMax(),
 		now_color_r,now_color_g,now_color_b,0xFF);
 	}
+
+	
+
+
+
 
 	if (this->is_render_next_sheet) {
 		if (now_sheet->next_sheet) {
@@ -554,6 +571,7 @@ void KTPaint::render() {
 //	g->getDeviceContext()->ClearRenderTargetView(tex_class_back_buffer->target_view, clearColor2);
 	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 
+	
 	if (now_paint_id == KTPAINT_HEIPEN_ID) {
 		if (now_penkyokuline_start) {
 			int temp_now = now_penkyokuline_start;
@@ -582,6 +600,8 @@ void KTPaint::render() {
 			*/
 		}
 	}
+	
+
 	KTROBO::Graphics::drawPenSpecial(g, now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getPlineMax());
 	ID3D11RenderTargetView* tt = g->getRenderTargetView();
 	MYVECTOR3 center;
@@ -591,6 +611,9 @@ void KTPaint::render() {
 	nuridayo.printKouten(g, now_sheet->now_sheet->getHeiPLine());
 	
 
+	g->getSwapChain()->Present(0,NULL);
+	KTROBO::CS::instance()->leave(CS_DEVICECON_CS, "leave");
+	return;
 
 
 /*
@@ -614,8 +637,8 @@ void KTPaint::render() {
 //	viewport.Height = g->getScreenHeight();//*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 //	g->getDeviceContext()->RSSetViewports(1,&viewport);
 //	KTROBO::Graphics::drawTex(g,g->getScreenWidth(),g->getScreenHeight(),/*tex_class_back_buffer->width,tex_class_back_buffer->height,*/tex_class_back_buffer->view,transx,transy,zoom,pens);
-	g->getSwapChain()->Present(1,NULL);
-	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
+//	g->getSwapChain()->Present(1,NULL);
+//	KTROBO::CS::instance()->leave(CS_DEVICECON_CS,"leave");
 }
 void KTPaint::Release()  {
 	KTROBO::Graphics::Del();
@@ -966,6 +989,7 @@ static HWND dougad;
 static char labeltext[1024];
 static PAINTSTRUCT ps;
 static HDC hdc;
+static HBITMAP hBitmap;
 char strtext[1024];
 	switch (i) {
 	case WM_PAINT:
@@ -1088,8 +1112,19 @@ char strtext[1024];
 
 
 
-
-
+		CreateWindow(
+			TEXT("BUTTON"), TEXT("Play"), WS_CHILD | WS_VISIBLE|BS_BITMAP,0,450,40,40,h,(HMENU)20,paint->getHInst(),NULL);
+		CreateWindow(
+			TEXT("BUTTON"), TEXT("Pause"), WS_CHILD | WS_VISIBLE|BS_BITMAP,50,450,40,40,h,(HMENU)21,paint->getHInst(),NULL);
+		CreateWindow(
+			TEXT("BUTTON"), TEXT("Stop"), WS_CHILD | WS_VISIBLE|BS_BITMAP,100,450,40,40,h,(HMENU)22,paint->getHInst(),NULL);
+	
+		hBitmap=LoadBitmap(paint->getHInst(),LPCSTR(IDB_BITMAP6));
+			SendDlgItemMessage(h,20,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
+		hBitmap=LoadBitmap(paint->getHInst(),LPCSTR(IDB_BITMAP7));
+			SendDlgItemMessage(h,21,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
+		hBitmap=LoadBitmap(paint->getHInst(),LPCSTR(IDB_BITMAP8));
+			SendDlgItemMessage(h,22,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
 
 		return 0;		
 		case WM_HSCROLL:
@@ -1173,7 +1208,15 @@ char strtext[1024];
 			case 2:
 				paint->makeNewSheet();
 				break;
-
+			case 20:
+				paint->playdouga();
+				break;
+			case 21:
+				paint->pausedouga();
+				break;
+			case 22:
+				paint->stopdouga();
+				break;
 			}
 		}
 		break;
@@ -1213,7 +1256,7 @@ void KTPaint::makeNewSheet() {
 void KTPaint::updateDispLineNum() {
 	char labeltext[1024];
 	memset(labeltext,0,1024);
-	sprintf_s(labeltext ,1024, "line” = %d/%d\n‘I‘ğ€–Ú = %d\n•Mˆ³=%d\nhline”=%d/%d\n‚Ê‚è—Ìˆæ”=%d/%d\n‹Èline”=%d/%d\n‰”•Mline”%d/%d\n\n“®‰æƒtƒŒ[ƒ€”=%d" ,
+	sprintf_s(labeltext ,1024, "line” = %d/%d\n‘I‘ğ€–Ú = %d\n•Mˆ³=%d\nhline”=%d/%d\n‚Ê‚è—Ìˆæ”=%d/%d\n‹Èline”=%d/%d\n‰”•Mline”%d/%d\n\n“®‰æŠÔ”=%d" ,
 		getNowSheetLineNum() , KTPAINT_SHEET_LINE_MAX,
 				SendMessage(combo , CB_GETCURSEL , 0 , 0),
 				temp_pressure,

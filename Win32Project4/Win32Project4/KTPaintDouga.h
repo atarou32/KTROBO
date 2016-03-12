@@ -39,6 +39,8 @@ private:
     ISampleGrabber *pSampleGrabber;
 	IVideoWindow  *pVideoWindow;
 	IVMRWindowlessControl *Cont;
+	IBaseFilter* teefil;
+	IBaseFilter* nr;
 
 	REFTIME length;
 	LONGLONG frame_length;
@@ -60,12 +62,15 @@ public:
 	BITMAPINFO bmi;         // Å© í«â¡
 	HBITMAP hBitmap;        // Å© í«â¡
 	HDC hdcMem;          // Å© í«â¡
-
+	LONGLONG alt;
+	LONGLONG alt2;
 	KTPaintDouga(void);
 	~KTPaintDouga(void);
 	bool Init(HWND hwnd,HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g);
 	bool Init2(HWND hwnd,HINSTANCE hinst);
 	void Init3(HWND hwnd, int nCmdShow);
+	bool Init5(HWND hwnd, HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g);
+	bool getInited() {return inited;}
 	void Del();
 	void Run(HWND hwnd, HDC hdc);
 	LONGLONG getAllFrame() {
@@ -74,7 +79,7 @@ public:
 
 	void copyBufferOfVideoFrame(HWND hWnd);
 	void setFrame(HWND hwnd, HDC hdc, PSTR text_frame, int offset);
-	void Pause();
+	LONGLONG Pause(HWND hwnd, HDC hdc);
 	void Stop(HWND hwnd, HDC hdc);
 
 

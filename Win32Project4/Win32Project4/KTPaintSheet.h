@@ -58,7 +58,7 @@ public:
 	KTPAINT_pen() {
 
 		for (int i=0;i<16;i++) {
-			pen_width.m[i/4][i%4] = 2+0.8*i/4.00f;//2+1*(i+1)/8.0f;
+			pen_width.m[i/4][i%4] = 2+0.2*i/15.0f;//2+1.2*i/15.0f;//2+0.8*i/4.00f;//2+1*(i+1)/8.0f;
 			pen_width_calcurator.m[i/4][i%4] = 300+(30)*i;
 		}
 			pen_width_calcurator.m[0][0] = 400;
