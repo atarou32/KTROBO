@@ -223,7 +223,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	int delta;
 	float zo;
 	static bool is_rdragged=false;
+	static bool is_ldragged = false;
 	static POINT dragpoint;
+	static POINT before_ldragpoint;
 	POINT po;
 	POINT mpo;
 	switch (message)
@@ -246,10 +248,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		is_rdragged = false;
 		break;
 	case WM_LBUTTONUP:
+		if (prsNew == 300) {
+			paint->writeWithPen(before_ldragpoint,before_ldragpoint,prsNew,prsNew,true);
+		}
 		paint->endDrawLine();
 		paint->deactivate();
+		is_ldragged = false;
+		
 		break;
 	case WM_LBUTTONDOWN:
+		is_ldragged = true;
+		prsNew = 300;
+		before_ldragpoint.x = xMousePos;
+		before_ldragpoint.y = yMousePos;
+//		ScreenToClient(hWnd, &before_ldragpoint);
 		paint->activate();
 		paint->startDrawLine();
 		break;
@@ -379,6 +391,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				dragpoint.x = xMousePos;
 				dragpoint.y = yMousePos;
 			}
+
+			if (is_ldragged) {
+				if (prsNew == 300) {
+					POINT now_point;
+					now_point.x = xMousePos;
+					now_point.y = yMousePos;
+					paint->writeWithPen(before_ldragpoint,now_point,prsNew,prsNew,false);
+					before_ldragpoint = now_point;
+				}
+			}
 		break;
 
 	case WT_PACKET:
@@ -422,10 +444,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (GET_WM_ACTIVATE_STATE(wParam, lParam))
       {
 			InvalidateRect(hWnd, NULL, TRUE);
+			paint->setCursorNow();
       } else {
 		  is_rdragged = false;
-		  //paint->endDrawLine();
+		  if (paint->getIsActive()) {
+			  paint->endDrawLine();
+		  }
 		  paint->deactivate();
+		  is_ldragged = false;
 		}
 		/* if switching in the middle, disable the region */
 		if (hCtx) 
@@ -441,6 +467,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
+	paint->setCursorNow();
 	return 0;
 }
 

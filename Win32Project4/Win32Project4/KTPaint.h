@@ -10,6 +10,7 @@
 #include "MyTextureLoader.h"
 #include "KTPaintNuri.h"
 #include "KTPaintDouga.h"
+#include <list>
 
 #define KTPAINT_PEN_ID 1
 #define KTPAINT_PENCIL_ID 2
@@ -22,7 +23,7 @@ public:
 	short transx;
 	short transy;
 	float zoom;
-	int count;
+	float count;
 	KTPaintSheet* now_sheet;
 	KTPaintSheetList* mae_sheet;
 	KTPaintSheetList* next_sheet;
@@ -33,7 +34,7 @@ public:
 		now_sheet = 0;
 		mae_sheet =0;
 		next_sheet = 0;
-		count = 1;
+		count = 10000;
 	}
 };
 
@@ -57,7 +58,7 @@ private:
 	int now_pen_index;
 	int now_penkyokuline_start;
 	int temp_pressure;
-	vector<KTPaintSheetList*> sheets;
+	list<KTPaintSheetList*> sheets;
 	KTPaintSheetList* now_sheet;
 	KTPaintSheetList* root_sheet;
 	bool is_activate;
@@ -88,6 +89,8 @@ private:
 	MyTextureLoader::MY_TEXTURE_CLASS* exam_class;
 	KTPaintNuri nuridayo;
 public:
+	void updateNowSheetPos();
+
 	void setIsRenderPencilLine(bool t) {
 		is_render_pencil_line = t;
 	}
@@ -194,6 +197,7 @@ public:
 	void clearSheetTransInfoNado();
 	void activate(){is_activate = true;}
 	void deactivate() {is_activate=false;}
+	bool getIsActive() {return is_activate;}
 	KTROBO::Graphics* getGraphics() {return g;}
 
 	bool is_dougasaisei() {return is_mode_dougasaisei;}
@@ -227,7 +231,10 @@ public:
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
 			now_count = 0;
+			int now_cursel = SendMessage(combo,CB_GETCURSEL,0,0);
+			SendMessage(combo,CB_SETCURSEL,now_cursel+1,0);
 			//ReleaseDC(parent_window, hdc);
+			updateDispLineNum();
 			return true;
 		}
 
@@ -243,6 +250,9 @@ public:
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
 			now_count = 0;
+			int now_cursel = SendMessage(combo,CB_GETCURSEL,0,0);
+			SendMessage(combo,CB_SETCURSEL,now_cursel-1,0);
+			updateDispLineNum();
 			return true;
 		}
 		return false;

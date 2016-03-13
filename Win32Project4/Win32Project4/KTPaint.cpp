@@ -45,7 +45,7 @@ KTPaint::KTPaint(HINSTANCE hins)
 	*/
 	now_penkyokuline_start = 0;
 	temp_pressure = 0;
-	is_render_pencil_line = false;
+	is_render_pencil_line = true;
 	is_mode_dougasaisei = false;
 	is_mode_pausedougabyouga = true;
 }
@@ -537,8 +537,11 @@ void KTPaint::render() {
 				KTROBO::Graphics::drawTex(g,douga.getBitmapClass()->width, douga.getBitmapClass()->height,douga.getBitmapClass()->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 			}
 	
-	}	
-	if (is_render_pencil_line || now_paint_id == KTPAINT_PENCIL_ID) {
+	}
+
+	if (is_render_pencil_line || (now_paint_id == KTPAINT_PENCIL_ID)) {
+		KTROBO::Graphics::setPenInfo(g,g->getScreenWidth(), g->getScreenHeight(), 
+				now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 	KTROBO::Graphics::drawPencil(g,now_sheet->now_sheet->getEline(),now_sheet->now_sheet->getElineMax(),
 		now_color_r,now_color_g,now_color_b,0xFF);
 	}
@@ -650,7 +653,7 @@ void KTPaint::Release()  {
 	KTROBO::CS::instance()->Del();
 	loader.del();
 
-	vector<KTPaintSheetList*>::iterator it = sheets.begin();
+	list<KTPaintSheetList*>::iterator it = sheets.begin();
 	while( it != sheets.end()) {
 		KTPaintSheetList* pp = *it;
 		if (pp) {
@@ -968,14 +971,25 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 }
 
 LPCSTR strItem[] = {
-	"text",
-	"text1",
-	"text2",
-	"text3",
-	"text4"
+	"text10000.000000"
 };
 
 WNDPROC OrgTrackProc; //元々のトラックバーのプロシージャ
+
+
+void KTPaint::updateNowSheetPos() {
+	KTPaintSheetList* temp = root_sheet;
+	int index = SendMessage(combo,CB_GETCURSEL,0,0);
+	for (int i=0;i<index;i++) {
+		if (temp->next_sheet) {
+		temp = temp->next_sheet;
+		} else {
+			break;
+		}
+	}
+	now_sheet = temp;
+}
+
 
 LRESULT CALLBACK LoadSaveWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 static HWND combo;
@@ -1062,9 +1076,10 @@ char strtext[1024];
 		paint->updateDispLineNum();
 		
 
-		for (i = 0 ; i < 5 ; i++)
-			SendMessage(combo , CB_ADDSTRING , 0 , (LPARAM)strItem[i]);
-
+		for (i = 0 ; i < 1 ; i++)
+			SendMessage(combo , CB_INSERTSTRING , 0 , (LPARAM)strItem[i]);
+		
+		SendMessage(combo, CB_SETCURSEL,0,0);
 
 
 
@@ -1161,6 +1176,7 @@ char strtext[1024];
             break;
 		case WM_COMMAND:
 		if (HIWORD(w) == CBN_SELCHANGE) {
+			paint->updateNowSheetPos();
 			paint->updateDispLineNum();
 		}
 		/*
@@ -1233,13 +1249,76 @@ void KTPaint::makeNewSheet() {
 	KTPaintSheetList* sheetlist = new KTPaintSheetList();
 	sheetlist->now_sheet = sheet;
 	sheetlist->mae_sheet = now_sheet;
+
 	if (now_sheet->next_sheet) {
 		sheetlist->next_sheet = now_sheet->next_sheet;
+	
+		sheetlist->count = now_sheet->count + 1000;
+		if (sheetlist->count >= now_sheet->next_sheet->count) {
+			sheetlist->count = now_sheet->count + 100;
+			if (sheetlist->count >= now_sheet->next_sheet->count) {
+				sheetlist->count = now_sheet->count + 10;
+				if (sheetlist->count >= now_sheet->next_sheet->count) {
+					sheetlist->count = now_sheet->count+1;
+					if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/10.0f;
+						if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/100.0f;
+						if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/1000.0f;
+						if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/10000.0f;
+						if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/100000.0f;
+						if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/1000000.0f;
+						if (sheetlist->count >= now_sheet->next_sheet->count) {
+						sheetlist->count = now_sheet->count+1/10000000.0f;
+						}
+						}
+						}
+						}
+						}
+						}
+					}
+				}
+			}
+		}
+
+		now_sheet->next_sheet->mae_sheet = sheetlist;
+		now_sheet->next_sheet = sheetlist;
+
+
+	} else {
+		now_sheet->next_sheet = sheetlist;
+		sheetlist->count = now_sheet->count+10000;
 	}
-	now_sheet->next_sheet = sheetlist;
+
+	
+	static char str[1024];
+	memset(str,0,1024);
+	sprintf_s(str,1024,"text%f",sheetlist->count);
+	int index =0;
+	int ssize = sheets.size();
+	list<KTPaintSheetList*>::iterator it = sheets.begin();
+	while(it != sheets.end()) {
+		if (*it == now_sheet) {
+			break;
+		}
+		index++;
+		it++;
+	}
+
+	SendMessage(combo,CB_INSERTSTRING,index+1,(LPARAM)str);
+	SendMessage(combo,CB_SETCURSEL,index+1,0);
+	//now_sheet->next_sheet = sheetlist;
 
 	now_sheet = sheetlist;
+	if (it != sheets.end()) {
+	sheets.insert((++it),sheetlist);
+	} else {
 	sheets.push_back(sheetlist);
+	}
 	clearSheetTransInfoNado();
 	float clearColor[4] = {
 		1.0f,1.0f,1.0f,1.0f};
