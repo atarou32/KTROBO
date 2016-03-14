@@ -140,7 +140,7 @@ void KTPaintSheet::setHeiPline(POINT mpo, POINT po, unsigned char width, unsigne
 	int tans;
 
 	if (hei_pline_max >= KTPAINT_SHEET_HEILINE_MAX) {
-		hei_pline_max = 0;
+	//	hei_pline_max = 0;
 		return;
 	}
 
@@ -205,7 +205,7 @@ void KTPaintSheet::setPline(POINT mpo, POINT po, unsigned char width, unsigned c
 	int tans;
 
 	if (pline_max >= KTPAINT_SHEET_LINE_MAX) {
-		pline_max = 0;
+		//pline_max = 0;
 		return;
 	}
 
@@ -603,7 +603,171 @@ int KTPaintSheet::getTempHeiFromSitenAndID2(KTPAINT_kouten* siten, KTPAINT_koute
 	return KTPAINT_SHEET_TEMPHEI_NOHEI;
 }
 
-bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart, DWORD color, bool onaji_check) {
+
+
+
+int KTPaintSheet::getTempHeiFromSitenAndID3(KTPAINT_kouten* siten, KTPAINT_kouten** mae_k, KTPAINT_kouten** kk, 
+											KTPAINT_kouten* koutens, int* keiro_indexs,
+											KTPAINT_kouten** temp_koutens, int* keiro_depth,
+											KTPAINT_bubblehei* heis) {
+
+	int now_ID=0;
+	int now_depth =0;
+//	KTPAINT_kouten* kk = siten;
+	set<pair<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>>>::iterator it;
+	bool is_finish = false;
+	int count_max = KTPAINT_PENHEIRYOUIKI_MAX;
+	int count=0;
+	while((count < count_max) && (*keiro_depth<KTPAINT_PENHEIRYOUIKI_MAX)) {
+		int now_depth_index = keiro_indexs[*keiro_depth];
+	//	kk = getDepthKouten(siten,koutens,keiro_indexs,*keiro_depth);
+		if (*kk) {
+		for (int i=0;i<*keiro_depth;i++) {
+			if (temp_koutens[i]) {
+				if (temp_koutens[i] == *kk) {
+					keiro_indexs[*keiro_depth]++;
+					*kk = NULL;
+					return KTPAINT_SHEET_TEMPHEI_NOHEI;
+				}
+			}
+		}
+		} 
+
+		if (*kk == NULL) {
+			if (*keiro_depth) {
+				*keiro_depth = *keiro_depth - 1;
+				keiro_indexs[*keiro_depth]++;
+				count++;
+				if (*mae_k&& *mae_k != siten) {
+					(*mae_k)->is_tuuka = false;
+				}
+				*kk = *mae_k;
+			
+				if (*keiro_depth) {
+					*mae_k = temp_koutens[*keiro_depth-1];//getDepthKouten(siten,koutens,keiro_indexs,*keiro_depth-1);
+				} else {
+					*mae_k = NULL;
+				}
+				
+				continue;
+			} else {
+				return KTPAINT_SHEET_TEMPHEI_NOMOREHEI;
+			}
+		}
+		it = (*kk)->keiros.begin();
+		if (it == (*kk)->keiros.end()) return KTPAINT_SHEET_TEMPHEI_NOHEI; 
+		
+	
+		for (int i=0;i<now_depth_index;i++) {
+			it++;
+			if (it == (*kk)->keiros.end()) {
+			// もう経路がない場合は
+				break;
+				
+
+			}
+		}
+		if (it == (*kk)->keiros.end()) {
+			// もう経路がない場合は
+			if (*keiro_depth) {
+				// ひとつ上にしてみる
+				*keiro_depth = *keiro_depth-1;
+				keiro_indexs[*keiro_depth]++;
+
+				if (*mae_k && *mae_k != siten) {
+					(*mae_k)->is_tuuka = false;
+				}
+
+				*kk = *mae_k;
+				
+
+				if (*keiro_depth) {
+					*mae_k =  temp_koutens[*keiro_depth-1];//getDepthKouten(siten,koutens,keiro_indexs,*keiro_depth-1);
+				} else {
+					*mae_k = NULL;
+				}
+
+				
+				continue;
+				
+
+			} else {
+				// ほんとうにもう経路がない
+				return KTPAINT_SHEET_TEMPHEI_NOMOREHEI; 
+			}
+		}
+
+		KTPAINT_kouten* ikisaki = (*it).first;
+
+
+		bool konomama_ikeru = true;
+
+
+
+
+
+		for (int i=0;i<*keiro_depth;i++) {
+			if (temp_koutens[i]) {
+				if ((temp_koutens[i] == *kk) && (ikisaki != siten)) {
+					keiro_indexs[*keiro_depth]++;
+					*kk = NULL;
+					return KTPAINT_SHEET_TEMPHEI_NOHEI;
+				}
+			}
+		}
+
+
+
+		if (ikisaki->is_tuuka && ikisaki != siten) {
+			// 別の点でループした
+			konomama_ikeru = false;
+		//	now_ID++;
+		//	if (now_ID == keiro_ID) 
+			keiro_indexs[*keiro_depth]++;
+			return KTPAINT_SHEET_TEMPHEI_NOHEI;
+		//	now_ID++;
+		} else if(ikisaki->is_tuuka && ikisaki == siten) {
+			konomama_ikeru = false;
+			
+
+		
+
+
+			// 同じ経路を通る場合も含まれることに注意する
+			//if (now_ID == keiro_ID) 
+
+			return KTPAINT_SHEET_TEMPHEI_HEI;
+			//now_ID++;
+		}
+
+
+		if (heis->fukumu_kouten_indexs.find(ikisaki->index) == heis->fukumu_kouten_indexs.end()) {
+			// 経路にないのでこのままいけない
+			konomama_ikeru = false;
+		}
+
+		if (konomama_ikeru) {
+			(*kk)->is_tuuka = true;
+			temp_koutens[*keiro_depth] = *kk;
+			*mae_k = *kk;
+			*kk = ikisaki;
+			*keiro_depth = *keiro_depth+1;
+			keiro_indexs[*keiro_depth]=0;
+			
+		} else {
+			// このままいけない場合は次の経路にいくかもしくは前の経路に戻る
+			keiro_indexs[*keiro_depth]++;
+		}
+		count++;
+	}
+
+
+	return KTPAINT_SHEET_TEMPHEI_NOHEI;
+}
+
+
+
+bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart, DWORD color, bool onaji_check, unsigned short is_pline) {
 
 	// 同じ経路を通っていないかどうかチェックする
 	
@@ -716,6 +880,7 @@ bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 		hei[hei_max].startheiryouiki = hei_part_max;
 		hei[hei_max].endheiryouiki = temp_hei->endheiryouiki - temp_hei->startheiryouiki + hei_part_max;
 		hei[hei_max].color = color;
+		hei[hei_max].is_use_pline = is_pline;
 		for (int i=temp_hei->startheiryouiki; i<= temp_hei->endheiryouiki;i++) {
 			hei_part[hei_part_max].keiro_first_index = temp_heipart[i].keiro_first_index;
 			hei_part[hei_part_max].keiro_index = temp_heipart[i].keiro_index;
@@ -727,8 +892,16 @@ bool KTPaintSheet::tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAI
 
 
 		}
+		if (is_pline) {
+			temp_hei->daen_index = 0;
+			// 再計算させる
+		}
 		if (!temp_hei->daen_index) {
-			motomeruJyusin(&hei[hei_max], &hei_daen[hei_daen_max], hei_part);
+			if (is_pline) {
+				motomeruJyusinPline(&hei[hei_max], &hei_daen[hei_daen_max], hei_part);
+			} else {
+				motomeruJyusin(&hei[hei_max], &hei_daen[hei_daen_max], hei_part);
+			}
 		//	hei[hei_max].daen_calced = 1;
 			hei[hei_max].daen_index = hei_daen_max;
 			hei_daen_max++;
@@ -751,10 +924,19 @@ void KTPaintSheet::simulationStepStart(unsigned short width, unsigned short heig
 	KTPAINT_bubble* bubbles = nuri->getBubble();
 	float radius = KTPAINT_PENHEIRYOUIKI_BUBBLE_RADIUS_SAISHO;
 	int temp_count = 0;
-	for (int i=0;i < width; i += (int)(2*radius)) {
-		for (int j=0;j<height; j += (int)(2*radius)) {
+	
+	int width_count = width/ KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU / (int)(2*radius)+1;
+	int height_count = height/ KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU / (int)(2*radius)+1;
+
+	
+	
+	for (int j=0;j<height/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU; j += (int)(2*radius)) {
+		for (int i=0;i < width/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU; i += (int)(2*radius)) {
+		//	temp_count = i + j*width_count;
 			bubbles[temp_count].radius = radius;
 			bubbles[temp_count].status = 0;
+			bubbles[temp_count].label_index_tate = 0;
+			bubbles[temp_count].label_index_yoko = 0;
 			bubbles[temp_count].ketugou[0] = NULL;
 			for (int k=0;k<KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX;k++) {
 				bubbles[temp_count].fukumuten[k] = KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_FUKUMANAI;
@@ -762,25 +944,337 @@ void KTPaintSheet::simulationStepStart(unsigned short width, unsigned short heig
 			bubbles[temp_count].x = i + (int)radius;
 			bubbles[temp_count].y = j + (int)radius;
 			temp_count++;
-
+			
 			if (temp_count >= KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX) {
 				nuri->setBubbleMax(temp_count);return;
+			}
+			
+		}
+	
+	}
+
+
+	// ketugou を設定する
+	
+		for (int j=0;j<height_count;j++) {
+			for (int i=0;i<width_count;i++) {
+			int index = i + j * width_count;
+			if (index >= KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX) continue;
+			if (i >0) {
+				int index3 = i-1 + j *width_count;
+				bubbles[index].ketugou[1] = &bubbles[index3];
+			}
+			if (i < width_count-1) {
+				int index4 = i + 1 + j*width_count;
+				bubbles[index].ketugou[2] = &bubbles[index4];
+			}
+			if (j >0) {
+				int index1 = i + (j-1)*width_count;
+				bubbles[index].ketugou[0] = &bubbles[index1];
+			}
+			if (j < height_count-1) {
+				int index6 = i + (j+1)*width_count;
+				bubbles[index].ketugou[3] = &bubbles[index6];
 			}
 		}
 	}
 
 	nuri->setBubbleMax(temp_count);
-
+	nuri->setBubbleHeiMax(0);
 
 }
 
-void KTPaintSheet::simulationBubbleStep(short min_d, short max_d, float radius_d, KTPaintNuri* nuri) {
+void KTPaintSheet::copyHeiTo(KTPaintSheet* dest) {
+
+	int dest_hei_max = dest->getHeiMax();
+	int dest_hei_daen_max = dest->getHeiDaenMax();
+	int dest_hei_part_max = dest->getHeiPartMax();
+	KTPAINT_penheiryouiki* dest_hei = dest->getHei();
+	KTPAINT_penheiryouikipart* dest_hei_part =dest->getHeiPart();
+	KTPAINT_penheiryouikidaen* dest_hei_daen = dest->getHeiDaen();
+
+	if (dest_hei_max + hei_max >= KTPAINT_PENHEIRYOUIKI_MAX) return;
+	if (dest_hei_daen_max + hei_daen_max >= KTPAINT_PENHEIRYOUIKI_DAEN_MAX) return;
+	if (dest_hei_part_max + hei_part_max >= KTPAINT_PENHEIRYOUIKI_PART_MAX) return;
+	
+	int temp_heiryouiki;
+	if (dest_hei_max) {
+		temp_heiryouiki = dest_hei[dest_hei_max-1].endheiryouiki+1;
+	} else {
+		temp_heiryouiki = 0;
+	}
+	for (int i=0;i<hei_max;i++) {
+		/*unsigned short startheiryouiki;
+		unsigned short endheiryouiki;
+		unsigned short daen_index;
+		unsigned short hen_id;
+		unsigned short is_use_pline; // 0 use_heipline, 1 use_pline
+		unsigned short offset;
+		DWORD color;*/
+		dest_hei[i+dest_hei_max].startheiryouiki = temp_heiryouiki;
+		dest_hei[i+dest_hei_max].endheiryouiki = temp_heiryouiki + hei[i].endheiryouiki - hei[i].startheiryouiki;
+		dest_hei[i+dest_hei_max].daen_index = dest_hei_daen_max + i;
+		dest_hei[i+dest_hei_max].is_use_pline = hei[i].is_use_pline;
+		dest_hei[i+dest_hei_max].offset= 0;
+		dest_hei[i+dest_hei_max].color = hei[i].color;
+		// hei[i].daen_index の内容を登録する
+		/*	unsigned short heiryouiki_index;
+			unsigned short width;
+			unsigned short height;
+			unsigned short x;
+			unsigned short y;
+			unsigned short index;
+			float theta;
+			*/
+		KTPAINT_penheiryouikidaen* da = &hei_daen[hei[i].daen_index];
+		dest_hei_daen[dest_hei_daen_max+i].width = da->width;
+		dest_hei_daen[dest_hei_daen_max+i].height = da->height;
+		dest_hei_daen[dest_hei_daen_max+i].x = da->x;
+		dest_hei_daen[dest_hei_daen_max+i].y = da->y;
+		dest_hei_daen[dest_hei_daen_max+i].theta = da->theta;
+		dest_hei_daen[dest_hei_daen_max+i].index =da->index;
+		dest_hei_daen[dest_hei_daen_max+i].heiryouiki_index = i + dest_hei_max;
+	}
+
+	for (int i=0;i<hei_part_max;i++) {
+		/*
+		unsigned short kouten_x;
+		unsigned short kouten_y;
+		unsigned short keiro_first_index;
+		unsigned short keiro_last_index;
+		unsigned short kouten_index;
+		unsigned short keiro_index;// kouten の何番目の経路かということ　kyokuline_indexは keiro_first_index, keiro_last_index から推測できるはず？
+		*/
+		dest_hei_part[dest_hei_part_max+i].kouten_x = hei_part[i].kouten_x;
+		dest_hei_part[dest_hei_part_max+i].kouten_y = hei_part[i].kouten_y;
+		dest_hei_part[dest_hei_part_max+i].keiro_first_index = hei_part[i].keiro_first_index;
+		dest_hei_part[dest_hei_part_max+i].keiro_last_index = hei_part[i].keiro_last_index;
+		dest_hei_part[dest_hei_part_max+i].kouten_index = hei_part[i].kouten_index;
+		dest_hei_part[dest_hei_part_max+i].keiro_index = hei_part[i].keiro_index;
+	}
+
+	dest->hei_max = hei_max + dest_hei_max;
+	dest->hei_part_max = hei_part_max + dest_hei_part_max;
+	dest->hei_daen_max = dest_hei_daen_max + hei_max;
+
+}
 
 
+void KTPaintSheet::simulationBubbleStep(unsigned short width, unsigned short height, KTPaintNuri* nuri) {
+
+	// 各bubbleと線分が交わっているかどうか判定して
+	// 交わっている場合は交わっているしるしをつける
+	KTPAINT_bubble* bubbles = nuri->getBubble();
+	KTPAINT_kouten* koutens = nuri->getKoutens();
+	
+	int kouten_max = nuri->getKoutenMax();
+	int bubble_max = nuri->getBubbleMax();
+	// bubbleの半径が全て同じと仮定する
+	int r2 = (int)(bubbles[0].radius*2);
+	int bwidth = width /KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/ r2+1;
+
+	for (int k = 0;k<kouten_max;k++) {
+
+		set<pair<KTPAINT_kouten*, pair<KTPAINT_penkyokuline*, pair<int,int>>>>::iterator it = koutens[k].keiros.begin();
+		while(it != koutens[k].keiros.end()) {
+			int first_index = (*it).second.second.first;
+			int last_index = (*it).second.second.second;
+		
+			for (int h=first_index; h<=last_index;h++) {
+					float px = plines[h].x;
+					float py = plines[h].y;
+					float px2 = plines[h].x + plines[h].dx;
+					float py2 = plines[h].y + plines[h].dy;
+					int px_width = px / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/r2;
+					int py_height = py /KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/ r2;
+					int px_width2 = px2 / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/r2+1;
+					int py_height2 = py2 / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/r2+1;
+					
+
+				// is_kousaLineAndBubbleの前に検討はずれのものは除外する
+				
+				
+					for (int j=py_height;j <= py_height2;j++) {
+							for (int i= px_width;i<=px_width2;i++) {
+							int inde = i + j * bwidth;
+							if (inde > bubble_max) continue;
+
+							if (nuri->isKousaLineAndBubble(&plines[h],&bubbles[inde])) {
+								int ind = KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX;
+								for (int g=0;g<KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX;g++) {
+									if (bubbles[inde].fukumuten[g] == KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_FUKUMANAI) {
+										ind = g;
+										break;
+									}
+								}
+								if (ind == KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX) continue; // 記録しない
+								bubbles[inde].fukumuten[ind] = k;
+								bubbles[inde].status = KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE;
+							}
+						}
+					}
+				
+			}
+			it++;
+		}
+	}
+
+	// 次にバブルのラベル付けを行う
+	unsigned short bhei_count=0;
+	unsigned short label_index = 1;
+	KTPAINT_bubblehei* bhei = nuri->getBubbleHeis();
+	float radius = KTPAINT_PENHEIRYOUIKI_BUBBLE_RADIUS_SAISHO;
+	int width_count = width/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/ (int)(2*radius)+1;
+	int height_count = height/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/ (int)(2*radius)+1;
+
+	for (int j=0;j<height_count; j += 1) {
+		int label = 1;
+		for (int i=0;i < width_count; i += 1) {
+			int inde = i + j * width_count;
+			
+			if (bubbles[inde].status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
+				label++;
+				continue;
+			}
+			bubbles[inde].label_index_yoko = label;
+		}
+	}
+
+	
+		
+	for (int i=0;i < width_count; i += 1) {
+		int label = 1;
+		for (int j=0;j<height_count; j += 1) {
+			int inde = i + j * width_count;
+			
+			if (bubbles[inde].status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
+				label++;
+				continue;
+			}
+			bubbles[inde].label_index_tate = label;
+		}
+	}
+
+	// tateと横のラベル付けは終わったのでheiのラベル付けを行う
+	bool is_has=false;
+	for (int i=0;i<bubble_max;i++) {
+
+		if (labeldukeBubble(&bubbles[i],label_index,bhei_count,bhei)) {
+			bhei[bhei_count].label = label_index;
+			label_index++;
+			bhei_count++;
+			is_has =true;
+		}
+	}
+	nuri->setBubbleHeiMax(bhei_count);
+}
+
+bool KTPaintSheet::labeldukeBubble(KTPAINT_bubble* bubble, unsigned short label_index, unsigned short count, KTPAINT_bubblehei* gheis) {
+	if ((bubble->status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_LABELED) || (bubble->status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE)) return false;
+	bubble->status = KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_LABELED;
+	KTPAINT_bubble* left = bubble;
+	KTPAINT_bubble* right = bubble;
+	bool is_true=false;
+	bubble->hei_index = count;
+	while (left->ketugou[1]) {
 
 
+		if (left->ketugou[1]->status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
+			for (int i=0;i<KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX;i++) {
+				if (left->ketugou[1]->fukumuten[i] != KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_FUKUMANAI) {
+					gheis[count].fukumu_kouten_indexs.insert(left->ketugou[1]->fukumuten[i]);
+					is_true = true;
+					
+				}
+			}
+			break;
+		}
+		
+		left->status = KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_LABELED;
+		left->hei_index = count;
+		if (left->label_index_yoko != left->ketugou[1]->label_index_yoko) break;
+		
+		left = left->ketugou[1];
+		
+	}
+	while (right->ketugou[2]) {
 
+		if (right->ketugou[2]->status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
+			for (int i=0;i<KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX;i++) {
+				if (right->ketugou[2]->fukumuten[i] != KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_FUKUMANAI) {
+					gheis[count].fukumu_kouten_indexs.insert(right->ketugou[2]->fukumuten[i]);
+					is_true = true;
+				}
+			}
+			break;
+		}
+		right->status = KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_LABELED;
+		right->hei_index = count;
+		if (right->label_index_yoko != right->ketugou[2]->label_index_yoko) break;
+		
+		right = right->ketugou[2];
+	}
 
+	// left と　right には現在タンテンが入っている
+	set<KTPAINT_bubble*> has_to_scan;
+	KTPAINT_bubble* temp = left;
+	KTPAINT_bubble* temp2 = right;
+	// ひとつだけ上の方向を考えてhas_to_scanに入れていく
+	if (temp->ketugou[0]) {
+		if (temp->ketugou[0]->label_index_tate == temp->label_index_tate) {
+			has_to_scan.insert(temp->ketugou[0]);
+			KTPAINT_bubble* bb = temp->ketugou[0];
+			KTPAINT_bubble* bb_temp = bb;
+			// 横方向に進んでいって
+			// tempの結合0 があるのでtemp2もあると考えられる
+			KTPAINT_bubble* bb_owari = temp2->ketugou[0];
+
+			while((bb_owari != bb_temp) && bb_temp->ketugou[2]) {
+
+				if (bb_temp->label_index_yoko != bb->label_index_yoko) {
+					if (bb_temp->ketugou[3]->label_index_tate == bb_temp->label_index_tate) {
+						bb = bb_temp;
+						has_to_scan.insert(bb_temp);
+					}
+				}
+				bb_temp= bb_temp->ketugou[2];
+			}
+		}
+	}
+
+	if (temp->ketugou[3]) {
+		if (temp->ketugou[3]->label_index_tate == temp->label_index_tate) {
+			has_to_scan.insert(temp->ketugou[3]);
+			KTPAINT_bubble* bb = temp->ketugou[3];
+			KTPAINT_bubble* bb_temp = bb;
+			// 横方向に進んでいって
+			// tempの結合0 があるのでtemp2もあると考えられる
+			KTPAINT_bubble* bb_owari = temp2->ketugou[3];
+
+			while((bb_owari != bb_temp) && bb_temp->ketugou[2]) {
+
+				if (bb_temp->label_index_yoko != bb->label_index_yoko) {
+					if (bb_temp->ketugou[0]->label_index_tate == bb_temp->label_index_tate) {
+						bb = bb_temp;
+						has_to_scan.insert(bb_temp);
+					}
+				}
+				bb_temp= bb_temp->ketugou[2];
+			}
+		}
+	}
+
+	set<KTPAINT_bubble*>::iterator has_to_it = has_to_scan.begin();
+	while(has_to_it != has_to_scan.end()) {
+		KTPAINT_bubble* bs = *has_to_it;
+		if (labeldukeBubble(bs,label_index,count,gheis)) {
+			is_true = true;
+		}
+		has_to_it++;
+	}
+
+	
+	return is_true;
 }
 
 
@@ -945,7 +1439,7 @@ bool KTPaintSheet::calcHeiryouikiPlus(KTPaintNuri* nuri, DWORD color) {
 
 		for (int i=0;i<temp_hei_count;i++) {
 			if (temp_hei_use[i]) {
-				if (tryTourokuTempHeiToHei(&temp_hei[i], temp_heipart, color,true)) {
+				if (tryTourokuTempHeiToHei(&temp_hei[i], temp_heipart, color,true, 0)) {
 					// 一個登録できたら十分
 					ans = true;
 				}
@@ -957,12 +1451,110 @@ bool KTPaintSheet::calcHeiryouikiPlus(KTPaintNuri* nuri, DWORD color) {
 
 
 
+void KTPaintSheet::copyto(KTPaintSheet* dest) {
+
+	//KTPAINT_penheiryouikipart hei_part[KTPAINT_PENHEIRYOUIKI_PART_MAX];
+	memset(dest->hei_part,0,sizeof(KTPAINT_penheiryouikipart)*KTPAINT_PENHEIRYOUIKI_PART_MAX);
+	for (int i=0;i<hei_part_max;i++) {
+		dest->hei_part[i].keiro_first_index = hei_part[i].keiro_first_index;
+		dest->hei_part[i].keiro_index = hei_part[i].keiro_index;
+		dest->hei_part[i].keiro_last_index = hei_part[i].keiro_last_index;
+		dest->hei_part[i].kouten_index = hei_part[i].kouten_index;
+		dest->hei_part[i].kouten_x = hei_part[i].kouten_x;
+		dest->hei_part[i].kouten_y = hei_part[i].kouten_y;
+	}
+
+	//KTPAINT_penheiryouiki hei[KTPAINT_PENHEIRYOUIKI_MAX];
+	memset(dest->hei, 0 , sizeof(KTPAINT_penheiryouiki)*KTPAINT_PENHEIRYOUIKI_MAX);
+	for (int i=0;i<hei_max;i++) {
+		dest->hei[i].color = hei[i].color;
+		dest->hei[i].daen_index = hei[i].daen_index;
+		dest->hei[i].endheiryouiki = hei[i].endheiryouiki;
+		dest->hei[i].hen_id = hei[i].hen_id;
+		dest->hei[i].startheiryouiki = hei[i].startheiryouiki;
+	}
+	//KTPAINT_penheiryouikidaen hei_daen[KTPAINT_PENHEIRYOUIKI_DAEN_MAX];
+	memset(dest->hei_daen,0, sizeof(KTPAINT_penheiryouikidaen)*KTPAINT_PENHEIRYOUIKI_DAEN_MAX);
+	for (int i=0;i<hei_daen_max;i++) {
+		dest->hei_daen[i].height = hei_daen[i].height;
+		dest->hei_daen[i].heiryouiki_index = hei_daen[i].heiryouiki_index;
+		dest->hei_daen[i].index = hei_daen[i].index;
+		dest->hei_daen[i].theta = hei_daen[i].theta;
+		dest->hei_daen[i].width = hei_daen[i].width;
+		dest->hei_daen[i].x = hei_daen[i].x;
+		dest->hei_daen[i].y = hei_daen[i].y;
+	}
+
+	//map<pair<int, int>, int> oyakokankei;// KTPAINT_HEI* KTPAINT_HEI* int
+	dest->oyakokankei.clear();
+	dest->oyakokankei = oyakokankei;
+	// int 0 最初 がoya  1 最後がoya 2 不明
+	//KTPAINT_penline hei_plines[KTPAINT_SHEET_HEILINE_MAX];
+	memset(dest->hei_plines, 0, sizeof(KTPAINT_penline)*KTPAINT_SHEET_HEILINE_MAX);
+	for (int i=0;i<hei_pline_max;i++) {
+		dest->hei_plines[i].dx = hei_plines[i].dx;
+		dest->hei_plines[i].dy = hei_plines[i].dy;
+		dest->hei_plines[i].pen_index = hei_plines[i].pen_index;
+		dest->hei_plines[i].width_and_nwidth = hei_plines[i].width_and_nwidth;
+		dest->hei_plines[i].x = hei_plines[i].x;
+		dest->hei_plines[i].y = hei_plines[i].y;
+	}
+
+	//KTPAINT_penkyokuline hei_kyoku_plines[KTPAINT_SHEET_KYOKULINE_MAX];
+	memset(dest->hei_kyoku_plines, 0,  sizeof(KTPAINT_penkyokuline)*KTPAINT_SHEET_KYOKULINE_MAX);
+	for (int i=0;i<hei_kyokupline_max;i++) {
+		dest->hei_kyoku_plines[i].end_index = hei_kyoku_plines[i].end_index;
+		dest->hei_kyoku_plines[i].kyoku_id = hei_kyoku_plines[i].kyoku_id;
+		dest->hei_kyoku_plines[i].kyoku_index = hei_kyoku_plines[i].kyoku_index;
+		dest->hei_kyoku_plines[i].start_index = hei_kyoku_plines[i].start_index;
+	}
+
+	//KTPAINT_enpituline elines[KTPAINT_SHEET_DUMMY_MAX];
+	memset(dest->elines,0, sizeof(KTPAINT_enpituline)*KTPAINT_SHEET_DUMMY_MAX);
+	for (int i=0;i<eline_max;i++) {
+		dest->elines[i].alpha = elines[i].alpha;
+		dest->elines[i].color_index = elines[i].color_index;
+		dest->elines[i].dx = elines[i].dx;
+		dest->elines[i].dy = elines[i].dy;
+		dest->elines[i].x = elines[i].x;
+		dest->elines[i].y = elines[i].y;
+	}
+
+	// KTPAINT_penline plines[KTPAINT_SHEET_LINE_MAX];
+	memset(dest->plines,0,sizeof(KTPAINT_penline)*KTPAINT_SHEET_LINE_MAX);
+	for (int i=0;i<pline_max;i++) {
+		dest->plines[i].dx = plines[i].dx;
+		dest->plines[i].dy = plines[i].dy;
+		dest->plines[i].pen_index = plines[i].pen_index;
+		dest->plines[i].width_and_nwidth = plines[i].width_and_nwidth;
+		dest->plines[i].x = plines[i].x;
+		dest->plines[i].y = plines[i].y;
+	}
+	// KTPAINT_penkyokuline kyoku_plines[KTPAINT_SHEET_KYOKULINE_MAX];
+	memset(dest->kyoku_plines, 0, sizeof(KTPAINT_penkyokuline)*KTPAINT_SHEET_KYOKULINE_MAX);
+	for (int i=0;i<kyokupline_max;i++) {
+		dest->kyoku_plines[i].end_index = kyoku_plines[i].end_index;
+		dest->kyoku_plines[i].kyoku_id = kyoku_plines[i].kyoku_id;
+		dest->kyoku_plines[i].kyoku_index = kyoku_plines[i].kyoku_index;
+		dest->kyoku_plines[i].start_index = kyoku_plines[i].start_index;
+	}
+
+	dest->hei_daen_max =  hei_daen_max;
+	dest->hei_part_max = hei_part_max;
+	dest->hei_max =  hei_max;
+	dest->hei_pline_max = hei_pline_max;
+	dest->hei_kyokupline_max = hei_kyokupline_max;
+
+	dest->eline_max =  eline_max;
+	dest->pline_max = pline_max;
+	dest->kyokupline_max = kyokupline_max;
+	dest->pline_start_index = pline_start_index;
+	dest->pline_end_index = pline_end_index;
 
 
+}
 
-
-
-void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri, DWORD color) {
+void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri, KTPAINT_bubblehei* hei, DWORD color) {
 
 	vector<KTPAINT_koutens*>* koutenss = nuri->getKoutenss();
 	KTPAINT_kouten* koutens = nuri->getKoutens();
@@ -988,7 +1580,7 @@ void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri, DWORD color) {
 
 	// すべての交点に対して走査する
 	for (int k=0;k<kouten_max;k++) {
-
+		if (hei->fukumu_kouten_indexs.find(k) == hei->fukumu_kouten_indexs.end()) continue;
 		if (hei_daen_max >= KTPAINT_PENHEIRYOUIKI_DAEN_MAX) continue;
 		KTPAINT_kouten* siten = &koutens[k];
 		KTPAINT_kouten* kk = siten;
@@ -1028,7 +1620,7 @@ void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri, DWORD color) {
 			// 経路がsiten以外でループを作っていたり、同じ経路をたどることになってしまっていたり
 			// する場合もIDに数えるが　ループや同じ経路の場合は次の深さを走査しない
 			
-			int kekka  = getTempHeiFromSitenAndID2(siten,&mae_k,&kk,koutens,keiro_indexs,temp_koutens, &keiro_depth);
+			int kekka  = getTempHeiFromSitenAndID3(siten,&mae_k,&kk,koutens,keiro_indexs,temp_koutens, &keiro_depth, hei);
 			if (kekka == KTPAINT_SHEET_TEMPHEI_NOMOREHEI) {
 				is_has_more_keiro = false;
 			} else if(kekka == KTPAINT_SHEET_TEMPHEI_HEI) {
@@ -1120,7 +1712,11 @@ void KTPaintSheet::calcHeiryouiki(KTPaintNuri* nuri, DWORD color) {
 
 		for (int i=0;i<temp_hei_count;i++) {
 			if (temp_hei_use[i]) {
-				tryTourokuTempHeiToHei(&temp_hei[i], temp_heipart, color);
+				if (tryTourokuTempHeiToHei(&temp_hei[i], temp_heipart, color,true,1)) {
+				// 一個みつかればオッケー
+					return;
+				}
+
 			}
 		}
 	}
@@ -1553,4 +2149,60 @@ bool KTPaintSheet::isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_pe
 	return false;
 
 
+}
+
+
+
+
+
+
+void KTPaintSheet::motomeruJyusinPline(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen, KTPAINT_penheiryouikipart* parts) {
+
+	daen->height = 0;
+	daen->index=0;
+	daen->theta = 0;
+	daen->width = 0;
+	daen->x = 0;
+	daen->y = 0;
+
+	double x =0;
+	double y =0;
+	int t_count=0;
+	for (int i=ryou->startheiryouiki; i<=ryou->endheiryouiki;i++) {
+		x += parts[i].kouten_x;
+		y += parts[i].kouten_y;
+		t_count++;
+		for (int k=parts[i].keiro_first_index;k<=parts[i].keiro_last_index;k++) {
+			x += this->plines[k].x;
+			y += this->plines[k].y;
+			t_count++;
+		}
+	}
+	if (t_count) {
+		x /= t_count;
+		y /= t_count;
+	}
+	
+	// 次にradius を求める
+	float radius2 = 0;
+
+	for (int i=ryou->startheiryouiki; i<=ryou->endheiryouiki;i++) {
+		float rad = (parts[i].kouten_x-x)*(parts[i].kouten_x-x)+
+			(parts[i].kouten_y-y)*(parts[i].kouten_y-y);
+		if (rad > radius2) {
+			radius2 = rad;
+		}
+		for (int k=parts[i].keiro_first_index;k<=parts[i].keiro_last_index;k++) {
+			float rad = (plines[k].x-x)*(plines[k].x-x)+(plines[i].y-y)*(plines[i].y-y);
+			if (rad > radius2) {
+				radius2 = rad;
+			}
+		}
+	}
+
+	daen->height = sqrt(radius2);
+	daen->width = daen->height;
+	daen->theta = 0;
+	daen->x = x;
+	daen->y = y;
 }

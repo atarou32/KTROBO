@@ -264,6 +264,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 //		ScreenToClient(hWnd, &before_ldragpoint);
 		paint->activate();
 		paint->startDrawLine();
+		if (paint->getNowPaint() == KTPAINT_NURI_ID) {
+			paint->fill(before_ldragpoint);
+		}
 		break;
 
 	case WM_MOUSEWHEEL:

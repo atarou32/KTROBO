@@ -755,11 +755,11 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   REFERENCE_TIME mm = pVideoInfoHeader->AvgTimePerFrame;
   HDC hdc = GetDC(hwnd);
   if (hdcMem) {
-	  DeleteDC(hdcMem);
+	  ReleaseDC(hwnd,hdcMem);
   }
 
   hdcMem = CreateCompatibleDC(hdc);
-  DeleteDC(hdc);
+  ReleaseDC(hwnd, hdc);
   hBitmap = CreateDIBSection( hdcMem, &bmi, DIB_RGB_COLORS, ( VOID ** )&pBuffer, NULL, 0 );
         if( !hBitmap ) {
                 MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );
@@ -1552,7 +1552,7 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
   }
 
   hdcMem = CreateCompatibleDC(hdc);
-  DeleteDC(hdc);
+  ReleaseDC(hwnd, hdc);
   hBitmap = CreateDIBSection( hdcMem, &bmi, DIB_RGB_COLORS, ( VOID ** )&pBuffer, NULL, 0 );
         if( !hBitmap ) {
                 MessageBoxW( hwnd, L"Error.", L"Error", MB_OK | MB_ICONERROR );

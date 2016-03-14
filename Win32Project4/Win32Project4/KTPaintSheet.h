@@ -6,6 +6,7 @@
 #include "windows.h"
 #include "MyDefine.h"
 #include <map>
+#include <set>
 using namespace std;
 class KTPaintNuri;
 class KTPAINT_kouten;
@@ -102,8 +103,8 @@ public:
 };
 
 #define KTPAINT_SHEET_HEILINE_MAX 4096*6
-#define KTPAINT_SHEET_LINE_MAX 4096*6
-#define KTPAINT_SHEET_DUMMY_MAX 4096
+#define KTPAINT_SHEET_LINE_MAX  4096*6
+#define KTPAINT_SHEET_DUMMY_MAX  4096
 #define KTPAINT_SHEET_KYOKULINE_MAX 2048
 
 class KTPAINT_penheiryouikipart {
@@ -122,6 +123,8 @@ public:
 	unsigned short endheiryouiki;
 	unsigned short daen_index;
 	unsigned short hen_id;
+	unsigned short is_use_pline; // 0 use_heipline, 1 use_pline
+	unsigned short offset;
 	DWORD color;
 };
 
@@ -137,28 +140,39 @@ public:
 };
 
 #define KTPAINT_PENHEIRYOUIKI_MAX 512
-#define KTPAINT_PENHEIRYOUIKI_PART_MAX 2048
-#define KTPAINT_PENHEIRYOUIKI_DAEN_MAX 2048
+#define KTPAINT_PENHEIRYOUIKI_PART_MAX  2048
+#define KTPAINT_PENHEIRYOUIKI_DAEN_MAX  2048
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX 4096*2
-#define KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX 16
-#define KTPAINT_PENHEIRYOUIKI_BUBBLE_RADIUS_SAISHO 10
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX 64
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_RADIUS_SAISHO 8
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_FUKUMANAI 65535
 
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_UNUSE 0
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_MAIN 1
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_SUB 2
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE 3
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_LABELED 4
 
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_LABEL_MAX 65535
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_HEI_MAX 1024
 class KTPAINT_bubble {
 public:
 	unsigned short x;
 	unsigned short y;
 	float radius;
-	KTPAINT_bubble* ketugou[8];
+	KTPAINT_bubble* ketugou[4];
 	unsigned short fukumuten[KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX];
-	unsigned short oya_ketugou;
+	unsigned short label_index_tate;
+	unsigned short label_index_yoko;
 	unsigned short status;
+	unsigned short hei_index;
 };
 
+class KTPAINT_bubblehei {
+public:
+	unsigned short label;
+	set<unsigned short> fukumu_kouten_indexs;
+};
 
 
 
@@ -168,7 +182,6 @@ public:
 class KTPaintSheet
 {
 private:
-
 
 	KTPAINT_penheiryouikipart hei_part[KTPAINT_PENHEIRYOUIKI_PART_MAX];
 	KTPAINT_penheiryouiki hei[KTPAINT_PENHEIRYOUIKI_MAX];
@@ -195,6 +208,7 @@ private:
 	bool oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPAINT_penheiryouiki* ryou3, 
 		KTPAINT_penheiryouiki** out_oya_ryou, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
 	void motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen, KTPAINT_penheiryouikipart* parts);
+	void motomeruJyusinPline(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen, KTPAINT_penheiryouikipart* parts);
 	bool addTempPartsCount(KTPAINT_penheiryouikipart* temp_parts,int* temp_c,int maxx,KTPAINT_penheiryouiki* ryou1,KTPAINT_penheiryouikipart* parts);
 	int karuiOyakoHantei(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
 	bool isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts); 
@@ -202,11 +216,24 @@ private:
 	int getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID);
 	int getTempHeiFromSitenAndID2(KTPAINT_kouten* siten, KTPAINT_kouten** mae_k, KTPAINT_kouten** kk,  KTPAINT_kouten* koutens, 
 		int* keiro_indexs,KTPAINT_kouten** temp_koutens,int* keiro_depth);
-	bool tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart, DWORD color, bool onaji_check=true);
-
+	
+	int getTempHeiFromSitenAndID3(KTPAINT_kouten* siten, KTPAINT_kouten** mae_k, KTPAINT_kouten** kk, 
+											KTPAINT_kouten* koutens, int* keiro_indexs,
+											KTPAINT_kouten** temp_koutens, int* keiro_depth,
+											KTPAINT_bubblehei* heis);
+	
+	
+	
+	
+	
+	bool tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart,
+		DWORD color, bool onaji_check=true, unsigned short is_pline=0);
+	bool labeldukeBubble(KTPAINT_bubble* bubble, unsigned short label_index, unsigned short count, KTPAINT_bubblehei* heis); 
 public:
 	void simulationStepStart(unsigned short width, unsigned short height,KTPaintNuri* nuri);
-	void simulationBubbleStep(short min_d, short max_d, float radius_d, KTPaintNuri* nuri);
+	void simulationBubbleStep(unsigned short width, unsigned short height, KTPaintNuri* nuri);
+	void copyto(KTPaintSheet* dest);
+	void copyHeiTo(KTPaintSheet* dest);
 
 public:
 	KTPaintSheet(void);
@@ -220,7 +247,7 @@ public:
 			return &kyoku_plines[0];
 		}
 	}
-	void setPlineStart() {
+	void setPlineStart() {	
 		pline_start_index = pline_max;
 	}
 	void setPlineEnd() {
@@ -268,7 +295,7 @@ public:
 	void clearP() {
 		pline_max = 0;
 	}
-	void calcHeiryouiki(KTPaintNuri* nuri, DWORD color);
+	void calcHeiryouiki(KTPaintNuri* nuri, KTPAINT_bubblehei* hei, DWORD color);
 	bool calcHeiryouikiPlus(KTPaintNuri* nuri, DWORD color);// trueÇ»ÇÁï¬óÃàÊÇ™ëùÇ¶ÇΩÇ±Ç∆Çà”ñ°Ç∑ÇÈ
 	int bunkatuDaenWithLine(int hei_index, int start_index, int end_index,int start_daen_index, int end_daen_index);
 	KTPAINT_penheiryouiki* getHei() {return hei;}
@@ -279,6 +306,8 @@ public:
 	int getHeiPLineMax() {return hei_pline_max;}
 	KTPAINT_penline* getHeiPLine() {return hei_plines;}
 	KTPAINT_penkyokuline* getHeiKyokuPLine() {return hei_kyoku_plines;}
+	int getHeiDaenMax() {return hei_daen_max;}
+	int getHeiPartMax() {return hei_part_max;}
 };
 
 

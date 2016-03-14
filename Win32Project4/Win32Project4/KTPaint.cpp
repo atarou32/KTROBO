@@ -8,6 +8,25 @@
 #include "KTRoboGraphics.h"
 #include "CommCtrl.h"
 
+LRESULT CALLBACK MessageWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
+	PAINTSTRUCT psPaint;
+	HDC hdc;
+	switch(i) {
+	case WM_PAINT:
+		if (hdc = BeginPaint(h, &psPaint)) 
+		{
+			TextOut(hdc , 0 , 0 , "計算中でございます・・" , lstrlen("計算中でございます・・"));
+			//paint->paint();
+		    //BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, paint->getHdcMem(), 0, 0, SRCCOPY);
+			
+						EndPaint(h, &psPaint);
+		}
+	
+		break;
+	}
+	return DefWindowProc(h,i,w,l);
+}
+
 
 #define KTPAINT_GRADIATION_CIRCLE_RADIUS_DEFAULT 95
 KTPaint::KTPaint(HINSTANCE hins)
@@ -48,6 +67,7 @@ KTPaint::KTPaint(HINSTANCE hins)
 	is_render_pencil_line = true;
 	is_mode_dougasaisei = false;
 	is_mode_pausedougabyouga = true;
+	message_window = 0;
 }
 
 
@@ -106,8 +126,18 @@ void KTPaint::setCursorToNuri() {
 	now_paint_id = KTPAINT_NURI_ID;
 	SetCursor(hCursor);
 	renderlineToTex();
-//	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
-//	now_sheet->now_sheet->calcHeiryouiki(&nuridayo);
+	ShowWindow(message_window, SW_SHOW);
+	UpdateWindow(message_window);
+
+	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), 0, now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
+	now_sheet->now_sheet->simulationStepStart(g->getScreenWidth(),g->getScreenHeight(),&nuridayo);
+	now_sheet->now_sheet->copyto(&this->sheet_for_nuri);
+	sheet_for_nuri.simulationBubbleStep(g->getScreenWidth(),g->getScreenHeight(), &nuridayo);
+	//sheet_for_nuri.calcHeiryouiki(&nuridayo,0xFFFF0000);
+	//Sleep(10000);
+	ShowWindow(message_window, SW_HIDE);
+	UpdateWindow(message_window);
+	//now_sheet->now_sheet->calcHeiryouiki(&nuridayo,0xFFFFF000);
 	
 }
 
@@ -188,9 +218,14 @@ void KTPaint::renderlineToTex() {
 	
 	int hei_max = now_sheet->now_sheet->getHeiMax();
 	for (int i=0;i<hei_max;i++) {
+		if (now_sheet->now_sheet->getHei()[i].is_use_pline) {
+			KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
+		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
+		} else {
 	KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
 		now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiDaen());
 	///KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
+		}
 	}
 
 	
@@ -281,6 +316,30 @@ void KTPaint::createKoWindow(HWND p_window) {
 	UpdateWindow(colorpen_window);
 
 
+
+
+
+	wc.style  = CS_HREDRAW|CS_VREDRAW;
+	wc.lpfnWndProc = MessageWindowProc ; // プロシージャ名
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = hInst;
+    wc.hIcon  = NULL;
+    wc.hCursor  = NULL;
+    wc.hbrBackground= reinterpret_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)); //グレーにする
+    wc.lpszMenuName = NULL;  // 未サポート
+    wc.lpszClassName=(LPCSTR) "message";
+	t = RegisterClass(&wc);
+
+	message_window = CreateWindow("message", "message",  WS_OVERLAPPED,
+		200+g->getScreenWidth()/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/2-110, 
+		g->getScreenHeight()/2/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU-25, 220,50,
+		/*CW_USEDEFAULT, CW_USEDEFAULT,*/ NULL, NULL, hInst, NULL);
+
+	if (!t || !message_window)
+	{
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "error in create kowindow");
+	}
 
 	
 	CreateWindow(TEXT("BUTTON"),TEXT("ERASERBUT"),
@@ -614,21 +673,49 @@ void KTPaint::render() {
 	nuridayo.printKouten(g, now_sheet->now_sheet->getHeiPLine());
 	
 
+
+
+	KTPAINT_bubble* bubbles = nuridayo.getBubble();
+	int bubble_max = nuridayo.getBubbleMax();
+
+	if (now_paint_id == KTPAINT_NURI_ID) {
+		
+		for (int i=0;i<bubble_max;i++) {
+			MYVECTOR3 center(bubbles[i].x,bubbles[i].y,0);
+			float radius = bubbles[i].radius;
+			LONGLONG colors[] = {
+				0xFFFFFF00,
+				0xFFFF00FF,
+				0xFFFF0000,
+				0xFF00FF00,
+				0xFF0000FF,
+				0xFF00FFFF,
+				0xFF000000,
+				0xFFFFFFFF,
+				0xFF33FF33,
+				0xFFFF33FF,
+				0xFFFFFF33,
+				0xFF33FFFF,
+				0xFF3333FF,
+				0xFF333333,
+				0xFF221100,
+				0xFFAAAAAA
+			};
+			KTROBO::Graphics::drawDaen(g,colors[(/*bubbles[i].label_index_tate*/ bubbles[i].label_index_yoko )% 16],center,radius,radius,0);
+		}
+	}
+
+
+
+
 	g->getSwapChain()->Present(0,NULL);
 	KTROBO::CS::instance()->leave(CS_DEVICECON_CS, "leave");
 	return;
 
 
-/*
-	KTPAINT_bubble* bubbles = nuridayo.getBubble();
-	int bubble_max = nuridayo.getBubbleMax();
 
-	for (int i=0;i<bubble_max;i++) {
-		MYVECTOR3 center(bubbles[i].x,bubbles[i].y,0);
-		float radius = bubbles[i].radius;
-		KTROBO::Graphics::drawDaen(g,0xFFFFFF00,center,radius,radius,0);
-	}
-*/
+	
+
 	
 
 //	g->getDeviceContext()->OMSetRenderTargets(1,&tt,NULL);
@@ -1346,5 +1433,51 @@ void KTPaint::updateDispLineNum() {
 				douga.getAllFrame()
 			);
 	SetWindowText(sheet_index_label , labeltext);
+
+}
+
+
+void KTPaint::fill(POINT po) {
+
+
+
+
+	float w = g->getScreenWidth()/2;///KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	float h = g->getScreenHeight()/2;///KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	float zoom = now_sheet->zoom;
+	short transx  =now_sheet->transx;
+	short transy = now_sheet->transy;
+	POINT po_c;
+
+
+
+	
+	po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+	po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
+	
+	KTPAINT_bubble* bubbles = nuridayo.getBubble();
+	KTPAINT_bubblehei* bubble_heis = nuridayo.getBubbleHeis();
+	int bhei_max = nuridayo.getBubbleHeiMax();
+	
+	// 指定されたポイントに一番近い円をまず求める
+	int bwidth = g->getScreenWidth()/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/(int)(bubbles[0].radius*2) + 1;
+	int width = po_c.x / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU / (int)(bubbles[0].radius*2);
+	int height = po_c.y / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU / (int)(bubbles[0].radius*2);
+
+	int inde = width + height * bwidth;
+
+	if (bubbles[inde].status != KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
+		KTPAINT_bubble* bs = &bubbles[inde];
+		DWORD color = (0xFF << 24) + (now_color_r << 16) + (now_color_g << 8) + now_color_b;
+
+		ShowWindow(message_window, SW_SHOW);
+		UpdateWindow(message_window);
+		sheet_for_nuri.calcHeiryouiki(&nuridayo,&bubble_heis[bs->hei_index],color);
+		sheet_for_nuri.copyHeiTo(now_sheet->now_sheet);
+
+		ShowWindow(message_window, SW_HIDE);
+		UpdateWindow(message_window);
+	}
+	//sheet_for_nuri.calcurateHeiAndFill(
 
 }

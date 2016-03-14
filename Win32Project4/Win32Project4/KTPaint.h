@@ -46,11 +46,13 @@ public:
 	HWND parent_window;
 	HWND colorpen_window;
 	HWND loadsave_window;
+	HWND message_window;
 private:
 	HCURSOR temp_cursor;
 	int now_paint_id;
 	KTROBO::Graphics* g;
 	KTPaintGUI gui;
+	KTPaintSheet sheet_for_nuri;
 public:
 	KTPaintDouga douga;
 private:
@@ -157,7 +159,6 @@ public:
 	bool isInTriangleColorPen(ULONG mouse_x, ULONG mouse_y);
 	void setNowColor(COLORREF c);
 	void setNowGColor(COLORREF c);
-
 	int getNowSheetLineNum() {
 		return now_sheet->now_sheet->getPlineMax();
 	}
@@ -171,6 +172,7 @@ public:
 			//now_penkyokuline_start = now_sheet->now_sheet->getHeiKyokuPLineMax();
 		}
 	}
+	void fill(POINT po);
 	void writeWithPen(POINT mpo, POINT po, UINT pressure_old, UINT pressure_new, bool reset);
 	void endDrawLine() {
 		if (this->now_paint_id == KTPAINT_PEN_ID) {
@@ -205,13 +207,13 @@ public:
 		is_mode_dougasaisei = true;
 		HDC hdc = GetDC(parent_window);
 		douga.Run(parent_window,hdc);
-		DeleteDC(hdc);
+		ReleaseDC(parent_window,hdc);
 	}
 	void stopdouga() {
 		HDC hdc = GetDC(parent_window);
 		douga.Stop(parent_window,hdc);
 		pausedouga();
-		DeleteDC(hdc);
+		ReleaseDC(parent_window,hdc);
 	}
 	void pausedouga() {
 		HDC hdc = GetDC(parent_window);
@@ -222,7 +224,7 @@ public:
 		SetWindowText(GetDlgItem(loadsave_window, 10) , str);
 		douga.transportBitmapToTextureClass(getGraphics());
 		is_mode_dougasaisei = false;
-		DeleteDC(hdc);
+		ReleaseDC(parent_window,hdc);
 	}
 	bool setSheetNext() {
 		//HDC hdc = GetDC(parent_window);
@@ -230,6 +232,8 @@ public:
 		//is_mode_dougasaisei = true;
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
+			renderlineToTex();
+			now_penkyokuline_start = now_sheet->now_sheet->getHeiPlineStart();
 			now_count = 0;
 			int now_cursel = SendMessage(combo,CB_GETCURSEL,0,0);
 			SendMessage(combo,CB_SETCURSEL,now_cursel+1,0);
@@ -249,6 +253,8 @@ public:
 		//ReleaseDC(parent_window, hdc);
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
+			renderlineToTex();		
+			now_penkyokuline_start = now_sheet->now_sheet->getHeiPlineStart();
 			now_count = 0;
 			int now_cursel = SendMessage(combo,CB_GETCURSEL,0,0);
 			SendMessage(combo,CB_SETCURSEL,now_cursel-1,0);
@@ -259,6 +265,7 @@ public:
 	}
 
 	void makeNewSheet();
+	int getNowPaint() {return now_paint_id;}
 };
 
 LRESULT CALLBACK ColorPenWindowProc(HWND , UINT , WPARAM , LPARAM );

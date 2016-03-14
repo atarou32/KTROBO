@@ -49,10 +49,17 @@ class KTPaintNuri
 private:
 	KTPAINT_bubble bubbles[KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX];
 	int bubble_max;
+	KTPAINT_bubblehei bubble_heis[KTPAINT_PENHEIRYOUIKI_BUBBLE_HEI_MAX];
+	int bubble_hei_max;
 
 	void addNewKoutenOfKeiro(int kouten_index, int line1_index,  KTPAINT_penkyokuline* line);
 	bool isKousaLine(KTPAINT_penline* line1, KTPAINT_penline* line2);
 public:
+	bool isKousaLineAndBubble(KTPAINT_penline* line1, KTPAINT_bubble* bubble);
+	int getBubbleHeiMax() {return bubble_hei_max;}
+	KTPAINT_bubblehei* getBubbleHeis() {return bubble_heis;}
+	void setBubbleHeiMax(int bmax) {bubble_hei_max = bmax;}
+
 	bool isKousaLine2(KTPAINT_penline* line1_mae,KTPAINT_penline* line1_ato, KTPAINT_penline* line2_mae, KTPAINT_penline* line2_ato);
 private:
 	void makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokuline* bigline1, KTPAINT_penkyokuline* bigline2, KTPAINT_penline* linesdayo);

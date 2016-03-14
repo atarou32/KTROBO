@@ -10,6 +10,10 @@ KTPaintNuri::KTPaintNuri(void)
 
 	memset(bubbles,0, sizeof(KTPAINT_bubble)*KTPAINT_PENHEIRYOUIKI_BUBBLE_MAX);
 	bubble_max = 0;
+	bubble_hei_max = 0;
+	for (int i=0;i<KTPAINT_PENHEIRYOUIKI_BUBBLE_HEI_MAX;i++) {
+		bubble_heis[i].label = 0;
+	}
 }
 
 
@@ -518,3 +522,63 @@ void KTPaintNuri::printKouten(KTROBO::Graphics* g,KTPAINT_penline* line_infos) {
 	}
 
 }
+
+
+
+
+bool KTPaintNuri::isKousaLineAndBubble(KTPAINT_penline* line1, KTPAINT_bubble* bubble) {
+
+	MYVECTOR2 D(line1->dx,line1->dy);
+	MYVECTOR2 A(bubble->x * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->x, bubble->y * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->y);
+	MYVECTOR2 B(bubble->x * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->x - line1->dx, bubble->y * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->y - line1->dy);
+
+
+	float dotDD = D.x * D.x + D.y * D.y; // |D||D|
+	float dotAA = A.x * A.x + A.y * A.y; // |A||A|
+
+	float dotBB = B.x * B.x + B.y * B.y;
+
+
+	float radi = bubble->radius * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	
+	if (radi*radi > dotAA) return true;
+	if (radi*radi > dotBB) return true;
+
+	if (abs(dotDD) < 0.000000001f) {
+		// 円と点の話になるので計算する
+		if (dotAA <= radi*radi) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	//if (radi*radi < dotAA - dotDD) return false;
+//	if (radi*radi < dotBB - dotDD) return false;
+
+	if (abs(dotAA) < 0.00000001f) {
+		// この場合は近いところにあるといえるので
+		// 交わる
+		return true;
+	}
+
+	float dotAD = D.x * A.x + D.y * A.y; // |A||D|cos(theta)
+	float dotBD = D.x * B.x + D.y * B.y;
+	float sin2 = 1- dotAD * dotAD / dotDD / dotAA; // sin2(theta)
+	float d2 = dotAA * sin2; // |A||A|sin2(theta) = d2
+
+	if (d2 <radi *radi) {
+		if (dotAD * dotBD <= 0) {
+			return true;
+		}
+
+		// スペシャルケースの場合
+		if (dotAD <0 && dotBD <0) {
+			if (( radi* radi > dotAA) || (radi* radi > dotBB)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
