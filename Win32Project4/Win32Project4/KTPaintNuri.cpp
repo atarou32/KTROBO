@@ -380,19 +380,21 @@ void KTPaintNuri::kousaKyokusenAndMakeKouten(KTPAINT_penkyokuline* line1, KTPAIN
 
 	for (int i=line1->start_index;i<line1->end_index;i+=1) {
 		for (int j=line2->start_index;j<line2->end_index;j+=1) {
-			if ((i != j) && (i!= j+1) && (j != i+1) &&( abs(i-j) > 4)) {
+			
 				if (isKousaLine(&lines[i],&lines[j])) {
 					if (line1->kyoku_id == line2->kyoku_id) {
+						if ((i != j) && (i!= j+1) && (j != i+1) &&( abs(i-j) > 5)) {
 					//	if ((lines[line1->start_index].x ==0) && (lines[line1->end_index].x ==0)
 					//		&&(lines[line1->start_index].y==0) && (lines[line1->end_index].y ==0)) {
 					//	} else {
 							makeKouTen(i,j,line1,line2,lines);
+						}
 					//	}
 					}else {
 							makeKouTen(i,j,line1,line2,lines);
 					}
 				}
-			}
+			
 		}
 	}
 }
@@ -533,8 +535,8 @@ void KTPaintNuri::printKouten(KTROBO::Graphics* g,KTPAINT_penline* line_infos) {
 bool KTPaintNuri::isKousaLineAndBubble(KTPAINT_penline* line1, KTPAINT_bubble* bubble) {
 
 	MYVECTOR2 D(line1->dx,line1->dy);
-	MYVECTOR2 A(bubble->x * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->x, bubble->y * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->y);
-	MYVECTOR2 B(bubble->x * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->x - line1->dx, bubble->y * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - line1->y - line1->dy);
+	MYVECTOR2 A(bubble->x  - line1->x, bubble->y  - line1->y);
+	MYVECTOR2 B(bubble->x  - line1->x - line1->dx, bubble->y  - line1->y - line1->dy);
 
 
 	float dotDD = D.x * D.x + D.y * D.y; // |D||D|
@@ -543,10 +545,10 @@ bool KTPaintNuri::isKousaLineAndBubble(KTPAINT_penline* line1, KTPAINT_bubble* b
 	float dotBB = B.x * B.x + B.y * B.y;
 
 
-	float radi = bubble->radius * KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	float radi = bubble->radius;
 	
-	if (radi*radi > dotAA) return true;
-	if (radi*radi > dotBB) return true;
+//	if (radi*radi > dotAA) return true;
+//	if (radi*radi > dotBB) return true;
 
 	if (abs(dotDD) < 0.000000001f) {
 		// ‰~‚Æ“_‚Ì˜b‚É‚È‚é‚Ì‚ÅŒvŽZ‚·‚é

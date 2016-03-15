@@ -846,7 +846,9 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	center.float3.y = y3/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	center.float3.z = 0;
 	drawDaen(g,0xFFFF0000,center, 10,10,0);
-	
+	if (i+3 >= 1024) {
+		break;
+	}
 	sttr[i].color = hei->color;//color;
 	sttr[i].x = -1 + 2*x1 / (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i].y = 1 - 2*y1 / (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
@@ -859,17 +861,16 @@ for (int tt=0;tt<=heipart[k].keiro_last_index-heipart[k].keiro_first_index;) {
 	sttr[i+2].x =  -1 + 2*x3/ (float)g->getScreenWidth();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].y = 1 - 2*y3/ (float)g->getScreenHeight();//* KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
 	sttr[i+2].z = 0;
+	
 	i += 3;
 	tt += 1;
 	temp+=1;
-	if (i >= 1024) {
-		break;
-	}
+	
 	if (tug_last) {
 		break;
 	}
 }
-if (i >= 1024) {
+if (i+3 >= 1024) {
 	break;
 }
 }

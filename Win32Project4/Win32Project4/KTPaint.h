@@ -232,7 +232,7 @@ public:
 		//is_mode_dougasaisei = true;
 		if (now_sheet->next_sheet) {
 			now_sheet = now_sheet->next_sheet;
-			renderlineToTex();
+			//renderlineToTex();
 			now_penkyokuline_start = now_sheet->now_sheet->getHeiPlineStart();
 			now_count = 0;
 			int now_cursel = SendMessage(combo,CB_GETCURSEL,0,0);
@@ -253,7 +253,7 @@ public:
 		//ReleaseDC(parent_window, hdc);
 		if (now_sheet->mae_sheet) {
 			now_sheet = now_sheet->mae_sheet;
-			renderlineToTex();		
+			//renderlineToTex();		
 			now_penkyokuline_start = now_sheet->now_sheet->getHeiPlineStart();
 			now_count = 0;
 			int now_cursel = SendMessage(combo,CB_GETCURSEL,0,0);

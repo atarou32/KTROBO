@@ -132,7 +132,9 @@ void KTPaint::setCursorToNuri() {
 	nuridayo.koutenShori(now_sheet->now_sheet->getKyokuPLines(), 0, now_sheet->now_sheet->getKyokuPLineMax(), now_sheet->now_sheet->getPline());
 	now_sheet->now_sheet->simulationStepStart(g->getScreenWidth(),g->getScreenHeight(),&nuridayo);
 	now_sheet->now_sheet->copyto(&this->sheet_for_nuri);
-	sheet_for_nuri.simulationBubbleStep(g->getScreenWidth(),g->getScreenHeight(), &nuridayo);
+	sheet_for_nuri.simulationBubbleStep(g->getScreenWidth(),g->getScreenHeight(),
+		&nuridayo,now_sheet->transx,now_sheet->transy,
+		now_sheet->zoom);
 	//sheet_for_nuri.calcHeiryouiki(&nuridayo,0xFFFF0000);
 	//Sleep(10000);
 	ShowWindow(message_window, SW_HIDE);
@@ -844,14 +846,7 @@ void KTPaint::paint() {
 	POINT center;
 	MYTRIANGLEPOINT points[3];
 
-/*	BOOL ExtFloodFill(
-  HDC hdc,          // デバイスコンテキストハンドル
-  int nXStart,      // 開始点の x 座標
-  int nYStart,      // 開始点の y 座標
-  COLORREF crColor, // 色
-  UINT fuFillType   // 種類
-);
-*/
+
 	getGUI()->clear(hdcMem);
 	center.x = 100;
 	center.y = 200;
@@ -1454,7 +1449,8 @@ void KTPaint::fill(POINT po) {
 	POINT po_c;
 
 
-
+	//po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+	//po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
 	
 	po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
 	po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
@@ -1465,8 +1461,8 @@ void KTPaint::fill(POINT po) {
 	
 	// 指定されたポイントに一番近い円をまず求める
 	int bwidth = g->getScreenWidth()/KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU/(int)(bubbles[0].radius*2) + 1;
-	int width = po_c.x / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU / (int)(bubbles[0].radius*2);
-	int height = po_c.y / KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU / (int)(bubbles[0].radius*2);
+	int width = po.x / (int)(bubbles[0].radius*2);
+	int height = po.y / (int)(bubbles[0].radius*2);
 
 	int inde = width + height * bwidth;
 
@@ -1474,7 +1470,8 @@ void KTPaint::fill(POINT po) {
 		KTPAINT_bubble* bs = &bubbles[inde];
 		DWORD color = (0xFF << 24) + (now_color_r << 16) + (now_color_g << 8) + now_color_b;
 		POINT ppo;
-		ppo = po_c;
+		ppo.x = po_c.x;
+		ppo.y = po_c.y;
 		ShowWindow(message_window, SW_SHOW);
 		UpdateWindow(message_window);
 		sheet_for_nuri.calcHeiryouiki(&nuridayo,&bubble_heis[bs->hei_index],color, ppo);
