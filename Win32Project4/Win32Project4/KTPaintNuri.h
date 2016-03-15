@@ -52,7 +52,7 @@ private:
 	KTPAINT_bubblehei bubble_heis[KTPAINT_PENHEIRYOUIKI_BUBBLE_HEI_MAX];
 	int bubble_hei_max;
 
-	void addNewKoutenOfKeiro(int kouten_index, int line1_index,  KTPAINT_penkyokuline* line);
+	void addNewKoutenOfKeiro(int kouten_index, int line1_index,  KTPAINT_penkyokuline* line, KTPAINT_penline* pen_lines);
 	bool isKousaLine(KTPAINT_penline* line1, KTPAINT_penline* line2);
 public:
 	bool isKousaLineAndBubble(KTPAINT_penline* line1, KTPAINT_bubble* bubble);

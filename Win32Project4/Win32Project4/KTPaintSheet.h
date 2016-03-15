@@ -151,6 +151,7 @@ public:
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_MAIN 1
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_SUB 2
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE 3
+#define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONKOUTEN 3
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_LABELED 4
 
 #define KTPAINT_PENHEIRYOUIKI_BUBBLE_LABEL_MAX 65535
@@ -212,6 +213,8 @@ private:
 	bool addTempPartsCount(KTPAINT_penheiryouikipart* temp_parts,int* temp_c,int maxx,KTPAINT_penheiryouiki* ryou1,KTPAINT_penheiryouikipart* parts);
 	int karuiOyakoHantei(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
 	bool isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts); 
+	bool isInHeiryouikiPline(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
+
 	void insertOyakoKankei(int te12, KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2);
 	int getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID);
 	int getTempHeiFromSitenAndID2(KTPAINT_kouten* siten, KTPAINT_kouten** mae_k, KTPAINT_kouten** kk,  KTPAINT_kouten* koutens, 
@@ -295,7 +298,7 @@ public:
 	void clearP() {
 		pline_max = 0;
 	}
-	void calcHeiryouiki(KTPaintNuri* nuri, KTPAINT_bubblehei* hei, DWORD color);
+	void calcHeiryouiki(KTPaintNuri* nuri, KTPAINT_bubblehei* hei, DWORD color, POINT po);
 	bool calcHeiryouikiPlus(KTPaintNuri* nuri, DWORD color);// trueÇ»ÇÁï¬óÃàÊÇ™ëùÇ¶ÇΩÇ±Ç∆Çà”ñ°Ç∑ÇÈ
 	int bunkatuDaenWithLine(int hei_index, int start_index, int end_index,int start_daen_index, int end_daen_index);
 	KTPAINT_penheiryouiki* getHei() {return hei;}

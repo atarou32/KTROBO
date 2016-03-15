@@ -701,7 +701,11 @@ void KTPaint::render() {
 				0xFF221100,
 				0xFFAAAAAA
 			};
-			KTROBO::Graphics::drawDaen(g,colors[(/*bubbles[i].label_index_tate*/ bubbles[i].label_index_yoko )% 16],center,radius,radius,0);
+			if (bubbles[i].status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
+				KTROBO::Graphics::drawDaen(g,colors[( 15)% 16],center,radius,radius,0);
+			} else {
+			KTROBO::Graphics::drawDaen(g,colors[(/*bubbles[i].label_index_tate*/ bubbles[i].hei_index )% 15],center,radius,radius,0);
+			}		
 		}
 	}
 
@@ -1469,12 +1473,13 @@ void KTPaint::fill(POINT po) {
 	if (bubbles[inde].status != KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
 		KTPAINT_bubble* bs = &bubbles[inde];
 		DWORD color = (0xFF << 24) + (now_color_r << 16) + (now_color_g << 8) + now_color_b;
-
+		POINT ppo;
+		ppo = po_c;
 		ShowWindow(message_window, SW_SHOW);
 		UpdateWindow(message_window);
-		sheet_for_nuri.calcHeiryouiki(&nuridayo,&bubble_heis[bs->hei_index],color);
+		sheet_for_nuri.calcHeiryouiki(&nuridayo,&bubble_heis[bs->hei_index],color, ppo);
 		sheet_for_nuri.copyHeiTo(now_sheet->now_sheet);
-
+		renderlineToTex();
 		ShowWindow(message_window, SW_HIDE);
 		UpdateWindow(message_window);
 	}

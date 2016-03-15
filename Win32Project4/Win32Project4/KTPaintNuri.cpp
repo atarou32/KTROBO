@@ -83,7 +83,7 @@ void KTPaintNuri::koutenShori(KTPAINT_penkyokuline* lines, int penkyoku_line_sta
 	}
 }
 
-void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT_penkyokuline* bigline1) {
+void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT_penkyokuline* bigline1, KTPAINT_penline* pen_lines) {
 
 
 	if (koutenss[bigline1->kyoku_id]->ks.size()) {
@@ -211,6 +211,8 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 		koutens[kouten_max].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,bigline1->start_index));
 		koutens[kouten_max].keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(&koutens[kouten_index],
 			pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(bigline1->start_index,line1_index))));
+		koutens[kouten_max].x = pen_lines[bigline1->start_index].x;// 新規に追加　注意
+		koutens[kouten_max].y = pen_lines[bigline1->start_index].y;//
 		koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,line1_index));
 		koutens[kouten_index].keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(&koutens[kouten_max],
 			pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(bigline1->start_index,line1_index))));
@@ -219,6 +221,8 @@ void KTPaintNuri::addNewKoutenOfKeiro(int kouten_index, int line1_index, KTPAINT
 		koutens[kouten_max+1].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,bigline1->end_index));
 		koutens[kouten_max+1].keiros.insert(pair<KTPAINT_kouten*,pair<KTPAINT_penkyokuline*,pair<int,int>>>(&koutens[kouten_index],
 			pair<KTPAINT_penkyokuline*,pair<int,int>>(bigline1,pair<int,int>(line1_index, bigline1->end_index))));
+		koutens[kouten_max+1].x = pen_lines[bigline1->end_index].x;// 新規に追加　注意
+		koutens[kouten_max+1].y = pen_lines[bigline1->end_index].y;//
 		koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_max]);
 		koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_max+1]);
 		kouten_max++;
@@ -285,10 +289,10 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 
 	if (bigline1 == bigline2) {
 		// 自分自身で交わっている場合は扱いが異なる(異ならなくてすむかもしれない)
-		addNewKoutenOfKeiro(kouten_index, line1_index, bigline1);
+		addNewKoutenOfKeiro(kouten_index, line1_index, bigline1, linesdayo);
 		koutenss[bigline1->kyoku_id]->ks.push_back(&koutens[kouten_index]);
 		koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,line1_index));
-		addNewKoutenOfKeiro(kouten_index, line2_index, bigline2);
+		addNewKoutenOfKeiro(kouten_index, line2_index, bigline2, linesdayo);
 
 		/*
 		if (kouten_index == temp_max) {
@@ -306,8 +310,8 @@ void KTPaintNuri::makeKouTen(int line1_index, int line2_index, KTPAINT_penkyokul
 
 	
 
-	addNewKoutenOfKeiro(kouten_index, line1_index, bigline1);
-	addNewKoutenOfKeiro(kouten_index, line2_index, bigline2);
+	addNewKoutenOfKeiro(kouten_index, line1_index, bigline1, linesdayo);
+	addNewKoutenOfKeiro(kouten_index, line2_index, bigline2, linesdayo);
 	// 最後に場所の位置情報を入れ込む
 	koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline1,line1_index));
 	koutens[kouten_index].iti.insert(pair<KTPAINT_penkyokuline*,int>(bigline2,line2_index));
