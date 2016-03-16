@@ -57,10 +57,12 @@ public:
 		}
 	}
 
+	void setPenWidth(int pen_index);
+
 	KTPAINT_pen() {
 
 		for (int i=0;i<16;i++) {
-			pen_width.m[i/4][i%4] = 2+0.2*i/15.0f;//2+1.2*i/15.0f;//2+0.8*i/4.00f;//2+1*(i+1)/8.0f;
+			pen_width.m[i/4][i%4] = /*標準ペン4+1*i/12.0f;*//*細ペン2+0.2*i/15.0f;*//*Gペン2+4.2*i/15.0f;*///2+0.8*i/4.00f;//2+1*(i+1)/8.0f;
 			pen_width_calcurator.m[i/4][i%4] = 300+(30)*i;
 		}
 			pen_width_calcurator.m[0][0] = 400;
@@ -164,7 +166,8 @@ public:
 	float radius;
 	KTPAINT_bubble* ketugou[4];
 	unsigned short fukumuten[KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX];
-	unsigned short fukumuten_ikisaki[KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX];
+	unsigned short fukumuten_first[KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX];
+	unsigned short fukumuten_last[KTPAINT_PENHEIRYOUIKI_BUBBLE_FUKUMUTEN_MAX];
 	unsigned short label_index_tate;
 	unsigned short label_index_yoko;
 	unsigned short status;
@@ -174,8 +177,9 @@ public:
 class KTPAINT_bubblehei {
 public:
 	unsigned short label;
-	vector<unsigned short> fukumu_kouten_indexs;
-	vector<unsigned short> fukumu_kouten_indexs_ikisaki;
+	set<unsigned short> fukumu_kouten_indexs;
+	set<pair<pair<unsigned short,unsigned short>,pair<unsigned short, unsigned short>>> fukumu_kouten_indexs_fl;
+	//kouten_x,kouten_y とfirst_index,last_index
 };
 
 
@@ -209,6 +213,11 @@ private:
 	int pline_start_index;
 	int pline_end_index;
 
+	int undo_pline_max;
+	int undo_kyokupline_max;
+	int undo_hei_max;
+	int undo_hei_part_max;
+
 	bool oyakoKankeiHeiryouiki(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, 
 		KTPAINT_penheiryouiki** out_oya_ryou, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
 	void motomeruJyusin(KTPAINT_penheiryouiki* ryou, KTPAINT_penheiryouikidaen* daen, KTPAINT_penheiryouikipart* parts);
@@ -218,8 +227,8 @@ private:
 	int tyuuOyakoHantei(KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
 
 
-	bool isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts); 
-	bool isInHeiryouikiPline(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid, KTPaintNuri* nuri, KTPAINT_penheiryouikipart* parts);
+	bool isInHeiryouiki(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid,  KTPAINT_penheiryouikipart* parts); 
+	bool isInHeiryouikiPline(unsigned short x, unsigned short y, KTPAINT_penheiryouiki* heid,  KTPAINT_penheiryouikipart* parts);
 
 	void insertOyakoKankei(int te12, KTPAINT_penheiryouiki* ryou1, KTPAINT_penheiryouiki* ryou2);
 	int getTempHeiFromSitenAndID(KTPAINT_kouten* siten, KTPAINT_kouten* koutens, int* keiro_indexs,int keiro_ID);
@@ -241,7 +250,7 @@ private:
 	
 	bool tryTourokuTempHeiToHei(KTPAINT_penheiryouiki* temp_hei, KTPAINT_penheiryouikipart* temp_heipart,
 		DWORD color, bool onaji_check=true, unsigned short is_pline=0);
-	bool labeldukeBubble(KTPAINT_bubble* bubble, unsigned short label_index, unsigned short count, KTPAINT_bubblehei* heis); 
+	bool labeldukeBubble(KTPAINT_bubble* bubble, unsigned short label_index, unsigned short count, KTPAINT_bubblehei* heis, KTPAINT_kouten* koutens); 
 public:
 	void simulationStepStart(unsigned short width, unsigned short height,KTPaintNuri* nuri);
 	void simulationBubbleStep(unsigned short width, unsigned short height, KTPaintNuri* nuri, short transx, short transy, float zoom);
@@ -251,6 +260,75 @@ public:
 public:
 	KTPaintSheet(void);
 	~KTPaintSheet(void);
+	void erase(POINT po);
+
+	void resetUndoHei() {
+		undo_hei_max =0;
+		undo_hei_part_max = 0;
+	}
+	void enpituClear() {
+		eline_max = 0;
+	}
+
+	void undoHei() {
+		if (hei_max) {
+			if (undo_hei_max < hei_max) {
+			undo_hei_max = hei_max;
+			undo_hei_part_max = hei_part_max;
+			}
+			hei_max--;
+			hei_part_max -= hei[hei_max].endheiryouiki - hei[hei_max].startheiryouiki-1;
+		}
+	}
+
+	void redoHei() {
+
+		if (undo_hei_max) {
+			if (undo_hei_max > hei_max) {
+				hei_max++;
+				hei_part_max += hei[hei_max-1].endheiryouiki - hei[hei_max-1].startheiryouiki + 1;
+			}
+		}
+	}
+
+	void redoPline() {
+		if (undo_kyokupline_max) {
+			if (undo_kyokupline_max > kyokupline_max) {
+				kyokupline_max++;
+				pline_max += kyoku_plines[kyokupline_max-1].end_index - kyoku_plines[kyokupline_max-1].start_index + 1;
+
+			}
+		}
+	}
+	void undoPline() {
+		if (this->kyokupline_max) {
+			if (undo_kyokupline_max < kyokupline_max) {
+				undo_kyokupline_max = kyokupline_max;
+				undo_pline_max = pline_max;
+			}
+			pline_max = kyoku_plines[kyokupline_max-1].start_index;
+			unsigned short start_inde = kyoku_plines[kyokupline_max-1].start_index;
+			unsigned short end_inde = kyoku_plines[kyokupline_max-1].end_index;
+
+			kyokupline_max--;
+			// start_indexからend_indexまで閉領域が使ってる場合は閉領域を消してしまう
+			for (int i=0;i<hei_max;i++) {
+				if (!hei[i].is_use_pline) continue;
+				if (!hei[i].is_transport) {
+					for (int k=hei[i].startheiryouiki;k<hei[i].endheiryouiki;k++) {
+						if (start_inde <= hei_part[k].keiro_first_index <= end_inde) {
+							hei[i].is_transport = 1;
+							break;
+						}
+						if (start_inde <= hei_part[k].keiro_last_index <= end_inde) {
+							hei[i].is_transport = 1;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 	KTPAINT_penkyokuline* getKyokuPLines() {return kyoku_plines;}
 	int getKyokuPLineMax() {return kyokupline_max;}
 	KTPAINT_penkyokuline* getLastKyokuPLine() {
@@ -262,6 +340,8 @@ public:
 	}
 	void setPlineStart() {	
 		pline_start_index = pline_max;
+		undo_kyokupline_max = 0;
+		undo_pline_max = 0;
 	}
 	void setPlineEnd() {
 		pline_end_index = pline_max;

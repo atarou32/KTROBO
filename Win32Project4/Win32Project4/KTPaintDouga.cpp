@@ -3,6 +3,7 @@
 #include "wxdebug.h"
 #include "KTPaint.h"
 #include "KTRoboCS.h"
+#include "stringconverter.h"
 
 #define	WM_GRAPH_NOTIFY		(WM_APP + 1)
 
@@ -1350,7 +1351,7 @@ void KTPaintDouga::transportBitmapToTextureClass(KTROBO::Graphics* g) {
 
 
 
-bool KTPaintDouga::Init5(HWND hwnd, HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g) {
+bool KTPaintDouga::Init5(HWND hwnd, HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g, char* title) {
 	UpdateWindow(hwnd);
 	loader = new MyTextureLoader();
 	loader->init(g);
@@ -1527,8 +1528,12 @@ OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     
 
 
-	// pGB->Render(pinn);	
-		hr = pGB->RenderFile( L"resrc/smile3.wmv",NULL );
+	// pGB->Render(pinn);
+		stringconverter sc;
+		WCHAR buf[512];
+		memset(buf,0,sizeof(WCHAR)*512);
+		sc.charToWCHAR(title,buf);
+		hr = pGB->RenderFile(buf,NULL );
 		pMediaPosition->get_Duration(&length);
 	
 		pMediaPosition->Release();

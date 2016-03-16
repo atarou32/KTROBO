@@ -38,10 +38,16 @@ public:
 	}
 };
 
+#define KTPAINT_PEN_INDEX_G 0
+#define KTPAINT_PEN_INDEX_H 1
+#define KTPAINT_PEN_INDEX_HO 2
+
 class KTPaint
 {
 private:
 	HINSTANCE hInst;
+public:
+	int nCMDSHOW;
 public:
 	HWND parent_window;
 	HWND colorpen_window;
@@ -55,6 +61,7 @@ private:
 	KTPaintSheet sheet_for_nuri;
 public:
 	KTPaintDouga douga;
+	void setNowPenIndex(int i) {now_pen_index=i;}
 private:
 	KTPAINT_pen pens[KTPAINT_PEN_NUM_MAX];
 	int now_pen_index;
@@ -188,6 +195,7 @@ public:
 				// ‚¢‚Ü‚Ü‚Å‚Ìheiü‚ğÁ‚·
 				renderlineToTex();
 				now_penkyokuline_start = now_sheet->now_sheet->getHeiKyokuPLineMax();
+				now_sheet->now_sheet->resetUndoHei();
 			}
 		}
 
@@ -201,6 +209,26 @@ public:
 	void deactivate() {is_activate=false;}
 	bool getIsActive() {return is_activate;}
 	KTROBO::Graphics* getGraphics() {return g;}
+	void erase(POINT po);
+	void enpituClear() {
+		now_sheet->now_sheet->enpituClear();
+	}
+	void undo() {
+		if (now_paint_id == KTPAINT_PEN_ID) {
+		now_sheet->now_sheet->undoPline();
+		} else {
+			now_sheet->now_sheet->undoHei();
+		}
+		renderlineToTex();
+	}
+	void redo() {
+		if (now_paint_id == KTPAINT_PEN_ID) {
+			now_sheet->now_sheet->redoPline();
+		} else {
+			now_sheet->now_sheet->redoHei();
+		}
+		renderlineToTex();
+	}
 
 	bool is_dougasaisei() {return is_mode_dougasaisei;}
 	void playdouga() {

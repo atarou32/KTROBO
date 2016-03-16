@@ -8,6 +8,11 @@
 #include "KTRoboGraphics.h"
 #include "CommCtrl.h"
 
+#pragma once
+#pragma comment(lib, "Comdlg32.lib")    //GetOpenFileName関数用
+#include <Commdlg.h>    //GetOpenFileName関数用
+
+
 LRESULT CALLBACK MessageWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	PAINTSTRUCT psPaint;
 	HDC hdc;
@@ -68,7 +73,41 @@ KTPaint::KTPaint(HINSTANCE hins)
 	is_mode_dougasaisei = false;
 	is_mode_pausedougabyouga = true;
 	message_window = 0;
+	pens[KTPAINT_PEN_INDEX_G].setPenWidth(KTPAINT_PEN_INDEX_G);
+	pens[KTPAINT_PEN_INDEX_H].setPenWidth(KTPAINT_PEN_INDEX_H);
+	pens[KTPAINT_PEN_INDEX_HO].setPenWidth(KTPAINT_PEN_INDEX_HO);
+	nCMDSHOW = 0;
 }
+
+
+
+
+void KTPaint::erase(POINT po) {
+
+	
+	float w = g->getScreenWidth()/2;///KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	float h = g->getScreenHeight()/2;///KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU;
+	float zoom = now_sheet->zoom;
+	short transx  =now_sheet->transx;
+	short transy = now_sheet->transy;
+	POINT po_c;
+
+
+	//po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+	//po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
+	
+	po_c.x = (po.x*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - w)/zoom-transx+w;
+	po_c.y = (po.y*KTROBO_GRAPHICS_RENDER_PEN_SPECIAL_BAIRITU - h)/zoom-transy+h;
+
+	now_sheet->now_sheet->erase(po_c);
+	renderlineToTex();
+//	now_sheet->now_sheet->undoPline();
+
+
+
+
+}
+
 
 
 KTPaint::~KTPaint(void)
@@ -162,7 +201,7 @@ void KTPaint::Init(HWND hwnd,HINSTANCE hInst, int nCmdShow) {
 	g = new KTROBO::Graphics();
 	g->Init(hwnd);
 	KTROBO::Graphics::InitMSS(g);
-
+	nCMDSHOW = nCmdShow;
 	loader.init(g);
 	parent_window = hwnd;
 	createKoWindow(hwnd);
@@ -175,9 +214,9 @@ void KTPaint::Init(HWND hwnd,HINSTANCE hInst, int nCmdShow) {
 	back_tex_class = tex_class2;
 	exam_class = loader.loadClass("resrc/gui.png");
 	
-	if (!douga.Init5(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow, g)) {
+	/*if (!douga.Init5(hwnd,loadsave_window, g->getScreenWidth(),g->getScreenHeight(),nCmdShow, g)) {
 		douga.Del();
-	}
+	}*/
 	
 	updateDispLineNum();
 	//douga.Init3(hwnd,nCmdShow);
@@ -195,7 +234,7 @@ void KTPaint::clearSheetTransInfoNado() {
 void KTPaint::renderlineToTex() {
 
 	float clearColor[4] = {
-		1.0f,0.6f,0.0f,1.0f};
+		1.0f,1.0f,1.0f,1.0f};
 	KTROBO::CS::instance()->enter(CS_DEVICECON_CS, "enter");
 	g->getDeviceContext()->ClearRenderTargetView(render_tex_class->target_view,clearColor);
 //	g->getDeviceContext()->ClearDepthStencilView(KTROBO::Graphics::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
@@ -215,15 +254,15 @@ void KTPaint::renderlineToTex() {
 	float zzoom = getZoom();
 
 	this->clearSheetTransInfoNado();
-	KTROBO::Graphics::drawTex(g,back_tex_class->width,back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
+//	KTROBO::Graphics::drawTex(g,back_tex_class->width,back_tex_class->height,back_tex_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 //	KTROBO::Graphics::drawTex(g,exam_class->width, exam_class->height, exam_class->view,now_sheet->transx,now_sheet->transy,now_sheet->zoom,pens);
 	
 	int hei_max = now_sheet->now_sheet->getHeiMax();
 	for (int i=0;i<hei_max;i++) {
-		if (now_sheet->now_sheet->getHei()[i].is_use_pline) {
+		if (now_sheet->now_sheet->getHei()[i].is_use_pline && !now_sheet->now_sheet->getHei()[i].is_transport) {
 			KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
 		now_sheet->now_sheet->getPline(),now_sheet->now_sheet->getHeiDaen());
-		} else {
+		} else if (!now_sheet->now_sheet->getHei()[i].is_use_pline && !now_sheet->now_sheet->getHei()[i].is_transport) {
 	KTROBO::Graphics::drawHeiryouiki(g,&now_sheet->now_sheet->getHei()[i], now_sheet->now_sheet->getHeiPart(), 
 		now_sheet->now_sheet->getHeiPLine(),now_sheet->now_sheet->getHeiDaen());
 	///KTROBO::Graphics::drawDaen(g,0xFFFFFFFF,center,200,250,12);
@@ -420,6 +459,45 @@ void KTPaint::createKoWindow(HWND p_window) {
     
 	SendMessage(enpi, BM_SETCHECK , BST_CHECKED , 0);
 	is_render_pencil_line = true;
+
+
+
+
+	HWND tem = CreateWindow(TEXT("BUTTON"), "Gペン",
+                 WS_CHILD|WS_VISIBLE|WS_GROUP |BS_AUTORADIOBUTTON,
+                 0,550,60,30,
+                 colorpen_window,
+                 (HMENU)26,
+                 hInst,
+                 NULL);
+
+	CreateWindow(TEXT("BUTTON"), "普ペン",
+                 WS_CHILD|WS_VISIBLE |BS_AUTORADIOBUTTON,
+                 60,550,70,30,
+                 colorpen_window,
+                 (HMENU)27,
+                 hInst,
+                 NULL);
+
+	CreateWindow(TEXT("BUTTON"), "細ペン",
+                 WS_CHILD|WS_VISIBLE |BS_AUTORADIOBUTTON,
+                 130,550,80,30,
+                 colorpen_window,
+                 (HMENU)28,
+                 hInst,
+                 NULL);
+
+	SendMessage(tem, BM_SETCHECK , BST_CHECKED , 0);
+
+	CreateWindow(TEXT("BUTTON"),TEXT("クリア"),
+                 WS_CHILD|WS_VISIBLE| BS_DEFPUSHBUTTON,
+                 140,500,60,20,
+                 colorpen_window,
+				 (HMENU)29,
+                 hInst,
+                 NULL);
+
+
 
 	#ifndef HID_USAGE_PAGE_GENERIC
     #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -672,7 +750,7 @@ void KTPaint::render() {
 	center.float3.x = 400;
 	center.float3.y = 500;
 	center.float3.z = 0;
-	nuridayo.printKouten(g, now_sheet->now_sheet->getHeiPLine());
+	//nuridayo.printKouten(g, now_sheet->now_sheet->getHeiPLine());
 	
 
 
@@ -704,9 +782,9 @@ void KTPaint::render() {
 				0xFFAAAAAA
 			};
 			if (bubbles[i].status == KTPAINT_PENHEIRYOUIKI_BUBBLE_STATUS_ONLINE) {
-				KTROBO::Graphics::drawDaen(g,colors[( 15)% 16],center,radius,radius,0);
+		//		KTROBO::Graphics::drawDaen(g,colors[( 15)% 16],center,radius,radius,0);
 			} else {
-			KTROBO::Graphics::drawDaen(g,colors[(/*bubbles[i].label_index_tate*/ bubbles[i].hei_index )% 15],center,radius,radius,0);
+		//	KTROBO::Graphics::drawDaen(g,colors[(/*bubbles[i].label_index_tate*/ bubbles[i].hei_index )% 15],center,radius,radius,0);
 			}		
 		}
 	}
@@ -886,8 +964,22 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 	static ULONG yMousePos=0;
 	bool redraw = false;
 	int checkbox =0;
+	unsigned char keys[256];
 	switch(i) {
-	
+	case WM_KEYDOWN:
+			if (GetKeyboardState(keys)) {
+				//for (int i=0;i<256;i++) {
+
+				if (keys[VK_CONTROL] & 0x80) {
+					if (keys['Z'] & 0x80) {
+						paint->undo();
+					}
+					if (keys['Y'] & 0x80) {
+						paint->redo();
+					}
+				}
+			}
+			break;
 	case WM_ERASEBKGND:
 		return 0;
 	case WM_PAINT:
@@ -1049,6 +1141,18 @@ LRESULT CALLBACK ColorPenWindowProc(HWND h, UINT i, WPARAM w, LPARAM l) {
 		 		 	SendMessage(GetDlgItem(h,6) , BM_SETCHECK , BST_CHECKED , 0);
 				 }
 				 break;
+
+			case 26:// Gペン
+				paint->setNowPenIndex(KTPAINT_PEN_INDEX_G);
+				break;
+			case 27:// 普通ペン
+				paint->setNowPenIndex(KTPAINT_PEN_INDEX_H);
+				break;
+			case 28:// 細ペン
+				paint->setNowPenIndex(KTPAINT_PEN_INDEX_HO);
+				break;
+			case 29: // 鉛筆線クリア
+				paint->enpituClear();
 			}
 		}
 		break;
@@ -1090,7 +1194,9 @@ static char labeltext[1024];
 static PAINTSTRUCT ps;
 static HDC hdc;
 static HBITMAP hBitmap;
+static HWND douga_title_text;
 char strtext[1024];
+OPENFILENAME opn;
 	switch (i) {
 	case WM_PAINT:
 		hdc = BeginPaint(h, &ps);
@@ -1147,7 +1253,7 @@ char strtext[1024];
 	
 		dougad = CreateWindow(TEXT("BUTTON"), "動画静止時描画",
                  WS_CHILD|WS_VISIBLE|BS_CHECKBOX,
-                 0,700,30*4,30,
+                 0,700,40*4,30,
                  h,
                  (HMENU)14,
                  paint->getHInst(),
@@ -1226,6 +1332,9 @@ char strtext[1024];
 			SendDlgItemMessage(h,21,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
 		hBitmap=LoadBitmap(paint->getHInst(),LPCSTR(IDB_BITMAP8));
 			SendDlgItemMessage(h,22,BM_SETIMAGE,IMAGE_BITMAP,(LPARAM)hBitmap);
+
+		CreateWindow(
+			TEXT("BUTTON"), TEXT("動画を開く"), WS_CHILD | WS_VISIBLE|BS_DEFPUSHBUTTON,0,400,140,40,h,(HMENU)40,paint->getHInst(),NULL);
 
 		return 0;		
 		case WM_HSCROLL:
@@ -1318,6 +1427,44 @@ char strtext[1024];
 				break;
 			case 22:
 				paint->stopdouga();
+				break;
+			case 40:
+				{
+
+					static char szFileName[MAX_PATH];
+			        static char szFileTitle[MAX_PATH];
+
+				    memset(&opn, 0, sizeof(OPENFILENAME));  // 構造体の初期化
+
+        
+					opn.lStructSize = sizeof(OPENFILENAME); //構造体のサイズ
+					opn.hwndOwner = h;   //親ウィンドウのハンドル
+				    opn.lpstrFilter = TEXT("All(*.*)\0*.*\0データ(*.wmv)\0*.wmv\0\0"); //フィルター
+				    opn.lpstrFile = szFileName;     // フルパスファイル名
+				    opn.nMaxFile = sizeof(szFileName);      //フルパスファイルのサイズ
+				    opn.lpstrFileTitle = szFileTitle;       //ファイル名
+					opn.nMaxFileTitle = sizeof(szFileTitle);        //ファイル名のサイズ
+					//既存ファイル名のみ入力許可 | 読み取りチェックボックスを表示しない
+				    opn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+					opn.lpstrDefExt = TEXT("wmv");                    //デフォルトの拡張子
+					opn.lpstrTitle = TEXT("動画ファイルの読込み");      //タイトルバーに表示される文字列
+					i=GetOpenFileName(&opn);
+
+					if (i) {
+						// 決定されたので
+						SetWindowText(paint->loadsave_window, opn.lpstrFileTitle);
+						hdc = GetDC(paint->parent_window);
+						paint->douga.Stop(paint->parent_window, hdc);
+						ReleaseDC(paint->parent_window, hdc);
+						paint->douga.Del();
+						if (!paint->douga.Init5(paint->parent_window, h,paint->getGraphics()->getScreenWidth(),
+							paint->getGraphics()->getScreenHeight(),paint->nCMDSHOW,paint->getGraphics(),opn.lpstrFile)) {
+								MessageBox(paint->parent_window,"動画の読み込みに失敗しました","error",MB_OK);
+								paint->douga.Del();
+						}
+						
+					}
+				}
 				break;
 			}
 		}
@@ -1479,6 +1626,7 @@ void KTPaint::fill(POINT po) {
 		renderlineToTex();
 		ShowWindow(message_window, SW_HIDE);
 		UpdateWindow(message_window);
+		now_sheet->now_sheet->resetUndoHei();
 	}
 	//sheet_for_nuri.calcurateHeiAndFill(
 

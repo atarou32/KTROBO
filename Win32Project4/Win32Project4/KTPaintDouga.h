@@ -69,7 +69,7 @@ public:
 	bool Init(HWND hwnd,HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g);
 	bool Init2(HWND hwnd,HINSTANCE hinst);
 	void Init3(HWND hwnd, int nCmdShow);
-	bool Init5(HWND hwnd, HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g);
+	bool Init5(HWND hwnd, HWND loadsave, int width, int height,int nCmdShow, KTROBO::Graphics* g, char* title);
 	bool getInited() {return inited;}
 	void Del();
 	void Run(HWND hwnd, HDC hdc);

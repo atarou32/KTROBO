@@ -13,6 +13,8 @@ KTPaintNuri::KTPaintNuri(void)
 	bubble_hei_max = 0;
 	for (int i=0;i<KTPAINT_PENHEIRYOUIKI_BUBBLE_HEI_MAX;i++) {
 		bubble_heis[i].label = 0;
+		bubble_heis[i].fukumu_kouten_indexs.clear();
+		bubble_heis[i].fukumu_kouten_indexs_fl.clear();
 	}
 }
 

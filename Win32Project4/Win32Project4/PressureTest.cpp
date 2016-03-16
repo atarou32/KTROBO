@@ -267,6 +267,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (paint->getNowPaint() == KTPAINT_NURI_ID) {
 			paint->fill(before_ldragpoint);
 		}
+		if (paint->getNowPaint() == KTPAINT_ERASER_ID) {
+			paint->erase(before_ldragpoint);
+		}
 		break;
 
 	case WM_MOUSEWHEEL:
@@ -282,6 +285,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 			if (GetKeyboardState(keys)) {
 				//for (int i=0;i<256;i++) {
+
+				if (keys[VK_CONTROL] & 0x80) {
+					if (keys['Z'] & 0x80) {
+						paint->undo();
+					}
+					if (keys['Y'] & 0x80) {
+						paint->redo();
+					}
+				}
 					if (keys[VK_LEFT] & 0x80) {
 						paint->setSheetBefore();
 
