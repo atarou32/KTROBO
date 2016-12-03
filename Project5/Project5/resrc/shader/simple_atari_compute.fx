@@ -369,6 +369,7 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLEDAYO( TRIANGLEDAYO tri1, TRIANGLEDAYO 
 	if (temp_ans == 0) {
 		// Œð‚í‚ç‚È‚¢
                 ans_ten.is_majiwari = false;
+		return ans_ten;
 		//return YATTEYARU_TRIANGLE_OUT;
 	}
 
@@ -596,10 +597,13 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariUnitTikeiToSoreigai(MESH_VERTEXKARI ver
 
   
   ans = majiwariAtariTriangleToOBB(henkan_v1,henkan_v2,henkan_v3, obb1);
- // if(ans.is_majiwari) {
- //   float4 norm  = (henkanv1.normal + henkan_v2.normal + hankan_v3.normal)/3
-  //  ans.normal = float3(norm.x,norm.y,norm.z);
-  //}
+  if(ans.is_majiwari) {
+    float4 norm = (henkan_v1.normal + henkan_v2.normal + henkan_v3.normal)/3;
+    float3 norm3 = float3(norm.x,norm.y,norm.z);
+    if (dot(norm3, ans.housen) < 0) {
+      ans.housen = - ans.housen;
+    }
+  }
 
   return ans;
 }
