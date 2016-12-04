@@ -114,7 +114,7 @@ HRESULT CompileShaderFromFile(char* filename, char* entrypoint, char* shadermode
 #define KTROBO_GRAPHICS_SHADER_VS "VSFunc"
 #define KTROBO_GRAPHICS_SHADER_GS "GSFunc"
 #define KTROBO_GRAPHICS_SHADER_PS "PSFunc"
-#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 32
+#define KTROBO_GRAPHICS_RENDER_STRUCT_SIZE 36
 
 class GRAPHICS_RENDER_STRUCT {
 public:

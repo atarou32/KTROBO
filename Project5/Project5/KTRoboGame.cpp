@@ -240,12 +240,7 @@ void BUTUKARIPOSTCB2(TCB* thisTCB) {
 	vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
 	CS::instance()->enter(CS_DEVICECON_CS, "ref");
 	CS::instance()->enter(CS_RENDERDATA_CS,"def");
-	hantei->maecalcdayo(g);
-	hantei->calcAuInfo(g,true);
-	hantei->calcKumi(g);
-	hantei->calcObb(g);
-
-	hantei->runComputeShader(g);
+	
 	
 	
 	CS::instance()->leave(CS_RENDERDATA_CS, "def");
@@ -263,7 +258,7 @@ void BUTUKARIPOSTCB(TCB* thisTCB) {
 	vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
 	CS::instance()->enter(CS_DEVICECON_CS, "ref");
 	CS::instance()->enter(CS_RENDERDATA_CS,"def");
-	AtariHantei::compileShader(g);
+//	AtariHantei::compileShader(g);
 	CS::instance()->leave(CS_RENDERDATA_CS, "def");
 	CS::instance()->leave(CS_DEVICECON_CS, "ref");
 
@@ -335,8 +330,8 @@ bool Game::Init(HWND hwnd) {
 	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
 	
 	mesh = new Mesh();
-	mesh->readMesh(g, "resrc/model/densin/densin.MESH", demo->tex_loader);
-	mesh->readAnime("resrc/model/densin/densin.ANIME");
+	mesh->readMesh(g, "resrc/model/cube/pkcube.MESH", demo->tex_loader);
+	mesh->readAnime("resrc/model/cube/pkcube.ANIME");
 
 	mesh2 = new Mesh();
 	mesh2->readMesh(g, "resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader);
@@ -437,56 +432,75 @@ bool Game::Init(HWND hwnd) {
 	MyMatrixRotationY(worldforg, -3.14/2);
 	MyMatrixMultiply(mesh3[9]->rootbone_matrix_local_kakeru, mesh3[9]->rootbone_matrix_local_kakeru, worldforg);
 
-	
+	AtariHantei::compileShader(g);
 	hantei = new AtariHantei();
+	/*
+	for (int i=0;i<1;i++) {
+	{
+	MYMATRIX idenmat;
+	MyMatrixIdentity(idenmat);
+	UMeshUnit* umesh_unit = new UMeshUnit();
+	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
+		0,KTROBO_MESH_BONE_NULL,false);
+	umesh_unit->setUMesh(um);
+	umesh_units.push_back(umesh_unit);
+	umesh_unit->calcJyusinAndR();
+	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
+	}
+	*/
+	//}
+	{
+	MYMATRIX idenmat;
+	MyMatrixIdentity(idenmat);
+	UMeshUnit* umesh_unit = new UMeshUnit();
+	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
+		0,KTROBO_MESH_BONE_NULL,false);
+	umesh_unit->setUMesh(um);
+	umesh_units.push_back(umesh_unit);
+	bool tyo_unko=true;
+	float frame_anime=0;
 
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	}
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	}
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	}
+	umesh_unit->setSCALEXYZ(1,1,1);
+	umesh_unit->setXYZ(0,0,0);
+	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
 
+	umesh_unit->calcJyusinAndR();
+	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
+	}
+	/*
 	{
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
 	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/densin/densin.MESH", demo->tex_loader,mesh,false,&idenmat,
+	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
+		0,KTROBO_MESH_BONE_NULL,false);
+	umesh_unit->setUMesh(um);
+	umesh_units.push_back(umesh_unit);
+	umesh_unit->calcJyusinAndR();
+	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
+	}*/
+
+	for(int i=0;i<1;i++) {
+		for(int k=0;k<1;k++) {
+	{
+	MYMATRIX idenmat;
+	MyMatrixIdentity(idenmat);
+	UMeshUnit* umesh_unit = new UMeshUnit();
+	UMesh* um = new UMesh(g,"resrc/model/cube/pkcube.MESH", demo->tex_loader,mesh,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL, true);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
+	umesh_unit->setSCALEXYZ(10,10,2);
+	umesh_unit->setXYZ((i)*25,(k)*25,-3);
+	bool tyo_unko=true;
+	float frame_anime = 0;
+
+	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
 	umesh_unit->calcJyusinAndR();
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
 	}
-
-
+		}
+	}
 
 
 	/*
@@ -1281,7 +1295,7 @@ void Game::Run() {
 	MyMatrixScaling(world,0.6,0.6,0.6);
 	MyMatrixTranslation(world,0,0,0);
 	MyMatrixMultiply(world,world,worldforg);
-	mesh2->draw(g, &world, &view, &proj);
+	//mesh2->draw(g, &world, &view, &proj);
 	RAY testdray;
 	CS::instance()->enter(CS_MESSAGE_CS, "test");
 	testdray.org = temp_input_shori->ray.org;
@@ -1341,15 +1355,15 @@ void Game::Run() {
 	MyMatrixIdentity(idenmat);
 
 	if (is_ma) {
-		g->drawRAY(g,0xFF000000,&idenmat,&view,&proj,50,&testdray);
+//		g->drawRAY(g,0xFF000000,&idenmat,&view,&proj,50,&testdray);
 	} else {
-		g->drawRAY(g,0xFFFFFFFF,&idenmat,&view,&proj,50,&testdray);
+	//	g->drawRAY(g,0xFFFFFFFF,&idenmat,&view,&proj,50,&testdray);
 	}
 
 	if (TestSegmentOBB(&temp_input_shori->ray,&testobb)) {	
-		g->drawOBB(g,0xFF000000,&idenmat,&view,&proj,&testobb);
+//		g->drawOBB(g,0xFF000000,&idenmat,&view,&proj,&testobb);
 	} else {			
-		g->drawOBB(g,0xFF888888,&idenmat,&view,&proj,&testobb);
+//		g->drawOBB(g,0xFF888888,&idenmat,&view,&proj,&testobb);
 	}
 
 	CS::instance()->leave(CS_MESSAGE_CS, "testt");
@@ -1375,7 +1389,7 @@ void Game::Run() {
 			kousi.c.float3.x =30*i;
 			kousi.c.float3.y =30*k;
 			kousi.c.float3.z = 0;
-			g->drawOBB(g,0xFFFFFFFF,&idenmat,&view,&proj,&kousi);
+	//		g->drawOBB(g,0xFFFFFFFF,&idenmat,&view,&proj,&kousi);
 		}
 	}
 
@@ -1384,10 +1398,10 @@ void Game::Run() {
 	MyMatrixIdentity(idenmat);
 
 	if (TestSegmentOBB(&tempray, &mesh2->houkatuobb)) {
-		g->drawRAY(g,0xFFFF00FF,&idenmat,&view,&proj,50/*MyVec3Length(tempray.dir)*/,&tempray);
-		g->drawOBB(g,0xFFFFFF00,&idenmat,&view,&proj,&mesh2->houkatuobb);
+	//	g->drawRAY(g,0xFFFF00FF,&idenmat,&view,&proj,50/*MyVec3Length(tempray.dir)*/,&tempray);
+	//	g->drawOBB(g,0xFFFFFF00,&idenmat,&view,&proj,&mesh2->houkatuobb);
 	} else {
-		g->drawRAY(g,0xFF000000,&idenmat,&view,&proj,50/*MyVec3Length(tempray.dir)*/,&tempray);
+	//	g->drawRAY(g,0xFF000000,&idenmat,&view,&proj,50/*MyVec3Length(tempray.dir)*/,&tempray);
 	}
 //	mesh->draw(g, &world, &view, &proj);
 	//texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
@@ -1433,12 +1447,12 @@ void Game::Run() {
 	ra.dir = MYVECTOR3(0,0,1);//k_a;
 
 	if (t == YATTEYARU_TRIANGLE_KOUSA) {
-		g->drawRAY(g,0xFF00FFFF,&world,&view,&proj,100,&ra);
-		g->drawTriangle(g,0xFF00FFFF,&world,&view,&proj,&t1.x,&t1.y,&t1.z);
-		g->drawTriangle(g,0xFF00FFFF,&world,&view,&proj,&t2.x,&t2.y,&t2.z);
+	//	g->drawRAY(g,0xFF00FFFF,&world,&view,&proj,100,&ra);
+	//	g->drawTriangle(g,0xFF00FFFF,&world,&view,&proj,&t1.x,&t1.y,&t1.z);
+	//	g->drawTriangle(g,0xFF00FFFF,&world,&view,&proj,&t2.x,&t2.y,&t2.z);
 	} else {
-		g->drawTriangle(g,0xFFFFFFFF,&world,&view,&proj,&t1.x,&t1.y,&t1.z);
-		g->drawTriangle(g,0xFFFFFFFF,&world,&view,&proj,&t2.x,&t2.y,&t2.z);
+	//	g->drawTriangle(g,0xFFFFFFFF,&world,&view,&proj,&t1.x,&t1.y,&t1.z);
+	//	g->drawTriangle(g,0xFFFFFFFF,&world,&view,&proj,&t2.x,&t2.y,&t2.z);
 	}
 
 	
@@ -1446,7 +1460,7 @@ void Game::Run() {
 		UMeshUnit* umesh_unit = umesh_units[0];
 	umesh_unit->setROTXYZ(0,0,0);
 	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(testcc,testcc,0);
+	umesh_unit->setXYZ(testcc,testcc,-testcc);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
@@ -1454,13 +1468,14 @@ void Game::Run() {
 
 	{
 		UMeshUnit* umesh_unit = umesh_units[1];
-	umesh_unit->setROTXYZ(0,0,0);
+	umesh_unit->setROTXYZ(0,0,testcc/3.00f);
 	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(-testcc,testcc,0);
+	umesh_unit->setXYZ(0,0,0);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	}
+	/*
 	{
 		UMeshUnit* umesh_unit = umesh_units[2];
 	umesh_unit->setROTXYZ(0,0.5,0.5);
@@ -1469,19 +1484,19 @@ void Game::Run() {
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,false, false, true,true);
-	}
-	
-
+	}*/
+	/*
+	for(int i=0;i<1;i++)
 	{
-	UMeshUnit* umesh_unit = umesh_units[3];
-	umesh_unit->setROTXYZ(0,0.5,0.5);
-	umesh_unit->setSCALEXYZ(3,3,0.2);
-	umesh_unit->setXYZ(testcc,-testcc/2,0);
+	UMeshUnit* umesh_unit = umesh_units[3+i];
+//	umesh_unit->setROTXYZ(0,0.5,0.5);
+//	umesh_unit->setSCALEXYZ(3,3,0.2);
+//	umesh_unit->setXYZ(testcc,-testcc/2,0);
 	//umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false, false,true);
 	}
-
+	*/
 //	mesh_instanceds->calcCombinedMatrixToTexture(g);
 //	mesh_instanceds->loadColorToTexture(g);
 	mesh_instanceds->render(g);
@@ -1551,11 +1566,27 @@ void Game::Run() {
 	}
 
 
-	g->getSwapChain()->Present(0,0);
-
 	
+	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
+	hantei->maecalcdayo(g);
+	hantei->calcAuInfo(g,true);
+	hantei->calcKumi(g);
+	hantei->calcObb(g);
+	hantei->clearKekkaOfBuffer(g);
+	hantei->runComputeShader(g);
+
+	hantei->copyKekkaToBufferForCopy(g,true);
+
+	hantei->calcKumiKuwasiku(g);
+	hantei->runComputeShaderKuwasiku(g);
 	hantei->copyKekkaToBufferForCopy(g,false);
 	
+	hantei->drawKekka(g,&view,&proj);
+	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+
+	g->getSwapChain()->Present(0,0);
+
+
 	static int s = 0;
 	if (c->getSecond() != s) {
 	}

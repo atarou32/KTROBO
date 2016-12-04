@@ -48,6 +48,7 @@ struct AtariUnitTikeiToSoreigai {
   int atari_idx;
   int obb_idx;
   int atari_idx2;
+  int offset;
 };
 
 struct AtariUnitTikeiIgaiDousi {
@@ -83,8 +84,8 @@ StructuredBuffer<MESH_INDEX> indexBuf : register(t1);
 StructuredBuffer<AtariUnitOBB> obbBuf : register(t2);
 StructuredBuffer<AtariUnitInfo> auinfoBuf: register(t3);
 StructuredBuffer<AtariUnitKumi> kumiBuf : register(t4);
-StructuredBuffer<AtariUnitTikeiIgaiDousi> autidBuf : register(t5);
-StructuredBuffer<AtariUnitTikeiToSoreigai> auttsBuf : register(t6);
+StructuredBuffer<AtariUnitTikeiIgaiDousi> autidBuf : register(t6);
+StructuredBuffer<AtariUnitTikeiToSoreigai> auttsBuf : register(t5);
 
 
 RWStructuredBuffer<AtariUnitAns> ansBuf :register(u0);
@@ -102,10 +103,10 @@ uint getIndex(uint index) {
 bool majiwariKumi(AtariUnitInfo k1, AtariUnitInfo k2) {
   // 重心とr は計算済み
 
-  if(k1.atari_idx == k2.atari_idx) return false;
+  //if(k1.atari_idx == k2.atari_idx) return false;
 
   float3 jminus = k1.jyusin - k2.jyusin;
-  float len = length(jminus);
+  float len = sqrt(dot(jminus,jminus));
   if (len > k1.r + k2.r) {
     return false;
   }
@@ -438,7 +439,7 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariTriangleToOBB(MESH_VERTEXKARI v1, MESH_
 
   ANS_MAJIWARITIKEITOSOREIGAI ans;
   ans.is_majiwari = false;
-  TRIANGLEDAYO tri1;
+  TRIANGLEDAYO tri1;// = (TRIANGLEDAYO)0;
   tri1.x = float3(v1.pos.x,v1.pos.y,v1.pos.z);
   tri1.y = float3(v2.pos.x,v2.pos.y,v2.pos.z);
   tri1.z = float3(v3.pos.x,v3.pos.y,v3.pos.z);
@@ -446,17 +447,31 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariTriangleToOBB(MESH_VERTEXKARI v1, MESH_
   float3 q = tri1.y;
   float3 r = tri1.z;
  
-  float3 housen_tri1 = cross(tri1.z - tri1.x, tri1.y - tri1.x);
+  float3 housen_tri1 =float3(0,0,0);
+  housen_tri1 = cross(tri1.z - tri1.x, tri1.y - tri1.x);
   float nai = dot(housen_tri1,b.c - tri1.x);
   float nai_2 = nai*nai;
   float x_r_2 = dot(b.e,b.e);
-  if(nai_2 > x_r_2) return ans;
+  float3 jyusin_tri1 = float3(0,0,0);
+  float leng=0;
+  float3 majiwaripos = float3(0,0,0);
 
-  float3 jyusin_tri1 = (tri1.x + tri1.y + tri1.z)/3;
-  float r_tri1 = length(tri1.x - jyusin_tri1);
-  if (length(jyusin_tri1 - b.c) > r_tri1 + b.e[0]+b.e[1]+b.e[2]) return ans;
+ 
+
   
-  float3 majiwaripos = b.c - (housen_tri1) * nai;
+  jyusin_tri1 = (tri1.x + tri1.y + tri1.z)/3;
+  float r_tri1 = 0;
+  r_tri1 = length(tri1.x - jyusin_tri1);
+  if(nai_2 > x_r_2) {
+    return ans;
+  }
+  
+  leng = length(jyusin_tri1 - b.c);
+  if (leng > r_tri1 + b.e[0]+b.e[1]+b.e[2]) {
+    return ans;
+  }
+  
+  majiwaripos = b.c - (housen_tri1) * nai;
   if (majiwariPointOBB(tri1.x, b)) {
      ans.is_majiwari = true;
      ans.pos = majiwaripos;
@@ -511,9 +526,10 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariTriangleToOBB(MESH_VERTEXKARI v1, MESH_
 	}
 
 
-
-	for (int i=0;i<3;i++) {
-		for (int k=0;k<2;k++) {
+int i = 0;
+int k=0;
+	for (i=0;i<3;i++) {
+		for (k=0;k<2;k++) {
 			float test = 1;
 			if (k==0) {
 			} else {
@@ -523,6 +539,12 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariTriangleToOBB(MESH_VERTEXKARI v1, MESH_
 
 			TRIANGLEDAYO tri2;
 			TRIANGLEDAYO tri22;
+tri2.x = float3(0,0,0);
+tri2.y = float3(0,0,0);
+tri2.z = float3(0,0,0);
+tri22.x = float3(0,0,0);
+tri22.y = float3(0,0,0);
+tri22.z = float3(0,0,0);
 	//		float3 jyusin;
 //			float3 housen;
 //			float3 ans_ten;
@@ -564,7 +586,7 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariTriangleToOBB(MESH_VERTEXKARI v1, MESH_
 //			pp = tri22.y - jyusin;
 //			MyVec3Cross(housen,p,pp);
 			ANS_MAJIWARITIKEITOSOREIGAI t2 = hanteiTRIANGLEDAYO(tri1, tri22);
-			if (t2.is_majiwari) return t;
+			if (t2.is_majiwari) return t2;
 
 		}
 	}
@@ -576,6 +598,9 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariTriangleToOBB(MESH_VERTEXKARI v1, MESH_
 
   return ans;
 }
+
+
+#define KTROBO_MAX_TIKEI_HITOTU_INDEX 2048
 
 ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariUnitTikeiToSoreigai(MESH_VERTEXKARI vertex1,
  MESH_VERTEXKARI vertex2, MESH_VERTEXKARI vertex3, AtariUnitOBB obb1, AtariUnitInfo au2) {
@@ -598,6 +623,7 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariUnitTikeiToSoreigai(MESH_VERTEXKARI ver
   
   ans = majiwariAtariTriangleToOBB(henkan_v1,henkan_v2,henkan_v3, obb1);
   if(ans.is_majiwari) {
+    ans.is_majiwari = true;
     float4 norm = (henkan_v1.normal + henkan_v2.normal + henkan_v3.normal)/3;
     float3 norm3 = float3(norm.x,norm.y,norm.z);
     if (dot(norm3, ans.housen) < 0) {
@@ -610,12 +636,14 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariUnitTikeiToSoreigai(MESH_VERTEXKARI ver
 
 // group にはmaxインスタンスの数を指定する
 // numthreads にはmaxbonenum の数を指定する
-[numthreads(32,1,1)]
+[numthreads(128,1,1)]
 void CalcCS(uint gtid: SV_GroupIndex, uint3 gid: SV_GroupID )
 {
 
-int struct_idx = (gtid) *32 + gid.x;
-if (kumi_count > struct_idx) {
+uint struct_idx = (gid.x*32*32 + gid.y * 32 + gid.z)* 128+ gtid;
+uint k_count = kumi_count;
+
+if (k_count > struct_idx) {
     AtariUnitKumi k = kumiBuf[struct_idx];
     bool t = majiwariKumi(auinfoBuf[k.atari_idx],auinfoBuf[k.atari_idx2]);
     if (t) {
@@ -626,67 +654,9 @@ if (kumi_count > struct_idx) {
       ansBuf[struct_idx].obb_idx2 = 0;
     } else {
       ansBuf[struct_idx].is_use = 0;
+ //     ansBuf[struct_idx].atari_idx = k.atari_idx;
+  //    ansBuf[struct_idx].atari_idx2 = k.atari_idx2;
     }
-
-}
-
-if (igaidousi_count > struct_idx) {
-  AtariUnitTikeiIgaiDousi autid = autidBuf[struct_idx];
-  bool t = majiwariAtariUnitOBB(obbBuf[autid.obb_idx], obbBuf[autid.obb_idx2]);
-  if (t) {
-    ansBuf2[struct_idx].is_use = 1;
-    ansBuf2[struct_idx].atari_idx = autid.atari_idx;
-    ansBuf2[struct_idx].atari_idx2 = autid.atari_idx2;
-    ansBuf2[struct_idx].obb_idx = autid.obb_idx;
-    ansBuf2[struct_idx].obb_idx2 = autid.obb_idx2;
-    ansBuf2[struct_idx].kouten_jyusin = (obbBuf[autid.obb_idx].c + obbBuf[autid.obb_idx2].c)/2;
-
-  } else {
-    ansBuf2[struct_idx].is_use = 0;
-  } 
-}
-
-if (soreigai_count > struct_idx) {
-
-  AtariUnitTikeiToSoreigai autts = auttsBuf[struct_idx];
-  if (autts.atari_idx == autts.atari_idx2) return;
-  AtariUnitInfo au1 = auinfoBuf[autts.atari_idx];
-  AtariUnitInfo au2 = auinfoBuf[autts.atari_idx2];
-  bool t = majiwariKumi(auinfoBuf[autts.atari_idx],auinfoBuf[autts.atari_idx2]);
-  if (t) {
-  AtariUnitOBB obb1 = obbBuf[autts.obb_idx];
-  int vertex_place = au2.vertexs_place;
-  int au2_indexs_place = au2.indexs_place;
-  int au2_indexs_count = au2.index_count;
-  for (int i=0;i<au2_indexs_count;i+=3) {
-    uint inde1 = getIndex(au2_indexs_place + i);
-    uint inde2 = getIndex(au2_indexs_place + i +1);
-    uint inde3 = getIndex(au2_indexs_place + i +2);
-    MESH_VERTEXKARI vertex1 = vertexBuf[vertex_place + inde1];
-    MESH_VERTEXKARI vertex2 = vertexBuf[vertex_place + inde2];
-    MESH_VERTEXKARI vertex3 = vertexBuf[vertex_place + inde3];
-    ANS_MAJIWARITIKEITOSOREIGAI at = majiwariAtariUnitTikeiToSoreigai(vertex1, vertex2, vertex3, obb1, au2);
-    if (at.is_majiwari) {
-      ansBuf2[struct_idx+igaidousi_count].is_use = 1;
-      ansBuf2[struct_idx+igaidousi_count].atari_idx = autts.atari_idx;
-      ansBuf2[struct_idx+igaidousi_count].atari_idx2 = autts.atari_idx2;
-      ansBuf2[struct_idx+igaidousi_count].obb_idx = autts.obb_idx;
-      ansBuf2[struct_idx+igaidousi_count].obb_idx2 = 0;
-      ansBuf2[struct_idx+igaidousi_count].kouten_jyusin = float3(at.pos.x,at.pos.y,at.pos.z);
-      ansBuf2[struct_idx+igaidousi_count].kouten_housen = float3(at.housen.x, at.housen.y, at.housen.z);
-      
-      return;
-    } 
-  }  
-  }
-
-  ansBuf2[struct_idx+igaidousi_count].is_use = 0;
-
-
-
-
-
-
 
 }
 

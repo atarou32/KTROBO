@@ -623,6 +623,7 @@ void Mesh::readMeshOnlyForSaveVertexIndex(Graphics* g, char* filename, MyTexture
 		}
 		
 	}
+	//calcHoukatuOBB(vertexs);
 	} catch (GameError* err) {
 		a.deletedayo();
 		Release();
@@ -649,15 +650,16 @@ void Mesh::readMeshOnlyForSaveVertexIndex(Graphics* g, char* filename, MyTexture
 
 }
 
-void Mesh::calcHoukatuOBB(MESH_VERTEX* vertexs) {
+void Mesh::calcHoukatuOBB(MESH_VERTEX* vertexs, UINT* indexs) {
 	MYVECTOR3 jyusin(0,0,0);
 
-	for (int i=0;i<VertexCount;i++) {
-		jyusin = jyusin + vertexs[i].pos;
+	for (int i=0;i<FaceCount*3;i+=3) {
+		jyusin = jyusin + (vertexs[indexs[i]].pos + vertexs[indexs[i+1]].pos + vertexs[indexs[i+2]].pos)/3;
+		
 	}
 
-	if (VertexCount >0) {
-		jyusin = jyusin / VertexCount;
+	if (FaceCount >0) {
+		jyusin = jyusin / FaceCount;
 	}
 	// これで重心は求められた
 	MYVECTOR3 mae(1,0,0);
@@ -668,8 +670,12 @@ void Mesh::calcHoukatuOBB(MESH_VERTEX* vertexs) {
 	float yokomax= 0;
 	float upmax = 0;
 	MYVECTOR3 temp(0,0,0);
-	for (int i=0;i<VertexCount;i++) {
-		temp = vertexs[i].pos - jyusin;
+	for (int i=0;i<FaceCount*3;i+=3) {
+
+		for(int d=0;d<3;d++) {
+			MESH_VERTEX* mm = &vertexs[indexs[i+d]];
+
+		temp = mm->pos - jyusin;
 		float ab = abs(MyVec3Dot(temp,mae));
 		if (ab > maemax) {
 			maemax = ab;
@@ -681,6 +687,7 @@ void Mesh::calcHoukatuOBB(MESH_VERTEX* vertexs) {
 		ab = abs(MyVec3Dot(temp,up));
 		if (ab > upmax) {
 			upmax = ab;
+		}
 		}
 	}
 
@@ -831,13 +838,17 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		// まず重心を求める
 		MYVECTOR3 jyusin(0,0,0);
 
-		for (int i=0;i<VertexCount;i++) {
-			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
-				if (vertexs[i].Index[k] == bb->bone_index) {
-					if (0.000001 < vertexs[i].weight[k]) {
-						// このvertexはぼねに含まれる
-						bonefukumucount++;
-						jyusin = jyusin + vertexs[i].pos;// * vertexs[i].weight[k];
+		for (int i=0;i<FaceCount*3;i+=3) {
+			for (int d = 0 ; d<3;d++) {
+				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
+
+				for (int k=0;k<MODEL_BLEND_COUNT;k++) {
+					if (mm->Index[k] == bb->bone_index) {
+						if (0.000001 < mm->weight[k]) {
+							// このvertexはぼねに含まれる
+							bonefukumucount++;
+							jyusin = jyusin + mm->pos;// * vertexs[i].weight[k];
+						}
 					}
 				}
 			}
@@ -861,26 +872,30 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		int bonefukumucount2up = 0;
 		int bonefukumucount2yoko =0;
 		int bonefukumucount2mae = 0;
-		for (int i=0;i<VertexCount;i++) {
+		for (int i=0;i<FaceCount*3;i+=3) {
+			for (int d = 0 ; d<3;d++) {
+				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
-				if (vertexs[i].Index[k] == bb->bone_index) {
-					if (0.000001 < vertexs[i].weight[k]) {
-						jyusintov = vertexs[i].pos - jyusin;
+				if (mm->Index[k] == bb->bone_index) {
+					if (0.000001 < mm->weight[k]) {
+						jyusintov = mm->pos - jyusin;
 						if (MyVec3Dot(jyusintov, upper) >= 0) {
 						// このvertexはぼねに含まれる
 							bonefukumucount2up++;
-							jyusin2upper = jyusin2upper + vertexs[i].pos;// * vertexs[i].weight[k];
+							jyusin2upper = jyusin2upper + mm->pos;// * vertexs[i].weight[k];
 						}
 						if (MyVec3Dot(jyusintov,yokoer) >=0) {
 							bonefukumucount2yoko++;
-							jyusin2yokoer = jyusin2yokoer + vertexs[i].pos;// * vertexs[i].weight[k];
+							jyusin2yokoer = jyusin2yokoer + mm->pos;// * vertexs[i].weight[k];
 						}
 						if (MyVec3Dot(jyusintov,maer) >=0) {
 							bonefukumucount2mae++;
-							jyusin2maer = jyusin2maer + vertexs[i].pos;
+							jyusin2maer = jyusin2maer + mm->pos;
 						}
 					}
 				}
+			}
+
 			}
 		}
 		if ((bonefukumucount2up ==0) &&( bonefukumucount2mae ==0) &&(bonefukumucount2yoko ==0)) {
@@ -925,15 +940,20 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		int lnum=0;
 		// l２の平均を取る
 
-			for (int i=0;i<VertexCount;i++) {
+			for (int i=0;i<FaceCount*3;i+=3) {
+
+			for (int d = 0 ; d<3;d++) {
+				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
-				if (vertexs[i].Index[k] == bb->bone_index) {
-					if (0.000001 < vertexs[i].weight[k]) {
-						jyusintox = vertexs[i].pos - jyusin;
+				if (mm->Index[k] == bb->bone_index) {
+					if (0.000001 < mm->weight[k]) {
+						jyusintox = mm->pos - jyusin;
 						l += MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
 						lnum++;
 					}
 				}
+			}
+
 			}
 		}
 		if (lnum != 0) {
@@ -1083,7 +1103,7 @@ void Mesh::readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 	}
 
 	readBoneInfo(&a, true, vertexs, indexs);
-	calcHoukatuOBB(vertexs);
+	calcHoukatuOBB(vertexs, indexs);
 
 	} catch (GameError* err) {
 		a.deletedayo();

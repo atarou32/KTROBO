@@ -8,7 +8,7 @@
 
 
 namespace KTROBO {
-
+#define KTROBO_MAX_TIKEI_HITOTU_INDEX 2048 // ひとつの地形のfaceの最大数 ここをかきかえるときはシェーダも書き換えること
 class UMesh {
 public:
 	Mesh* mesh;
@@ -251,6 +251,7 @@ struct AtariUnitTikeiToSoreigai {
 	int atariidx;
 	int obbidx;
 	int atariidx2;
+	int offset;
 };
 
 struct AtariUnitTikeiIgaiDousi {
@@ -274,7 +275,7 @@ struct AtariHanteiTempCount {
 
 
 #define KTROBO_ATARI_SHADER_COMPUTE "resrc/shader/simple_atari_compute.ps"
-#define KTROBO_ATARI_SHADER_COMPUTE2 "resrc/shader/simple_atari_compute2.ps"
+#define KTROBO_ATARI_SHADER_COMPUTE2 "resrc/shader/simple_atari_compute_kuwasiku.ps"
 #define KTROBO_ATARI_MAX 128*32*32;
 
 class AtariHantei {
@@ -318,9 +319,10 @@ public:
 
 	void maecalcdayo(Graphics* g);
 	void calcKumi(Graphics* g);
+	void calcKumiKuwasiku(Graphics* g);
 	void calcAuInfo(Graphics* g, bool calc_vertex_and_index);
 	void calcObb(Graphics* g);
-
+	void drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 private:
 	static MYSHADERSTRUCT mss;
 	static MYSHADERSTRUCT mss2;
@@ -366,9 +368,11 @@ public:
 	static HRESULT createBufferUnorderedAccessView(Graphics* g, ID3D11Buffer* pBuffer, ID3D11UnorderedAccessView** ppUavOut);
 	static HRESULT createBufferForCopy(Graphics* g, ID3D11Buffer* pBuffer, ID3D11Buffer** ppBufOut);
 	HRESULT copyKekkaToBufferForCopy(Graphics* g,bool isans1);
+	void clearKekkaOfBuffer(Graphics* g);
+
 	// 計算するのはいっせいに行う
 	void runComputeShader(Graphics* g);
-	
+	void runComputeShaderKuwasiku(Graphics* g);
 
 	~AtariHantei() {
 		// UMeshUnitは外で消す

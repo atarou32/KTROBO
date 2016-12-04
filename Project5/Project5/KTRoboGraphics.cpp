@@ -461,30 +461,51 @@ GRAPHICS_RENDER_STRUCT sttr[] = {
  
       { point1.float3.x, point1.float3.y, point1.float3.z, /*1.0f,*/ FontColor},
       { point2.float3.x, point2.float3.y, point2.float3.z, /*1.0f,*/ FontColor}, 
-      { point1.float3.x, point1.float3.y, point1.float3.z, /*1.0f,*/ FontColor}, 
+      { point3.float3.x, point3.float3.y, point3.float3.z, /*1.0f,*/ FontColor}, 
       { point4.float3.x, point4.float3.y, point4.float3.z, /*1.0f,*/ FontColor},
 	  { point3.float3.x, point3.float3.y, point3.float3.z, FontColor},
-	  { point2.float3.x, point2.float3.y, point2.float3.z, FontColor},
-	  { point3.float3.x, point3.float3.y, point3.float3.z, FontColor},
-	  { point4.float3.x, point4.float3.y, point4.float3.z, FontColor},
+	  { point1.float3.x, point1.float3.y, point1.float3.z, FontColor},
+	//  { point3.float3.x, point3.float3.y, point3.float3.z, FontColor},
+	 // { point4.float3.x, point4.float3.y, point4.float3.z, FontColor},
 	  
 	  { point5.float3.x, point5.float3.y, point5.float3.z, /*1.0f,*/ FontColor},
       { point6.float3.x, point6.float3.y, point6.float3.z, /*1.0f,*/ FontColor}, 
-      { point5.float3.x, point5.float3.y, point5.float3.z, /*1.0f,*/ FontColor}, 
+      { point7.float3.x, point7.float3.y, point7.float3.z, /*1.0f,*/ FontColor}, 
       { point8.float3.x, point8.float3.y, point8.float3.z, /*1.0f,*/ FontColor},
 	  { point7.float3.x, point7.float3.y, point7.float3.z, FontColor},
-	  { point6.float3.x, point6.float3.y, point6.float3.z, FontColor},
-	  { point7.float3.x, point7.float3.y, point7.float3.z, FontColor},
-	  { point8.float3.x, point8.float3.y, point8.float3.z, FontColor},
+	  { point5.float3.x, point5.float3.y, point5.float3.z, FontColor},
+	//  { point7.float3.x, point7.float3.y, point7.float3.z, FontColor},
+	//  { point8.float3.x, point8.float3.y, point8.float3.z, FontColor},
 
 	  { point1.float3.x, point1.float3.y, point1.float3.z, /*1.0f,*/ FontColor},
       { point5.float3.x, point5.float3.y, point5.float3.z, /*1.0f,*/ FontColor}, 
       { point2.float3.x, point2.float3.y, point2.float3.z, /*1.0f,*/ FontColor}, 
       { point6.float3.x, point6.float3.y, point6.float3.z, /*1.0f,*/ FontColor},
-	  { point3.float3.x, point3.float3.y, point3.float3.z, FontColor},
-	  { point7.float3.x, point7.float3.y, point7.float3.z, FontColor},
+	  { point2.float3.x, point2.float3.y, point2.float3.z, FontColor},
+	  { point5.float3.x, point5.float3.y, point5.float3.z, FontColor},
+//	  { point8.float3.x, point8.float3.y, point8.float3.z, FontColor},
+//	  { point4.float3.x, point4.float3.y, point4.float3.z, FontColor}
+
+	  { point3.float3.x, point3.float3.y, point3.float3.z, /*1.0f,*/ FontColor},
+      { point7.float3.x, point7.float3.y, point7.float3.z, /*1.0f,*/ FontColor}, 
+      { point8.float3.x, point8.float3.y, point8.float3.z, /*1.0f,*/ FontColor}, 
+      { point7.float3.x, point7.float3.y, point7.float3.z, /*1.0f,*/ FontColor},
 	  { point8.float3.x, point8.float3.y, point8.float3.z, FontColor},
-	  { point4.float3.x, point4.float3.y, point4.float3.z, FontColor}
+	  { point4.float3.x, point4.float3.y, point4.float3.z, FontColor},
+
+      { point2.float3.x, point2.float3.y, point2.float3.z, /*1.0f,*/ FontColor},
+      { point3.float3.x, point3.float3.y, point3.float3.z, /*1.0f,*/ FontColor}, 
+      { point6.float3.x, point6.float3.y, point6.float3.z, /*1.0f,*/ FontColor}, 
+      { point3.float3.x, point3.float3.y, point3.float3.z, /*1.0f,*/ FontColor},
+	  { point6.float3.x, point6.float3.y, point6.float3.z, FontColor},
+	  { point7.float3.x, point7.float3.y, point7.float3.z, FontColor},
+
+      { point1.float3.x, point1.float3.y, point1.float3.z, /*1.0f,*/ FontColor},
+      { point5.float3.x, point5.float3.y, point5.float3.z, /*1.0f,*/ FontColor}, 
+      { point8.float3.x, point8.float3.y, point8.float3.z, /*1.0f,*/ FontColor}, 
+      { point8.float3.x, point8.float3.y, point8.float3.z, /*1.0f,*/ FontColor},
+	  { point4.float3.x, point4.float3.y, point4.float3.z, FontColor},
+	  { point1.float3.x, point1.float3.y, point1.float3.z, FontColor},
 
    };
 
@@ -498,7 +519,7 @@ GRAPHICS_RENDER_STRUCT sttr[] = {
 	D3D11_MAPPED_SUBRESOURCE msr;
 	
 	g->getDeviceContext()->Map(render_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy( msr.pData, &sttr, sizeof(GRAPHICS_RENDER_STRUCT)*24 );
+	memcpy( msr.pData, &sttr, sizeof(GRAPHICS_RENDER_STRUCT)*36 );
 	g->getDeviceContext()->Unmap(render_buffer, 0);
 
 	g->getDeviceContext()->IASetInputLayout( mss.vertexlayout );
@@ -517,7 +538,7 @@ GRAPHICS_RENDER_STRUCT sttr[] = {
 		
 	g->getDeviceContext()->PSSetShader(mss.ps, NULL, 0);
 			
-	g->getDeviceContext()->Draw(24,0);
+	g->getDeviceContext()->Draw(36,0);
 	
 	CS::instance()->leave(CS_DEVICECON_CS, "leave");
 }

@@ -257,7 +257,7 @@ public:
 	ID3D11Buffer* p_indexbuffer;
 private:
 	void readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* vertexs, UINT* indexs);
-	void calcHoukatuOBB(MESH_VERTEX* vertexs);
+	void calcHoukatuOBB(MESH_VERTEX* vertexs, UINT* indexs);
 	static MeshCBuf1 cbuf1;
 	static MeshCBuf2 cbuf2;
 	static MeshCBuf3 cbuf3;
