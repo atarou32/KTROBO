@@ -149,7 +149,7 @@ void UMeshUnit::calcJyusinAndR() {
 
 
 
-	r = ans_r + MyVec3Length(v); // ‚–‚Ì’·‚³‚Ì•ª‚¾‚¯”¼Œa‚ð‘å‚«‚­‚·‚é
+	r = ans_r + MyVec3Length(v) * dt; // ‚–‚Ì’·‚³‚Ì•ª‚¾‚¯”¼Œa‚ð‘å‚«‚­‚·‚é
 	jyusin = ans_jyusin;
 }
 
@@ -790,7 +790,7 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 			au_info[au->atariidx].jyusin = au->umesh_unit->jyusin;
 			au_info[au->atariidx].v = au->umesh_unit->v;
 			au_info[au->atariidx].atari_idx = au->atariidx;
-
+			au_info[au->atariidx].dt = au->umesh_unit->dt;
 			if (calc_vertex_and_index && au->umesh->vertexs && au->umesh->mesh) {
 				au_info[au->atariidx].vertexs_place = temp_vertex_place;
 				au_info[au->atariidx].vertex_count = au->umesh->mesh->VertexCount;
@@ -1209,10 +1209,14 @@ void AtariHantei::compileShader(Graphics* g) {
 	
 	try {
 		CompileShaderFromFile(KTROBO_ATARI_SHADER_COMPUTE2, "CalcCS", "cs_5_0",&pblob,true);
+			if (!pblob) {
+			throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cs make error");;
+		}
 		hr = g->getDevice()->CreateComputeShader(pblob->GetBufferPointer(),
 			pblob->GetBufferSize(),
 			NULL,
 			&mss2.cs);
+
 		if (FAILED(hr)) {
 			pblob->Release();
 			delete pblob;
@@ -1362,26 +1366,26 @@ void AtariHantei::releaseBufferAndView() {
 void AtariHantei::drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
-	for (int i=0;i<atatta_count;i++) {
+	for (int k=0;k<atatta_count;k++) {
 		RAY ray;
 
-		ray.org = ans[i].kouten_jyusin;
-		ray.dir = ans[i].kouten_housen;
+		ray.org = ans[k].kouten_jyusin;
+		ray.dir = ans[k].kouten_housen;
 
-		if ((units[ans[i].atari_idx].type == AtariUnit::AtariType::ATARI_TIKEI) ||
-			(units[ans[i].atari_idx2].type == AtariUnit::AtariType::ATARI_TIKEI)) {
+		if ((units[ans[k].atari_idx].type == AtariUnit::AtariType::ATARI_TIKEI) ||
+			(units[ans[k].atari_idx2].type == AtariUnit::AtariType::ATARI_TIKEI)) {
 			g->drawRAY(g,0xFF2200FF,&idenmat,view,proj,50,&ray);
 		}else {
 			// ’nŒ`ˆÈŠO‚È‚Ì‚Ådrawobb
 			OBB ob;
 			for (int i=0;i<KTROBO_MESH_BONE_MAX;i++) {
-				if (ans[i].is_use && units[ans[i].atari_idx].umesh && units[ans[i].atari_idx].umesh->is_bone_obbs_use[i] &&
-					(units[ans[i].atari_idx].umesh->bone_obbs_idx[i] == ans[i].obbidx)) {
-						g->drawOBBFill(g,0xFFFFFFFF,&idenmat,view,proj,&units[ans[i].atari_idx].umesh->bone_obbs[i]);
+				if (ans[k].is_use && units[ans[k].atari_idx].umesh && units[ans[k].atari_idx].umesh->is_bone_obbs_use[i] &&
+					(units[ans[k].atari_idx].umesh->bone_obbs_idx[i] == ans[k].obbidx)) {
+						g->drawOBBFill(g,0xFFFFFFFF,&idenmat,view,proj,&units[ans[k].atari_idx].umesh->bone_obbs[i]);
 				}
-				if (ans[i].is_use && units[ans[i].atari_idx2].umesh && units[ans[i].atari_idx2].umesh->is_bone_obbs_use[i] &&
-					(units[ans[i].atari_idx2].umesh->bone_obbs_idx[i] == ans[i].obbidx2)) {
-						g->drawOBBFill(g,0xFFFFFFFF,&idenmat,view,proj,&units[ans[i].atari_idx2].umesh->bone_obbs[i]);
+				if (ans[k].is_use && units[ans[k].atari_idx2].umesh && units[ans[k].atari_idx2].umesh->is_bone_obbs_use[i] &&
+					(units[ans[k].atari_idx2].umesh->bone_obbs_idx[i] == ans[k].obbidx2)) {
+						g->drawOBBFill(g,0xFF0000FF,&idenmat,view,proj,&units[ans[k].atari_idx2].umesh->bone_obbs[i]);
 				}
 			}
 		}

@@ -116,6 +116,7 @@ public:
 	MYMATRIX world;
 	MYVECTOR3 jyusin;// 包括球の重心(xyz rotx roty rotz 込み) 当たり判定に使用する
 	float r;// 包括球のｒ
+	float dt; // 経過時間
 	vector<UMesh*> meshs;
 	void setUMesh(UMesh* mm) {
 		meshs.push_back(mm);
@@ -141,6 +142,7 @@ public:
 		r = 1;
 		MyMatrixIdentity(world);
 		is_updated = true;
+		dt = 0;
 	}
 	void setXYZ(float x, float y, float z);
 	void setROTXYZ(float rotx, float roty, float rotz);
@@ -149,6 +151,9 @@ public:
 		this->scaley = scaley;
 		this->scalez = scalez;
 		is_updated = true;
+	}
+	void setDT(float d) {
+		dt = d;
 	}
 
 	void setV(MYVECTOR3* v);
@@ -216,6 +221,7 @@ struct AtariUnitInfo{
 	MYVECTOR3 jyusin;
 	MYVECTOR3 v;
 	float r;
+	float dt;
 };
 
 struct AtariUnitVertexs {
@@ -277,9 +283,8 @@ struct AtariHanteiTempCount {
 };
 
 
-#define KTROBO_ATARI_SHADER_COMPUTE "resrc/shader/simple_atari_compute.ps"
-#define KTROBO_ATARI_SHADER_COMPUTE2 "resrc/shader/simple_atari_compute_kuwasiku.ps"
-#define KTROBO_ATARI_MAX 128*32*32;
+#define KTROBO_ATARI_SHADER_COMPUTE "resrc/shader/simple_atari_compute.cso"
+#define KTROBO_ATARI_SHADER_COMPUTE2 "resrc/shader/simple_atari_compute_kuwasiku.cso"
 
 class AtariHantei {
 private:

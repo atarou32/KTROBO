@@ -21,6 +21,7 @@ struct AtariUnitInfo {
   float3 jyusin;
   float3 v;
   float r;
+  float dt;
 };
 
 struct AtariUnitKumi {
@@ -868,7 +869,23 @@ if (soreigai_count > soreigai_idx) {
     MESH_VERTEXKARI vertex1 = vertexBuf[vertex_place+inde1];
     MESH_VERTEXKARI vertex2 = vertexBuf[vertex_place+inde2];
     MESH_VERTEXKARI vertex3 = vertexBuf[vertex_place+inde3];
-    ANS_MAJIWARITIKEITOSOREIGAI at = majiwariAtariUnitTikeiToSoreigai(vertex1, vertex2, vertex3, obb1, au2);
+
+	float obb1u0 = abs(dot(au1.v * au1.dt,obb1.u[0]));
+	float obb1u1 = abs(dot(au1.v * au1.dt,obb1.u[1]));
+	float obb1u2 = abs(dot(au1.v * au1.dt,obb1.u[2]));
+	AtariUnitOBB obbdayo;
+	obbdayo.c = obb1.c - au1.v * au1.dt/2;
+	obbdayo.u[0] = obb1.u[0];
+	obbdayo.u[1] = obb1.u[1];
+	obbdayo.u[2] = obb1.u[2];
+	obbdayo.e[0] = obb1.e[0] + obb1u0;
+	obbdayo.e[1] = obb1.e[1] + obb1u1;
+	obbdayo.e[2] = obb1.e[2] + obb1u2;
+
+
+
+
+    ANS_MAJIWARITIKEITOSOREIGAI at = majiwariAtariUnitTikeiToSoreigai(vertex1, vertex2, vertex3, obbdayo, au2);
 
     if (at.is_majiwari) {
       ansBuf2[soreigai_idx+igaidousi_count].is_use = 1;

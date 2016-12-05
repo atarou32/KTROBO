@@ -434,7 +434,7 @@ bool Game::Init(HWND hwnd) {
 
 	AtariHantei::compileShader(g);
 	hantei = new AtariHantei();
-	/*
+	
 	for (int i=0;i<1;i++) {
 	{
 	MYMATRIX idenmat;
@@ -444,11 +444,18 @@ bool Game::Init(HWND hwnd) {
 		0,KTROBO_MESH_BONE_NULL,false);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
+	bool tyo_unko=true;
+	float frame_anime=0;
+
+	umesh_unit->setSCALEXYZ(1,1,1);
+	umesh_unit->setXYZ(0,0,10);
+	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+
 	umesh_unit->calcJyusinAndR();
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
 	}
-	*/
-	//}
+	
+	}
 	{
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
@@ -461,7 +468,7 @@ bool Game::Init(HWND hwnd) {
 	float frame_anime=0;
 
 	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,0,0);
+	umesh_unit->setXYZ(0,0,10);
 	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
 
 	umesh_unit->calcJyusinAndR();
@@ -480,8 +487,8 @@ bool Game::Init(HWND hwnd) {
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
 	}*/
 
-	for(int i=0;i<1;i++) {
-		for(int k=0;k<1;k++) {
+	for(int i=0;i<10;i++) {
+		for(int k=0;k<10;k++) {
 	{
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
@@ -491,7 +498,7 @@ bool Game::Init(HWND hwnd) {
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
 	umesh_unit->setSCALEXYZ(10,10,2);
-	umesh_unit->setXYZ((i)*25,(k)*25,-3);
+	umesh_unit->setXYZ((i-5)*25,(k-5)*25,-3);
 	bool tyo_unko=true;
 	float frame_anime = 0;
 
@@ -1457,10 +1464,17 @@ void Game::Run() {
 
 	
 	{
+		static float bui = 0;
+		bui = bui - 4.98*0.0001f * millisecond/1000 * millisecond/1000;
+		static float bb = 0;
+		bb = bb + bui*millisecond;
 		UMeshUnit* umesh_unit = umesh_units[0];
+		umesh_unit->setDT(millisecond/1000);
+		umesh_unit->setV(&MYVECTOR3(0,0,bui));
+
 	umesh_unit->setROTXYZ(0,0,0);
-	umesh_unit->setSCALEXYZ(2,2,1);
-	umesh_unit->setXYZ(0,0,0);//5-testcc/*-testcc*/);
+	umesh_unit->setSCALEXYZ(1,1,1);
+	umesh_unit->setXYZ(testcc,testcc,bb);//5-testcc/*-testcc*/);
 	float frame_a=testcc;
 	bool com=true;
 
@@ -1469,9 +1483,38 @@ void Game::Run() {
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	}
-	for(int i=0;i<1;i++) {
+
+	
 	{
-		UMeshUnit* umesh_unit = umesh_units[1+i];
+		static float bui = 0;
+		bui = bui - 4.98*0.0001f * millisecond/1000 * millisecond/1000;
+		static float bb = 0;
+		bb = bb + bui*millisecond;
+		UMeshUnit* umesh_unit = umesh_units[1];
+		//umesh_unit->setDT(millisecond/1000);
+		//umesh_unit->setV(&MYVECTOR3(0,0,bui));
+
+//	umesh_unit->setROTXYZ(0,0,0);
+//	umesh_unit->setSCALEXYZ(1,1,1);
+//	umesh_unit->setXYZ(testcc,testcc,bb);//5-testcc/*-testcc*/);
+	//float frame_a=testcc;
+//	bool com=true;
+
+//	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+		float frame_a=testcc;
+	bool com=true;
+	umesh_unit->setXYZ(0,0,-2);//5-testcc/*-testcc*/);
+	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+
+	umesh_unit->calcJyusinAndR();
+	bool calcom = true;
+	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+	}
+
+
+	for(int i=0;i<100;i++) {
+	{
+		UMeshUnit* umesh_unit = umesh_units[2+i];
 //	umesh_unit->setROTXYZ(0,0,0);//testcc/3.00f);
 //	umesh_unit->setSCALEXYZ(2,2,1);
 //	umesh_unit->setXYZ(0,0,0);

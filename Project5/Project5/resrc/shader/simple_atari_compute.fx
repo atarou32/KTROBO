@@ -21,6 +21,7 @@ struct AtariUnitInfo {
   float3 jyusin;
   float3 v;
   float r;
+  float dt;
 };
 
 struct AtariUnitKumi {
