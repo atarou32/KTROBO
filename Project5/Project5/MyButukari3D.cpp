@@ -81,15 +81,18 @@ bool majiwaruPointOBB(MYVECTOR3* point, OBB* b) {
 	point6 = *point - point6;
 	MYXMFLOAT3 test = (-b->u[0]);
 	float dot1 = MyVec3Dot(point1, test);
+	test = b->u[0];
 	float dot2 = MyVec3Dot(point2, test);
 	test = -b->u[1];
 	float dot3 = MyVec3Dot(point3, test);
+	test = b->u[1];
 	float dot4 = MyVec3Dot(point4, test);
 	test = -b->u[2];
 	float dot5 = MyVec3Dot(point5, test);
+	test = b->u[2];
 	float dot6 = MyVec3Dot(point6, test);
 
-	if (dot1 >0 && dot2 >0 && dot3>0 && dot4 >0 && dot5 > 0 && dot6 > 0) {
+	if ((dot1 >=0) && (dot2 >=0) && (dot3>=0) && (dot4 >=0) && (dot5 >= 0) && (dot6 >= 0)) {
 		return true;
 	}
 
@@ -673,10 +676,10 @@ int hanteiTRIANGLETOHEN( RAY* ray1, TRIANGLEDAYO* tri2, MYVECTOR3* jyusin, MYVEC
 	float afag = MyVec3Dot(af2,ag2);
 	float aeag = MyVec3Dot(ae2,ag2);
 
-	if ((aeaf > 0) && (afag >0) &&( aeag >0)) {
+	if ((aeaf >= 0) && (afag >=0) &&( aeag >=0)) {
 		*ans_ten = ddayo;
 		return YATTEYARU_TRIANGLE_KOUSA;
-	} else if((aeaf <0) && (afag <0) && (aeag <0)) {
+	} else if((aeaf <=0) && (afag <=0) && (aeag <=0)) {
 		*ans_ten = ddayo;
 		return YATTEYARU_TRIANGLE_KOUSA;
 	}
@@ -779,4 +782,309 @@ int hanteiTRIANGLEDAYO( TRIANGLEDAYO* tri1, TRIANGLEDAYO* tri2, MYVECTOR3* k_ans
 
 	return YATTEYARU_TRIANGLE_KOUSA;
 
+}
+
+int hanteiTRIANGLETOOBB(TRIANGLEDAYO* tri11, OBB* obb) {
+	OBB b = *obb;
+	TRIANGLEDAYO tri1;// = (TRIANGLEDAYO)0;
+	tri1.x = MYVECTOR3(tri11->x);
+  tri1.y = MYVECTOR3(tri11->y);
+  tri1.z = MYVECTOR3(tri11->z);
+  MYVECTOR3 p = tri1.x;
+  MYVECTOR3 q = tri1.y;
+  MYVECTOR3 r = tri1.z;
+ 
+  MYVECTOR3 housen_tri1 = MYVECTOR3(0,0,0);
+  MYVECTOR3 xz = tri1.z - tri1.x;
+  MYVECTOR3 xy = tri1.y - tri1.x;
+  MyVec3Cross(housen_tri1,xz, xy);
+  MyVec3Normalize(housen_tri1,housen_tri1);
+  MYVECTOR3 ctoti = b.c - tri1.x;
+  float nai = MyVec3Dot(housen_tri1,ctoti);
+  float nai_2 = nai*nai;
+  float x_r_2 = MyVec3Dot(b.e,b.e);
+  MYVECTOR3 jyusin_tri1 = MYVECTOR3(0,0,0);
+  float leng=0;
+  MYVECTOR3 majiwaripos = MYVECTOR3(0,0,0);
+
+ 
+
+  
+  jyusin_tri1 = (tri1.x + tri1.y + tri1.z)/3;
+  float r_tri1 = 0;
+  MYVECTOR3 tritoj = tri1.x - jyusin_tri1;
+  r_tri1 = MyVec3Length(tritoj);
+
+
+  majiwaripos = b.c - (housen_tri1) * nai;
+  if (majiwaruPointOBB(&tri1.x, obb)) {
+     return 1;
+  }
+
+  if (majiwaruPointOBB(&tri1.y, obb)) {
+     return 1;
+  }
+
+  if (majiwaruPointOBB(&tri1.z, obb)) {
+     return 1;
+  }
+
+
+
+
+/*
+  if(nai_2 > x_r_2) {
+    return 0;
+  }
+  */
+  tritoj = jyusin_tri1 - b.c;
+  /*
+  leng = MyVec3Length(tritoj);
+  
+  if (leng > r_tri1 + b.e[0]+b.e[1]+b.e[2]) {
+   // return 0;
+  }
+  */
+ 
+  
+  MYVECTOR3 point1 = b.c + b.u[0]*     b.e[0]; 
+  MYVECTOR3 point2 = b.c + (-b.u[0])*  b.e[0]; 
+  MYVECTOR3 point3 = b.c +  b.u[1]*	   b.e[1];
+  MYVECTOR3 point4 = b.c +  (-b.u[1])* b.e[1];
+  MYVECTOR3 point5 = b.c +  b.u[2]*	   b.e[2];
+  MYVECTOR3 point6 = b.c +  (-b.u[2])* b.e[2];
+
+
+	if (heimenUeni(&point1, &b.u[0], &p) && heimenUeni(&point1, &b.u[0], &q)
+		&& heimenUeni(&point1, &b.u[0], &r)) {
+			return 0;
+	}
+
+	if (heimenUeni(&point2, &(-b.u[0]), &p) && heimenUeni(&point2, &(-b.u[0]), &q)
+		&& heimenUeni(&point2, &(-b.u[0]), &r)) {
+			return 0;
+	}
+
+	if (heimenUeni(&point3, &b.u[1], &p) && heimenUeni(&point3, &b.u[1], &q)
+		&& heimenUeni(&point3, &b.u[1], &r)) {
+			return 0;
+	}
+
+	if (heimenUeni(&point4, &(-b.u[1]), &p) && heimenUeni(&point4, &(-b.u[1]), &q)
+		&& heimenUeni(&point4, &(-b.u[1]), &r)) {
+			return 0;
+	}
+
+	if (heimenUeni(&point5, &(b.u[2]), &p) && heimenUeni(&point5, &(b.u[2]), &q)
+		&& heimenUeni(&point5, &(b.u[2]), &r)) {
+			return 0;
+	}
+
+	if (heimenUeni(&point6, &(-b.u[2]), &p) && heimenUeni(&point6, &(-b.u[2]), &q)
+		&& heimenUeni(&point6, &(-b.u[2]), &r)) {
+			return 0;
+	}
+
+/*
+int i = 0;
+int k=0;
+[unroll(3)]
+	for (i=0;i<3;i++) {
+[unroll(2)]
+		for (k=0;k<2;k++) {
+			float test = 1;
+			if (k==0) {
+			} else {
+				test = -1;
+			}
+
+
+			TRIANGLEDAYO tri2;
+			TRIANGLEDAYO tri22;
+tri2.x = float3(0,0,0);
+tri2.y = float3(0,0,0);
+tri2.z = float3(0,0,0);
+tri22.x = float3(0,0,0);
+tri22.y = float3(0,0,0);
+tri22.z = float3(0,0,0);
+	//		float3 jyusin;
+//			float3 housen;
+//			float3 ans_ten;
+
+			float3 tyu = b.c + b.u[i] * test * b.e[i];
+			if (i==0) {
+				tri2.x = tyu + b.u[1] * b.e[1] + b.u[2] * b.e[2];
+				tri2.y = tyu - b.u[1] * b.e[1] + b.u[2] * b.e[2];
+				tri2.z = tyu + b.u[1] * b.e[1] - b.u[2] * b.e[2];
+				tri22.x = tyu + b.u[1] * b.e[1] - b.u[2] * b.e[2];
+				tri22.y = tyu - b.u[1] * b.e[1] + b.u[2] * b.e[2];
+				tri22.z = tyu - b.u[1] * b.e[1] - b.u[2] * b.e[2];
+			} else if(i == 1) {
+				tri2.x = tyu + b.u[2] * b.e[2] + b.u[0] * b.e[0];
+				tri2.y = tyu - b.u[2] * b.e[2] + b.u[0] * b.e[0];
+				tri2.z = tyu + b.u[2] * b.e[2] - b.u[0] * b.e[0];
+				tri22.x = tyu + b.u[2] * b.e[2] - b.u[0] * b.e[0];
+				tri22.y = tyu - b.u[2] * b.e[2] + b.u[0] * b.e[0];
+				tri22.z = tyu - b.u[2] * b.e[2] - b.u[0] * b.e[0];
+			} else if(i==2) {
+				tri2.x = tyu + b.u[0] * b.e[0] + b.u[1] * b.e[1];
+				tri2.y = tyu - b.u[0] * b.e[0] + b.u[1] * b.e[1];
+				tri2.z = tyu + b.u[0] * b.e[0] - b.u[1] * b.e[1];
+				tri22.x = tyu + b.u[0] * b.e[0] - b.u[1] * b.e[1];
+				tri22.y = tyu - b.u[0] * b.e[0] + b.u[1] * b.e[1];
+				tri22.z = tyu - b.u[0] * b.e[0] - b.u[1] * b.e[1];
+			}
+
+			ANS_MAJIWARITIKEITOSOREIGAI t = hanteiTRIANGLEDAYO(tri1, tri2);
+                        t.housen = housen_tri1;
+			if (t.is_majiwari) return t;
+
+			ANS_MAJIWARITIKEITOSOREIGAI t2 = hanteiTRIANGLEDAYO(tri1, tri22);
+			t2.housen = housen_tri1;
+			if (t2.is_majiwari) return t2;
+
+		}
+	}
+  */
+
+
+
+TRIANGLEDAYO tri2;
+TRIANGLEDAYO tri22;
+tri2.x = MYVECTOR3(0,0,0);
+tri2.y = MYVECTOR3(0,0,0);
+tri2.z = MYVECTOR3(0,0,0);
+tri22.x = MYVECTOR3(0,0,0);
+tri22.y = MYVECTOR3(0,0,0);
+tri22.z = MYVECTOR3(0,0,0);
+	
+float test = 1;
+int i=0;
+MYVECTOR3 tyu = b.c + b.u[i] * test * b.e[i];
+tri2.x = tyu + b.u[1] * b.e[1] + b.u[2] * b.e[2];
+tri2.y = tyu - b.u[1] * b.e[1] + b.u[2] * b.e[2];
+tri2.z = tyu + b.u[1] * b.e[1] - b.u[2] * b.e[2];
+tri22.x = tyu + b.u[1] * b.e[1] - b.u[2] * b.e[2];
+tri22.y = tyu - b.u[1] * b.e[1] + b.u[2] * b.e[2];
+tri22.z = tyu - b.u[1] * b.e[1] - b.u[2] * b.e[2];
+int t =  hanteiTRIANGLEDAYO(&tri1, &tri2,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+ t =  hanteiTRIANGLEDAYO(&tri2, &tri1,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+int t2 = hanteiTRIANGLEDAYO(&tri1, &tri22,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+t2 = hanteiTRIANGLEDAYO(&tri22, &tri1,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+
+
+
+test = -1;
+i=0;
+tyu = b.c + b.u[i] * test * b.e[i];
+tri2.x = tyu + b.u[1] * b.e[1] + b.u[2] * b.e[2];
+tri2.y = tyu - b.u[1] * b.e[1] + b.u[2] * b.e[2];
+tri2.z = tyu + b.u[1] * b.e[1] - b.u[2] * b.e[2];
+tri22.x = tyu + b.u[1] * b.e[1] - b.u[2] * b.e[2];
+tri22.y = tyu - b.u[1] * b.e[1] + b.u[2] * b.e[2];
+tri22.z = tyu - b.u[1] * b.e[1] - b.u[2] * b.e[2];
+t =  hanteiTRIANGLEDAYO(&tri1, &tri2,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+ t =  hanteiTRIANGLEDAYO(&tri2, &tri1,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+t2 = hanteiTRIANGLEDAYO(&tri1, &tri22,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+t2 = hanteiTRIANGLEDAYO(&tri22, &tri1,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+
+
+test = 1;
+i=1;
+tyu = b.c + b.u[i] * test * b.e[i];
+tri2.x = tyu + b.u[2] * b.e[2] + b.u[0] * b.e[0];
+tri2.y = tyu - b.u[2] * b.e[2] + b.u[0] * b.e[0];
+tri2.z = tyu + b.u[2] * b.e[2] - b.u[0] * b.e[0];
+tri22.x = tyu + b.u[2] * b.e[2] - b.u[0] * b.e[0];
+tri22.y = tyu - b.u[2] * b.e[2] + b.u[0] * b.e[0];
+tri22.z = tyu - b.u[2] * b.e[2] - b.u[0] * b.e[0];
+t =  hanteiTRIANGLEDAYO(&tri1, &tri2,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+ t =  hanteiTRIANGLEDAYO(&tri2, &tri1,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+t2 = hanteiTRIANGLEDAYO(&tri1, &tri22,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+t2 = hanteiTRIANGLEDAYO(&tri22, &tri1,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+test = -1;
+i=1;
+tyu = b.c + b.u[i] * test * b.e[i];
+tri2.x = tyu + b.u[2] * b.e[2] + b.u[0] * b.e[0];
+tri2.y = tyu - b.u[2] * b.e[2] + b.u[0] * b.e[0];
+tri2.z = tyu + b.u[2] * b.e[2] - b.u[0] * b.e[0];
+tri22.x = tyu + b.u[2] * b.e[2] - b.u[0] * b.e[0];
+tri22.y = tyu - b.u[2] * b.e[2] + b.u[0] * b.e[0];
+tri22.z = tyu - b.u[2] * b.e[2] - b.u[0] * b.e[0];
+t =  hanteiTRIANGLEDAYO(&tri1, &tri2,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+ t =  hanteiTRIANGLEDAYO(&tri2, &tri1,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+t2 = hanteiTRIANGLEDAYO(&tri1, &tri22,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+t2 = hanteiTRIANGLEDAYO(&tri22, &tri1,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+
+test = 1;
+i=2;
+tyu = b.c + b.u[i] * test * b.e[i];
+tri2.x = tyu + b.u[0] * b.e[0] + b.u[1] * b.e[1];
+tri2.y = tyu - b.u[0] * b.e[0] + b.u[1] * b.e[1];
+tri2.z = tyu + b.u[0] * b.e[0] - b.u[1] * b.e[1];
+tri22.x = tyu + b.u[0] * b.e[0] - b.u[1] * b.e[1];
+tri22.y = tyu - b.u[0] * b.e[0] + b.u[1] * b.e[1];
+tri22.z = tyu - b.u[0] * b.e[0] - b.u[1] * b.e[1];
+t =  hanteiTRIANGLEDAYO(&tri1, &tri2,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+ t =  hanteiTRIANGLEDAYO(&tri2, &tri1,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+t2 = hanteiTRIANGLEDAYO(&tri1, &tri22,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+t2 = hanteiTRIANGLEDAYO(&tri22, &tri1,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+
+
+test = -1;
+i=2;
+tyu = b.c + b.u[i] * test * b.e[i];
+tri2.x = tyu + b.u[0] * b.e[0] + b.u[1] * b.e[1];
+tri2.y = tyu - b.u[0] * b.e[0] + b.u[1] * b.e[1];
+tri2.z = tyu + b.u[0] * b.e[0] - b.u[1] * b.e[1];
+tri22.x = tyu + b.u[0] * b.e[0] - b.u[1] * b.e[1];
+tri22.y = tyu - b.u[0] * b.e[0] + b.u[1] * b.e[1];
+tri22.z = tyu - b.u[0] * b.e[0] - b.u[1] * b.e[1];
+t =  hanteiTRIANGLEDAYO(&tri1, &tri2,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+ t =  hanteiTRIANGLEDAYO(&tri2, &tri1,&tyu);
+if (t == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+t2 = hanteiTRIANGLEDAYO(&tri1, &tri22,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+t2 = hanteiTRIANGLEDAYO(&tri22, &tri1,&tyu);
+if (t2 == YATTEYARU_TRIANGLE_KOUSA) return 1;
+
+  return 0;
 }

@@ -42,9 +42,9 @@ void UMeshUnit::calcAnimeFrame(int meshnum, float* frames, bool* calculateoffset
 
 void UMeshUnit::calcJyusinAndR() {
 	// UMeshUnitÇïÔäáÇ∑ÇÈèdêSç¿ïWÇ∆RÇãÅÇﬂÇÈ
-	if (is_updated == false) {
+	/*if (is_updated == false) {
 		return;
-	}
+	}*/
 	is_updated = false;
 	vector<UMesh*>::iterator it = meshs.begin();
 	int size = meshs.size();
@@ -286,8 +286,8 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 		max_count.indexs_count = temp_c2;
 		temp_count.indexs_count = temp_indexs_count;
 		delete[] max_tikei_indexs;
-		max_tikei_indexs = new UINT[temp_c2];
-		memset(max_tikei_indexs,0,sizeof(UINT)*temp_c2);
+		max_tikei_indexs = new AtariUnitIndexs[temp_c2];
+		memset(max_tikei_indexs,0,sizeof(AtariUnitIndexs)*temp_c2);
 		if (buffer_indexs) {
 			buffer_indexs->Release();
 			buffer_indexs  =0;
@@ -297,7 +297,7 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 			buffer_indexs_view = 0;
 		}
 		HRESULT hr;
-		hr = AtariHantei::createStructuredBuffer(g,sizeof(UINT),temp_c2,max_tikei_indexs,&buffer_indexs);
+		hr = AtariHantei::createStructuredBuffer(g,sizeof(AtariUnitIndexs),temp_c2,max_tikei_indexs,&buffer_indexs);
 		if(FAILED(hr)) {
 			throw new GameError(KTROBO::FATAL_ERROR, "failed in create buffer");
 		}
@@ -825,7 +825,7 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 					throw new GameError(KTROBO::FATAL_ERROR, "no more index in atarihantei");
 				}
 				for (int k=0;k<ic;k++) {
-					max_tikei_indexs[k+temp_index_place] = au->umesh->indexs[k];
+					max_tikei_indexs[k+temp_index_place].index = au->umesh->indexs[k];
 				}
 				temp_index_place += au->umesh->mesh->FaceCount * 3;
 			}
@@ -884,11 +884,10 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 
 
 void AtariHantei::calcObb(Graphics* g) {
-	
 	for (int i = 0;i<au_count;i++) {
 		AtariUnit* au = &units[i];
 		for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
-			if (au->umesh && au->umesh->is_bone_obbs_use[k]) {
+			if (au->umesh && au->umesh->is_bone_obbs_use[k] && (au->type != AtariUnit::AtariType::ATARI_TIKEI)) {
 				obbs[au->umesh->bone_obbs_idx[k]].c = au->umesh->bone_obbs[k].c;
 				obbs[au->umesh->bone_obbs_idx[k]].e = au->umesh->bone_obbs[k].e;
 				obbs[au->umesh->bone_obbs_idx[k]].u[0] =au->umesh->bone_obbs[k].u[0];
@@ -1152,7 +1151,7 @@ void AtariHantei::runComputeShaderKuwasiku(Graphics* g) {
 	int zenbuoki = temp_count.kumi_count + temp_count.igaidousi_count + temp_count.soreigai_count;
 	int x = 32*16;
 	int y = 32;
-	int z = 32;
+	int z = 1;
 
 	g->getDeviceContext()->Dispatch( x, y, z );
 

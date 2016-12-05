@@ -453,7 +453,7 @@ bool Game::Init(HWND hwnd) {
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
 	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
+	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH"/*"resrc/model/cube/pkcube.MESH"*/, demo->tex_loader,mesh2,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL,false);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
@@ -1136,7 +1136,7 @@ void Game::Run() {
 	MYMATRIX view;
 	MYMATRIX proj;
 	MyMatrixIdentity(world);
-	MYVECTOR3 a(0,-25,15);
+	MYVECTOR3 a(5,35,20);
 //	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
@@ -1336,10 +1336,10 @@ void Game::Run() {
 				stringconverter sc;
 				sc.charToWCHAR(vv->bone_name,buf);
 				DebugTexts::instance()->setText(g,wcslen(buf),buf);
-				g->drawOBB(g,0xFFFFFFFF,&idenmat,&view,&proj,&henkanobb);
+			//	g->drawOBB(g,0xFFFFFFFF,&idenmat,&view,&proj,&henkanobb);
 				is_ma = true;
 			}	else {
-				g->drawOBB(g,0xFFFF2222,&idenmat,&view,&proj,&henkanobb);
+			//	g->drawOBB(g,0xFFFF2222,&idenmat,&view,&proj,&henkanobb);
 			}
 			
 		}
@@ -1459,22 +1459,57 @@ void Game::Run() {
 	{
 		UMeshUnit* umesh_unit = umesh_units[0];
 	umesh_unit->setROTXYZ(0,0,0);
-	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(testcc,testcc,-testcc);
+	umesh_unit->setSCALEXYZ(2,2,1);
+	umesh_unit->setXYZ(0,0,0);//5-testcc/*-testcc*/);
+	float frame_a=testcc;
+	bool com=true;
+
+	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+	}
+	for(int i=0;i<1;i++) {
+	{
+		UMeshUnit* umesh_unit = umesh_units[1+i];
+//	umesh_unit->setROTXYZ(0,0,0);//testcc/3.00f);
+//	umesh_unit->setSCALEXYZ(2,2,1);
+//	umesh_unit->setXYZ(0,0,0);
+//	umesh_unit->calcJyusinAndR();
+	bool calcom = true;
+	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+	}
+	}
+	{
+		UMeshUnit* um2 = umesh_units[0];
+		UMeshUnit* um1 = umesh_units[1];
+		TRIANGLEDAYO tri1;
+		for (int inde =0;inde < um1->meshs[0]->mesh->FaceCount;inde++) {
+			
+			if (!um1->meshs[0]->indexs) continue;
+			if (!um1->meshs[0]->vertexs) continue;
+			UINT inde1 = um1->meshs[0]->indexs[3*inde];
+			UINT inde2 = um1->meshs[0]->indexs[3*inde+1];
+			UINT inde3 = um1->meshs[0]->indexs[3*inde+2];
+			MESH_VERTEX* v1 = &um1->meshs[0]->vertexs[inde1];
+			MESH_VERTEX* v2 = &um1->meshs[0]->vertexs[inde2];
+			MESH_VERTEX* v3 = &um1->meshs[0]->vertexs[inde3];
+			tri1.x = v1->pos;
+			tri1.y = v2->pos;
+			tri1.z = v3->pos;
+
+			MyVec3TransformCoord(tri1.x,tri1.x,um1->world);
+			MyVec3TransformCoord(tri1.y,tri1.y,um1->world);
+			MyVec3TransformCoord(tri1.z,tri1.z,um1->world);
+			for (int h=0;h<KTROBO_MESH_BONE_MAX;h++) {
+				if (um2->meshs[0]->is_bone_obbs_use[h] && hanteiTRIANGLETOOBB(&tri1,&um2->meshs[0]->bone_obbs[h])) {
+					DebugTexts::instance()->setText(g,3,L"ata");
+				}
+			}
+		}
 	}
 
-	{
-		UMeshUnit* umesh_unit = umesh_units[1];
-	umesh_unit->setROTXYZ(0,0,testcc/3.00f);
-	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,0,0);
-	umesh_unit->calcJyusinAndR();
-	bool calcom = true;
-	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
-	}
+
 	/*
 	{
 		UMeshUnit* umesh_unit = umesh_units[2];
@@ -1562,7 +1597,7 @@ void Game::Run() {
 	if(TestOBBOBB(&hantei->umesh_units[0]->meshs[0]->bone_obbs[0],&hantei->umesh_units[1]->meshs[0]->bone_obbs[0])) {
 		MYMATRIX iden;
 		MyMatrixTranslation(iden,0,0,5);
-		g->drawOBB(g,0xFF0000FF,&iden,&view,&proj,&umesh_units[0]->meshs[0]->bone_obbs[0]);
+	//	g->drawOBB(g,0xFF0000FF,&iden,&view,&proj,&umesh_units[0]->meshs[0]->bone_obbs[0]);
 	}
 
 

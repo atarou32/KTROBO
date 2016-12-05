@@ -844,7 +844,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 
 				for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 					if (mm->Index[k] == bb->bone_index) {
-						if (0.000001 < mm->weight[k]) {
+						if (0.4500001 < mm->weight[k]) {
 							// このvertexはぼねに含まれる
 							bonefukumucount++;
 							jyusin = jyusin + mm->pos;// * vertexs[i].weight[k];
@@ -862,9 +862,9 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 
 		// これで重心を求められた
 		// 次の重心を求める
-		MYVECTOR3 jyusin2upper(0,0,0);
-		MYVECTOR3 jyusin2yokoer(0,0,0);
-		MYVECTOR3 jyusin2maer(0,0,0);
+		MYVECTOR3 jyusin2upper = MYVECTOR3(0,0,0);// jyusin;
+		MYVECTOR3 jyusin2yokoer = MYVECTOR3(0,0,0);//jyusin;
+		MYVECTOR3 jyusin2maer = MYVECTOR3(0,0,0);//jyusin;
 		MYVECTOR3 upper(0,0,1);
 		MYVECTOR3 maer(1,0,0);
 		MYVECTOR3 yokoer(0,1,0);
@@ -877,7 +877,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 				if (mm->Index[k] == bb->bone_index) {
-					if (0.000001 < mm->weight[k]) {
+					if (0.450001 < mm->weight[k]) {
 						jyusintov = mm->pos - jyusin;
 						if (MyVec3Dot(jyusintov, upper) >= 0) {
 						// このvertexはぼねに含まれる
@@ -915,7 +915,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		if (bonefukumucount2mae != 0) {
 			MYVECTOR3 pp = jyusin2upper - jyusin;
 			MYVECTOR3 ppp = jyusin2maer - jyusin;
-			if (MyVec3Length(pp) < MyVec3Length(ppp)) {
+			if ((MyVec3Length(pp) < MyVec3Length(ppp)) && (bonefukumucount2mae > bonefukumucount2up)) {
 				jyusin2upper = jyusin2maer;
 				upper = maer;
 			}
@@ -923,7 +923,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		if (bonefukumucount2yoko != 0) {
 			MYVECTOR3 pp = jyusin2upper - jyusin;
 			MYVECTOR3 ppp = jyusin2yokoer - jyusin;
-			if (MyVec3Length(pp) < MyVec3Length(ppp)) {
+			if ((MyVec3Length(pp) < MyVec3Length(ppp)) && (bonefukumucount2yoko > bonefukumucount2up)) {
 				jyusin2upper = jyusin2yokoer;
 				upper = yokoer;
 			}
@@ -938,7 +938,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		MYVECTOR3 jyusintox(0,0,0);
 		float l=0;
 		int lnum=0;
-		// l２の平均を取る
+		// l２の最大値を取る
 
 			for (int i=0;i<FaceCount*3;i+=3) {
 
@@ -946,9 +946,12 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 				if (mm->Index[k] == bb->bone_index) {
-					if (0.000001 < mm->weight[k]) {
+					if (0.4500001 < mm->weight[k]) {
 						jyusintox = mm->pos - jyusin;
-						l += MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
+						float yokohaba =  MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
+						if (yokohaba > l) {
+							l = yokohaba;
+						}
 						lnum++;
 					}
 				}
@@ -957,7 +960,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 			}
 		}
 		if (lnum != 0) {
-			l = l / (float)lnum;
+		//	l = l / (float)lnum;
 			l = sqrt(l);
 		} else {
 			it++;
@@ -965,8 +968,8 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		}
 
 		bb->houkatuobb.c = jyusin;
-		bb->houkatuobb.e.float3.y = l;
-		bb->houkatuobb.e.float3.z = l;
+		bb->houkatuobb.e.float3.y = l/1.41f;
+		bb->houkatuobb.e.float3.z = l/1.41f;
 		bb->houkatuobb.e.float3.x = MyVec3Length(jyusintojyusin2);
 		MYVECTOR3 ans;
 		MyVec3Normalize(ans,jyusintojyusin2);
@@ -1591,7 +1594,7 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 	}
 	
 	int cc=0;
-	g->drawOBB(g,0xFFFFFFFF,world,view,proj,&houkatuobb);
+	//g->drawOBB(g,0xFFFFFFFF,world,view,proj,&houkatuobb);
 	vector<MeshBone*>::iterator itb = Bones.begin();
 	while(itb != Bones.end()) {
 		MeshBone* bb = *itb;
@@ -1601,13 +1604,13 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 				MYMATRIX matdayo;
 				MyMatrixIdentity(matdayo);
 				MyMatrixMultiply(matdayo,bb->combined_matrix,*world);
-				g->drawOBB(g,0xFFFF0000,&matdayo,view,proj,&bb->houkatuobb);
+				//g->drawOBB(g,0xFFFF0000,&matdayo,view,proj,&bb->houkatuobb);
 				
 			} else {
 				MYMATRIX matdayo;
 				MyMatrixIdentity(matdayo);
 				MyMatrixMultiply(matdayo,bb->combined_matrix,*world);
-				g->drawOBB(g,0xFF00FF00,&matdayo,view,proj,&bb->houkatuobb);
+				//g->drawOBB(g,0xFF00FF00,&matdayo,view,proj,&bb->houkatuobb);
 			}
 		} else {
 			int test;

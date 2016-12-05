@@ -222,6 +222,9 @@ struct AtariUnitVertexs {
 	MYVECTOR4 pos;
 	MYVECTOR4 normal;
 };
+struct AtariUnitIndexs {
+	unsigned int index;
+};
 
 struct AtariUnitKumi {
 	int atari_idx;
@@ -303,7 +306,7 @@ private:
 	vector<AtariUnit::AtariType> umesh_unit_types;
 
 	AtariUnitVertexs* max_tikei_vertexs;
-	UINT* max_tikei_indexs;
+	AtariUnitIndexs* max_tikei_indexs;
 	AtariUnitInfo* au_info;
 	AtariUnitKumi* kumi;
 	AtariUnitAns* ans;
@@ -449,7 +452,7 @@ public:
 		temp_count.vertexs_count = 0;
 
 		max_tikei_vertexs = new AtariUnitVertexs[kakuho_counts[0]];
-		max_tikei_indexs = new UINT[kakuho_counts[0]];
+		max_tikei_indexs = new AtariUnitIndexs[kakuho_counts[0]];
 		au_info = new AtariUnitInfo[kakuho_counts[0]];
 		autid = new AtariUnitTikeiIgaiDousi[kakuho_counts[0]];
 		autts = new AtariUnitTikeiToSoreigai[kakuho_counts[0]];
