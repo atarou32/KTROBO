@@ -844,7 +844,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 
 				for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 					if (mm->Index[k] == bb->bone_index) {
-						if (0.4500001 < mm->weight[k]) {
+						if (0.4000001 < mm->weight[k]) {
 							// ‚±‚Ìvertex‚Í‚Ú‚Ë‚ÉŠÜ‚Ü‚ê‚é
 							bonefukumucount++;
 							jyusin = jyusin + mm->pos;// * vertexs[i].weight[k];
@@ -877,7 +877,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 				if (mm->Index[k] == bb->bone_index) {
-					if (0.450001 < mm->weight[k]) {
+					if (0.400001 < mm->weight[k]) {
 						jyusintov = mm->pos - jyusin;
 						if (MyVec3Dot(jyusintov, upper) >= 0) {
 						// ‚±‚Ìvertex‚Í‚Ú‚Ë‚ÉŠÜ‚Ü‚ê‚é
@@ -915,7 +915,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		if (bonefukumucount2mae != 0) {
 			MYVECTOR3 pp = jyusin2upper - jyusin;
 			MYVECTOR3 ppp = jyusin2maer - jyusin;
-			if ((MyVec3Length(pp) < MyVec3Length(ppp)) && (bonefukumucount2mae > bonefukumucount2up)) {
+			if ((MyVec3Length(pp) < MyVec3Length(ppp)) && (bonefukumucount2mae != bonefukumucount2up)) {
 				jyusin2upper = jyusin2maer;
 				upper = maer;
 			}
@@ -923,7 +923,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		if (bonefukumucount2yoko != 0) {
 			MYVECTOR3 pp = jyusin2upper - jyusin;
 			MYVECTOR3 ppp = jyusin2yokoer - jyusin;
-			if ((MyVec3Length(pp) < MyVec3Length(ppp)) && (bonefukumucount2yoko > bonefukumucount2up)) {
+			if ((MyVec3Length(pp) < MyVec3Length(ppp)) && (bonefukumucount2yoko != bonefukumucount2up)) {
 				jyusin2upper = jyusin2yokoer;
 				upper = yokoer;
 			}
@@ -946,7 +946,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 				if (mm->Index[k] == bb->bone_index) {
-					if (0.4500001 < mm->weight[k]) {
+					if (0.4000001 < mm->weight[k]) {
 						jyusintox = mm->pos - jyusin;
 						float yokohaba =  MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
 						if (yokohaba > l) {
@@ -1502,6 +1502,38 @@ void Mesh::animate(float frame, bool calculate_offsetmatrix) {
 	animateBoneFrame(this->RootBone);
 }
 
+void Mesh::drawWithObbs(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
+
+
+	draw(g,world,view,proj);
+
+	// •ïŠ‡OBB‚ð•`‰æ‚·‚é
+
+	static int test=0;
+
+	
+	int cc=0;
+	g->drawOBB(g,0xFFFFFFFF,world,view,proj,&houkatuobb);
+	vector<MeshBone*>::iterator itb = Bones.begin();
+	while(itb != Bones.end()) {
+		MeshBone* bb = *itb;
+		
+		if (bb->houkatuobbuse && Bones.size()) {
+			
+				MYMATRIX matdayo;
+				MyMatrixIdentity(matdayo);
+				MyMatrixMultiply(matdayo,bb->combined_matrix,*world);
+				g->drawOBB(g,0xFF00FF00,&matdayo,view,proj,&bb->houkatuobb);
+			
+		} else {
+			int test;
+			test = 0;
+		}
+
+		cc++;
+		itb++;
+	}
+}
 
 void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 		
@@ -1572,55 +1604,7 @@ void Mesh::draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj) {
 		
 	}
 
-	// •ïŠ‡OBB‚ð•`‰æ‚·‚é
-
-	static int test=0;
-	static int count=0;
-
-	count++;
-
-	if(count > 800) {
-		count=0;
-		test++;
-		if (Bones.size()) {
-		
-		stringconverter sc;
-		WCHAR buf[512];
-		memset(buf,0,sizeof(WCHAR)*512);
-
-		sc.charToWCHAR(Bones[test % Bones.size()]->bone_name,buf);
-	//	DebugTexts::instance()->setText(g,wcslen(buf),buf);
-		}
-	}
 	
-	int cc=0;
-	//g->drawOBB(g,0xFFFFFFFF,world,view,proj,&houkatuobb);
-	vector<MeshBone*>::iterator itb = Bones.begin();
-	while(itb != Bones.end()) {
-		MeshBone* bb = *itb;
-		
-		if (bb->houkatuobbuse && Bones.size()) {
-			if (cc == test % Bones.size()) {
-				MYMATRIX matdayo;
-				MyMatrixIdentity(matdayo);
-				MyMatrixMultiply(matdayo,bb->combined_matrix,*world);
-				//g->drawOBB(g,0xFFFF0000,&matdayo,view,proj,&bb->houkatuobb);
-				
-			} else {
-				MYMATRIX matdayo;
-				MyMatrixIdentity(matdayo);
-				MyMatrixMultiply(matdayo,bb->combined_matrix,*world);
-				//g->drawOBB(g,0xFF00FF00,&matdayo,view,proj,&bb->houkatuobb);
-			}
-		} else {
-			int test;
-			test = 0;
-		}
-
-		cc++;
-		itb++;
-	}
-
 
 
 }

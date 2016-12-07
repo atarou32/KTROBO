@@ -28,7 +28,7 @@
 #include "KTRoboTextFromLua.h"
 #include "KTRoboMessage.h"
 #include "KTRoboAtari.h"
-
+#include "KTRoboKendo.h"
 
 namespace KTROBO {
 
@@ -41,6 +41,10 @@ public:
 		ray.dir = MYVECTOR3(0,0,1);
 		ray.org = MYVECTOR3(0,0,0);
 		testdayo = 0;
+		testx = -1.56;
+		testy = -0.36;
+		testz = 6.4;
+		roty = 0;
 	}
 	MySound* sound;
 	int sound_index;
@@ -52,12 +56,26 @@ public:
 	int x;
 	int y;
 	float testdayo;
-	
+	float testx;
+	float testz;
+	float testy;
+	float roty;
+	void getPos(MYVECTOR3* p) {
+			CS::instance()->enter(CS_MESSAGE_CS, "enter");
+		p->float3.x = testx;
+		p->float3.y = testy;
+		p->float3.z = testz;
+			CS::instance()->leave(CS_MESSAGE_CS, "leave");
+	}
 
 	void setMAT(MYMATRIX* mat,MYMATRIX* view, MYMATRIX* proj) {
 		matd = *mat;
 		this->proj = *proj;
 		this->view = *view;
+	}
+	
+	float getRotY() {
+		return roty;
 	}
 
 
@@ -106,8 +124,8 @@ private:
 	Messages* messages;
 	MySound* sound;
 	TempInputShori* temp_input_shori;
-
-
+	Sinai* sinai;
+	SinaiNigiru* ss;
 public:
 	Game(void);
 	~Game(void);

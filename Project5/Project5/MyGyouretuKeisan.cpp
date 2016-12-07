@@ -41,7 +41,8 @@ void MyIKMODOKI::calcYMat() {
 
 
 	MYMATRIX mymat;
-	MyMatrixMultiply(mymat, temp_bone->combined_matrix, temp_bone->matrix_local);
+	MyMatrixMultiply(mymat, temp_bone->matrix_local,temp_bone->combined_matrix);
+	MyMatrixMultiply(mymat,mymat,world);
 	MYVECTOR3 gen(0,0,0);
 	MYVECTOR3 gen_h(0,0,0);
 	MyVec3TransformCoord(gen_h,gen,mymat);
@@ -68,7 +69,8 @@ void MyIKMODOKI::calcYMat() {
 		MYVECTOR3 z_h(0,0,0);
 		MYVECTOR3 gen_h(0,0,0);
 		MYMATRIX mymat;
-		MyMatrixMultiply(mymat, temp_bone->combined_matrix, temp_bone->matrix_local);
+		MyMatrixMultiply(mymat, temp_bone->matrix_local,temp_bone->combined_matrix);
+		MyMatrixMultiply(mymat, mymat, world);
 		MyVec3TransformNormal(x_h,x,mymat);
 		MyVec3TransformNormal(y_h,y,mymat);
 		MyVec3TransformNormal(z_h,z,mymat);
@@ -143,7 +145,7 @@ void MyIKMODOKI::calcYMat() {
 	MYVECTOR3 vdayo = mymoku - now_moku_iti;
 
 	float length = MyVec3Length(vdayo);
-	if (length < 0.01) {
+	if (length < 0.00001) {
 		vdayo = MYVECTOR3(0,0,0);
 	}
 

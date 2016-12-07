@@ -78,6 +78,7 @@ Game::Game(void)
 	temp_input_shori = 0;
 	//umesh_unit = 0;
 	hantei = 0;
+	sinai = 0;
 }
 
 
@@ -121,6 +122,58 @@ bool TempInputShori::handleMessage(int msg, void * data, DWORD time) {
 			sound->playCue(yumes[sound_index]);
 			CS::instance()->leave(CS_SOUND_CS, "leave");
 		}
+
+		if (input->getKEYSTATE()['Q'] & KTROBO_INPUT_BUTTON_PRESSED) {
+				CS::instance()->enter(CS_MESSAGE_CS, "enter");
+				testx += 0.1f;
+
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+		}
+
+		if (input->getKEYSTATE()['A'] & KTROBO_INPUT_BUTTON_PRESSED) {
+				CS::instance()->enter(CS_MESSAGE_CS, "enter");
+				testx -= 0.1f;
+
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+		}
+
+		if (input->getKEYSTATE()['W'] & KTROBO_INPUT_BUTTON_PRESSED) {
+				CS::instance()->enter(CS_MESSAGE_CS, "enter");
+				testy += 0.1f;
+
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+		}
+
+		if (input->getKEYSTATE()['S'] & KTROBO_INPUT_BUTTON_PRESSED) {
+				CS::instance()->enter(CS_MESSAGE_CS, "enter");
+				testy -= 0.1f;
+
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+		}
+
+		if (input->getKEYSTATE()['E'] & KTROBO_INPUT_BUTTON_PRESSED) {
+				CS::instance()->enter(CS_MESSAGE_CS, "enter");
+				testz += 0.1f;
+
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+		}
+
+		if (input->getKEYSTATE()['D'] & KTROBO_INPUT_BUTTON_PRESSED) {
+				CS::instance()->enter(CS_MESSAGE_CS, "enter");
+				testz -= 0.1f;
+
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+		}
+
+		if (input->getKEYSTATE()['R'] & KTROBO_INPUT_BUTTON_PRESSED) {
+			roty +=0.1f;
+		}
+
+		if (input->getKEYSTATE()['F'] & KTROBO_INPUT_BUTTON_PRESSED) {
+			roty -=0.1f;
+		}
+
+
 	}
 
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
@@ -334,8 +387,8 @@ bool Game::Init(HWND hwnd) {
 	mesh->readAnime("resrc/model/cube/pkcube.ANIME");
 
 	mesh2 = new Mesh();
-	mesh2->readMesh(g, "resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader);
-	mesh2->readAnime("resrc/model/ponko2-4/pk2sailordayo.ANIME");
+	mesh2->readMesh(g, "resrc/model/ponko2-4/pk2sailor.MESH", demo->tex_loader);
+	mesh2->readAnime("resrc/model/ponko2-4/pk2sailor.ANIME");
 	mesh3[0] = new Mesh();
 	mesh3[0]->readMesh(g, "resrc/model/ponko2-3/pk2face.MESH", demo->tex_loader);
 	mesh3[0]->readAnime("resrc/model/ponko2-3/pk2face.ANIME");
@@ -440,7 +493,7 @@ bool Game::Init(HWND hwnd) {
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
 	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
+	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailor.MESH", demo->tex_loader,mesh2,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL,false);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
@@ -473,6 +526,9 @@ bool Game::Init(HWND hwnd) {
 
 	umesh_unit->calcJyusinAndR();
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
+	sinai = new Sinai();
+	sinai->init(g, demo->tex_loader,hantei);
+	ss = new SinaiNigiru(sinai,umesh_unit);
 	}
 	/*
 	{
@@ -509,7 +565,7 @@ bool Game::Init(HWND hwnd) {
 		}
 	}
 
-
+	
 	/*
 	MyMatrixRotationX(worldforg, -3.14/4*2);
 	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
@@ -1014,7 +1070,10 @@ void Game::Del() {
 		itttt++;
 	}
 	umesh_units.clear();
-
+	if (sinai) {
+	delete sinai;
+	sinai = 0;
+	}
 }
 
 
@@ -1126,8 +1185,8 @@ void Game::Run() {
 		mae_testcc = testcc;
 		is_calc_anime = true;
 	
-	mesh->animate(testcc, true);
-	mesh2->animate(testcc, true);
+	//mesh->animate(testcc, true);
+	//mesh2->animate(testcc, true);
 	for (int i = 0 ; i <= 10 ; i++) {
 		mesh3[i]->animate(testcc, true);
 	}
@@ -1143,7 +1202,7 @@ void Game::Run() {
 	MYMATRIX view;
 	MYMATRIX proj;
 	MyMatrixIdentity(world);
-	MYVECTOR3 a(5,35,20);
+	MYVECTOR3 a(5,15,5);
 //	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
@@ -1474,11 +1533,11 @@ void Game::Run() {
 
 	umesh_unit->setROTXYZ(0,0,0);
 	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(testcc,testcc,bb);//5-testcc/*-testcc*/);
+	umesh_unit->setXYZ(0,0,0);//testcc,testcc,bb);//5-testcc/*-testcc*/);
 	float frame_a=testcc;
 	bool com=true;
 
-	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+	//umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
@@ -1503,12 +1562,36 @@ void Game::Run() {
 //	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 		float frame_a=testcc;
 	bool com=true;
-	umesh_unit->setXYZ(0,0,-2);//5-testcc/*-testcc*/);
-	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+	umesh_unit->setSCALEXYZ(1,1,1);
+	umesh_unit->setXYZ(0,3,-5);//5-testcc/*-testcc*/);
+	//umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 
+	sinai->umesh_unit->setSCALEXYZ(3,3,3);
+	MYVECTOR3 oo;
+	temp_input_shori->getPos(&oo);
+	sinai->umesh_unit->setROTXYZ(temp_input_shori->getRotY(),0,0);
+	sinai->umesh_unit->setXYZ(oo.float3.x,oo.float3.y,oo.float3.z);//10*sin(testcc),-4,10*cos(testcc));
+//	sinai->umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+	sinai->umesh_unit->calcJyusinAndR();
+	MYVECTOR3 p = sinai->getHidaritePos();
+	OBB b;
+	p = MYVECTOR3(-0.78,-3.02,6.15);
+	b.c = p;
+	b.e = MYVECTOR3(0.3,0.3,0.3);
+	g->drawOBBFill(g,0xFFFF0000FF,&idenmat,&view,&proj,&b);
+	
+	 p = sinai->getMigitePos();
+	 p = MYVECTOR3(-1.56,-0.36,6.4);
+	b.c = p;
+	b.e = MYVECTOR3(0.3,0.3,0.3);
+	g->drawOBBFill(g,0xFFFF00FFFF,&idenmat,&view,&proj,&b);
+	SinaiNigiru sn(sinai, umesh_unit);
+	ss->setDefaultAnimeFrameAll(140);
+	ss->nigiraseru(g,&view,&proj);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+
 	}
 
 
@@ -1582,6 +1665,7 @@ void Game::Run() {
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
+	sinai->draw(g,&view,&proj);
 
 	static float h = 0.0f;
 	h += 0.001f;

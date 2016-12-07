@@ -249,6 +249,8 @@ public:
 	void readMeshOnlyForSaveVertexIndex(Graphics* g, char* filename, MyTextureLoader* tex_loader, MESH_VERTEX** vertexs, UINT** indexs);  
 
 	void draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
+	void drawWithObbs(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
+
 	bool RootBone_connect_without_material_local;
 public:
 	unsigned int VertexCount;
