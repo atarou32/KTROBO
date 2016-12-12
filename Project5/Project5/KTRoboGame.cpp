@@ -1586,8 +1586,8 @@ void Game::Run() {
 	b.e = MYVECTOR3(0.3,0.3,0.3);
 	g->drawOBBFill(g,0xFFFF00FFFF,&idenmat,&view,&proj,&b);
 	SinaiNigiru sn(sinai, umesh_unit);
-	ss->setDefaultAnimeFrameAll(140);
-	ss->nigiraseru(g,&view,&proj);
+	sn.setDefaultAnimeFrameAll(testcc);
+	sn.nigiraseru(g,&view,&proj);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);

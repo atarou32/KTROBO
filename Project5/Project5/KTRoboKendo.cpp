@@ -151,7 +151,7 @@ void SinaiNigiru::nigiraseru(Graphics* g, MYMATRIX *view, MYMATRIX* proj) {
 		sakip = sakip->parent_bone;
 	}
 	int retry_count = 0;
-	if (MyVec3Length(sa) > 0.1f) {
+//	if (MyVec3Length(sa) > 0.3f) {
 
 	for (int s=0;s<16;s++) {
 		if (retry_count > 16) {
@@ -208,7 +208,7 @@ void SinaiNigiru::nigiraseru(Graphics* g, MYMATRIX *view, MYMATRIX* proj) {
 			break;
 		}
 
-		if (kawaranai_count > ik.getfreenum()/2) {
+		if (kawaranai_count == ik.getfreenum()) {
 			// XV‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚é‚Ì‚É‚³‚ê‚Ä‚¢‚È‚¢‚Æ‚¢‚¤ó‘Ô‚Åˆø‚Á‚©‚©‚Á‚Ä‚éê‡‚ª‚ ‚é
 
 
@@ -250,7 +250,7 @@ void SinaiNigiru::nigiraseru(Graphics* g, MYMATRIX *view, MYMATRIX* proj) {
 		this->setOffsetMatrixToNigiru();
 	}
 
-	}
+//	}
 
 
 
@@ -316,7 +316,7 @@ void SinaiNigiru::nigiraseru(Graphics* g, MYMATRIX *view, MYMATRIX* proj) {
 
 	retry_count =0;
 
-	if (MyVec3Length(sa) > 0.1f) {
+//	if (MyVec3Length(sa) > 0.3f) {
 	for (int s=0;s<16;s++) {
 		if (retry_count > 16) {
 			break;
@@ -416,7 +416,7 @@ void SinaiNigiru::nigiraseru(Graphics* g, MYMATRIX *view, MYMATRIX* proj) {
 
 		this->setOffsetMatrixToNigiru();
 	}
-	}
+//	}
 	
 }
 
