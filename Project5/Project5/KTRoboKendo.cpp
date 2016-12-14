@@ -699,3 +699,124 @@ if (strcmp(bone_name, "hidariArmBone")==0) {
 		return rotz;
 	}
 
+
+
+
+SinaiFuru::SinaiFuru(Sinai* sinai, UMeshUnit* nigiruhito) {
+	sn = 0;
+	this->sinai = sinai;
+	this->nigiruhito = nigiruhito;
+	sn = new SinaiNigiru(sinai, nigiruhito);
+	kamae_rotx = 0;
+	kamae_rotz = 0;
+	kamae_tuka_pos = MYVECTOR3(0,0,0);
+}
+	
+	
+SinaiFuru::~SinaiFuru() {
+	men_parts.clear();
+	if (sn) {
+		delete sn;
+		sn = 0;
+	}
+}
+
+
+void SinaiFuru::men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float dt) {
+
+	// dt に対応したsinai のpos とrot を設定していい感じのアニメフレームを設定してsinainigiruで握らせる
+
+	SinaiFuruPart p;
+	SinaiFuruPart pp;
+	float pdt = 0;
+	float ppdt = 1000000;
+
+	int psize = men_parts.size();
+
+	for (int i=0;i<psize;i++) {
+		if ((pdt < men_parts[i].dt) && (men_parts[i].dt < dt)) {
+			pdt = men_parts[i].dt;
+			p.dt = men_parts[i].dt;
+			p.rotx = men_parts[i].rotx;
+			p.rotz = men_parts[i].rotz;
+			p.tuka_dpos = men_parts[i].tuka_dpos;
+		}
+		if ((ppdt > men_parts[i].dt) && men_parts[i].dt > dt) {
+			ppdt = men_parts[i].dt;
+			pp.dt = men_parts[i].dt;
+			pp.rotx = men_parts[i].rotx;
+			pp.rotz = men_parts[i].rotz;
+			pp.tuka_dpos = men_parts[i].tuka_dpos;
+		}
+	}
+
+	if ((pdt == 0) && (ppdt==1000000)) {
+		// なにもしないでリターン
+		return;
+	}
+
+	if (pdt==0) {
+		p.dt = pp.dt;
+		p.rotx = pp.rotx;
+		p.rotz = pp.rotz;
+		p.tuka_dpos = pp.tuka_dpos;
+		pp.dt = dt;
+		p.dt = p.dt;
+	}
+
+	if (ppdt == 1000000) {
+		pp.dt = p.dt;
+		pp.rotx = p.rotx;
+		pp.rotz = p.rotz;
+		pp.tuka_dpos = p.tuka_dpos;
+		p.dt = dt;
+		pp.dt = dt;
+	}
+
+	SinaiFuruPart ppp;
+
+	if (pp.dt - p.dt > 0.0001f) {
+		// 分ける
+		float dd = pp.dt - p.dt;
+		float ddt = pp.dt - dt;
+		float ddt2 = dt - p.dt;
+
+		ppp.dt = dt;
+		ppp.rotx = (pp.rotx * ddt2 + p.rotx * ddt)/dd;
+		ppp.rotz = (pp.rotz * ddt2 + p.rotz * ddt)/dd;
+		ppp.tuka_dpos = (pp.tuka_dpos * ddt2 + p.tuka_dpos * ddt) /dd;
+
+	} else {
+		ppp.dt = dt;
+		ppp.rotx = p.rotx;
+		ppp.rotz = p.rotz;
+		ppp.tuka_dpos = p.tuka_dpos;
+	}
+
+	sinai->umesh_unit->setROTXYZ(ppp.rotx+kamae_rotx,0,ppp.rotz+kamae_rotz);
+	sinai->umesh_unit->setXYZ(ppp.tuka_dpos.float3.x + this->kamae_tuka_pos.float3.x,
+		ppp.tuka_dpos.float3.y + this->kamae_tuka_pos.float3.y,
+		ppp.tuka_dpos.float3.z + this->kamae_tuka_pos.float3.z);
+	sinai->umesh_unit->calcJyusinAndR();
+
+	float anime = 140;
+
+	anime = (dt)+ 140;
+	bool tt = true;
+	nigiruhito->calcAnimeFrame(1,&anime,&tt);
+	nigiruhito->calcJyusinAndR();
+	SinaiNigiru snn(sinai, nigiruhito);
+	snn.setDefaultAnimeFrameAll(anime);
+	snn.nigiraseru(g,view,proj);
+	//sn->setDefaultAnimeFrameAll(anime);
+	//sn->nigiraseru(g,view,proj);
+
+
+
+
+}
+
+
+
+
+

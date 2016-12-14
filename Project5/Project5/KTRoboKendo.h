@@ -8,6 +8,9 @@ namespace KTROBO {
 class UMesh;
 class UMeshUnit;
 class AtariHantei;
+
+class SinaiNigiru;
+
 class Sinai {
 private:
 	Mesh* mesh;
@@ -22,6 +25,77 @@ public:
 	MYVECTOR3 getMigitePos();
 	MYVECTOR3 getHidaritePos();
 };
+
+class SinaiFuruPart {
+public:
+	float dt;// Ç«ÇÃéûä‘Ç≈ÇÃí|ìÅÇÃà íuépê®Çï\ÇµÇƒÇ¢ÇÈÇ©
+	MYVECTOR3 tuka_dpos;
+	float rotx;
+	float rotz;
+	SinaiFuruPart() {
+		tuka_dpos = MYVECTOR3(0,0,0);
+		dt = 0;
+		rotx = 0;
+		rotz = 0;
+	}
+	~SinaiFuruPart() {
+	}
+};
+class SinaiFuru {
+private:
+	Sinai* sinai;
+	UMeshUnit* nigiruhito;
+	SinaiNigiru* sn;
+public:
+	SinaiFuru(Sinai* sinai, UMeshUnit* nigiruhito);
+	~SinaiFuru();
+
+	void men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float dt);
+	enum SINAIFURU_JYOUTAI {
+		FURIAGEHAJIME=0,
+		FURIAGETYUU = 1,
+		FURIAGEOWARI = 2,
+		FURIOROSIHAJIME = 3,
+		FURIOROSITYUU = 4,
+		FURIOROSIOWARI = 5,
+		END = 6,
+	};
+	SINAIFURU_JYOUTAI getNowJyoutai();
+
+private:
+	SINAIFURU_JYOUTAI jyoutai;
+#define SINAIFURU_DT_FURIAGE_HAJIMETOTYUU 0
+#define SINAIFURU_DT_FURIAGE_TYUUTOOWARI 1
+#define SINAIFURU_DT_FURIAGE_OWARI_TO_FURIOROSI_HAJIME 2
+#define SINAIFURU_DT_FURIOROSI_HAJIMETOTYUU 3
+#define SINAIFURU_DT_FURIOROSI_TYUUTOOWARI 4
+#define SINAIFURU_DT_FURIOROSI_OWARI_TO_END 5
+	float dts[6];
+	MYVECTOR3 kamae_tuka_pos;
+	float kamae_rotz;
+	float kamae_rotx;
+	vector<SinaiFuruPart> men_parts;
+
+public:
+	void setMenParts(SinaiFuruPart* p) {
+		men_parts.push_back(*p);
+	}
+
+	void clearParts() {
+		men_parts.clear();
+	}
+
+
+	void setJYOUTAIDT(SINAIFURU_JYOUTAI jyoutai_id, float dt) {
+		dts[jyoutai_id] = dt;
+	}
+	void setKAMAE(float x,float z, MYVECTOR3* p) {
+		kamae_rotx = x;
+		kamae_rotz = z;
+		kamae_tuka_pos = *p;
+	}
+};
+
 
 class SinaiNigiru {
 private:
@@ -101,3 +175,5 @@ public:
 }
 
 #endif
+
+

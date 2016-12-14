@@ -79,6 +79,7 @@ Game::Game(void)
 	//umesh_unit = 0;
 	hantei = 0;
 	sinai = 0;
+	sfuru = 0;
 }
 
 
@@ -521,7 +522,7 @@ bool Game::Init(HWND hwnd) {
 	float frame_anime=0;
 
 	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,0,10);
+	umesh_unit->setXYZ(0,3,-5);
 	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
 
 	umesh_unit->calcJyusinAndR();
@@ -529,6 +530,29 @@ bool Game::Init(HWND hwnd) {
 	sinai = new Sinai();
 	sinai->init(g, demo->tex_loader,hantei);
 	ss = new SinaiNigiru(sinai,umesh_unit);
+
+	sfuru = new SinaiFuru(sinai,umesh_unit);
+
+	SinaiFuruPart p;
+	p.dt =0.1;
+	p.rotx = 0;
+	p.rotz = 0;
+	p.tuka_dpos = MYVECTOR3(0,0,0);
+	sfuru->setMenParts(&p);
+
+	p.dt = 10;
+	p.rotx = -1.57;
+	p.rotz = 0;
+	p.tuka_dpos = MYVECTOR3(0,0.7f,1.1f);
+	sfuru->setMenParts(&p);
+
+	p.dt = 20;
+	p.rotx = 0.05f;
+	p.rotz = 0;
+	p.tuka_dpos = MYVECTOR3(0,0,1);
+	sfuru->setMenParts(&p);
+	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
+
 	}
 	/*
 	{
@@ -558,8 +582,8 @@ bool Game::Init(HWND hwnd) {
 	bool tyo_unko=true;
 	float frame_anime = 0;
 
-	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-	umesh_unit->calcJyusinAndR();
+	//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+	//umesh_unit->calcJyusinAndR();
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
 	}
 		}
@@ -1074,6 +1098,11 @@ void Game::Del() {
 	delete sinai;
 	sinai = 0;
 	}
+
+	if (sfuru) {
+		delete sfuru;
+		sfuru = 0;
+	}
 }
 
 
@@ -1188,7 +1217,7 @@ void Game::Run() {
 	//mesh->animate(testcc, true);
 	//mesh2->animate(testcc, true);
 	for (int i = 0 ; i <= 10 ; i++) {
-		mesh3[i]->animate(testcc, true);
+	//	mesh3[i]->animate(testcc, true);
 	}
 	}else {
 		is_calc_anime = false;
@@ -1347,7 +1376,7 @@ void Game::Run() {
 
 //	mesh->draw(g, &world,&view,&proj);
 	static float ccc;
-	ccc  = frame * RENDERTIME_SETTIME;
+	ccc  = frame/60.00f;// * RENDERTIME_SETTIME;
 	int tesss = sizeof(MESH_VERTEX);
 	char bbf[512];
 	sprintf_s(bbf,512,"%f,%d",ccc,tesss);
@@ -1537,7 +1566,7 @@ void Game::Run() {
 	float frame_a=testcc;
 	bool com=true;
 
-	//umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
@@ -1562,17 +1591,20 @@ void Game::Run() {
 //	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 		float frame_a=testcc;
 	bool com=true;
-	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,3,-5);//5-testcc/*-testcc*/);
+//	umesh_unit->setSCALEXYZ(1,1,1);
+//	umesh_unit->setXYZ(0,3,-5);//5-testcc/*-testcc*/);
 	//umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 
 	sinai->umesh_unit->setSCALEXYZ(3,3,3);
 	MYVECTOR3 oo;
+	MYVECTOR3 moto(0,1.9,-0.20);
+	oo = oo + moto; 
 	temp_input_shori->getPos(&oo);
-	sinai->umesh_unit->setROTXYZ(temp_input_shori->getRotY(),0,0);
-	sinai->umesh_unit->setXYZ(oo.float3.x,oo.float3.y,oo.float3.z);//10*sin(testcc),-4,10*cos(testcc));
+	sfuru->setKAMAE(temp_input_shori->getRotY(),0,&oo);
+//	sinai->umesh_unit->setROTXYZ(temp_input_shori->getRotY(),0,0);
+//	sinai->umesh_unit->setXYZ(oo.float3.x,oo.float3.y,oo.float3.z);//10*sin(testcc),-4,10*cos(testcc));
 //	sinai->umesh_unit->calcAnimeFrame(1,&frame_a,&com);
-	sinai->umesh_unit->calcJyusinAndR();
+//	sinai->umesh_unit->calcJyusinAndR();
 	MYVECTOR3 p = sinai->getHidaritePos();
 	OBB b;
 	p = MYVECTOR3(-0.78,-3.02,6.15);
@@ -1585,10 +1617,15 @@ void Game::Run() {
 	b.c = p;
 	b.e = MYVECTOR3(0.3,0.3,0.3);
 	g->drawOBBFill(g,0xFFFF00FFFF,&idenmat,&view,&proj,&b);
-	SinaiNigiru sn(sinai, umesh_unit);
-	sn.setDefaultAnimeFrameAll(testcc);
-	sn.nigiraseru(g,&view,&proj);
-	umesh_unit->calcJyusinAndR();
+	//SinaiNigiru sn(sinai, umesh_unit);
+	//sn.setDefaultAnimeFrameAll(testcc);
+	//sn.nigiraseru(g,&view,&proj);
+	//umesh_unit->calcJyusinAndR();
+	//ss->nigiraseru(g,&view, &proj);
+	sfuru->men_furaseru(g,&view,&proj,testcc);
+
+
+
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 

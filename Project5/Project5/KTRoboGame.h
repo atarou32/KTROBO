@@ -41,9 +41,9 @@ public:
 		ray.dir = MYVECTOR3(0,0,1);
 		ray.org = MYVECTOR3(0,0,0);
 		testdayo = 0;
-		testx = -1.56;
-		testy = -0.36;
-		testz = 6.4;
+		testx = 0;
+		testy = -0.90;
+		testz = 2.0;
 		roty = 0;
 	}
 	MySound* sound;
@@ -126,6 +126,7 @@ private:
 	TempInputShori* temp_input_shori;
 	Sinai* sinai;
 	SinaiNigiru* ss;
+	SinaiFuru* sfuru;
 public:
 	Game(void);
 	~Game(void);

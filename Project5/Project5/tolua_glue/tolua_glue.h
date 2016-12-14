@@ -12,6 +12,7 @@
 #include "../KTRoboLuaCMesh.h"
 #include "../KTRoboTexture.h"
 #include "../KTRoboMessage.h"
+#include "../KTRoboKendoSinaiGenerator.h"
 using namespace std;
 namespace KTROBO {
 /////  please write this functions!///////
@@ -91,6 +92,14 @@ int Messages_makeMessageGlue(lua_State* L);
 int Messages_getMessageIndexsFromMsgIdGlue(lua_State* L);
 int Messages_getMessageIndexsFromReceiverIdGlue(lua_State* L);
 int Messages_getMsgBodyGlue(lua_State* L);
+int SinaiFuruAnimeMakers_makeInstGlue(lua_State* L);
+int SinaiFuruAnimeMakers_togglePlayAnimeGlue(lua_State* L);
+int SinaiFuruAnimeMakers_nigiruhitoSetAnimeGlue(lua_State* L);
+int SinaiFuruAnimeMakers_nigiruhitoEraseAnimeGlue(lua_State* L);
+int SinaiFuruAnimeMakers_sinaiEraseAnimeGlue(lua_State* L);
+int SinaiFuruAnimeMakers_sinaiSetAnimeGlue(lua_State* L);
+int SinaiFuruAnimeMakers_undoGlue(lua_State* L);
+int SinaiFuruAnimeMakers_sinaiNigiruhitoUpdateGlue(lua_State* L);
 class MyLuaGlueSingleton{
  private:
   MyLuaGlueSingleton() {};
@@ -107,6 +116,7 @@ class MyLuaGlueSingleton{
   vector<CMeshs*> m_CMeshs;
   vector<Textures*> m_Textures;
   vector<Messages*> m_Messages;
+  vector<SinaiFuruAnimeMakers*> m_SinaiFuruAnimeMakers;
  public:
 MeshInstanceds* getColMeshInstanceds ( int index) {
   int size = m_MeshInstanceds.size();
@@ -162,6 +172,17 @@ Messages* getColMessages ( int index) {
 }
 void setColMessages ( Messages* m) {
   m_Messages.push_back(m);
+}
+SinaiFuruAnimeMakers* getColSinaiFuruAnimeMakers ( int index) {
+  int size = m_SinaiFuruAnimeMakers.size();
+  if (size > index && index >=0) {
+    return m_SinaiFuruAnimeMakers[index];
+  } else {
+    throw new GameError(KTROBO::WARNING, " try to access outside vector SinaiFuruAnimeMakers");
+  }
+}
+void setColSinaiFuruAnimeMakers ( SinaiFuruAnimeMakers* m) {
+  m_SinaiFuruAnimeMakers.push_back(m);
 }
 void registerdayo(lua_State* L) {
   lua_register(L, "MeshInstanceds_setBoneIndexInfo", KTROBO::MeshInstanceds_setBoneIndexInfoGlue);
@@ -228,6 +249,14 @@ void registerdayo(lua_State* L) {
   lua_register(L, "Messages_getMessageIndexsFromReceiverId", KTROBO::Messages_getMessageIndexsFromReceiverIdGlue);
   lua_register(L, "Messages_getMsgBody", KTROBO::Messages_getMsgBodyGlue);
   lua_register(L, "Messages_makeInst", KTROBO::Messages_makeInstGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_togglePlayAnime", KTROBO::SinaiFuruAnimeMakers_togglePlayAnimeGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_nigiruhitoSetAnime", KTROBO::SinaiFuruAnimeMakers_nigiruhitoSetAnimeGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_nigiruhitoEraseAnime", KTROBO::SinaiFuruAnimeMakers_nigiruhitoEraseAnimeGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_sinaiEraseAnime", KTROBO::SinaiFuruAnimeMakers_sinaiEraseAnimeGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_sinaiSetAnime", KTROBO::SinaiFuruAnimeMakers_sinaiSetAnimeGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_undo", KTROBO::SinaiFuruAnimeMakers_undoGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_sinaiNigiruhitoUpdate", KTROBO::SinaiFuruAnimeMakers_sinaiNigiruhitoUpdateGlue);
+  lua_register(L, "SinaiFuruAnimeMakers_makeInst", KTROBO::SinaiFuruAnimeMakers_makeInstGlue);
 }};
 }
 #endif

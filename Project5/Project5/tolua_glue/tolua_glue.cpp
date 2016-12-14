@@ -1270,3 +1270,79 @@ for (int i=0;i<temp && i < 32;i++) {
 }
 return 9;
 }
+int KTROBO::SinaiFuruAnimeMakers_makeInstGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->makeInst();
+{
+int ci = lua_tonumber(L, 1);
+int cci = kaeriti;
+lua_newtable(L);
+lua_pushnumber(L, 1);
+lua_newtable(L);
+int top = lua_gettop(L);
+lua_pushstring(L, "SinaiFuruAnimeMaker");
+lua_setfield(L, top, "collected_class_name");
+{
+char tempp[1024];memset(tempp,0,1024);
+sprintf_s(tempp, 1024, "%d", cci);
+lua_pushstring(L, tempp);
+lua_setfield(L, top, "collected_index");
+}
+lua_pushstring(L, "ISinaiFuruAnimeMaker");
+lua_setfield(L, top, "collected_interface_name");
+lua_pushstring(L, "SinaiFuruAnimeMakers");
+lua_setfield(L, top, "collection_class_name");
+{
+char tempp[1024];memset(tempp,0,1024);
+sprintf_s(tempp, 1024, "%d", ci);
+lua_pushstring(L, tempp);
+lua_setfield(L, top, "collection_index");
+}
+lua_settable(L,-3);
+lua_insert(L,1);
+}
+return 3;
+}
+int KTROBO::SinaiFuruAnimeMakers_togglePlayAnimeGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->togglePlayAnime();
+return 2;
+}
+int KTROBO::SinaiFuruAnimeMakers_nigiruhitoSetAnimeGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->nigiruhitoSetAnime();
+return 2;
+}
+int KTROBO::SinaiFuruAnimeMakers_nigiruhitoEraseAnimeGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->nigiruhitoEraseAnime();
+return 2;
+}
+int KTROBO::SinaiFuruAnimeMakers_sinaiEraseAnimeGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->sinaiEraseAnime();
+return 2;
+}
+int KTROBO::SinaiFuruAnimeMakers_sinaiSetAnimeGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->sinaiSetAnime();
+return 2;
+}
+int KTROBO::SinaiFuruAnimeMakers_undoGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->undo();
+return 2;
+}
+int KTROBO::SinaiFuruAnimeMakers_sinaiNigiruhitoUpdateGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->sinaiNigiruhitoUpdate();
+return 2;
+}
