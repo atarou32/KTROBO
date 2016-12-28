@@ -50,7 +50,7 @@ public:
 	SinaiFuru(Sinai* sinai, UMeshUnit* nigiruhito);
 	~SinaiFuru();
 
-	void men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float dt);
+	void men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float dt, float anime);
 	enum SINAIFURU_JYOUTAI {
 		FURIAGEHAJIME=0,
 		FURIAGETYUU = 1,

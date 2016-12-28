@@ -51,6 +51,9 @@ void KTROBO::Task::exec() {
 	} catch (GameError* err) {
 		mylog::writelog(err->getErrorCode(),err->getMessage());
 	//	MessageBoxA(hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
+		// エラーが起こったらキルする
+		this->kill(execTCB);
+
 		if (err->getErrorCode() == KTROBO::FATAL_ERROR) {
 			// 終了させる
 	//		MessageBoxA(hWnd,"タスクスレッドを終了させます","FATAL",MB_OK);
@@ -69,8 +72,10 @@ void KTROBO::Task::exec() {
 			return;
 		}
 		Sleep(1); // そのまま続行
+	} catch (...) {
+		// なんらかのエラーが起こった
+		mylog::writelog(KTROBO::FATAL_ERROR,"unknown error occured in tcb lua");
 	}
-
 	CS::instance()->leave(CS_TASK_CS,"",index);
 
 

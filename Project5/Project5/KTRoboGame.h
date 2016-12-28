@@ -29,6 +29,8 @@
 #include "KTRoboMessage.h"
 #include "KTRoboAtari.h"
 #include "KTRoboKendo.h"
+#include "KTRoboKendoSinaiGenerator.h"
+
 
 namespace KTROBO {
 
@@ -127,6 +129,9 @@ private:
 	Sinai* sinai;
 	SinaiNigiru* ss;
 	SinaiFuru* sfuru;
+	KendoSinaiGenerator* ksgene;
+	SinaiFuruAnimeMakers* makers;
+
 public:
 	Game(void);
 	~Game(void);

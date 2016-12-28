@@ -722,7 +722,7 @@ SinaiFuru::~SinaiFuru() {
 }
 
 
-void SinaiFuru::men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float dt) {
+void SinaiFuru::men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float dt, float anime) {
 
 	// dt に対応したsinai のpos とrot を設定していい感じのアニメフレームを設定してsinainigiruで握らせる
 
@@ -799,9 +799,9 @@ void SinaiFuru::men_furaseru(Graphics* g,MYMATRIX *view, MYMATRIX* proj, float d
 		ppp.tuka_dpos.float3.z + this->kamae_tuka_pos.float3.z);
 	sinai->umesh_unit->calcJyusinAndR();
 
-	float anime = 140;
+//	float anime = 140;
 
-	anime = (dt)+ 140;
+//	anime = (dt)+ 140;
 	bool tt = true;
 	nigiruhito->calcAnimeFrame(1,&anime,&tt);
 	nigiruhito->calcJyusinAndR();

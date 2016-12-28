@@ -38,6 +38,7 @@ private:
 
 	int slider_nigiruhito_anime_id;
 	int nigiruhito_anime_set_button_id;
+	int sinai_anime_set_button_id;
 
 	int undo_button_id;
 	int erase_anime_set_button_id;
@@ -63,6 +64,10 @@ private:
 public:
 	KendoSinaiGenerator(void);
 	~KendoSinaiGenerator(void);
+
+	float getNigiruhitoAnimeTemp();
+	void setSinaiPosRot(SinaiFuru* sinaifuru);
+
 	void Init(HWND hw, Texture* tex, lua_State* l, int screen_width, int screen_height);
 	void Del();
 	bool handleMessage(int msg, void* data, DWORD time);
@@ -104,7 +109,7 @@ public:
 	void undo();
 	void sinaiNigiruhitoUpdate();
 
-	void update(float dt);
+	void update(float dt, SinaiFuru* furu);
 
 };
 

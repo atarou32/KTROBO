@@ -80,6 +80,8 @@ Game::Game(void)
 	hantei = 0;
 	sinai = 0;
 	sfuru = 0;
+	ksgene = 0;
+	makers = 0;
 }
 
 
@@ -122,56 +124,6 @@ bool TempInputShori::handleMessage(int msg, void * data, DWORD time) {
 			sound_index =(sound_index+1) % 6;
 			sound->playCue(yumes[sound_index]);
 			CS::instance()->leave(CS_SOUND_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['Q'] & KTROBO_INPUT_BUTTON_PRESSED) {
-				CS::instance()->enter(CS_MESSAGE_CS, "enter");
-				testx += 0.1f;
-
-				CS::instance()->leave(CS_MESSAGE_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['A'] & KTROBO_INPUT_BUTTON_PRESSED) {
-				CS::instance()->enter(CS_MESSAGE_CS, "enter");
-				testx -= 0.1f;
-
-				CS::instance()->leave(CS_MESSAGE_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['W'] & KTROBO_INPUT_BUTTON_PRESSED) {
-				CS::instance()->enter(CS_MESSAGE_CS, "enter");
-				testy += 0.1f;
-
-				CS::instance()->leave(CS_MESSAGE_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['S'] & KTROBO_INPUT_BUTTON_PRESSED) {
-				CS::instance()->enter(CS_MESSAGE_CS, "enter");
-				testy -= 0.1f;
-
-				CS::instance()->leave(CS_MESSAGE_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['E'] & KTROBO_INPUT_BUTTON_PRESSED) {
-				CS::instance()->enter(CS_MESSAGE_CS, "enter");
-				testz += 0.1f;
-
-				CS::instance()->leave(CS_MESSAGE_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['D'] & KTROBO_INPUT_BUTTON_PRESSED) {
-				CS::instance()->enter(CS_MESSAGE_CS, "enter");
-				testz -= 0.1f;
-
-				CS::instance()->leave(CS_MESSAGE_CS, "leave");
-		}
-
-		if (input->getKEYSTATE()['R'] & KTROBO_INPUT_BUTTON_PRESSED) {
-			roty +=0.1f;
-		}
-
-		if (input->getKEYSTATE()['F'] & KTROBO_INPUT_BUTTON_PRESSED) {
-			roty -=0.1f;
 		}
 
 
@@ -510,10 +462,13 @@ bool Game::Init(HWND hwnd) {
 	}
 	
 	}
+	UMeshUnit* uum;
 	{
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
 	UMeshUnit* umesh_unit = new UMeshUnit();
+	uum = umesh_unit;
+
 	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH"/*"resrc/model/cube/pkcube.MESH"*/, demo->tex_loader,mesh2,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL,false);
 	umesh_unit->setUMesh(um);
@@ -539,7 +494,7 @@ bool Game::Init(HWND hwnd) {
 	p.rotz = 0;
 	p.tuka_dpos = MYVECTOR3(0,0,0);
 	sfuru->setMenParts(&p);
-
+/*
 	p.dt = 10;
 	p.rotx = -1.57;
 	p.rotz = 0;
@@ -551,6 +506,7 @@ bool Game::Init(HWND hwnd) {
 	p.rotz = 0;
 	p.tuka_dpos = MYVECTOR3(0,0,1);
 	sfuru->setMenParts(&p);
+	*/
 	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
 
 	}
@@ -635,7 +591,7 @@ bool Game::Init(HWND hwnd) {
 	temp_input_shori->setMAT(&m,&m,&m);
 	sound->playCue(yumes[3]);//temp_input_shori->sound_index]);
 	InputMessageDispatcher::registerImpl(temp_input_shori, NULL,NULL);
-
+	
 	MYMATRIX worl;
 	/*
 	for (int i = 0 ; i < 30;i++) {
@@ -751,9 +707,15 @@ bool Game::Init(HWND hwnd) {
 	texdayo->setRenderTexIsRender(j,true);
 	*/
 
+	GUI::Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
 
+	ksgene = new KendoSinaiGenerator();
+	ksgene->Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
+	makers = new SinaiFuruAnimeMakers();
+	MyLuaGlueSingleton::getInstance()->setColSinaiFuruAnimeMakers(makers);
+	MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(0)->getInstance(0)->Init(ksgene,uum,sinai);
 
-	
+	InputMessageDispatcher::registerImpl(ksgene,NULL,NULL);
 
 
 	MYMATRIX jiken;
@@ -864,12 +826,13 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	//InputMessageDispatcher::registerImpl(&k,NULL,NULL);
 
-
+	/*
 	ONEMESSAGE* mes = new ONEMESSAGE();
+
 	mes->enter();
 	mes->changeText("unkokusai");
 	scenes.push_back(mes);
-
+	*/
 	
 
 	return true;
@@ -989,6 +952,18 @@ void Game::Del() {
 		 cltf= 0;
 	 }
 
+	 if (makers) {
+		makers->Release();
+		delete makers;
+		makers = 0;
+	}
+	 if(ksgene) {
+		ksgene->Del();
+		delete ksgene;
+		ksgene = 0;
+	}
+
+
 	 if (texdayo) {
 		delete texdayo;
 		texdayo = 0;
@@ -1103,6 +1078,11 @@ void Game::Del() {
 		delete sfuru;
 		sfuru = 0;
 	}
+
+	
+
+	
+
 }
 
 
@@ -1566,8 +1546,8 @@ void Game::Run() {
 	float frame_a=testcc;
 	bool com=true;
 
-	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
-	umesh_unit->calcJyusinAndR();
+//	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
+//	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	}
@@ -1600,7 +1580,7 @@ void Game::Run() {
 	MYVECTOR3 moto(0,1.9,-0.20);
 	oo = oo + moto; 
 	temp_input_shori->getPos(&oo);
-	sfuru->setKAMAE(temp_input_shori->getRotY(),0,&oo);
+//	sfuru->setKAMAE(temp_input_shori->getRotY(),0,&oo);
 //	sinai->umesh_unit->setROTXYZ(temp_input_shori->getRotY(),0,0);
 //	sinai->umesh_unit->setXYZ(oo.float3.x,oo.float3.y,oo.float3.z);//10*sin(testcc),-4,10*cos(testcc));
 //	sinai->umesh_unit->calcAnimeFrame(1,&frame_a,&com);
@@ -1622,10 +1602,10 @@ void Game::Run() {
 	//sn.nigiraseru(g,&view,&proj);
 	//umesh_unit->calcJyusinAndR();
 	//ss->nigiraseru(g,&view, &proj);
-	sfuru->men_furaseru(g,&view,&proj,testcc);
-
-
-
+	float t = this->ksgene->getNigiruhitoAnimeTemp();
+	
+	this->makers->getInstance(0)->update(testcc,sfuru);
+	sfuru->men_furaseru(g,&view,&proj,testcc,t);
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 
@@ -1779,7 +1759,7 @@ void Game::Run() {
 	hantei->calcKumiKuwasiku(g);
 	hantei->runComputeShaderKuwasiku(g);
 	hantei->copyKekkaToBufferForCopy(g,false);
-	
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	hantei->drawKekka(g,&view,&proj);
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 
