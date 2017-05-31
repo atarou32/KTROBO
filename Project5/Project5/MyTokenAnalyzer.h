@@ -48,6 +48,11 @@ public:
 	}
 
 	void GetToken() {
+
+		if ((Pointer ==0) && ((Token==0) || (strcmp(Token,"")==0))) {
+			return;
+		}
+
 	char* p = Pointer;
 	char* q = Token;
 	int offset = 0;
@@ -96,15 +101,19 @@ public:
 
 	int GetIntToken() {
 		GetToken();
+		if (Token == 0) return 0;
+
 		return atoi(Token);
 	}
 
 	unsigned int GetUIntToken() {
 		GetToken();
+		if (Token == 0) return 0;
 		return (unsigned int)atol(Token);
 	}
 	float GetFloatToken() {
 		GetToken();
+		if (Token == 0) return 0;
 		return float(atof(Token));
 	}
 
@@ -116,7 +125,10 @@ public:
 		}
 	}
 
-	char* Toke() {return Token;}
+	char* Toke() {
+		if (Token == 0) return "";
+		
+		return Token;}
 
 	void SkipNode() {
 		while(*Pointer != '\0') {

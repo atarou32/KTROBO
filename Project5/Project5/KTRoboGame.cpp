@@ -82,6 +82,8 @@ Game::Game(void)
 	sfuru = 0;
 	ksgene = 0;
 	makers = 0;
+	robodayo = 0;
+	ss = 0;
 }
 
 
@@ -296,7 +298,7 @@ void MessageDispatcherTCB(TCB* thisTCB) {
 
 bool Game::Init(HWND hwnd) {
 	// ‡”Ô‚ð‚©‚¦‚È‚¢‚±‚Æ cs ‚Æƒ^ƒXƒN‚ÌŠÔ‚ÉˆË‘¶ŠÖŒW‚ª‚ ‚é
-	
+	ss = 0;
 	g = new Graphics();
 	if (!g->Init(hwnd)) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "graphics init error");
@@ -414,6 +416,12 @@ bool Game::Init(HWND hwnd) {
 	mesh3[8]->RootBone->parent_bone_index = mesh3[7]->BoneIndexes["MigiHandMotiBone"];
 	mesh3[8]->RootBone_connect_without_material_local = false;
 */	
+
+	//throw new GameError(FATAL_ERROR,"test");
+	
+	robodayo = new Robo();
+	robodayo->init(g,demo->tex_loader);
+
 
 	MYMATRIX mat;
 	MyMatrixIdentity(mat);
@@ -942,6 +950,12 @@ void Game::Del() {
 		}
 	}
 
+	if (robodayo) {
+		robodayo->release();
+		delete robodayo;
+		robodayo = 0;
+	}
+
 	 if (cmeshs) {
 		 delete cmeshs;
 		 cmeshs = 0;
@@ -1086,6 +1100,8 @@ void Game::Del() {
 		ss = 0;
 	}
 	
+	
+
 
 }
 
@@ -1692,7 +1708,8 @@ void Game::Run() {
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
 	sinai->draw(g,&view,&proj);
-
+	MyMatrixTranslation(world,3,0,3);
+	robodayo->byouga(g,&world,&view,&proj);
 	static float h = 0.0f;
 	h += 0.001f;
 	MYMATRIX wor;
@@ -1736,7 +1753,7 @@ void Game::Run() {
 	//texdayo->getInstance(0)->setRenderBillBoardIsRender(0,false);
 
 	texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
-
+	
 
 
 	texdayo->createIndexBuffer(g);

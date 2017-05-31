@@ -33,6 +33,7 @@ public:
 		strcpy_s(p->data_name2,32,data_name2);
 		strcpy_s(p->string_data,96,string_data);
 		p->float_data = float_data;
+		datas.push_back(p);
 	}
 	RoboData* clone() {
 		RoboData* new_data = new RoboData();
@@ -44,6 +45,21 @@ public:
 			it = it + 1;
 		}
 	}
+
+	RoboDataPart* getData(char* data_name) {
+		vector<RoboDataPart*>::iterator it;
+		it = datas.begin();
+		while(it != datas.end()) {
+			RoboDataPart* p = *it;
+			if (strcmp(data_name,p->data_name)==0) {
+				return p;
+			}
+			it = it + 1;
+		}
+
+		return 0;
+	}
+
 	~RoboData() {
 		vector<RoboDataPart*>::iterator it;
 		it = datas.begin();
@@ -63,6 +79,26 @@ public:
 	char data_type[32];
 	char data_sentence[32];
 	char data_compare[32];
+	void clear() {
+		memset(data_name,0,16);
+		memset(data_name2,0,32);
+		memset(data_type,0,32);
+		memset(data_sentence,0,32);
+		memset(data_compare,0,32);
+	}
+	void readline(MyTokenAnalyzer* ma) {
+		ma->GetToken();
+		strcpy_s(data_name,16,ma->Toke());
+		ma->GetToken();
+		strcpy_s(data_name2,32,ma->Toke());
+		ma->GetToken();
+		strcpy_s(data_type,32,ma->Toke());
+		ma->GetToken();
+		strcpy_s(data_sentence,32,ma->Toke());
+		ma->GetToken();
+		strcpy_s(data_compare,32,ma->Toke());
+	}
+
 	RoboMetaDataPart() {
 		memset(data_name,0,16);
 		memset(data_name2,0,32);
@@ -82,6 +118,7 @@ public:
 		strcpy_s(p->data_type, 32, data_type);
 		strcpy_s(p->data_sentence,32,data_sentence);
 		strcpy_s(p->data_compare,32,data_sentence);
+		metadatas.push_back(p);
 	}
 	RoboMetaDataPart* getData(char* data_name) {
 		vector<RoboMetaDataPart*>::iterator it;
@@ -112,7 +149,7 @@ public:
 
 
 class RoboHead {
-private:
+public:
 	Mesh* head;
 	Mesh* head2;
 	Mesh* head3;
@@ -128,7 +165,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RoboHead* shead) {
 		if (shead->head) {
 			head = shead->head->clone();
@@ -170,7 +207,7 @@ public:
 };
 
 class RoboArm {
-private:
+public:
 	Mesh* rarm;
 	Mesh* larm;
 	RoboData* data;
@@ -181,7 +218,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RoboArm* sarm) {
 		if (sarm->rarm) {
 		rarm = sarm->rarm->clone();
@@ -207,6 +244,7 @@ public:
 		}
 		if (larm) {
 			larm->Release();
+			delete larm;
 			larm = 0;
 		}
 	
@@ -216,7 +254,7 @@ public:
 };
 
 class RoboLeg {
-private:
+public:
 	Mesh* leg;
 	RoboData* data;
 public:
@@ -225,7 +263,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RoboLeg* sleg) {
 		if (sleg->leg) {
 			leg = sleg->leg->clone();
@@ -250,7 +288,7 @@ public:
 };
 
 class RoboBody {
-private:
+public:
 	Mesh* body;
 	RoboData* data;
 public:
@@ -259,7 +297,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RoboBody* sbody) {
 		if (sbody->body) {
 		body = sbody->body->clone();
@@ -289,7 +327,7 @@ public:
 
 
 class RArmWeapon {
-private:
+public:
 	Mesh* weapon;
 	RoboData* data;
 public:
@@ -298,7 +336,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RArmWeapon* sweapon) {
 		if (sweapon->weapon) {
 		weapon = sweapon->weapon->clone();
@@ -326,7 +364,7 @@ public:
 };
 
 class LArmWeapon {
-private:
+public:
 	Mesh* weapon;
 	RoboData* data;
 public:
@@ -335,7 +373,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(LArmWeapon* sweapon) {
 		if (sweapon->weapon) {
 			weapon = sweapon->weapon->clone();
@@ -365,7 +403,7 @@ public:
 };
 
 class RShoulderWeapon {
-private:
+public:
 		Mesh* weapon;
 		RoboData* data;
 public:
@@ -374,7 +412,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data); 
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader); 
 	void init(RShoulderWeapon* sweapon) {
 		if (sweapon->weapon) {
 		weapon = sweapon->weapon->clone();
@@ -404,7 +442,7 @@ public:
 };
 
 class LShoulderWeapon {
-private:
+public:
 	Mesh* weapon;
 	RoboData* data;
 public:
@@ -413,7 +451,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(LShoulderWeapon* sweapon) {
 		if (sweapon->weapon) {
 		weapon = sweapon->weapon->clone();
@@ -443,7 +481,7 @@ public:
 };
 
 class InsideWeapon {
-private:
+public:
 	Mesh* weapon;
 	RoboData* data;
 public:
@@ -452,7 +490,7 @@ public:
 		data = 0;
 	}
 
-	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(InsideWeapon* sweapon) {
 		if (sweapon->weapon) {
 		weapon = sweapon->weapon->clone();
@@ -481,6 +519,144 @@ public:
 	}
 };
 
+class RoboEngine {
+
+public:
+	Mesh* mesh;
+	RoboData* data;
+public:
+	RoboEngine() {
+		mesh = 0;
+		data = 0;
+	}
+
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
+	void init(RoboEngine* sengine) {
+		if (sengine->mesh) {
+		mesh = sengine->mesh->clone();
+		}
+		if (sengine->data) {
+		data = sengine->data->clone();
+		}
+	}
+
+	void Release(){
+	
+	
+		if (data) {
+			delete data;
+			data = 0;
+		}
+		if (mesh) {
+			mesh->Release();
+			delete mesh;
+			mesh = 0;
+		}
+	
+		
+	
+	
+	}
+
+
+
+
+
+
+};
+
+class RoboBooster {
+
+
+public:
+	Mesh* mesh;
+	RoboData* data;
+public:
+	RoboBooster() {
+		mesh = 0;
+		data = 0;
+	}
+
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
+	void init(RoboBooster* sengine) {
+		if (sengine->mesh) {
+		mesh = sengine->mesh->clone();
+		}
+		if (sengine->data) {
+		data = sengine->data->clone();
+		}
+	}
+
+	void Release(){
+	
+	
+		if (data) {
+			delete data;
+			data = 0;
+		}
+		if (mesh) {
+			mesh->Release();
+			delete mesh;
+			mesh = 0;
+		}
+	
+		
+	
+	
+	}
+
+
+
+
+
+};
+
+class RoboFCS {
+
+
+public:
+	Mesh* mesh;
+	RoboData* data;
+public:
+	RoboFCS() {
+		mesh = 0;
+		data = 0;
+	}
+
+	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
+	void init(RoboFCS* sengine) {
+		if (sengine->mesh) {
+		mesh = sengine->mesh->clone();
+		}
+		if (sengine->data) {
+		data = sengine->data->clone();
+		}
+	}
+
+	void Release(){
+	
+	
+		if (data) {
+			delete data;
+			data = 0;
+		}
+		if (mesh) {
+			mesh->Release();
+			delete mesh;
+			mesh = 0;
+		}
+	
+		
+	
+	
+	}
+
+
+
+
+
+
+};
 
 class Robo
 {
@@ -489,18 +665,21 @@ private:
 	RoboBody* body;
 	RoboLeg* leg;
 	RoboArm* arm;
+	RoboBooster* booster;
+	RoboFCS* fcs;
+	RoboEngine* engine;
+
 	RArmWeapon* raweapon;
 	LArmWeapon* laweapon;
 	RShoulderWeapon* rsweapon;
 	LShoulderWeapon* lsweapon;
 	InsideWeapon* iweapon;
-
 public:
 	Robo(void);
 	~Robo(void);
 
 	void byouga(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
-	void init();
+	void init(Graphics* g, MyTextureLoader* tex_loader);
 	void release();
 
 };

@@ -30,7 +30,7 @@
 #include "KTRoboAtari.h"
 #include "KTRoboKendo.h"
 #include "KTRoboKendoSinaiGenerator.h"
-
+#include "KTRoboRobo.h"
 
 namespace KTROBO {
 
@@ -131,7 +131,7 @@ private:
 	SinaiFuru* sfuru;
 	KendoSinaiGenerator* ksgene;
 	SinaiFuruAnimeMakers* makers;
-
+	Robo* robodayo;
 public:
 	Game(void);
 	~Game(void);

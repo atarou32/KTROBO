@@ -18,7 +18,11 @@ void MyTokenAnalyzer::deletedayo() {
 	if (Buffer) {
 		delete[] Buffer;
 		Buffer = 0;
+	Pointer =0;
+		Token[0] = 0;	
 	}
+		Pointer =0;
+		Token[0] = 0;
 }
 
 
