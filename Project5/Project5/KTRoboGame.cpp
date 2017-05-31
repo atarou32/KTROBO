@@ -732,12 +732,13 @@ bool Game::Init(HWND hwnd) {
 
 	MYVECTOR3 ppos(0,0,0);
 	MyVec3TransformCoord(ppos,ppos,jiken);
-	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,ppos.float3.z);
+	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,0);//ppos.float3.z);
 	int j =0;
 	/*texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,true);*/
-	MyMatrixTranslation(jiken,0,0,0);
-	j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,2,2,0,0,512,512);
+//	MyMatrixTranslation(jiken,0,0,0);
+	MyMatrixRotationX(jiken,0.157);
+	j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,5,5,0,0,512,512);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 
 	//texdayo->getInstance(0)->getRenderText("0.00",0,0,30,400,100);
@@ -771,7 +772,7 @@ bool Game::Init(HWND hwnd) {
 //	MyMatrixRotationZ(world, 0.5f);
 	MyMatrixLookAtRH(view,from,at,up);
 	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
-
+	
 	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
 	
 	j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,0,0,200,200,0,0,512,512);//,0.021,0.021,0,0,500,500);
@@ -841,8 +842,8 @@ void Game::Del() {
 
 	
 
-	// シーンは別の場所でデストラクトを呼ぶ
-	/*
+	// シーンは別の場所でデストラクトを呼ぶ　とかいてあったがすべてデストラクトすることにした
+	
 	vector<Scene*>::iterator scene_it = scenes.begin();
 	while (scene_it != scenes.end()) {
 		Scene* s = *scene_it;
@@ -854,7 +855,7 @@ void Game::Del() {
 		scene_it++;
 	}
 	scenes.clear();
-	*/
+	
 
 	Scene::Del();
 
@@ -1080,7 +1081,10 @@ void Game::Del() {
 	}
 
 	
-
+	if (ss) {
+		delete ss;
+		ss = 0;
+	}
 	
 
 }
@@ -1246,7 +1250,11 @@ void Game::Run() {
 	MYMATRIX rotzmat;
 	MyMatrixRotationZ(rotzmat, temp_input_shori->testdayo);
 	MyMatrixMultiply(view,rotzmat,view);
-
+	MYVECTOR3 tesdt;
+	tesdt = b-a;
+	MyVec3TransformNormal(tesdt,tesdt,rotzmat);
+	a = b - tesdt;
+	MyMatrixLookAtRH(view, a, b, up);
 	char bbuf[512];
 	memset(bbuf,0,512);
 	sprintf_s(bbuf,"%d,%d,%d,%d",fps,byouga_count
@@ -1423,7 +1431,8 @@ void Game::Run() {
 	CS::instance()->leave(CS_MESSAGE_CS, "testt");
 	CS::instance()->enter(CS_MESSAGE_CS, "test");
 	temp_input_shori->setMAT(&world,&view,&proj);
-
+	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
+	
 	OBB testobb = mesh2->houkatuobb;
 
 	MYMATRIX idenmat;
@@ -1720,7 +1729,12 @@ void Game::Run() {
 //	inputtext->render(g);
 //	but->render(g);
 
-		MyMatrixTranslation(world,-3,f,1);
+	MYMATRIX te;
+	MyMatrixTranslation(world,f/200.0f,f/200.0f,0);
+	//MyMatrixRotationZ(te,f);
+//	MyMatrixMultiply(world,te,world);
+	//texdayo->getInstance(0)->setRenderBillBoardIsRender(0,false);
+
 	texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
 
 

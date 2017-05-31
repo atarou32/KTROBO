@@ -48,6 +48,7 @@ public:
 	virtual void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game)=0;
 
 public:
+
 	virtual void enter(); // シーンに入るときに呼ばれる enter leave が呼ばれるのはAIスレッドから
 	//（一番上位のスレッド）で他のスレッド（インプット以外？）をロックして行う
 	virtual void leave(); // シーンから抜けるときに呼ばれる

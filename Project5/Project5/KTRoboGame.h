@@ -182,7 +182,7 @@ public:
 		scenes.pop_back();
 		if (s) {
 			s->leave();
-			//delete s;
+			delete s;
 			s = 0;
 		}
 		}

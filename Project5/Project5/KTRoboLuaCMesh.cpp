@@ -1,19 +1,21 @@
 #include "KTRoboLuaCMesh.h"
 
 using namespace KTROBO;
-int CMesh::getMeshWithAnime(char* path_without_dot, char* path_to_anime) {
+int CMesh::getMeshWithAnime(char* path_to_mesh, char* path_to_anime) {
 
 
 	// まずはすでにロードされているかどうか判定する
 	CS::instance()->enter(CS_LOAD_CS, "enter");
-	if (meshname_index.find(path_without_dot) != meshname_index.end()) {
+	if (meshname_index.find(path_to_mesh) != meshname_index.end()) {
 		// 見つかったので
 		// meshname_indexを返す
-		int ans = meshname_index[path_without_dot];
+		int ans = meshname_index[path_to_mesh];
 		CS::instance()->leave(CS_LOAD_CS, "leave");
 		return ans;
 	} else {
+		CS::instance()->leave(CS_LOAD_CS, "leave");
 		execConstructOrDestruct();
+		CS::instance()->enter(CS_LOAD_CS, "enter");
 		// ロードされていなかったらロード処理が必要だけれども
 		// これはロードスレッドでのみ可能
 		// 更新スレッドでメッシュを取得するためにこのメソッドをロードしてないものを呼んだ場合c++側に例外が飛ぶ
@@ -29,7 +31,7 @@ int CMesh::getMeshWithAnime(char* path_without_dot, char* path_to_anime) {
 		memset(meshname,0,512);
 	
 		memset(path,0,256);
-		mystrcpy(path,255,0,path_without_dot);
+		mystrcpy(path,255,0,path_to_mesh);
 		path[255] = '\0';
 		sprintf_s(meshname, "%s.MESH", path);
 		CS::instance()->leave(CS_LOAD_CS, "leave");
@@ -43,7 +45,7 @@ int CMesh::getMeshWithAnime(char* path_without_dot, char* path_to_anime) {
 		CS::instance()->enter(CS_LOAD_CS, "enter");
 		int size = meshname_index.size();
 		meshs.push_back(mm);
-		meshname_index.insert(pair<string,int>((path_without_dot), size));
+		meshname_index.insert(pair<string,int>((path_to_mesh), size));
 		CS::instance()->leave(CS_LOAD_CS, "leave");
 		return size;
 	}

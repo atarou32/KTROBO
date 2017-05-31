@@ -176,7 +176,7 @@ HRESULT InitWindow( HINSTANCE hInstance, int nCmdShow, Input* input)
 	InputMessageDispatcher::Init();
 	ShowWindow(g_hWnd, nCmdShow);
 	UpdateWindow(g_hWnd);
-
+	
     return S_OK;
 }
 

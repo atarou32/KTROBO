@@ -87,7 +87,8 @@ public:
 	bool getIsLoad() {
 
 		CS::instance()->enter(CS_LOAD_CS, "get isload");
-		bool t = is_load;
+		bool t;
+		t = is_load;
 		CS::instance()->leave(CS_LOAD_CS, "get isload");
 		return t;
 	}

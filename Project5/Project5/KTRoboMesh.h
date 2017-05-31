@@ -43,6 +43,12 @@ public:
 	int bone_index;
 	MYMATRIX matrix_basis;
 	int frame;
+	MeshAnime(MeshAnime* an) {
+		this->matrix_basis = an->matrix_basis;
+		this->bone_index = an->bone_index;
+		this->frame = an->frame;
+	}
+
 	MeshAnime(int bone_index, int frame, float* matrix_basis) {
 		this->matrix_basis._11 = matrix_basis[0];
 		this->matrix_basis._21 = matrix_basis[1];
@@ -100,6 +106,26 @@ public:
 
 	OBB houkatuobb;
 	bool houkatuobbuse;
+	MeshBone(MeshBone* b) {// 親関係はコピーされない
+		this->bone_index = b->bone_index;
+		memset(this->bone_name, 0, 64);
+		strcpy_s(this->bone_name,64,b->bone_name);
+		memset(&combined_matrix, 0, sizeof(MYMATRIX));
+		memset(&offset_matrix, 0, sizeof(MYMATRIX));
+		this->matrix_local = b->matrix_local;
+		parent_bone = 0;
+		parent_bone_index = b->parent_bone_index;
+		child_bone_indexs = b->child_bone_indexs;
+		vector<MeshAnime*>::iterator itt = b->animes.begin();
+		while(itt != b->animes.end()) {
+			MeshAnime* m = *itt;
+			MeshAnime* mm = new MeshAnime(m);
+			this->animes.push_back(mm);
+			itt++;
+		}
+		houkatuobbuse = false;
+	}
+
 	MeshBone(int bone_index, float* matrix_local, const char* bone_name) {
 		this->matrix_local._11 = matrix_local[0];
 		this->matrix_local._21 = matrix_local[1];
@@ -246,8 +272,7 @@ public:
 	void readAnime(char* filename);
 	void readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader);
 	void readMeshWithoutVertex(Graphics* g, char* filename, MyTextureLoader* tex_loader);
-	void readMeshOnlyForSaveVertexIndex(Graphics* g, char* filename, MyTextureLoader* tex_loader, MESH_VERTEX** vertexs, UINT** indexs);  
-
+	void readMeshOnlyForSaveVertexIndex(Graphics* g, char* filename, MyTextureLoader* tex_loader, MESH_VERTEX** vertexs, UINT** indexs);
 	void draw(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
 	void drawWithObbs(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
 
@@ -281,9 +306,9 @@ public:
 	vector<MeshMaterial*> Materials;
 	vector<MeshBone*> Bones;
 	map<string, int> BoneIndexes;
-
+	Mesh* clone();
 private:
-	
+	bool is_cloned;
 	
 	void animateBoneFrame(MeshBone* root_bone);
 

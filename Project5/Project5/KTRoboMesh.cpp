@@ -412,6 +412,65 @@ void Mesh::readAnime(char* filename) {
 
 }
 
+Mesh* Mesh::clone() {
+
+	Mesh* nmesh = new Mesh();
+	nmesh->BoneIndexes = BoneIndexes;
+	std::vector<MeshMaterial*>::iterator it_mat;
+	it_mat = Materials.begin();
+	while(it_mat != Materials.end()) {
+		MeshMaterial* mm = *it_mat;
+		MeshMaterial* new_mm = new MeshMaterial();
+		new_mm->color = mm->color;
+		new_mm->texture = mm->texture;
+		nmesh->Materials.push_back(new_mm);
+		it_mat++;
+	}
+
+	std::vector<MeshSubset*>::iterator it_sub;
+	it_sub = Subsets.begin();
+	while(it_sub != Subsets.end()) {
+		MeshSubset* sub = *it_sub;
+		MeshSubset* new_sub = new MeshSubset();
+		new_sub->FaceCount = sub->FaceCount;
+		new_sub->FaceIndex = sub->FaceIndex;
+		new_sub->MaterialIndex = sub->MaterialIndex;
+		nmesh->Subsets.push_back(new_sub);
+		it_sub++;
+	}
+
+	std::map<string,int>::iterator it_bonei;
+	std::vector<MeshBone*>::iterator it_bone;
+	it_bonei = BoneIndexes.begin();
+	it_bone = Bones.begin();
+
+	while(it_bone != Bones.end()) {
+		MeshBone* bb = *it_bone;
+		MeshBone* b = new MeshBone(bb);
+		nmesh->Bones.push_back(b);
+		it_bone++;
+	}
+
+	it_bone = nmesh->Bones.begin();
+	while(it_bone != nmesh->Bones.end()) {
+		MeshBone* b = *it_bone;
+		b->parent_bone = nmesh->Bones[b->parent_bone_index];
+		it_bone++;
+	}
+	
+	nmesh->bone_max_depth = this->bone_max_depth;
+	nmesh->FaceCount = this->FaceCount;
+	nmesh->VertexCount = this->VertexCount;
+	nmesh->p_vertexbuffer = this->p_vertexbuffer;
+	nmesh->p_indexbuffer = this->p_indexbuffer;
+	nmesh->houkatuobb = this->houkatuobb;
+	nmesh->rootbone_matrix_local_kakeru = this->rootbone_matrix_local_kakeru;
+	nmesh->RootBone = nmesh->Bones[this->RootBone->bone_index];
+	nmesh->RootBone_connect_without_material_local = this->RootBone_connect_without_material_local;
+
+	return nmesh;
+}
+
 void Mesh::Release() {
 
 	if (VertexCount && FaceCount) {
@@ -419,6 +478,7 @@ void Mesh::Release() {
 		return;
 	}
 
+	if (!is_cloned) {
 	if (p_vertexbuffer) {
 		p_vertexbuffer->Release();
 		p_vertexbuffer = 0;
@@ -428,6 +488,10 @@ void Mesh::Release() {
 	if (p_indexbuffer) {
 		p_indexbuffer->Release();
 		p_indexbuffer = 0 ;
+		FaceCount = 0;
+	}
+	} else {
+		VertexCount = 0;
 		FaceCount = 0;
 	}
 
@@ -472,6 +536,7 @@ Mesh::Mesh() {
 	RootBone_connect_without_material_local = false;
 	MyMatrixIdentity(rootbone_matrix_local_kakeru);
 	bone_max_depth = 0;
+	is_cloned = false;
 }
 
 
