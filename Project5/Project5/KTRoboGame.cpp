@@ -419,8 +419,6 @@ bool Game::Init(HWND hwnd) {
 
 	//throw new GameError(FATAL_ERROR,"test");
 	
-	robodayo = new Robo();
-	robodayo->init(g,demo->tex_loader);
 
 
 	MYMATRIX mat;
@@ -448,7 +446,10 @@ bool Game::Init(HWND hwnd) {
 
 	AtariHantei::compileShader(g);
 	hantei = new AtariHantei();
-	
+	robodayo = new Robo();
+	robodayo->init(g,demo->tex_loader,hantei);
+	InputMessageDispatcher::registerImpl(robodayo, NULL,NULL);
+
 	for (int i=0;i<1;i++) {
 	{
 	MYMATRIX idenmat;
@@ -1708,8 +1709,15 @@ void Game::Run() {
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
 	sinai->draw(g,&view,&proj);
-	MyMatrixTranslation(world,3,0,3);
-	robodayo->byouga(g,&world,&view,&proj);
+	MyMatrixTranslation(world,3,0,1);
+	robodayo->byouga(g,&view,&proj);
+	if (robodayo->atarihan) {
+	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
+		robodayo->atarishori(g,hantei, frameTime, (int)frame);
+		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
+		robodayo->atarihan->calcJyusinAndR();
+
+	}
 	static float h = 0.0f;
 	h += 0.001f;
 	MYMATRIX wor;

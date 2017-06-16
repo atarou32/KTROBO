@@ -4,6 +4,8 @@
 #pragma once
 #include "KTRoboMesh.h"
 #include "MyTokenAnalyzer.h"
+#include "KTRoboAtari.h"
+#include "KTRoboInput.h"
 
 namespace KTROBO {
 
@@ -658,7 +660,330 @@ public:
 
 };
 
-class Robo
+
+class Robo;
+
+class RoboState {
+public:
+	bool isJump();
+	virtual void enter(Robo* robo, RoboState* now_state, RoboState* before_state)=0;
+	virtual void leave(Robo* robo, RoboState* now_state, RoboState* before_state)=0;
+	virtual int getStateID()=0;
+	virtual void exec(Graphics* g, Robo* robo, float dsecond, int stamp)=0;
+};
+
+class RoboMovingState_STOP : public RoboState {
+public:
+	RoboMovingState_STOP(){};
+	~RoboMovingState_STOP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_FORWARD : public RoboState {
+public:
+	RoboMovingState_FORWARD(){};
+	~RoboMovingState_FORWARD(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_BACK : public RoboState {
+public:
+	RoboMovingState_BACK(){};
+	~RoboMovingState_BACK(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_RIGHT : public RoboState {
+public:
+	RoboMovingState_RIGHT(){};
+	~RoboMovingState_RIGHT(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_LEFT : public RoboState {
+public:
+	RoboMovingState_LEFT(){};
+	~RoboMovingState_LEFT(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_RIGHTTURN : public RoboState {
+public:
+	RoboMovingState_RIGHTTURN(){};
+	~RoboMovingState_RIGHTTURN(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_LEFTTURN : public RoboState {
+public:
+	RoboMovingState_LEFTTURN(){};
+	~RoboMovingState_LEFTTURN(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_JUMP : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_JUMP(){t = 0;};
+	~RoboMovingState_JUMP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+
+class RoboMovingState_FORWARDJUMP : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_FORWARDJUMP(){};
+	~RoboMovingState_FORWARDJUMP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_BACKJUMP : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_BACKJUMP(){};
+	~RoboMovingState_BACKJUMP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_LEFTJUMP : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_LEFTJUMP(){};
+	~RoboMovingState_LEFTJUMP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_RIGHTJUMP : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_RIGHTJUMP(){};
+	~RoboMovingState_RIGHTJUMP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboSETTIState_SETTI : public RoboState {
+
+	public:
+	RoboSETTIState_SETTI(){};
+	~RoboSETTIState_SETTI(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboSETTIState_KUUTYUU : public RoboState {
+
+	public:
+	RoboSETTIState_KUUTYUU(){};
+	~RoboSETTIState_KUUTYUU(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboSETTIState_SETKABE : public RoboState { // •Ç‚ÉÚ‚µ‚Ä‚¢‚éê‡i•ÇR‚è‚ª‚Å‚«‚é)
+
+	public:
+	RoboSETTIState_SETKABE(){};
+	~RoboSETTIState_SETKABE(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboSETTIState_SETTENJYOU : public RoboState { // “Vˆä‚ÉÚ‚µ‚Ä‚¢‚é
+	public:
+	RoboSETTIState_SETTENJYOU(){};
+	~RoboSETTIState_SETTENJYOU(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_OFF : public RoboState { 
+	public:
+	RoboBoosterState_OFF(){};
+	~RoboBoosterState_OFF(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_ONTAIKI : public RoboState { 
+	public:
+	RoboBoosterState_ONTAIKI(){};
+	~RoboBoosterState_ONTAIKI(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_BOOSTUP : public RoboState { 
+	public:
+	RoboBoosterState_BOOSTUP(){};
+	~RoboBoosterState_BOOSTUP(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_BOOSTFORWARD : public RoboState { 
+	public:
+	RoboBoosterState_BOOSTFORWARD(){};
+	~RoboBoosterState_BOOSTFORWARD(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_BOOSTBACK : public RoboState { 
+	public:
+	RoboBoosterState_BOOSTBACK(){};
+	~RoboBoosterState_BOOSTBACK(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_BOOSTLEFT : public RoboState { 
+	public:
+	RoboBoosterState_BOOSTLEFT(){};
+	~RoboBoosterState_BOOSTLEFT(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboBoosterState_BOOSTRIGHT : public RoboState { 
+	public:
+	RoboBoosterState_BOOSTRIGHT(){};
+	~RoboBoosterState_BOOSTRIGHT(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+
+
+
+class RoboAnimeLoop {
+private:
+	float speed;
+	float firstsecond;
+	float nowsecond;
+	float first;
+	float last;
+	float now;
+	bool is_loop;
+public:
+
+	RoboAnimeLoop() {
+		speed = 0;
+		firstsecond = 0;
+		first = 0;
+		last = 0;
+		now = 0;
+		is_loop = 0;
+		nowsecond = 0;
+	};
+
+	~RoboAnimeLoop() {};
+
+	bool isFinished() {
+		if (now >= last) {
+			return true;
+		}
+	}
+	void setAnime(float first, float last, bool is_loop) {
+		this->first = first;
+		this->last = last;
+		this->is_loop = is_loop;
+		this->now = first;
+	};
+	void setTimeAndSpeed(float speed, float firstsecond) {
+		this->speed = speed;
+		this->firstsecond = firstsecond;
+		nowsecond = firstsecond;
+	};
+
+	void reset(float second) {
+		now = first;
+		firstsecond = second;
+	};
+	void animateTime(float dsecond) {
+		nowsecond += dsecond;
+		now += speed * (nowsecond - firstsecond) / (last - first);
+
+		if (now >= last) {
+			if (is_loop) {
+				reset(nowsecond);
+			} else {
+				now = last;
+			}
+		}
+	}
+
+
+	void animate(UMesh* umesh, bool calculateoffsetmatrix);
+};
+
+
+class Robo : public INPUTSHORICLASS
 {
 private:
 	RoboHead* head;
@@ -674,14 +999,62 @@ private:
 	RShoulderWeapon* rsweapon;
 	LShoulderWeapon* lsweapon;
 	InsideWeapon* iweapon;
+
+
+public:
+	RoboState* move_state;
+	RoboState* setti_state;
+	RoboState* setkabe_state;
+	RoboState* settenjyou_state;
+	RoboState* booster_state;
+
+
+	RoboBoosterState_BOOSTBACK boostback;
+	RoboBoosterState_BOOSTFORWARD boostforward;
+	RoboBoosterState_BOOSTLEFT boostleft;
+	RoboBoosterState_BOOSTRIGHT boostright;
+	RoboBoosterState_BOOSTUP boostup;
+	RoboBoosterState_OFF boostoff;
+	RoboBoosterState_ONTAIKI boostontaiki;
+
+
+	RoboSETTIState_KUUTYUU kuutyuu;
+	RoboSETTIState_SETKABE setkabe;
+	RoboSETTIState_SETTENJYOU settenjyou;
+	RoboSETTIState_SETTI setti;
+
+	RoboMovingState_BACK moveback;
+	RoboMovingState_FORWARD moveforward;
+	RoboMovingState_JUMP movejump;
+	RoboMovingState_FORWARDJUMP movejumpforward;
+	RoboMovingState_BACKJUMP movejumpback;
+	RoboMovingState_LEFTJUMP movejumpleft;
+	RoboMovingState_RIGHTJUMP movejumpright;
+	RoboMovingState_LEFT moveleft;
+	RoboMovingState_RIGHT moveright;
+	RoboMovingState_STOP movestop;
+	RoboMovingState_LEFTTURN moveleftturn;
+	RoboMovingState_RIGHTTURN moverightturn;
+
+public:
+	UMeshUnit* atarihan;
+	UMesh* atari_leg;
+	RoboAnimeLoop anime_loop_leg;
+
+
+
+
+
+	MYMATRIX world;
+	bool handleMessage(int msg, void* data, DWORD time);
 public:
 	Robo(void);
 	~Robo(void);
 
-	void byouga(Graphics* g, MYMATRIX* world, MYMATRIX* view, MYMATRIX* proj);
-	void init(Graphics* g, MyTextureLoader* tex_loader);
+	void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	void init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei);
 	void release();
-
+	void atarishori(Graphics* g ,AtariHantei* hantei, float dt, int stamp);
 };
 
 }

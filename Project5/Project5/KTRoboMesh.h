@@ -299,6 +299,7 @@ private:
 public:
 	MeshBone* RootBone;
 	int bone_max_depth;
+	char filename[256];
 
 	OBB houkatuobb;
 	MYMATRIX rootbone_matrix_local_kakeru;

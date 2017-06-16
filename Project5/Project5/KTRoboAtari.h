@@ -23,6 +23,8 @@ private:
 	bool is_use_vertexs_and_indexs;
 	
 public:
+	int getUMESHID() {return UMESH_ID;}
+
 	MESH_VERTEX* vertexs;
 	UINT* indexs;
 	OBB bone_obbs[KTROBO_MESH_BONE_MAX]; // 各位置、姿勢、アニメの計算後のおｂｂ
@@ -98,6 +100,7 @@ private:
 	
 	bool is_updated;
 	// 姿勢と位置の情報
+public:
 	float x;
 	float y;
 	float z;
@@ -247,6 +250,14 @@ struct AtariUnitAns {
 	int is_use;
 };
 
+struct AtariUnitAnsKWSK {
+
+	AtariUnit::AtariType aite_type;
+	AtariUnitAns* ans;
+	UMeshUnit* aite;
+	UMesh* aite_umesh;
+};
+
 // このOBBはアニメーションと位置姿勢が適用されたOBB
 // その適用はGPUではなくCPUで行っている
 
@@ -292,8 +303,9 @@ private:
 	static const int kakuho_counts[]; 
 	static int getKakuhoCountsFromCount(int count);
 	bool is_updated;
-private:
+public:
 	AtariUnit units[KTROBO_MAX_ATARI_HANTEI_UNIT_NUM];
+private:
 	AtariHanteiTempCount max_count;
 	AtariHanteiTempCount temp_count;
 	int au_count;
@@ -331,6 +343,7 @@ public:
 	void calcAuInfo(Graphics* g, bool calc_vertex_and_index);
 	void calcObb(Graphics* g);
 	void drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	int getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya,UMesh* oya2, int out_ans_num);
 private:
 	static MYSHADERSTRUCT mss;
 	static MYSHADERSTRUCT mss2;

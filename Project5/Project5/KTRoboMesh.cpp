@@ -537,6 +537,7 @@ Mesh::Mesh() {
 	MyMatrixIdentity(rootbone_matrix_local_kakeru);
 	bone_max_depth = 0;
 	is_cloned = false;
+	filename[0] = 0;
 }
 
 
@@ -909,7 +910,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 
 				for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 					if (mm->Index[k] == bb->bone_index) {
-						if (0.4000001 < mm->weight[k]) {
+						if (0.2000001 < mm->weight[k]) {
 							// Ç±ÇÃvertexÇÕÇ⁄ÇÀÇ…ä‹Ç‹ÇÍÇÈ
 							bonefukumucount++;
 							jyusin = jyusin + mm->pos;// * vertexs[i].weight[k];
@@ -942,7 +943,7 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 				if (mm->Index[k] == bb->bone_index) {
-					if (0.400001 < mm->weight[k]) {
+					if (0.300001 < mm->weight[k]) {
 						jyusintov = mm->pos - jyusin;
 						if (MyVec3Dot(jyusintov, upper) >= 0) {
 						// Ç±ÇÃvertexÇÕÇ⁄ÇÀÇ…ä‹Ç‹ÇÍÇÈ
@@ -1005,18 +1006,18 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 		int lnum=0;
 		// lÇQÇÃç≈ëÂílÇéÊÇÈ
 
-			for (int i=0;i<FaceCount*3;i+=3) {
+		for (int i=0;i<FaceCount*3;i+=3) {
 
 			for (int d = 0 ; d<3;d++) {
 				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
 			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
 				if (mm->Index[k] == bb->bone_index) {
-					if (0.4000001 < mm->weight[k]) {
-						jyusintox = mm->pos - jyusin;
-						float yokohaba =  MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
-						if (yokohaba > l) {
-							l = yokohaba;
-						}
+					if (0.3000001 < mm->weight[k]) {
+				//		jyusintox = mm->pos - jyusin;
+					//	float yokohaba =  MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
+						//if (yokohaba > l) {
+						//	l = yokohaba;
+						//}
 						lnum++;
 					}
 				}
@@ -1024,8 +1025,30 @@ void Mesh::readBoneInfo(MyTokenAnalyzer* a, bool is_read_weight, MESH_VERTEX* ve
 
 			}
 		}
+
+		for (int i=0;i<FaceCount*3;i+=3) {
+
+			for (int d = 0 ; d<3;d++) {
+				MESH_VERTEX* mm = &vertexs[indexs[i+d]];
+			for (int k=0;k<MODEL_BLEND_COUNT;k++) {
+				if (mm->Index[k] == bb->bone_index) {
+					if (0.3000001 < mm->weight[k]) {
+						jyusintox = mm->pos - jyusin;
+						float yokohaba =  MyVec3Dot(jyusintox,jyusintox) - MyVec3Dot(jyusintox,tempdayo)* MyVec3Dot(jyusintox,tempdayo);
+						l += yokohaba/(float)lnum;
+			//			lnum++;
+					}
+				}
+			}
+
+			}
+		}
+
+
+
+
 		if (lnum != 0) {
-		//	l = l / (float)lnum;
+			//l = l / (float)lnum;
 			l = sqrt(l);
 		} else {
 			it++;
@@ -1061,6 +1084,7 @@ void Mesh::readMesh(Graphics* g, char* filename, MyTextureLoader* tex_loader) {
 
 	MESH_VERTEX* vertexs=0;
 	UINT* indexs = 0; 
+	strcpy_s(this->filename,256,filename);
 
 	MyTokenAnalyzer a;
 	if (!a.load(filename)) {
@@ -1534,6 +1558,7 @@ void Mesh::animateBoneFrame(MeshBone* bone) {
 
 		
 		MyMatrixMultiply(bone->combined_matrix, bone->offset_matrix, bone->matrix_local);
+		MyMatrixMultiply(bone->combined_matrix, bone->combined_matrix, this->rootbone_matrix_local_kakeru);
 		MyMatrixMultiply(bone->combined_matrix, mat_inv, bone->combined_matrix);
 	
 		//MyMatrixTranslation(bone->combined_matrix, 0,0,1);

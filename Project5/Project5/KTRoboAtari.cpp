@@ -94,6 +94,10 @@ void UMeshUnit::calcJyusinAndR() {
 				MyVec3TransformNormal(henkanobb.u[2],henkanobb.u[2],henkanmat);
 				henkanobb.e.float3.z = henkanobb.e.float3.z * MyVec3Length(henkanobb.u[2]);
 				MyVec3Normalize(henkanobb.u[2],henkanobb.u[2]);
+				// henkanobb ‚Ì‘å‚«‚³‚ð‚––‚„‚”‚É‰ž‚¶‚Ä‘å‚«‚­‚·‚é
+				henkanobb.e.float3.x += abs(v.float3.x) * dt;
+				henkanobb.e.float3.y += abs(v.float3.y) * dt;
+				henkanobb.e.float3.z += abs(v.float3.z) * dt;
 
 				em->is_bone_obbs_use[i] = true;
 				em->bone_obbs[i] = henkanobb;
@@ -1359,6 +1363,62 @@ void AtariHantei::releaseBufferAndView() {
 		buffer_autts_view->Release();
 		buffer_autts_view = 0;
 	}
+}
+
+int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, int out_ans_num) {
+	int tmp = 0;
+	for (int k = 0; k < atatta_count;k++) {
+		if (oya2) {
+		if ((units[ans[k].atari_idx].umesh == oya2) && (units[ans[k].atari_idx].umesh_unit == oya)
+			&&(units[ans[k].atari_idx2].umesh_unit != oya)) {
+			out_ans[tmp].ans = &ans[k];
+			out_ans[tmp].aite = units[ans[k].atari_idx2].umesh_unit;
+			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
+			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
+
+			tmp++;
+			if (tmp >= out_ans_num) {
+				return tmp;
+			}
+		}
+		if ((units[ans[k].atari_idx2].umesh == oya2) && (units[ans[k].atari_idx2].umesh_unit == oya) &&
+			(units[ans[k].atari_idx].umesh_unit != oya)) {
+				out_ans[tmp].ans = &ans[k];
+				out_ans[tmp].aite = units[ans[k].atari_idx].umesh_unit;
+				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
+				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
+			tmp++;
+			if (tmp >= out_ans_num) {
+				return tmp;
+			}
+		}
+
+
+
+		} else {
+			if ((units[ans[k].atari_idx].umesh_unit == oya) && (units[ans[k].atari_idx2].umesh_unit != oya)) {
+				out_ans[tmp].ans = &ans[k];
+				out_ans[tmp].aite = units[ans[k].atari_idx2].umesh_unit;
+			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
+			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
+			tmp++;
+			if (tmp >= out_ans_num) {
+				return tmp;
+			}
+			}
+			if ((units[ans[k].atari_idx2].umesh_unit == oya) && (units[ans[k].atari_idx].umesh_unit != oya)) {
+			out_ans[tmp].ans = &ans[k];
+				out_ans[tmp].aite = units[ans[k].atari_idx].umesh_unit;
+				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
+				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
+			tmp++;
+			if (tmp >= out_ans_num) {
+				return tmp;
+			}
+			}
+		}
+	}
+	return tmp;
 }
 
 
