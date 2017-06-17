@@ -6,7 +6,7 @@
 #include "MyTokenAnalyzer.h"
 #include "KTRoboAtari.h"
 #include "KTRoboInput.h"
-
+#include "KTROBOArmPositioner.h"
 namespace KTROBO {
 
 struct RoboDataPart {
@@ -666,7 +666,7 @@ class Robo;
 class RoboState {
 public:
 	bool isJump();
-	virtual void enter(Robo* robo, RoboState* now_state, RoboState* before_state)=0;
+	virtual void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
 	virtual void leave(Robo* robo, RoboState* now_state, RoboState* before_state)=0;
 	virtual int getStateID()=0;
 	virtual void exec(Graphics* g, Robo* robo, float dsecond, int stamp)=0;
@@ -986,10 +986,14 @@ public:
 class Robo : public INPUTSHORICLASS
 {
 private:
+	ArmPositioner* ap;
+
 	RoboHead* head;
 	RoboBody* body;
 	RoboLeg* leg;
+public:
 	RoboArm* arm;
+private:
 	RoboBooster* booster;
 	RoboFCS* fcs;
 	RoboEngine* engine;
@@ -1007,6 +1011,18 @@ public:
 	RoboState* setkabe_state;
 	RoboState* settenjyou_state;
 	RoboState* booster_state;
+	int kuutyuu_count;
+	int setti_count;
+	void resetCount() {
+		kuutyuu_count = 0;
+		setti_count = 0;
+	};
+	void incKuutyuu() {
+		kuutyuu_count++;
+	};
+	void incSetti() {
+		setti_count++;
+	};
 
 
 	RoboBoosterState_BOOSTBACK boostback;
@@ -1054,7 +1070,7 @@ public:
 	void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 	void init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei);
 	void release();
-	void atarishori(Graphics* g ,AtariHantei* hantei, float dt, int stamp);
+	void atarishori(Graphics* g , MYMATRIX* view, AtariHantei* hantei, float dt, int stamp);
 };
 
 }

@@ -771,7 +771,7 @@ bool Game::Init(HWND hwnd) {
 	MYMATRIX view;
 	MYMATRIX proj;
 //	MYVECTOR3 from(0,-1,0);
-	MYVECTOR3 from(5,-5,0);
+	MYVECTOR3 from(15,15,8);
 	MYVECTOR3 at(0,0,0);
 	MYVECTOR3 up(0,0,1);
 	MyMatrixIdentity(world);
@@ -1232,7 +1232,7 @@ void Game::Run() {
 	MYMATRIX view;
 	MYMATRIX proj;
 	MyMatrixIdentity(world);
-	MYVECTOR3 a(5,15,5);
+	MYVECTOR3 a(15,15,8);
 //	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
@@ -1713,7 +1713,7 @@ void Game::Run() {
 	robodayo->byouga(g,&view,&proj);
 	if (robodayo->atarihan) {
 	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
-		robodayo->atarishori(g,hantei, frameTime, (int)frame);
+		robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
 
