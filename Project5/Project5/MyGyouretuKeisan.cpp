@@ -210,7 +210,12 @@ void MyIKMODOKI::calcYMat() {
 	}
 	
 	for (int i=0;i<temp_retu;i++) {
-		dthetadayo[i] /= un * 1;
+		if (un > 0.0000001) {
+			dthetadayo[i] /= un * 1;
+		} else {
+			// un
+		//	dthetadayo[i] *= 10000000;
+		}
 	}
 
 

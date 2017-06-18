@@ -1061,7 +1061,7 @@ public:
 
 
 
-	MYMATRIX world;
+	//MYMATRIX world;
 	bool handleMessage(int msg, void* data, DWORD time);
 public:
 	Robo(void);

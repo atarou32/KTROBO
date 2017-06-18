@@ -17,7 +17,7 @@ Robo::Robo(void)
 	booster = 0;
 	engine = 0;
 	atarihan = 0;
-	MyMatrixIdentity(world);
+//	MyMatrixIdentity(world);
 	atari_leg = 0;
 	move_state = &movestop;
 	setti_state = &kuutyuu;
@@ -108,9 +108,9 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 			MYMATRIX wor;
 			MYMATRIX wor2;
 			MYMATRIX wor3;
-		//	MyMatrixRotationZ(wor, 3.141592f);
+		//	MyMatrixRotationZ(wor, 1.57f);//3.141592f);
 		//	MyMatrixRotationX(wor2, 3.141592f);
-			MyMatrixRotationY(wor3, 0);//-3.141592f);
+			MyMatrixRotationY(wor3, 0);
 			wor3._11 = -1;
 			MyMatrixMultiply(arm->rarm->rootbone_matrix_local_kakeru, wor3, arm->rarm->rootbone_matrix_local_kakeru);
 		
@@ -264,19 +264,38 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 		//		arm->larm->animate(0,false);
 		//	}
 
-			MYVECTOR3 te = MYVECTOR3(1*cos(test),-8+4*sin(test)
-													 ,8+4*sin(test));
+			MYVECTOR3 te = MYVECTOR3(1*cos(test),-2+4*sin(test)
+													 ,3+4*sin(test));
 
 			{
 			MYMATRIX temp;
 			MyMatrixInverse(temp,NULL,atarihan->world);
 			MyVec3TransformCoord(te,te,temp);
-			}
-			if (ap->positionArm2(3.14/600,0.3,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+			
+			arm->larm->animate(40,true);
+			if (ap->positionArm3(g,&temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
 													 ,80+40*sin(test))*/, false)) {
-			arm->larm->animate(0,false);
-			}
+			arm->larm->animate(40,false);//false);
+			{
+			RAY ra;
+			
+			MeshBone* handbo = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
+			MYVECTOR3 tempd(0,0,0);
+			MYMATRIX tempma;
+			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+			MyVec3TransformCoord(tempd,tempd,tempma);
+			MYVECTOR3 tempdn(1,0,0);
+			MyVec3TransformNormal(tempdn,tempdn, tempma);
+			ra.org = tempd;
+			ra.dir = tempdn * 30;
+			MYMATRIX iden;
+			MyMatrixIdentity(iden);
 
+			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+
+			}
+			}
+			}
 
 			}
 			if (this->arm->rarm) {
@@ -290,7 +309,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			MyMatrixInverse(temp,NULL,atarihan->world);
 			MyVec3TransformCoord(te,te,temp);
 			MyMatrixMultiply(temp, this->atarihan->world, *view);
-			}
+			
 		//	if (ap->positionArm(g,&temp, 0,this,/* &moku*/&te, true)) {
 			//	arm->rarm->animate(0,false);
 		//	}
@@ -307,10 +326,40 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			if (unko > 1) {
 				unko = -1+0.01f;;
 			}
+			arm->rarm->animate(40,true);
 
-			if (ap->positionArm2(3.14/600,0.3,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-													 ,80+40*sin(test))*/, true)) {
-			arm->rarm->animate(0,false);
+		if (ap->positionArm3(g, &temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+											 ,80+40*sin(test))*/, true)) {
+			arm->rarm->animate(40,false);
+
+
+				{
+			RAY ra;
+			
+			MeshBone* handbo = arm->rarm->Bones[arm->larm->BoneIndexes["handBone"]];
+			MYVECTOR3 tempd(0,0,0);
+			MYMATRIX tempma;
+			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+			MyVec3TransformCoord(tempd,tempd,tempma);
+			MYVECTOR3 tempdn(1,0,0);
+			MyVec3TransformNormal(tempdn,tempdn, tempma);
+			ra.org = tempd;
+			ra.dir = tempdn * 30;
+			MYMATRIX iden;
+			MyMatrixIdentity(iden);
+
+			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+
+			}
+
+
+			}
+
+
+
+
+
+
 			}
 			
 			}
@@ -346,7 +395,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	engine = 0;
 	// headparts のメタデータの読み込み
 	atarihan = new UMeshUnit();
-	MyMatrixIdentity(world);
+	//MyMatrixIdentity(world);
 	MyTokenAnalyzer ma;
 	{
 	ma.load("resrc/ktrobo/info/metadata/ktroboheadpartsmetadata.txt");
@@ -509,7 +558,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 			MyMatrixRotationY(wor3, 0);//-3.141592f);
 			wor3._11 = -1;
 			MyMatrixMultiply(arm->rarm->rootbone_matrix_local_kakeru, wor3, arm->rarm->rootbone_matrix_local_kakeru);
-			arm->rarm->animate(0,true);
+			arm->rarm->animate(40,true);
 
 
 	}
@@ -518,7 +567,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 		arm->larm, false, &wor,  body->body->Bones[body->body->BoneIndexes["leftArmJointBone"]],body->body->BoneIndexes["leftArmJointBone"],false);
 	atarihan->setUMesh(um_larm);
 		MyMatrixScaling(arm->larm->rootbone_matrix_local_kakeru,1.1,1.1,1.1);
-		arm->larm->animate(0,true);
+		arm->larm->animate(40,true);
 	}
 
 	if (head->head) {
@@ -561,7 +610,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	atarihan->calcJyusinAndR();
 	anime_loop_leg.setAnime(10,30,true);
 	anime_loop_leg.setTimeAndSpeed(0.01,0);
-	world = atarihan->world;
+//	world = atarihan->world;
 	ap = new ArmPositioner(3.14/60000,3.14/3,0.62);
 }
 

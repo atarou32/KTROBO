@@ -3,6 +3,8 @@
 //#include "NEWGUI_OBSERVER.h"
 #include "KTRoboRobo.h"
 //#include "MyCameraAndBaseLine.h"
+#include "MyGyouretuKeisan.h"
+
 using namespace KTROBO;
 
 ArmPositioner::~ArmPositioner(void)
@@ -300,7 +302,7 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 
 
 
-
+	/*
 
 	{
 
@@ -310,9 +312,9 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 
 	robo->arm->rarm->animate(0,true);
 	}
+	*/
 
-
-
+	/*
 	MYMATRIX maat;
 	if (is_migi) {
 	MyMatrixRotationX(maat,-1.57);
@@ -340,7 +342,7 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 	robo->arm->rarm->animate(0,false);
 	}
 	}
-
+	*/
 
 
 
@@ -411,92 +413,44 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 	}
 
 	if (is_migi) {
-		MYMATRIX tte;
-		MyMatrixMultiply(tte,  arm1->matrix_local,arm1->parent_bone->combined_matrix);
-	//	MyMatrixTranspose(cc,tte);
-		cc = tte;
+		MyMatrixMultiply(cc,arm1->matrix_local, arm1->parent_bone->combined_matrix);
+//		D3DXMatrixTranspose(&cc,&(arm1->parent->combined_matrix * arm1->matrix_local));
 		//cc = arm1->combined_matrix;
 		MyVec3TransformNormal(yd, (yd), cc);
 		MyVec3TransformNormal(xd, (xd), cc);
 		MyVec3TransformNormal(zd, zd, cc);
 	} else {
-		MYMATRIX tte;
-		MyMatrixMultiply(tte,  arm1->matrix_local,arm1->parent_bone->combined_matrix);
-	//	MyMatrixTranspose(cc,tte);
-		cc = tte;
+		MyMatrixMultiply(cc,arm1->matrix_local, arm1->parent_bone->combined_matrix);
+//		D3DXMatrixTranspose(&cc,&(arm1->parent->combined_matrix * arm1->matrix_local));
 		//cc = arm1->combined_matrix;
-		MYVECTOR3 temp;
-		temp = -yd;
-		MyVec3TransformNormal(yd, temp, cc);
+		MYVECTOR3 tt;
+		tt = -yd;
+		MyVec3TransformNormal(yd, tt, cc);
 		MyVec3TransformNormal(xd, (xd), cc);
-		temp = -zd;
-		MyVec3TransformNormal(zd, temp, cc);
+		tt = -zd;
+		MyVec3TransformNormal(zd, tt, cc);
 	}
 
 	
 	MyMatrixIdentity(maat);
 	MyMatrixIdentity(mbbt);
 	MyMatrixRotationAxis(maat, yd, -epsiron);
-	MyMatrixRotationAxis(mbbt, xd, pusai-1.57f);//+3.14f+1.57f);
+	MyMatrixRotationAxis(mbbt, xd, pusai);
 	MYMATRIX mcct;
 
 
-	float aba = acos(-mokuhyou->float3.y/L)/3;///3
-	float asi = asin(-mokuhyou->float3.y/L);
+	float aba = acos(-mokuhyou->float3.y/L)/3;
 
 
-	if (asi >=0) {
-	MyMatrixRotationAxis(mcct, zd,  aba);//*/)
-	} else {
-		MyMatrixRotationAxis(mcct, zd,  aba);//*/)
-	}
-	MYMATRIX tuke;
-	MyMatrixIdentity(mcct);
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-	{
-	MYMATRIX maatf;
-	if (is_migi) {
-	MyMatrixRotationX(maatf,-1.57);
-	MYMATRIX tmp;
-	//MyMatrixIdentity(maat);
-	MyMatrixRotationZ(tmp, 1.57*2);
-	MyMatrixMultiply(maatf, maatf, tmp);
-	MyMatrixRotationY(tmp, 1.57);
-//	MyMatrixMultiply(maatf, maatf, tmp);
-	} else {
-		MyMatrixRotationX(maatf,-1.57);
-	//	MyMatrixIdentity(maat);
-		MYMATRIX tmp;
-		MyMatrixRotationZ(tmp, -1.57*2);
-		MyMatrixMultiply(maatf, maatf, tmp);
-			MyMatrixRotationY(tmp, 1.57);
-//	MyMatrixMultiply(maatf, maatf, tmp);
-	}	
-	tuke = maatf;
-	//MyMatrixIdentity(tuke);
-	}
-		//MyMatrixRotationAxis(tuke, zd, 1.57f);
-	
 
-	MyMatrixMultiply(mcct, tuke, mcct);
-	MyMatrixMultiply(mbbt, mcct,mbbt);
-	MyMatrixMultiply(maat, maat, mbbt);
+
+	MyMatrixRotationAxis(mcct, zd, aba/*-3.14/2*//* 3.14/2*/);
+	MyMatrixMultiply(maat, mbbt, maat);
+	//D3DXMatrixMultiply(&maat, &mcct, &maat);
+
 	arm1->offset_matrix = maat;
-	
+	MyMatrixRotationZ(maat,1.57);
+	MyMatrixMultiply(arm1->offset_matrix,maat, arm1->offset_matrix);
 
 
 	
@@ -517,40 +471,229 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 		D3DXVec3TransformNormal(&zd, &zd, &cc);
 	}
 	*/
-	static float unko=1.57f;
-	unko += 0.3f;
-	if (is_migi) {
-	MyMatrixRotationAxis( mbbt,  (zd),  mytheta);//-3.141592/2);
-	} else {
-	MyMatrixRotationAxis( mbbt,  (zd),  mytheta);//-3.141592/2);
-
-
-	}
+	static float unko=0;
+	unko+=0.2f;
+	MyMatrixRotationAxis(mbbt, (xd),  mytheta-3.141592/2);
 	aba = asin(mokuhyou->float3.x/L);
-
-
-	
-
-	if (is_migi) {
-	MyMatrixRotationAxis( mcct,  yd, aba);//+1.57);//+3.14/2);//-3.14/2);//* 3.14/2*/);
-	} else {
-		MyMatrixRotationAxis( mcct,  yd, -aba);//+1.57);//+3.14/2);//-3.14/2);//* 3.14/2*/);
-
-	}
+	MyMatrixRotationAxis(mcct, yd, aba-3.14/2);////* 3.14/2*/);
 //	mylog::writelog("%f,\n", aba);
 	MyMatrixMultiply(mbbt, mbbt, mcct);
 
-	
-	if(is_migi) {
-	MyMatrixRotationZ(maat,1.57);
-	} else {
-		MyMatrixRotationZ(maat,1.57);
-	}
-	
-	MyMatrixMultiply(mbbt, maat,mbbt);
-
-
 	arm2->offset_matrix = mbbt;
+	//MyMatrixMultiply(arm2->offset_matrix, mbbt,arm2->offset_matrix);
+	//MyMatrixRotationY(maat,1.57);
+	//MyMatrixMultiply(arm2->offset_matrix,maat, arm2->offset_matrix);
+
+
+
+	return true;
+}
+
+
+bool ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi) {
+
+
+
+
+
+	MeshBone* arm1;
+	MeshBone* arm2;
+	MeshBone* handjoint;
+
+	if (is_migi) {
+		arm1 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["handBone"]];
+	} else {
+		arm1 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["handBone"]];
+	}
+
+	// 各ボーンの位置を求めて長さを求める
+	MYVECTOR3 arm1_pos(0,0,0);
+	MYVECTOR3 arm2_pos(0,0,0);
+	MYVECTOR3 joint_pos(0,0,0);
+
+	MYMATRIX mma;
+	MyMatrixMultiply(mma,  arm1->matrix_local, arm1->combined_matrix);
+	MYMATRIX mmt;
+//	MyMatrixTranspose(mmt, mma);
+	MyVec3TransformCoord(arm1_pos, arm1_pos,mma);
+		
+	MyMatrixMultiply(mma  ,arm2->matrix_local,arm2->combined_matrix);
+//	MyMatrixTranspose(mmt, mma);
+	MyVec3TransformCoord(arm2_pos, arm2_pos,mma);
+	
+	MyMatrixMultiply(mma , handjoint->matrix_local, handjoint->combined_matrix);
+//	MyMatrixTranspose(mmt, mma);
+	MyVec3TransformCoord(joint_pos, joint_pos, mma);
+	
+
+	MYVECTOR3 arm2tomoku = *moku - arm2_pos;
+	MYVECTOR3 arm2joint =arm2_pos - joint_pos;
+	float arm2jointlen = MyVec3Length(arm2joint);
+	MyVec3Normalize(arm2tomoku, arm2tomoku);
+	arm2tomoku = arm2tomoku * arm2jointlen;
+
+	MYVECTOR3 mokuhf = arm2tomoku + arm2_pos;
+
+	
+
+
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	OBB re;
+	re.c = mokuhf;
+
+	g->drawOBB(g,0xFFFFFF00,&wo,view,g->getProj(), &re);
+
+	if (is_migi) {
+		float dthetaxa=0;
+		float dthetaya=0;
+		float dthetaza=0;
+
+		float dthetaxb=0;
+		float dthetayb=0;
+		float dthetazb=0;
+
+		for (int i = 0; i<5;i++) {
+		MyIKMODOKI modoki(robo->arm->rarm,&robo->atarihan->world,&mokuhf,"doBone", "handBone");
+		modoki.setXFreeBone("downarmBone");
+		modoki.setYFreeBone("downarmBone");
+		modoki.setZFreeBone("downarmBone");
+		/*
+		modoki.setXFreeBone("uparmBone");
+		modoki.setYFreeBone("uparmBone");
+		modoki.setZFreeBone("uparmBone");
+		*/
+		for(int i = 0;i < 1;i++) {
+		modoki.updateStep();
+		}
+		float dthetax = modoki.getdthetaXBone("downarmBone")/60.0;
+		float dthetay = modoki.getdthetaYBone("downarmBone")/60.0;
+		float dthetaz = modoki.getdthetaZBone("downarmBone")/60.0;
+
+		dthetaxa += dthetax;
+		dthetaya += dthetay;
+		dthetaza += dthetaz;
+/*
+		dthetax = modoki.getdthetaXBone("uparmBone")/3.14/60;
+		dthetay = modoki.getdthetaYBone("uparmBone")/3.14/60;
+		dthetaz = modoki.getdthetaZBone("uparmBone")/3.14/60;
+
+
+		dthetaxb += dthetax;
+		dthetayb += dthetay;
+		dthetazb += dthetaz;
+		*/
+		{
+		MYMATRIX rotxmat;
+		MYMATRIX rotymat;
+		MYMATRIX rotzmat;
+		MyMatrixRotationX(rotxmat, dthetaxa);
+		MyMatrixRotationY(rotymat, dthetaya);
+		MyMatrixRotationZ(rotzmat, dthetaza);
+
+
+
+
+
+		MeshBone* bn = arm2;
+		float frame = 40;//this->frame;
+		unsigned short ans_minmax;
+		unsigned short ans_maxmin;
+		float weight;
+		robo->arm->rarm->getOffsetMatrixToGetMinMaxAndWeightIndex(bn, frame, &ans_minmax, &ans_maxmin, &weight);
+		MYMATRIX mat1 = bn->animes[ans_minmax]->matrix_basis;
+		MYMATRIX mat2 = bn->animes[ans_maxmin]->matrix_basis;
+		MYMATRIX mat3;
+		for (int i=0;i<16;i++) {
+			mat2.m[i/4][i%4] *= weight;
+			mat1.m[i/4][i%4] *= (1-weight);
+			mat3.m[i/4][i%4] = mat2.m[i/4][i%4] + mat1.m[i/4][i%4];
+		}
+		MYVECTOR3 v(1,1,1);
+		WAsetScaleToMatrix(&mat3, &v);
+
+
+
+
+
+
+
+
+
+
+
+		MYMATRIX offmat= mat3;
+//			robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]]->offset_matrix;
+		MyMatrixMultiply(offmat, offmat,rotzmat);
+		MyMatrixMultiply(offmat, offmat,rotxmat);
+//		MyMatrixMultiply(offmat, offmat, rotymat);
+		MYMATRIX ans;
+		MyMatrixMultiply(ans, rotzmat, rotxmat);
+//		MyMatrixMultiply(ans, ans, rotymat);
+//		MyMatrixMultiply(ans, ans, trans);
+		MyMatrixMultiply(ans, ans, mat3);
+		robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]]->offset_matrix = ans;
+		robo->arm->rarm->animate(40,false);
+		}
+		/*
+		{
+		MYMATRIX rotxmat;
+		MYMATRIX rotymat;
+		MYMATRIX rotzmat;
+		MyMatrixRotationX(rotxmat, dthetaxb);
+		MyMatrixRotationY(rotymat, dthetayb);
+		MyMatrixRotationZ(rotzmat, dthetazb);
+		MYMATRIX offmat= 
+			robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]]->offset_matrix;
+		MyMatrixMultiply(offmat, offmat,rotzmat);
+		MyMatrixMultiply(offmat, offmat,rotxmat);
+		MyMatrixMultiply(offmat, offmat, rotymat);
+
+		robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]]->offset_matrix = offmat;
+		}
+		*/
+
+
+
+		}
+
+	} else {
+		float dthetaxa=0;
+		float dthetaya=0;
+		float dthetaza=0;
+		for (int i= 0;i<5;i++) {
+		MyIKMODOKI modoki(robo->arm->larm,&wo,&mokuhf,"uparmBone", "handBone");
+		modoki.setXFreeBone("downarmBone");
+		modoki.setYFreeBone("downarmBone");
+		modoki.setZFreeBone("downarmBone");
+		for(int i = 0;i < 1;i++) {
+			modoki.updateStep();
+		}
+		float dthetax = modoki.getdthetaXBone("downarmBone")/3.14/60;
+		float dthetay = modoki.getdthetaYBone("downarmBone")/3.14/60;
+		float dthetaz = modoki.getdthetaZBone("downarmBone")/3.14/60;
+		dthetaxa += dthetax;
+		dthetaya += dthetay;
+		dthetaza += dthetaz;
+		
+		MYMATRIX rotxmat;
+		MYMATRIX rotymat;
+		MYMATRIX rotzmat;
+		MyMatrixRotationY(rotxmat, dthetaxa);
+		MyMatrixRotationY(rotymat, dthetaya);
+		MyMatrixRotationY(rotzmat, dthetaza);
+		MYMATRIX offmat;
+		MyMatrixMultiply(offmat, rotzmat, rotxmat);
+		MyMatrixMultiply(offmat, offmat, rotymat);
+		robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]]->offset_matrix = offmat;
+		}
+	}
+
+
 
 	return true;
 }
