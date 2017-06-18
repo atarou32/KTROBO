@@ -264,8 +264,8 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 		//		arm->larm->animate(0,false);
 		//	}
 
-			MYVECTOR3 te = MYVECTOR3(1*cos(test),-2+4*sin(test)
-													 ,3+4*sin(test));
+			MYVECTOR3 te = MYVECTOR3(3,3,3);//1*cos(test),-2+4*sin(test)
+												//	 ,3+4*sin(test));
 
 			{
 			MYMATRIX temp;
@@ -301,8 +301,8 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			if (this->arm->rarm) {
 		//	this->arm->rarm->animate(0,true);
 	//		this->arm->rarm->animate(0,false);
-			MYVECTOR3 te = MYVECTOR3(1*cos(test),-2+4*sin(test)
-													 ,3+4*sin(test));
+			MYVECTOR3 te = MYVECTOR3(3,3,3);//1*cos(test),-2+4*sin(test)
+												//	 ,3+4*sin(test));
 			{
 
 			MYMATRIX temp;
@@ -316,9 +316,9 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			MYMATRIX world;
 			MyMatrixIdentity(world);
 			g->drawTriangle(g,0xFFFF0000,&world,view,g->getProj(), 
-				&MYVECTOR3(1*cos(test),-2+4*sin(test),3+4*sin(test)+1),
-				&MYVECTOR3(1*cos(test),-2+4*sin(test)+1,3+4*sin(test)),
-				&MYVECTOR3(1*cos(test)+1,-2+4*sin(test),3+4*sin(test)));
+				&MYVECTOR3(3,3,3),//1*cos(test),-2+4*sin(test),3+4*sin(test)+1),
+				&MYVECTOR3(3,4,3),//1*cos(test),-2+4*sin(test)+1,3+4*sin(test)),
+				&MYVECTOR3(3,4,4));//*cos(test)+1,-2+4*sin(test),3+4*sin(test)));
 
 
 			static float unko=0;
@@ -326,11 +326,46 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			if (unko > 1) {
 				unko = -1+0.01f;;
 			}
-			arm->rarm->animate(40,true);
-
+		
+			int i=0;
+			for (i=0;i<1;i++) {
 		if (ap->positionArm3(g, &temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-											 ,80+40*sin(test))*/, true)) {
-			arm->rarm->animate(40,false);
+											   ,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
+												
+												 
+										//		 	arm->rarm->animate(40,true);
+												 
+		//										 arm->rarm->animate(40,true);//
+												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 
+												 
+												 arm->rarm->animate(40,false);
+												 break;
+		} else {
+		//	ap->resetTheta();
+					 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 
+												 
+												 arm->rarm->animate(40,false);
+		}
+			}
+			
+		//	if ( i == 15) {
+			//	// arm ‚ÌƒAƒjƒ‚Í‚µ‚È‚¢
+				// ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+					//								 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 
+												 
+						//						 arm->rarm->animate(40,false);
+			//}
 
 
 				{
@@ -353,7 +388,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			}
 
 
-			}
+			
 
 
 

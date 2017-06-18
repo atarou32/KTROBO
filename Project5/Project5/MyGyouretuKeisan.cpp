@@ -49,7 +49,7 @@ void MyIKMODOKI::calcYMat() {
 		
 	now_moku_iti = gen_h;
 	MYVECTOR3 mymoku = mokuhyou - now_moku_iti;
-	mymoku = mymoku * 0.8f;
+	//mymoku = mymoku * 0.8f;
 	mymoku = mymoku + now_moku_iti;
 
 

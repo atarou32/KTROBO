@@ -1623,15 +1623,17 @@ void Game::Run() {
 	b.c = p;
 	b.e = MYVECTOR3(0.3,0.3,0.3);
 	g->drawOBBFill(g,0xFFFF00FFFF,&idenmat,&view,&proj,&b);
-	//SinaiNigiru sn(sinai, umesh_unit);
-	//sn.setDefaultAnimeFrameAll(testcc);
-	//sn.nigiraseru(g,&view,&proj);
+	
 	//umesh_unit->calcJyusinAndR();
 	//ss->nigiraseru(g,&view, &proj);
 	float t = this->ksgene->getNigiruhitoAnimeTemp();
 	
 	this->makers->getInstance(0)->update(testcc,sfuru);
 	sfuru->men_furaseru(g,&view,&proj,testcc,t);
+	SinaiNigiru sn(sinai, umesh_unit);
+	sn.setDefaultAnimeFrameAll(testcc);
+	sn.nigiraseru(g,&view,&proj);
+
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 
