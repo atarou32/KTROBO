@@ -338,6 +338,53 @@ float GUI::getMaxFromSlider(int gui_id) {
 	return 0;
 
 }
+void GUI::setCallLuaToSlider(int gui_id, bool t) {
+	CS::instance()->enter(CS_MESSAGE_CS, "setcalllua");
+	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
+
+		GUI_SLIDERH* s = sliderhs[p_sliderhs_index[gui_id]];
+		s->setIsCallLua(t);
+		CS::instance()->leave(CS_MESSAGE_CS, "setcalllua");
+		return;
+	}
+	if (p_slidervs_index.find(gui_id) != p_slidervs_index.end()) {
+
+		GUI_SLIDERV* s = slidervs[p_slidervs_index[gui_id]];
+		s->setIsCallLua(t);
+		CS::instance()->leave(CS_MESSAGE_CS, "setcalllua");
+		return;
+	}
+
+
+	CS::instance()->leave(CS_MESSAGE_CS, "setcalllua");
+	return;
+}
+
+bool GUI::getTriedToSendFromSlider(int gui_id) {
+		CS::instance()->enter(CS_MESSAGE_CS, "getmin");
+	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
+
+		GUI_SLIDERH* s = sliderhs[p_sliderhs_index[gui_id]];
+		bool ans = s->getIsLuaTriedToSend();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return ans;
+	}
+	if (p_slidervs_index.find(gui_id) != p_slidervs_index.end()) {
+
+		GUI_SLIDERV* s = slidervs[p_slidervs_index[gui_id]];
+		bool ans = s->getIsLuaTriedToSend();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return ans;
+	}
+
+
+	CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+	return false;
+
+
+
+}
+
 float GUI::getMinFromSlider(int gui_id) {
 	CS::instance()->enter(CS_MESSAGE_CS, "getmin");
 	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
@@ -1730,6 +1777,8 @@ GUI_SLIDERV::GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l
 	max_boxdayo.bottom = zentai.bottom - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 	max_boxdayo.right = zentai.right;// - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 */
+	is_call_lua = true;
+	is_lua_tried_to_send = false;
 }
 
 GUI_SLIDERV::~GUI_SLIDERV() {
@@ -1775,23 +1824,34 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 		if (is_min_pressed && getIsEffect()) {
 			//moveBox(-1,-1);
 			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
 			// lua ファイル実行
+			} else {
+				is_lua_tried_to_send = true;
+			}
 		}
 
 		if (is_max_pressed && getIsEffect()) {
 			//moveBox(1,1);
 			moveBox(abs(d->getMOUSESTATE()->mouse_dx), abs(d->getMOUSESTATE()->mouse_dy));
 			// lua ファイル実行
+			if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
-
+			}else {
+				is_lua_tried_to_send = true;
+			}
 		}
 
 		if (is_box_moved && getIsEffect() && d->getMOUSESTATE()->mouse_l_button_pressed) {
 
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 			// lua ファイル実行
+			if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+			} else {
+				is_lua_tried_to_send = true;
+			}
 		}
 	
 
@@ -1846,13 +1906,21 @@ bool GUI_SLIDERV::handleMessage(int msg, void* data, DWORD time) {
 				is_max_pressed = true;
 				this->setIsEffect(true);
 				moveBox(1,1);
+				if (is_call_lua) {
 				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+				} else {
+					is_lua_tried_to_send = true;
+				}
 				tex->setRenderTexTexPos(tex_id_max, KTROBO_GUI_SLIDERVMAX_PRESS_LEFT, KTROBO_GUI_SLIDERVMAX_PRESS_TOP,
 					KTROBO_GUI_SLIDERVMAX_PRESS_WIDTH,KTROBO_GUI_SLIDERVMAX_PRESS_HEIGHT);
 			} else if (butu_min & BUTUKARIPOINT_IN) {
 				is_min_pressed = true;
 				moveBox(-1,-1);
+				if (is_call_lua) {
 				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+				} else {
+					is_lua_tried_to_send = true;
+				}
 				this->setIsEffect(true);
 				tex->setRenderTexTexPos(tex_id_min, KTROBO_GUI_SLIDERVMIN_PRESS_LEFT, KTROBO_GUI_SLIDERVMIN_PRESS_TOP,
 					KTROBO_GUI_SLIDERVMIN_PRESS_WIDTH,KTROBO_GUI_SLIDERVMIN_PRESS_HEIGHT);
@@ -2006,6 +2074,8 @@ GUI_SLIDERH::GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l
 	max_boxdayo.bottom = zentai.bottom;
 	max_boxdayo.right = zentai.right - KTROBO_GUI_SLIDERMINMAX_WIDTH_HEIGHT;
 	*/
+	is_call_lua = true;
+	is_lua_tried_to_send = false;
 }
 
 
@@ -2094,23 +2164,35 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 		if (is_min_pressed && getIsEffect()) {
 			//moveBox(-1,-1);
 			moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+			if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+			
 			// lua ファイル実行
-
+			} else {
+				is_lua_tried_to_send = true;
+			}
 		}
 
 		if (is_max_pressed && getIsEffect()) {
 			//moveBox(1,1);
 			moveBox(abs(d->getMOUSESTATE()->mouse_dx), abs(d->getMOUSESTATE()->mouse_dy));
+			if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+			
 			// lua ファイル実行
-
+			} else {
+				is_lua_tried_to_send = true;
+			}
 		}
 
 		if (is_box_moved && getIsEffect() &&(d->getMOUSESTATE()->mouse_l_button_pressed)) {
 			moveBox(d->getMOUSESTATE()->mouse_dx, d->getMOUSESTATE()->mouse_dy);
 			// lua ファイル実行
+			if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+			} else {
+			is_lua_tried_to_send = true;
+			}
 		}
 	
 
@@ -2166,7 +2248,12 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 					KTROBO_GUI_SLIDERHMAX_PRESS_WIDTH,KTROBO_GUI_SLIDERHMAX_PRESS_HEIGHT);
 				moveBox(1,1);
 		//	moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+				if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+			
+				} else {
+					is_lua_tried_to_send = true;
+				}
 			} else if (butu_min & BUTUKARIPOINT_IN) {
 				is_min_pressed = true;
 				this->setIsEffect(true);
@@ -2174,7 +2261,11 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 					KTROBO_GUI_SLIDERHMIN_PRESS_WIDTH,KTROBO_GUI_SLIDERHMIN_PRESS_HEIGHT);
 				moveBox(-1,-1);
 		//	moveBox(-abs(d->getMOUSESTATE()->mouse_dx), -abs(d->getMOUSESTATE()->mouse_dy));
+				if (is_call_lua) {
 			LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+				} else {
+					is_lua_tried_to_send = true;
+				}
 			} else if (butu_now & BUTUKARIPOINT_IN) {
 				is_box_moved = true;
 				this->setIsEffect(true);
@@ -2204,9 +2295,11 @@ bool GUI_SLIDERH::handleMessage(int msg, void* data, DWORD time) {
 					KTROBO_GUI_SLIDERNOW_FOCUS_WIDTH,KTROBO_GUI_SLIDERNOW_FOCUS_HEIGHT);
 
 
-
+				if (is_call_lua) {
 				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
-
+				} else {
+					is_lua_tried_to_send = true;
+				}
 			
 			is_min_pressed = false;
 			is_max_pressed = false;

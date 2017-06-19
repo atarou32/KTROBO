@@ -84,6 +84,7 @@ Game::Game(void)
 	makers = 0;
 	robodayo = 0;
 	ss = 0;
+	sap = 0;
 }
 
 
@@ -720,6 +721,8 @@ bool Game::Init(HWND hwnd) {
 
 	ksgene = new KendoSinaiGenerator();
 	ksgene->Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
+	sap = new ShudouArmPositioner(robodayo, robodayo->ap);
+	sap->Init(hwnd, texdayo->getInstance(0), L , g->getScreenWidth(),g->getScreenHeight());
 	makers = new SinaiFuruAnimeMakers();
 	MyLuaGlueSingleton::getInstance()->setColSinaiFuruAnimeMakers(makers);
 	MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(0)->getInstance(0)->Init(ksgene,uum,sinai);
@@ -771,7 +774,7 @@ bool Game::Init(HWND hwnd) {
 	MYMATRIX view;
 	MYMATRIX proj;
 //	MYVECTOR3 from(0,-1,0);
-	MYVECTOR3 from(15,15,8);
+	MYVECTOR3 from(25,25,12);
 	MYVECTOR3 at(0,0,0);
 	MYVECTOR3 up(0,0,1);
 	MyMatrixIdentity(world);
@@ -978,7 +981,11 @@ void Game::Del() {
 		delete ksgene;
 		ksgene = 0;
 	}
-
+	 if (sap) {
+		 sap->Del();
+		 delete sap;
+		 sap = 0;
+	 }
 
 	 if (texdayo) {
 		delete texdayo;
@@ -1232,7 +1239,7 @@ void Game::Run() {
 	MYMATRIX view;
 	MYMATRIX proj;
 	MyMatrixIdentity(world);
-	MYVECTOR3 a(15,15,8);
+	MYVECTOR3 a(25,25,12);
 //	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
@@ -1718,7 +1725,7 @@ void Game::Run() {
 		robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
-
+		sap->update();
 	}
 	static float h = 0.0f;
 	h += 0.001f;

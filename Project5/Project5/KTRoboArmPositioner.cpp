@@ -448,7 +448,7 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 
 
 
-	MyMatrixRotationAxis(mcct, zd, unko2+aba/*-3.14/2*//* 3.14/2*/);
+	MyMatrixRotationAxis(mcct, zd, aba/*-3.14/2*//* 3.14/2*/);
 	MyMatrixMultiply(maat, mbbt, maat);
 	//MyMatrixMultiply(maat, mcct, maat);
 
@@ -606,11 +606,11 @@ void ArmPositioner::setArm3(Robo* robo, bool is_migi, MeshBone* arm1, MeshBone* 
 
 		dthetayb = 0;
 
-		if (dthetazb > 0.6) {
-			dthetazb = 0.6;
+		if (dthetazb > 0.9) {
+			dthetazb = 0.9;
 		}
-		if (dthetazb < -0.6) {
-			dthetazb = -0.6;
+		if (dthetazb < -0.9) {
+			dthetazb = -0.9;
 		}
 
 
@@ -725,7 +725,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	MYVECTOR3 unkov((rand() % 256)/256*0.05f-0.025f,
 		(rand() % 256)/256*0.05f-0.025f,
 		(rand() % 256)/256*0.05f-0.025f);
-	MYVECTOR3 mokuhf = arm2tomoku + arm2_pos;//+ unkov;
+	MYVECTOR3 mokuhf = arm2tomoku + arm2_pos+ unkov;
 
 
 
@@ -783,18 +783,18 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 			warukazu = 600000;
 			return KTROBO_ARMPOSITION_FINISH;
 			//und = true;
-		} else if (mlen < 0.08f) {
+		} else if (mlen < 0.12f) {
 			mada_count = 0;
 			warukazu = 3800;
 			und = true;
-		} else if (mlen < 1.2f) {
+		} else if (mlen < 0.9f) {
 			mada_count -=1;
 			warukazu = 160;
 			//und = true;
 
-		} else if (mlen <2.8f) {
+		} else if (mlen <1.8f) {
 			
-			warukazu = 9;
+			warukazu = 2;
 		} else {
 			warukazu = 1;
 			mada_count += 3;
@@ -830,7 +830,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		modoki.setYFreeBone("uparmBone");
 		modoki.setZFreeBone("uparmBone");
 		
-		for (int i = 0; i<3;i++) {
+		for (int i = 0; i<13;i++) {
 	
 		
 		for(int k = 0;k < 1;k++) {
@@ -1098,7 +1098,7 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
         dthetaxa += asinx/1000.0f* super_unko2;//asinx
 	}
 	if (_finite(asinz)) {
-		dthetaxb += asinz/1000.0f* super_unko + unko;
+		dthetaxb += asinz/1000.0f* super_unko;// + unko;
 	}
 	
 //	return true;
@@ -1220,5 +1220,279 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 
 
 	return true;
+
+}
+
+
+int ArmPositioner::positionArm34(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi) {
+
+	// uparmbone の位置を決定する
+
+
+	MeshBone* arm1;
+	MeshBone* arm2;
+	MeshBone* handjoint;
+
+	if (is_migi) {
+		arm1 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["handBone"]];
+	} else {
+		arm1 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["handBone"]];
+	}
+
+	
+	
+	if (is_migi) {
+	robo->arm->rarm->animate(40,true);
+	} else {
+		robo->arm->larm->animate(40,true);
+	}
+	
+	return 0;
+
+	// 各ボーンの位置を求めて長さを求める
+	MYVECTOR3 arm1_pos(0,0,0);
+	MYVECTOR3 arm2_pos(0,0,0);
+	MYVECTOR3 joint_pos(0,0,0);
+
+	MYMATRIX mma;
+	MyMatrixMultiply(mma,   arm1->matrix_local,arm1->parent_bone->combined_matrix);
+	MYMATRIX mmt;
+	//MyMatrixTranspose(mmt, mma);
+	mmt = mma;
+	MyVec3TransformCoord(arm1_pos, arm1_pos,mmt);
+		
+	MyMatrixMultiply(mma ,arm2->matrix_local, arm2->parent_bone->combined_matrix);
+	//MyMatrixTranspose(mmt, mma);
+	mmt = mma;
+	MyVec3TransformCoord(arm2_pos, arm2_pos,mmt);
+	
+	MyMatrixMultiply(mma  , handjoint->matrix_local, handjoint->parent_bone->combined_matrix);
+	//MyMatrixTranspose(mmt, mma);
+	mmt = mma;
+	MyVec3TransformCoord(joint_pos, joint_pos,mmt);
+
+	MYVECTOR3 mokuhf = arm2_pos;
+	
+	this->setArm3(robo,is_migi, arm1,arm2);
+	if (is_migi) {
+	robo->arm->rarm->animate(40,false);
+	} else {
+		robo->arm->larm->animate(40,false);
+	}
+
+	if (is_migi) {
+		
+	
+		
+		MyIKMODOKI modoki(robo->arm->rarm,&robo->atarihan->world,&mokuhf,"modoruBone", "downarmBone");
+		
+		modoki.setXFreeBone("uparmBone");
+		modoki.setYFreeBone("uparmBone");
+		modoki.setZFreeBone("uparmBone");
+		
+		for (int i = 0; i<13;i++) {
+	
+		
+		for(int k = 0;k < 1;k++) {
+		modoki.updateStep();
+		}
+		float dthetax = modoki.getdthetaXBone("uparmBone")/60.0;
+		float dthetay = modoki.getdthetaYBone("uparmBone")/60.0;
+		float dthetaz = modoki.getdthetaZBone("uparmBone")/60.0;
+
+		dthetaxa += dthetax;
+		dthetaya += dthetay;
+		dthetaza += dthetaz;
+
+
+
+
+		this->setArm3(robo,true,arm1,arm2);
+		robo->arm->rarm->animate(40,false);
+
+		}
+
+	} else {
+		float dthetaxa=0;
+		float dthetaya=0;
+		float dthetaza=0;
+		MyIKMODOKI modoki(robo->arm->larm,&robo->atarihan->world,&mokuhf,"uparmBone", "handBone");
+			modoki.setXFreeBone("downarmBone");
+		modoki.setYFreeBone("downarmBone");
+		modoki.setZFreeBone("downarmBone");
+		for (int i= 0;i<5;i++) {
+	
+	
+		for(int i = 0;i < 1;i++) {
+			modoki.updateStep();
+		}
+		float dthetax = modoki.getdthetaXBone("downarmBone")/3.14/60;
+		float dthetay = modoki.getdthetaYBone("downarmBone")/3.14/60;
+		float dthetaz = modoki.getdthetaZBone("downarmBone")/3.14/60;
+		dthetaxa += dthetax;
+		dthetaya += dthetay;
+		dthetaza += dthetaz;
+		
+		MYMATRIX rotxmat;
+		MYMATRIX rotymat;
+		MYMATRIX rotzmat;
+		MyMatrixRotationY(rotxmat, dthetaxa);
+		MyMatrixRotationY(rotymat, dthetaya);
+		MyMatrixRotationY(rotzmat, dthetaza);
+		MYMATRIX offmat;
+		MyMatrixMultiply(offmat, rotzmat, rotxmat);
+		MyMatrixMultiply(offmat, offmat, rotymat);
+		robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]]->offset_matrix = offmat;
+		}
+	}
+
+
+
+	return this->positionArm3(g,view,robo,moku,is_migi);
+}
+
+
+
+
+
+void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_width, int screen_height) {
+
+
+	gui = new GUI();
+	gui->Init(hw, tex,l,screen_width,screen_height);
+
+	screen_window_id = gui->makeWindow(0,0,screen_width,screen_height);
+	gui->setEffect(screen_window_id,true);
+	gui->setEnable(screen_window_id,true);
+	gui->setRender(screen_window_id, true);
+
+
+	MYRECT zentai;
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 0;
+	zentai.bottom = 30;
+
+	slider_dxa = gui->makeSliderH(&zentai,3.5,-0.37,0,"test.lua");
+	gui->setEffect(slider_dxa,true);
+	gui->setEnable(slider_dxa,true);
+	gui->setRender(slider_dxa,true);
+	gui->setCallLuaToSlider(slider_dxa , false);
+	gui->setPartToWindow(screen_window_id, slider_dxa);
+
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 40;
+	zentai.bottom = 70;
+
+	slider_dxb = gui->makeSliderH(&zentai,1.57,-1.57,0,"test.lua");
+	gui->setEffect(slider_dxb,true);
+	gui->setEnable(slider_dxb,true);
+	gui->setRender(slider_dxb,true);
+	gui->setCallLuaToSlider(slider_dxb , false);
+	gui->setPartToWindow(screen_window_id, slider_dxb);
+
+
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 80;
+	zentai.bottom = 110;
+
+	slider_dya = gui->makeSliderH(&zentai,0.2,-0.2,0,"test.lua");
+	gui->setEffect(slider_dya,true);
+	gui->setEnable(slider_dya,true);
+	gui->setRender(slider_dya,true);
+	gui->setCallLuaToSlider(slider_dya , false);
+	gui->setPartToWindow(screen_window_id, slider_dya);
+
+
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 120;
+	zentai.bottom = 150;
+
+	slider_dyb = gui->makeSliderH(&zentai,0,0,0,"test.lua");
+	gui->setEffect(slider_dyb,true);
+	gui->setEnable(slider_dyb,true);
+	gui->setRender(slider_dyb,true);
+	gui->setCallLuaToSlider(slider_dyb , false);
+	gui->setPartToWindow(screen_window_id, slider_dyb);
+
+
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 160;
+	zentai.bottom = 190;
+
+	slider_dza = gui->makeSliderH(&zentai,0.37,0,0,"test.lua");
+	gui->setEffect(slider_dza,true);
+	gui->setEnable(slider_dza,true);
+	gui->setRender(slider_dza,true);
+	gui->setCallLuaToSlider(slider_dza , false);
+	gui->setPartToWindow(screen_window_id, slider_dza);
+
+
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 200;
+	zentai.bottom = 230;
+
+	slider_dzb = gui->makeSliderH(&zentai,0.9,-0.9,0,"test.lua");
+	gui->setEffect(slider_dzb,true);
+	gui->setEnable(slider_dzb,true);
+	gui->setRender(slider_dzb,true);
+	gui->setCallLuaToSlider(slider_dzb , false);
+	gui->setPartToWindow(screen_window_id, slider_dzb);
+	gui->setRootWindowToInputMessageDispatcher(screen_window_id);
+
+}
+
+void ShudouArmPositioner::Del() {
+	if (gui) {
+		gui->deleteAll();
+		delete gui;
+		gui = 0;
+	}
+}
+
+void ShudouArmPositioner::update() {
+	bool t=false;
+
+	if (gui->getTriedToSendFromSlider(slider_dxa)) {
+		t = true;
+	}
+
+	if (gui->getTriedToSendFromSlider(slider_dxb)) {
+		t = true;
+	}
+
+	if (gui->getTriedToSendFromSlider(slider_dya)) {
+		t = true;
+	}
+
+	if (gui->getTriedToSendFromSlider(slider_dyb)) {
+		t = true;
+	}
+
+	if (gui->getTriedToSendFromSlider(slider_dza)) {
+		t = true;
+	}
+
+	if (gui->getTriedToSendFromSlider(slider_dzb)) {
+		t = true;
+	}
+	if (t) {
+		dthetaxa = gui->getNowFromSlider(slider_dxa);
+		dthetaxb = gui->getNowFromSlider(slider_dxb);
+		dthetaya = gui->getNowFromSlider(slider_dya);
+		dthetayb = gui->getNowFromSlider(slider_dyb);
+		dthetaza = gui->getNowFromSlider(slider_dza);
+		dthetazb = gui->getNowFromSlider(slider_dzb);
+		ap->setTheta(dthetaxa, dthetaxb, dthetaya, dthetayb, dthetaza, dthetazb);
+	}
 
 }

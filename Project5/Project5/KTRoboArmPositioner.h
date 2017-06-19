@@ -3,6 +3,8 @@
 
 #pragma once
 #include "MyDefine.h"
+#include "KTRoboGUI.h"
+
 using namespace MYDEFINE;
 
 namespace KTROBO {
@@ -16,6 +18,53 @@ namespace KTROBO {
 class Robo;
 class Graphics;
 class MeshBone;
+
+class ArmPositioner;
+
+class ShudouArmPositioner
+{
+	Robo* robo;
+	ArmPositioner* ap;
+	GUI* gui;
+	int screen_window_id;
+	float dthetaxa;
+	float dthetaxb;
+	float dthetaya;
+	float dthetayb;
+	float dthetaza;
+	float dthetazb;
+	int slider_dxa;
+	int slider_dxb;
+	int slider_dya;
+	int slider_dyb;
+	int slider_dza;
+	int slider_dzb;
+
+public:
+	ShudouArmPositioner(Robo* robo,ArmPositioner* ap){
+	this->ap = ap;
+	this->robo = robo;
+	gui = 0;
+	dthetaxa=0;
+	dthetaxb=0;
+	dthetaya=0;
+	dthetayb=0;
+	dthetaza=0;
+	dthetazb=0;
+	slider_dxa=0;
+	slider_dxb=0;
+	slider_dya=0;
+	slider_dyb=0;
+	slider_dza=0;
+	slider_dzb=0;
+	};
+	~ShudouArmPositioner(){};
+
+	void Init(HWND hw, Texture* tex, lua_State* l, int screen_width, int screen_height);
+	void Del();
+	void update();
+
+};
 class ArmPositioner
 {
 	//ap = new armPositioner(3.14/60000,3.14/3,0.62);
@@ -60,7 +109,7 @@ public:
 
 	int positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	bool positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
-
+	int positionArm34(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	void setArm3(Robo* robo, bool is_migi, MeshBone* uparm1, MeshBone* downarm2);
 	void resetTheta();
 	void setTheta(float dthetaxa, float dthetaxb, float dthetaya, float dthetayb, float dthetaza, float dthetazb) {

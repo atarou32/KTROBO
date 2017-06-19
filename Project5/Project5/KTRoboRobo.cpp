@@ -133,8 +133,8 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	atarihan->draw(g,view,proj,0,NULL,NULL,true,false,true,true);
 	LockOnSystem sys;
 
-	//sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
-	sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
+	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
+	//sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
 
 
 
@@ -144,7 +144,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 	AtariUnitAnsKWSK ans[128];
 	static float vdayo =0;
-	static float iunko = 220;
+	static float iunko = 0;
 	bool setdayo = false;
 	move_state->exec(g, this, dt, stamp);
 
@@ -335,19 +335,17 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			for (i=0;i<1;i++) {
 				LockOnSystem los;
 				
-				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,3,3,5);
+				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,300,300,500);
 				MyVec3TransformCoord(te,te,atarihan->world);
 				OBB ob;
 				ob.c = te;
-				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,3,3,5);
+				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,300,300,500);
 				g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
 		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
 											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
 												
 												 
-										//		 	arm->rarm->animate(40,true);
-												 
-												// arm->rarm->animate(40,true);//
+							
 												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
 													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
@@ -365,7 +363,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 												 
 												 
 												 
-												 arm->rarm->animate(40,false);
+											 arm->rarm->animate(40,false);
 		}
 			}
 			

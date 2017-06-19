@@ -658,6 +658,10 @@ public:
 class GUI_SLIDERV : public GUI_PART {
 
 private:
+	bool is_call_lua;
+	bool is_lua_tried_to_send; // 変更タイミング
+
+
 	MYRECT zentai_box;
 	MYRECT min_box;
 	MYRECT max_box;
@@ -676,6 +680,17 @@ private:
 	float getTexIdNowY();
 	void setMINMAXNOWFROMZENTAI();
 public:
+	void setIsCallLua(bool t) {
+		is_call_lua = t;
+	}
+	bool getIsLuaTriedToSend() {
+		if (is_lua_tried_to_send) {
+			is_lua_tried_to_send = false;
+			return true;
+		}
+		return false;//is_lua_tried_to_send;
+	}
+
 	GUI_SLIDERV(MYRECT zentai, float max, float min, float now, char* l_str);
 	~GUI_SLIDERV();
 	float getMax() {return max;}
@@ -702,6 +717,9 @@ public:
 class GUI_SLIDERH : public GUI_PART {
 
 private:
+	bool is_call_lua;
+	bool is_lua_tried_to_send; // 変更タイミング
+
 	MYRECT zentai_box;
 	MYRECT min_box;
 	MYRECT max_box;
@@ -720,6 +738,17 @@ private:
 	float getTexIdNowX();
 	void setMINMAXNOWFROMZENTAI();
 public:
+	void setIsCallLua(bool t) {
+		is_call_lua = t;
+	}
+	bool getIsLuaTriedToSend() {
+		if (is_lua_tried_to_send) {
+			is_lua_tried_to_send = false;
+			return true;
+		}
+		return false;//is_lua_tried_to_send;
+	}
+
 	GUI_SLIDERH(MYRECT zentai, float max, float min, float now, char* l_str);
 	~GUI_SLIDERH();
 	bool moveBox(int dx, int dy);
@@ -796,6 +825,9 @@ public:
 	float getNowFromSlider(int gui_id);
 	float getMaxFromSlider(int gui_id);
 	float getMinFromSlider(int gui_id);
+	bool getTriedToSendFromSlider(int gui_id);
+	void setCallLuaToSlider(int gui_id, bool t);
+
 	void setNOWMAXMINToSlider(int gui_id, float max, float min, float now);
 	void setTabIndex(int tab_gui_id, int index);
 	void setRootWindowToInputMessageDispatcher(int gui_window_id);

@@ -986,8 +986,9 @@ public:
 class Robo : public INPUTSHORICLASS
 {
 private:
+public:
 	ArmPositioner* ap;
-
+private:
 	RoboHead* head;
 	RoboBody* body;
 	RoboLeg* leg;
