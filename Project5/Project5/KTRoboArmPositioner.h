@@ -63,7 +63,14 @@ public:
 
 	void setArm3(Robo* robo, bool is_migi, MeshBone* uparm1, MeshBone* downarm2);
 	void resetTheta();
-
+	void setTheta(float dthetaxa, float dthetaxb, float dthetaya, float dthetayb, float dthetaza, float dthetazb) {
+		this->dthetaxa = dthetaxa;
+		this->dthetaxb = dthetaxb;
+		this->dthetaya = dthetaya;
+		this->dthetayb = dthetayb;
+		this->dthetaza = dthetaza;
+		this->dthetazb = dthetazb;
+	}
 
 };
 }

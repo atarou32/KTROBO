@@ -597,20 +597,20 @@ void ArmPositioner::setArm3(Robo* robo, bool is_migi, MeshBone* arm1, MeshBone* 
 		MYMATRIX rotzmat;
 
 
-		if (dthetaxb > 1) {
-			dthetaxb = 1;
+		if (dthetaxb > 1.57) {
+			dthetaxb = 1.57;
 		}
-		if (dthetaxb < -1) {
-			dthetaxb = -1;
+		if (dthetaxb < -1.57) {
+			dthetaxb = -1.57;
 		}
 
 		dthetayb = 0;
 
-		if (dthetazb > 0.3) {
-			dthetazb = 0.3;
+		if (dthetazb > 0.6) {
+			dthetazb = 0.6;
 		}
-		if (dthetazb < -0.3) {
-			dthetazb = -0.3;
+		if (dthetazb < -0.6) {
+			dthetazb = -0.6;
 		}
 
 
@@ -739,7 +739,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 
 	g->drawOBB(g,0xFFFFFF00,&wo,view,g->getProj(), &re);
 
-	mokuhf = (mokuhf- joint_pos)*5/4.0 + joint_pos;
+	mokuhf = (mokuhf- joint_pos)*4/4.0 + joint_pos;
 	re.c = mokuhf;
 	g->drawOBB(g,0xFF00FF00,&wo,view,g->getProj(), &re);
 
@@ -771,7 +771,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	static bool und= false;
 	und = false;
 
-	mokuhf = *moku;
+	//mokuhf = *moku;
 	if (len < 0.3f) {
                		mada_count = 0;
 		return KTROBO_ARMPOSITION_FINISH;// すでに到達している
@@ -783,27 +783,27 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 			warukazu = 600000;
 			return KTROBO_ARMPOSITION_FINISH;
 			//und = true;
-		} else if (mlen < 0.2f) {
+		} else if (mlen < 0.08f) {
 			mada_count = 0;
-			warukazu = 380;
+			warukazu = 3800;
 			und = true;
-		} else if (mlen < 0.5f) {
-			
-			warukazu = 16;
+		} else if (mlen < 1.2f) {
+			mada_count -=1;
+			warukazu = 160;
 			//und = true;
 
-		} else if (mlen <1.0f) {
-			mada_count += 10;
-			warukazu = 6;
+		} else if (mlen <2.8f) {
+			
+			warukazu = 9;
 		} else {
 			warukazu = 1;
-			mada_count += 30;
-			//resetTheta();
+			mada_count += 3;
+		//	resetTheta();
       		positionArm33(g, view, robo, moku, is_migi);
 
 		}
 		mada_count++;
-		if (mada_count > 160) {
+		if (mada_count > 760) {
 			resetTheta();
 			this->setArm3(robo,is_migi,arm1,arm2);
 			if (is_migi) {
@@ -830,7 +830,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		modoki.setYFreeBone("uparmBone");
 		modoki.setZFreeBone("uparmBone");
 		
-		for (int i = 0; i<15;i++) {
+		for (int i = 0; i<3;i++) {
 	
 		
 		for(int k = 0;k < 1;k++) {
@@ -839,6 +839,16 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		float dthetax = modoki.getdthetaXBone("uparmBone")/60.0/warukazu;
 		float dthetay = modoki.getdthetaYBone("uparmBone")/60.0/warukazu;
 		float dthetaz = modoki.getdthetaZBone("uparmBone")/60.0/warukazu;
+		unsigned int unko_count=0;
+		if (abs(dthetax) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetay) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetaz) < 0.000001) {
+			unko_count++;
+		}
 
 		if (und) {
 			dthetax /= 2.0f;
@@ -858,6 +868,15 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		dthetax = modoki.getdthetaXBone("downarmBone")/60/warukazu;
 		dthetay = modoki.getdthetaYBone("downarmBone")/60/warukazu;
 		dthetaz = modoki.getdthetaZBone("downarmBone")/60/warukazu;
+		if (abs(dthetax) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetay) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetaz) < 0.000001) {
+			unko_count++;
+		}
 
 		if (und) {
 			dthetax /= 2.0f;
@@ -874,6 +893,9 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		dthetayb += dthetay;
 		dthetazb += dthetaz;
 	
+		if ((unko_count == 6) && !und) {
+			resetTheta();
+		}
 
 		this->setArm3(robo,true,arm1,arm2);
 		robo->arm->rarm->animate(40,false);
@@ -999,10 +1021,45 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 	MYVECTOR3 arm2tojoint = joint_pos - arm2_pos;
 	MYVECTOR3 jointtomoku = arm2tomoku - arm2tojoint;
 	MYVECTOR3 crossdayo;
+	float dotdayo = MyVec3Dot(arm2tomoku, arm2tojoint);
+	if (dotdayo < 0) {
+		// あさっての方向を向いているので変更する
+		if (dthetaxa > 1.2) {
+		dthetaxa  -= 0.02f;
+		} else if(dthetaxa < -0.2) {
+			dthetaxa = 1.57f;
+		}
+
+
+
+
+
+
+
+	}
+
+	
 	MyVec3Cross(crossdayo, arm2tomoku, arm2tojoint);
+	
 	float super_unko = 1;
 	float super_unko2=1;
-	if (crossdayo.float3.z > 0) {
+	{
+	
+
+	}
+	{
+	MYVECTOR3 crossdesu;
+	MYVECTOR3 tempz(0,0,1);
+	MyVec3Cross(crossdesu, tempz, arm2tojoint);
+	MYVECTOR3 kotai;
+	MyVec3Cross(kotai, crossdesu, arm2tojoint);
+
+	float tes = MyVec3Dot(kotai, arm2tomoku);
+	float tes2 = MyVec3Dot(crossdesu, arm2tomoku);
+	if (tes > 0) {
+		super_unko2 = -1;
+	}
+	if (tes2 > 0) {
 		// 右にある
 		super_unko = 1;
 	} else {
@@ -1010,10 +1067,9 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 		super_unko = -1;
 	}
 
-	if (jointtomoku.float3.z > 0) {
-		super_unko2 = -1;
-	}
 
+
+	}
 	float asindayo;
 	if (MyVec3Length(arm2tomoku) != 0) {
 		asindayo = asin(MyVec3Length(crossdayo) / MyVec3Length(arm2tomoku) / MyVec3Length(arm2tojoint));
@@ -1035,14 +1091,17 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 	MyVec3Cross(crossz, zz,zzz);
 	float asinx = asin(MyVec3Length(crossx));
 	float asinz = asin(MyVec3Length(crossz));
+	static float unko=0;
+	unko += 0.3f;
+	
 	if (_finite(asinx)) {
-        dthetaxa += asinx/1000.0f* super_unko2;
+        dthetaxa += asinx/1000.0f* super_unko2;//asinx
 	}
 	if (_finite(asinz)) {
-		dthetaxb += asinz/1000.0f* super_unko;
+		dthetaxb += asinz/1000.0f* super_unko + unko;
 	}
 	
-	return true;
+//	return true;
 
 
 
@@ -1149,8 +1208,7 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 
 	// episiron psi alpha の三角をdthetaに入れる
 	
-	static float unko=0;
-	unko += 0.3f;
+
 
 //	dthetaxb = (dthetaxb+(alpha + alpha2 - 3.14))/2;
 //	dthetaxa = (dthetaxa + epsiron+1.57f)/2;

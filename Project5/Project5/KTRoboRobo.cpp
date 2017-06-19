@@ -133,7 +133,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	atarihan->draw(g,view,proj,0,NULL,NULL,true,false,true,true);
 	LockOnSystem sys;
 
-	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
+	//sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
 	sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
 
 
@@ -144,6 +144,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 	AtariUnitAnsKWSK ans[128];
 	static float vdayo =0;
+	static float iunko = 220;
 	bool setdayo = false;
 	move_state->exec(g, this, dt, stamp);
 
@@ -332,23 +333,32 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 		
 			int i=0;
 			for (i=0;i<1;i++) {
-		if (ap->positionArm2(0.01,0, this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-											   ,80+40*sin(test))*/, true)) {
+				LockOnSystem los;
+				
+				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,3,3,5);
+				MyVec3TransformCoord(te,te,atarihan->world);
+				OBB ob;
+				ob.c = te;
+				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,3,3,5);
+				g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
 												
 												 
 										//		 	arm->rarm->animate(40,true);
 												 
-		//										 arm->rarm->animate(40,true);//
-												 //ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-												//	 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+												// arm->rarm->animate(40,true);//
+												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
 												 
 												 
 												 
 												 arm->rarm->animate(40,false);
+												 iunko++;
 												 break;
 		} else {
-			ap->resetTheta();
+		//	ap->resetTheta();
 		//			 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
 			//										 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
@@ -650,6 +660,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	anime_loop_leg.setTimeAndSpeed(0.01,0);
 //	world = atarihan->world;
 	ap = new ArmPositioner(3.14/60000,3.14/3,0.62);
+	ap->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
 }
 
 void Robo::release() {
