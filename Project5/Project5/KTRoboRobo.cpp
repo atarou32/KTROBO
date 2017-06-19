@@ -1,5 +1,6 @@
 #include "KTRoboRobo.h"
 #include "KTRoboGameError.h"
+#include "KTRoboLockOnSystem.h"
 
 using namespace KTROBO;
 Robo::Robo(void)
@@ -130,8 +131,10 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 
 	atarihan->draw(g,view,proj,0,NULL,NULL,true,false,true,true);
+	LockOnSystem sys;
 
-
+	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
+	sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,3,3,5);
 
 
 
@@ -329,15 +332,15 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 		
 			int i=0;
 			for (i=0;i<1;i++) {
-		if (ap->positionArm3(g, &temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-											   ,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
+		if (ap->positionArm2(0.01,0, this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+											   ,80+40*sin(test))*/, true)) {
 												
 												 
 										//		 	arm->rarm->animate(40,true);
 												 
 		//										 arm->rarm->animate(40,true);//
-												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+												 //ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+												//	 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
 												 
 												 
@@ -345,9 +348,9 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 												 arm->rarm->animate(40,false);
 												 break;
 		} else {
-		//	ap->resetTheta();
-					 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			ap->resetTheta();
+		//			 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+			//										 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
 												 
 												 

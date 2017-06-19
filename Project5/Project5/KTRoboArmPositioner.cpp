@@ -292,6 +292,7 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 	MeshBone* handjoint;
 
 	if (is_migi) {
+		robo->arm->rarm->animate(40,true);//
 		arm1 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]];
 		arm2 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]];
 		handjoint = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["handBone"]];
@@ -432,7 +433,9 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 		MyVec3TransformNormal(zd, tt, cc);
 	}
 
-	
+	static float unko2=0;
+	unko2 += 0.3f;
+
 	MyMatrixIdentity(maat);
 	MyMatrixIdentity(mbbt);
 	MyMatrixRotationAxis(maat, yd, -epsiron);
@@ -445,9 +448,9 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 
 
 
-	MyMatrixRotationAxis(mcct, zd, aba/*-3.14/2*//* 3.14/2*/);
+	MyMatrixRotationAxis(mcct, zd, unko2+aba/*-3.14/2*//* 3.14/2*/);
 	MyMatrixMultiply(maat, mbbt, maat);
-	//D3DXMatrixMultiply(&maat, &mcct, &maat);
+	//MyMatrixMultiply(maat, mcct, maat);
 
 	arm1->offset_matrix = maat;
 	MyMatrixRotationZ(maat,1.57);
@@ -476,7 +479,7 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 	unko+=0.2f;
 	MyMatrixRotationAxis(mbbt, (xd),  mytheta-3.141592/2);
 	aba = asin(mokuhyou->float3.x/L);
-	MyMatrixRotationAxis(mcct, yd, aba-3.14/2);////* 3.14/2*/);
+	MyMatrixRotationAxis(mcct, yd, -aba);//-3.14/2);////* 3.14/2*/);
 //	mylog::writelog("%f,\n", aba);
 	MyMatrixMultiply(mbbt, mbbt, mcct);
 
@@ -736,7 +739,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 
 	g->drawOBB(g,0xFFFFFF00,&wo,view,g->getProj(), &re);
 
-	mokuhf = (mokuhf- joint_pos)*4/4.0 + joint_pos;
+	mokuhf = (mokuhf- joint_pos)*5/4.0 + joint_pos;
 	re.c = mokuhf;
 	g->drawOBB(g,0xFF00FF00,&wo,view,g->getProj(), &re);
 
@@ -768,7 +771,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	static bool und= false;
 	und = false;
 
-	//mokuhf = *moku;
+	mokuhf = *moku;
 	if (len < 0.3f) {
                		mada_count = 0;
 		return KTROBO_ARMPOSITION_FINISH;// ‚·‚Å‚É“ž’B‚µ‚Ä‚¢‚é
@@ -786,15 +789,16 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 			und = true;
 		} else if (mlen < 0.5f) {
 			
-			warukazu = 160;
-			und = true;
+			warukazu = 16;
+			//und = true;
 
 		} else if (mlen <1.0f) {
-		//	mada_count += 1;
+			mada_count += 10;
 			warukazu = 6;
 		} else {
 			warukazu = 1;
-			mada_count += 1;
+			mada_count += 30;
+			//resetTheta();
       		positionArm33(g, view, robo, moku, is_migi);
 
 		}
@@ -872,7 +876,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	
 
 		this->setArm3(robo,true,arm1,arm2);
-		//robo->arm->rarm->animate(40,false);
+		robo->arm->rarm->animate(40,false);
 
 		}
 
@@ -993,9 +997,11 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 
 	MYVECTOR3 arm2tomoku = *moku - arm2_pos;
 	MYVECTOR3 arm2tojoint = joint_pos - arm2_pos;
+	MYVECTOR3 jointtomoku = arm2tomoku - arm2tojoint;
 	MYVECTOR3 crossdayo;
 	MyVec3Cross(crossdayo, arm2tomoku, arm2tojoint);
 	float super_unko = 1;
+	float super_unko2=1;
 	if (crossdayo.float3.z > 0) {
 		// ‰E‚É‚ ‚é
 		super_unko = 1;
@@ -1003,6 +1009,11 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 		// ¶‚É‚ ‚é
 		super_unko = -1;
 	}
+
+	if (jointtomoku.float3.z > 0) {
+		super_unko2 = -1;
+	}
+
 	float asindayo;
 	if (MyVec3Length(arm2tomoku) != 0) {
 		asindayo = asin(MyVec3Length(crossdayo) / MyVec3Length(arm2tomoku) / MyVec3Length(arm2tojoint));
@@ -1025,13 +1036,13 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 	float asinx = asin(MyVec3Length(crossx));
 	float asinz = asin(MyVec3Length(crossz));
 	if (_finite(asinx)) {
-        dthetaxa += asinx/10.0f;
+        dthetaxa += asinx/1000.0f* super_unko2;
 	}
 	if (_finite(asinz)) {
-		dthetaxb += asinz/10.0f* super_unko;
+		dthetaxb += asinz/1000.0f* super_unko;
 	}
 	
-//	return true;
+	return true;
 
 
 
@@ -1141,9 +1152,9 @@ bool ArmPositioner::positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVEC
 	static float unko=0;
 	unko += 0.3f;
 
-	//dthetaxb = (dthetaxb+(alpha + alpha2 - 3.14))/2;
-	//dthetaxa = (dthetaxa + epsiron+1.57f)/2;
-	dthetaya = (dthetaya - pusai)/2;
+//	dthetaxb = (dthetaxb+(alpha + alpha2 - 3.14))/2;
+//	dthetaxa = (dthetaxa + epsiron+1.57f)/2;
+	dthetaya = (dthetaya + pusai)/2;
 	dthetayb += (rand() %256)/256.0*0.04 - 0.02;
 	dthetaza += (rand() %256)/256.0*0.04 - 0.02;
 	dthetazb += (rand() %256)/256.0*0.04 - 0.02;
