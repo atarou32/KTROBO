@@ -21,6 +21,49 @@ class MeshBone;
 
 class ArmPositioner;
 
+struct ArmPoint {
+	MYVECTOR3 pos;
+	float dthetaxa;
+	float dthetaxb;
+	float dthetaya;
+	float dthetayb;
+	float dthetaza;
+	float dthetazb;
+};
+
+#define KTROBO_ARMPOINT8_MHU 0
+#define KTROBO_ARMPOINT8_MHS 1
+#define KTROBO_ARMPOINT8_MMU 2
+#define KTROBO_ARMPOINT8_MMS 3
+#define KTROBO_ARMPOINT8_UHU 4
+#define KTROBO_ARMPOINT8_UHS 5
+#define KTROBO_ARMPOINT8_UMU 6
+#define KTROBO_ARMPOINT8_UMS 7
+
+class ArmPoint8Positioner {
+private:
+	ArmPoint points[8];
+public:
+	ArmPoint8Positioner(){
+		for (int i=0;i<8;i++) {
+			points[i].pos = MYVECTOR3(0,0,0);
+			points[i].dthetaxa = 0;
+			points[i].dthetaxb = 0;
+			points[i].dthetaya = 0;
+			points[i].dthetayb = 0;
+			points[i].dthetaza = 0;
+			points[i].dthetazb = 0;
+		}
+	
+	};
+	~ArmPoint8Positioner(){};
+
+	void setPoint(int index, ArmPoint* ap);
+	ArmPoint* getPoint(MYVECTOR3* moku);
+	bool isInPoint(MYVECTOR3* moku);
+};
+
+
 class ShudouArmPositioner
 {
 	Robo* robo;

@@ -1496,3 +1496,260 @@ void ShudouArmPositioner::update() {
 	}
 
 }
+
+
+
+void ArmPoint8Positioner::setPoint(int index, ArmPoint* ap) {
+if (index > 8) return;
+points[index].dthetaxa = ap->dthetaxa;
+points[index].dthetaxb = ap->dthetaxb;
+points[index].dthetaya = ap->dthetaya;
+points[index].dthetayb = ap->dthetayb;
+points[index].dthetaza = ap->dthetaza;
+points[index].dthetazb = ap->dthetazb;
+points[index].pos = ap->pos;
+}
+
+
+ArmPoint* getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, ArmPoint* point3, MYVECTOR3* moku) {
+	static ArmPoint ans;
+	ans.pos = MYVECTOR3(0,0,0);
+	ans.dthetaxa = 0;
+	ans.dthetaxb = 0;
+	ans.dthetaya = 0;
+	ans.dthetayb = 0;
+	ans.dthetaza = 0;
+	ans.dthetazb = 0;
+
+	// 表現できない場合は予測してdtheta を返す
+	MYVECTOR3 vec1 = point1->pos - kitenpoint->pos;
+	MYVECTOR3 vec2 = point2->pos - kitenpoint->pos;
+	MYVECTOR3 vec3 = point3->pos - kitenpoint->pos;
+
+	MYVECTOR3 n_vec1;
+	MyVec3Normalize(n_vec1,vec1);
+	MYVECTOR3 n_vec2;
+	MyVec3Normalize(n_vec2, vec2);
+	MYVECTOR3 n_vec3;
+	MyVec3Normalize(n_vec3, vec3);
+
+	MYVECTOR3 kitentomoku = *moku - kitenpoint->pos;
+	
+	float A11 = n_vec1.float3.x;
+	float A12 = n_vec1.float3.y;
+	float A13 = n_vec1.float3.z;
+
+	float A21 = n_vec2.float3.x;
+	float A22 = n_vec2.float3.y;
+	float A23 = n_vec2.float3.z;
+	
+	float A31 = n_vec3.float3.x;
+	float A32 = n_vec3.float3.y;
+	float A33 = n_vec3.float3.z;
+	float detA;
+	detA = A11*A22*A33 + A12*A23*A31 + A13*A21*A32 - A13*A22*A31 - A11*A23*A32- A12*A21*A33;
+
+	if (abs(detA) <0.000001f) {
+		detA = 1;
+	}
+
+	float x1a = ((A22*A33- A32*A23)* kitentomoku.float3.x - (A21* A33 - A31 * A23)* kitentomoku.float3.y + (A21 * A32 - A31*A22)*kitentomoku.float3.z) /detA;
+	float x2a = (-(A12 * A33 - A32*A13)*kitentomoku.float3.x + (A11*A33 - A31* A13)*kitentomoku.float3.y - (A11 * A32 - A31*A12)*kitentomoku.float3.z)/detA;
+	float x3a = ((A12 * A23 - A22*A13)*kitentomoku.float3.x - (A11*A23 - A21* A13)*kitentomoku.float3.y + (A11*A22 - A21*A12)*kitentomoku.float3.z)/detA;
+
+	// これで　moku = kiten + x1a * n_vec1 + x2a * n_vec2 + x3a * n_vec3 と表せる
+	float hi1 = x1a / MyVec3Length(vec1);
+	float hi2 = x2a / MyVec3Length(vec2);
+	float hi3 = x3a / MyVec3Length(vec3);
+
+	if ((hi1 <0) || (hi2 < 0) ||(hi3 <0)) {
+		return NULL;
+	}
+
+	if ((hi1 > 1) || (hi2 > 1) || (hi3 > 1)) {
+		return NULL;
+	}
+
+	// dtheta の計算を行う
+	float dthetaxa1 = kitenpoint->dthetaxa * ( 1-hi1) + point1->dthetaxa * hi1;
+	float dthetaxb1 = kitenpoint->dthetaxb * ( 1-hi1) + point1->dthetaxb * hi1;
+	float dthetaya1 = kitenpoint->dthetaya * ( 1-hi1) + point1->dthetaya * hi1;
+	float dthetayb1 = kitenpoint->dthetayb * ( 1-hi1) + point1->dthetayb * hi1;
+	float dthetaza1 = kitenpoint->dthetaza * ( 1-hi1) + point1->dthetaza * hi1;
+	float dthetazb1 = kitenpoint->dthetazb * ( 1-hi1) + point1->dthetazb * hi1;
+
+	float dthetaxa2 = kitenpoint->dthetaxa * ( 1-hi2) + point2->dthetaxa * hi2;
+	float dthetaxb2 = kitenpoint->dthetaxb * ( 1-hi2) + point2->dthetaxb * hi2;
+	float dthetaya2 = kitenpoint->dthetaya * ( 1-hi2) + point2->dthetaya * hi2;
+	float dthetayb2 = kitenpoint->dthetayb * ( 1-hi2) + point2->dthetayb * hi2;
+	float dthetaza2 = kitenpoint->dthetaza * ( 1-hi2) + point2->dthetaza * hi2;
+	float dthetazb2 = kitenpoint->dthetazb * ( 1-hi2) + point2->dthetazb * hi2;
+
+	float dthetaxa3 = kitenpoint->dthetaxa * ( 1-hi3) + point3->dthetaxa * hi3;
+	float dthetaxb3 = kitenpoint->dthetaxb * ( 1-hi3) + point3->dthetaxb * hi3;
+	float dthetaya3 = kitenpoint->dthetaya * ( 1-hi3) + point3->dthetaya * hi3;
+	float dthetayb3 = kitenpoint->dthetayb * ( 1-hi3) + point3->dthetayb * hi3;
+	float dthetaza3 = kitenpoint->dthetaza * ( 1-hi3) + point3->dthetaza * hi3;
+	float dthetazb3 = kitenpoint->dthetazb * ( 1-hi3) + point3->dthetazb * hi3;
+
+	ans.dthetaxa = (dthetaxa1 + dthetaxa2 + dthetaxa3) / 3;
+	ans.dthetaxb = (dthetaxb1 + dthetaxb2 + dthetaxb3) / 3;
+	ans.dthetaya = (dthetaya1 + dthetaya2 + dthetaya3) / 3;
+	ans.dthetayb = (dthetayb1 + dthetayb2 + dthetayb3) / 3;
+	ans.dthetaza = (dthetaza1 + dthetaza2 + dthetaza3) / 3;
+	ans.dthetazb = (dthetazb1 + dthetazb2 + dthetazb3) / 3;
+
+	return &ans;
+}
+ArmPoint* ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
+	static ArmPoint ans;
+	ans.pos = MYVECTOR3(0,0,0);
+	ans.dthetaxa = 0;
+	ans.dthetaxb = 0;
+	ans.dthetaya = 0;
+	ans.dthetayb = 0;
+	ans.dthetaza = 0;
+	ans.dthetazb = 0;
+
+	// どうやってやればいいのか・・
+	// 12ベクトルのうち空間を構成する3ベクトルの組を４つ作って
+	// 3ベクトルでmoku の位置を表現させて
+	// 表現できない場合でも　計算に加える
+	// そして平均（重心）を取る
+
+	ArmPoint* anp1 = getPointPart(&points[KTROBO_ARMPOINT8_MHU],&points[KTROBO_ARMPOINT8_UHU],
+		&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHS],moku);
+	
+	int c=0;
+
+	if (anp1) {
+		c++;
+		ans.dthetaxa += anp1->dthetaxa;
+		ans.dthetaxb += anp1->dthetaxb;
+		ans.dthetaya += anp1->dthetaya;
+		ans.dthetayb += anp1->dthetayb;
+		ans.dthetaza += anp1->dthetaza;
+		ans.dthetazb += anp1->dthetazb;
+	}
+	
+	
+	
+	ArmPoint* anp2 = getPointPart(&points[KTROBO_ARMPOINT8_UMS],&points[KTROBO_ARMPOINT8_UHS],
+		&points[KTROBO_ARMPOINT8_UMU], &points[KTROBO_ARMPOINT8_MMS], moku);
+	if (anp2) {
+		c++;
+		ans.dthetaxa += anp2->dthetaxa;
+		ans.dthetaxb += anp2->dthetaxb;
+		ans.dthetaya += anp2->dthetaya;
+		ans.dthetayb += anp2->dthetayb;
+		ans.dthetaza += anp2->dthetaza;
+		ans.dthetazb += anp2->dthetazb;
+	}
+	ArmPoint* anp3 = getPointPart(&points[KTROBO_ARMPOINT8_UHS], &points[KTROBO_ARMPOINT8_UHU],
+		&points[KTROBO_ARMPOINT8_MHS],&points[KTROBO_ARMPOINT8_UMS], moku);
+	
+	if (anp3) {
+		c++;
+		ans.dthetaxa += anp3->dthetaxa;
+		ans.dthetaxb += anp3->dthetaxb;
+		ans.dthetaya += anp3->dthetaya;
+		ans.dthetayb += anp3->dthetayb;
+		ans.dthetaza += anp3->dthetaza;
+		ans.dthetazb += anp3->dthetazb;
+	}
+
+
+	ArmPoint* anp4 = getPointPart(&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHU],
+		&points[KTROBO_ARMPOINT8_MMS], &points[KTROBO_ARMPOINT8_UMU], moku);
+
+	if (anp4) {
+		c++;
+		ans.dthetaxa += anp4->dthetaxa;
+		ans.dthetaxb += anp4->dthetaxb;
+		ans.dthetaya += anp4->dthetaya;
+		ans.dthetayb += anp4->dthetayb;
+		ans.dthetaza += anp4->dthetaza;
+		ans.dthetazb += anp4->dthetazb;
+	}
+	
+	if (c ==0) {
+		return NULL;
+	} else {
+		ans.dthetaxa /= c;
+		ans.dthetaxb /= c;
+		ans.dthetaya /= c;
+		ans.dthetayb /= c;
+		ans.dthetaza /= c;
+		ans.dthetazb /= c;
+		ans.pos = *moku;
+	}
+
+
+	return &ans;
+}
+
+bool isInPointPart(MYVECTOR3* moku, MYVECTOR3* pos1, MYVECTOR3* pos2, MYVECTOR3* pos3, MYVECTOR3* jyusin8) {
+	MYVECTOR3 pointt = (*pos1 + *pos2 + *pos3)/3;
+	// 重心とすみの点から面の法線を求める
+	MYVECTOR3 vec1;
+	MYVECTOR3 vec2;
+	vec1 = *pos1 - pointt;
+	vec2 = *pos2 - pointt;
+	MYVECTOR3 hou1;
+	MyVec3Cross(hou1, vec1,vec2);
+	MYVECTOR3 vec3;
+	MYVECTOR3 vec4;
+	vec3 = *jyusin8 - pointt;
+	vec4 = *moku - pointt;
+
+	// 求めた法線と　重心から８すみの重心、　重心からmokuの方向ベクトルのdotをとる
+	// dotの積をそれぞれ求める
+	float dot1 = MyVec3Dot(hou1, vec3);
+	float dot2 = MyVec3Dot(hou1, vec4);
+
+	if (dot1* dot2 >= 0) {
+		return true;
+	}
+	return false;
+}
+
+
+
+bool ArmPoint8Positioner::isInPoint(MYVECTOR3* moku) {
+
+	// ８すみの三角形重心を求める
+	MYVECTOR3 jyusin8 = (points[0].pos + points[1].pos + points[2].pos + points[3].pos + points[4].pos + points[5].pos + points[6].pos + points[7].pos)/8;
+	bool bpoint1 = isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHS].pos , &points[KTROBO_ARMPOINT8_MHU].pos , &points[KTROBO_ARMPOINT8_MMU].pos, &jyusin8);
+	bool bpoint2 = isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHS].pos , &points[KTROBO_ARMPOINT8_MHU].pos , &points[KTROBO_ARMPOINT8_MMS].pos, &jyusin8);
+	bool bpoint3 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHS].pos , &points[KTROBO_ARMPOINT8_MHU].pos , &points[KTROBO_ARMPOINT8_UHU].pos, &jyusin8);
+	bool bpoint4 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHS].pos , &points[KTROBO_ARMPOINT8_MHU].pos , &points[KTROBO_ARMPOINT8_UHS].pos, &jyusin8);
+	bool bpoint5 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_UMU].pos , &points[KTROBO_ARMPOINT8_UMS].pos , &points[KTROBO_ARMPOINT8_MMU].pos, &jyusin8);
+	bool bpoint6 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_UMU].pos , &points[KTROBO_ARMPOINT8_UMS].pos , &points[KTROBO_ARMPOINT8_MMS].pos, &jyusin8);
+	bool bpoint7 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_UMU].pos , &points[KTROBO_ARMPOINT8_UMS].pos , &points[KTROBO_ARMPOINT8_UHU].pos, &jyusin8);
+	bool bpoint8 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_UMU].pos , &points[KTROBO_ARMPOINT8_UMS].pos , &points[KTROBO_ARMPOINT8_UHS].pos, &jyusin8);
+	bool bpoint9 =isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHU].pos , &points[KTROBO_ARMPOINT8_UHU].pos , &points[KTROBO_ARMPOINT8_UMU].pos, &jyusin8);
+	bool bpoint10= isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHU].pos , &points[KTROBO_ARMPOINT8_UHU].pos , &points[KTROBO_ARMPOINT8_MMU].pos, &jyusin8);
+	bool bpoint11= isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHS].pos , &points[KTROBO_ARMPOINT8_UHS].pos , &points[KTROBO_ARMPOINT8_MMS].pos, &jyusin8);
+	bool bpoint12= isInPointPart(moku,&points[KTROBO_ARMPOINT8_MHS].pos , &points[KTROBO_ARMPOINT8_UHS].pos , &points[KTROBO_ARMPOINT8_UMS].pos, &jyusin8);
+
+	
+
+	
+
+
+	
+	// dot積がどれも正であれば８すみの中にある
+
+	if (bpoint1 && bpoint2 && bpoint3 && bpoint4 && bpoint5 && bpoint6 && bpoint7 && bpoint8 && bpoint9 && bpoint10 && bpoint11 && bpoint12) {
+		return true;
+	}
+	
+
+	return false;
+
+
+
+}
+
+
+
