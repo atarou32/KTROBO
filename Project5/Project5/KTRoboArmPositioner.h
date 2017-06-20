@@ -29,6 +29,22 @@ struct ArmPoint {
 	float dthetayb;
 	float dthetaza;
 	float dthetazb;
+	bool is_ok;
+
+	ArmPoint operator = (ArmPoint& t) {
+		
+		this->dthetaxa = t.dthetaxa;
+		this->dthetaxb = t.dthetaxb;
+		this->dthetaya = t.dthetaya;
+		this->dthetayb = t.dthetayb;
+		this->dthetaza = t.dthetaza;
+		this->dthetazb = t.dthetazb;
+		this->pos = t.pos;
+		this->is_ok = t.is_ok;
+		return *this;
+
+		//return MYXMFLOAT3(t.float3.x, t.float3.y, t.float3.z);
+	}
 };
 
 #define KTROBO_ARMPOINT8_MHU 0
@@ -41,7 +57,7 @@ struct ArmPoint {
 #define KTROBO_ARMPOINT8_UMS 7
 
 class ArmPoint8Positioner {
-private:
+public:
 	ArmPoint points[8];
 public:
 	ArmPoint8Positioner(){
@@ -54,12 +70,77 @@ public:
 			points[i].dthetaza = 0;
 			points[i].dthetazb = 0;
 		}
+
+		points[0].pos = MYVECTOR3(-6,-10,-6);
+		points[0].dthetaxa = 0.064;
+		points[0].dthetaxb = -1.041;
+		points[0].dthetaya = 0;
+		points[0].dthetayb = 0;
+		points[0].dthetaza = -0.06;
+		points[0].dthetazb = -0.44;
+
+		points[1].pos = MYVECTOR3(6,-10,-6);
+		points[1].dthetaxa = -0.151;
+		points[1].dthetaxb = -1.032;
+		points[1].dthetaya = 0;
+		points[1].dthetayb = 0;
+		points[1].dthetaza = -0.0123;
+		points[1].dthetazb = 0.394;
+
+		points[2].pos = MYVECTOR3(-6,-10,6);
+		points[2].dthetaxa = 2.9917;
+		points[2].dthetaxb = 0.8070;
+		points[2].dthetaya = 0;
+		points[2].dthetayb = 0;
+		points[2].dthetaza = 0.056;
+		points[2].dthetazb = -0.12;
+
+		points[3].pos = MYVECTOR3(6,-10,6);
+		points[3].dthetaxa = 0.8106;
+		points[3].dthetaxb = -1.147;
+		points[3].dthetaya = 0.026;
+		points[3].dthetayb = 0;
+		points[3].dthetaza = 0.0444;
+		points[3].dthetazb = 0.832;
+
+		points[4].pos = MYVECTOR3(-10,-100,-10);
+		points[4].dthetaxa = 0.4984;
+		points[4].dthetaxb = -0.9650;
+		points[4].dthetaya = 0;
+		points[4].dthetayb = 0;
+		points[4].dthetaza = -0.0916;
+		points[4].dthetazb = -0.0301;
+
+		points[5].pos = MYVECTOR3(10,-100,-10);
+		points[5].dthetaxa = 0.040;
+		points[5].dthetaxb = -1.366;
+		points[5].dthetaya = 0;
+		points[5].dthetayb = 0;
+		points[5].dthetaza = 0.0395;
+		points[5].dthetazb = 0.2182;
+
+		points[6].pos = MYVECTOR3(-10,-100,10);
+		points[6].dthetaxa = 1.3270;
+		points[6].dthetaxb = -0.3329;
+		points[6].dthetaya = 0.0004;
+		points[6].dthetayb = 0;
+		points[6].dthetaza = 0.02805;
+		points[6].dthetazb = 0.1533;
+	
+		points[7].pos = MYVECTOR3(10,-100,10);
+		points[7].dthetaxa = 1.194807;
+		points[7].dthetaxb = -0.369107;
+		points[7].dthetaya = 0.0264571;
+		points[7].dthetayb = 0;
+		points[7].dthetaza = 0.180440;
+		points[7].dthetazb = 0.360992;
+
 	
 	};
 	~ArmPoint8Positioner(){};
 
 	void setPoint(int index, ArmPoint* ap);
-	ArmPoint* getPoint(MYVECTOR3* moku);
+	ArmPoint getPoint(MYVECTOR3* moku);
 	bool isInPoint(MYVECTOR3* moku);
 };
 
@@ -154,6 +235,15 @@ public:
 	bool positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	int positionArm34(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	void setArm3(Robo* robo, bool is_migi, MeshBone* uparm1, MeshBone* downarm2);
+	void getTheta(ArmPoint* app) {
+		app->dthetaxa = dthetaxa;
+		app->dthetaxb = dthetaxb;
+		app->dthetaya = dthetaya;
+		app->dthetayb = dthetayb;
+		app->dthetaza = dthetaza;
+		app->dthetazb = dthetazb;
+	}
+
 	void resetTheta();
 	void setTheta(float dthetaxa, float dthetaxb, float dthetaya, float dthetayb, float dthetaza, float dthetazb) {
 		this->dthetaxa = dthetaxa;

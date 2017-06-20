@@ -725,7 +725,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	MYVECTOR3 unkov((rand() % 256)/256*0.05f-0.025f,
 		(rand() % 256)/256*0.05f-0.025f,
 		(rand() % 256)/256*0.05f-0.025f);
-	MYVECTOR3 mokuhf = arm2tomoku + arm2_pos+ unkov;
+	MYVECTOR3 mokuhf = arm2tomoku + arm2_pos;//+ unkov;
 
 
 
@@ -778,7 +778,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	} else {
 		
 
-		if (len < 0.5f) {
+		if (len < 0.6f) {
 			mada_count = 0;
 			warukazu = 600000;
 			return KTROBO_ARMPOSITION_FINISH;
@@ -790,7 +790,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		} else if (mlen < 0.9f) {
 			mada_count -=1;
 			warukazu = 160;
-			//und = true;
+			und = true;
 
 		} else if (mlen <1.8f) {
 			
@@ -937,9 +937,9 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	}
 
 
-	if (und) {
-		return KTROBO_ARMPOSITION_OK;
-	}
+//	if (und) {
+//		return KTROBO_ARMPOSITION_OK;
+//	}
 
 	return KTROBO_ARMPOSITION_DAME;
 }
@@ -1500,7 +1500,7 @@ void ShudouArmPositioner::update() {
 
 
 void ArmPoint8Positioner::setPoint(int index, ArmPoint* ap) {
-if (index > 8) return;
+if (index >= 8) return;
 points[index].dthetaxa = ap->dthetaxa;
 points[index].dthetaxb = ap->dthetaxb;
 points[index].dthetaya = ap->dthetaya;
@@ -1511,8 +1511,8 @@ points[index].pos = ap->pos;
 }
 
 
-ArmPoint* getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, ArmPoint* point3, MYVECTOR3* moku) {
-	static ArmPoint ans;
+ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, ArmPoint* point3, MYVECTOR3* moku) {
+	ArmPoint ans;
 	ans.pos = MYVECTOR3(0,0,0);
 	ans.dthetaxa = 0;
 	ans.dthetaxb = 0;
@@ -1520,7 +1520,7 @@ ArmPoint* getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2,
 	ans.dthetayb = 0;
 	ans.dthetaza = 0;
 	ans.dthetazb = 0;
-
+	ans.is_ok = false;
 	// 表現できない場合は予測してdtheta を返す
 	MYVECTOR3 vec1 = point1->pos - kitenpoint->pos;
 	MYVECTOR3 vec2 = point2->pos - kitenpoint->pos;
@@ -1563,11 +1563,11 @@ ArmPoint* getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2,
 	float hi3 = x3a / MyVec3Length(vec3);
 
 	if ((hi1 <0) || (hi2 < 0) ||(hi3 <0)) {
-		return NULL;
+		return ans;
 	}
 
 	if ((hi1 > 1) || (hi2 > 1) || (hi3 > 1)) {
-		return NULL;
+		return ans;
 	}
 
 	// dtheta の計算を行う
@@ -1598,10 +1598,10 @@ ArmPoint* getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2,
 	ans.dthetayb = (dthetayb1 + dthetayb2 + dthetayb3) / 3;
 	ans.dthetaza = (dthetaza1 + dthetaza2 + dthetaza3) / 3;
 	ans.dthetazb = (dthetazb1 + dthetazb2 + dthetazb3) / 3;
-
-	return &ans;
+	ans.is_ok = true;
+	return ans;
 }
-ArmPoint* ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
+ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 	static ArmPoint ans;
 	ans.pos = MYVECTOR3(0,0,0);
 	ans.dthetaxa = 0;
@@ -1610,70 +1610,70 @@ ArmPoint* ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 	ans.dthetayb = 0;
 	ans.dthetaza = 0;
 	ans.dthetazb = 0;
-
+	ans.is_ok = false;
 	// どうやってやればいいのか・・
 	// 12ベクトルのうち空間を構成する3ベクトルの組を４つ作って
 	// 3ベクトルでmoku の位置を表現させて
 	// 表現できない場合でも　計算に加える
 	// そして平均（重心）を取る
 
-	ArmPoint* anp1 = getPointPart(&points[KTROBO_ARMPOINT8_MHU],&points[KTROBO_ARMPOINT8_UHU],
+	ArmPoint anp1 = getPointPart(&points[KTROBO_ARMPOINT8_MHU],&points[KTROBO_ARMPOINT8_UHU],
 		&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHS],moku);
 	
 	int c=0;
 
-	if (anp1) {
+	if (anp1.is_ok) {
 		c++;
-		ans.dthetaxa += anp1->dthetaxa;
-		ans.dthetaxb += anp1->dthetaxb;
-		ans.dthetaya += anp1->dthetaya;
-		ans.dthetayb += anp1->dthetayb;
-		ans.dthetaza += anp1->dthetaza;
-		ans.dthetazb += anp1->dthetazb;
+		ans.dthetaxa += anp1.dthetaxa;
+		ans.dthetaxb += anp1.dthetaxb;
+		ans.dthetaya += anp1.dthetaya;
+		ans.dthetayb += anp1.dthetayb;
+		ans.dthetaza += anp1.dthetaza;
+		ans.dthetazb += anp1.dthetazb;
 	}
 	
 	
 	
-	ArmPoint* anp2 = getPointPart(&points[KTROBO_ARMPOINT8_UMS],&points[KTROBO_ARMPOINT8_UHS],
+	ArmPoint anp2 = getPointPart(&points[KTROBO_ARMPOINT8_UMS],&points[KTROBO_ARMPOINT8_UHS],
 		&points[KTROBO_ARMPOINT8_UMU], &points[KTROBO_ARMPOINT8_MMS], moku);
-	if (anp2) {
+	if (anp2.is_ok) {
 		c++;
-		ans.dthetaxa += anp2->dthetaxa;
-		ans.dthetaxb += anp2->dthetaxb;
-		ans.dthetaya += anp2->dthetaya;
-		ans.dthetayb += anp2->dthetayb;
-		ans.dthetaza += anp2->dthetaza;
-		ans.dthetazb += anp2->dthetazb;
+		ans.dthetaxa += anp2.dthetaxa;
+		ans.dthetaxb += anp2.dthetaxb;
+		ans.dthetaya += anp2.dthetaya;
+		ans.dthetayb += anp2.dthetayb;
+		ans.dthetaza += anp2.dthetaza;
+		ans.dthetazb += anp2.dthetazb;
 	}
-	ArmPoint* anp3 = getPointPart(&points[KTROBO_ARMPOINT8_UHS], &points[KTROBO_ARMPOINT8_UHU],
+	ArmPoint anp3 = getPointPart(&points[KTROBO_ARMPOINT8_UHS], &points[KTROBO_ARMPOINT8_UHU],
 		&points[KTROBO_ARMPOINT8_MHS],&points[KTROBO_ARMPOINT8_UMS], moku);
 	
-	if (anp3) {
+	if (anp3.is_ok) {
 		c++;
-		ans.dthetaxa += anp3->dthetaxa;
-		ans.dthetaxb += anp3->dthetaxb;
-		ans.dthetaya += anp3->dthetaya;
-		ans.dthetayb += anp3->dthetayb;
-		ans.dthetaza += anp3->dthetaza;
-		ans.dthetazb += anp3->dthetazb;
+		ans.dthetaxa += anp3.dthetaxa;
+		ans.dthetaxb += anp3.dthetaxb;
+		ans.dthetaya += anp3.dthetaya;
+		ans.dthetayb += anp3.dthetayb;
+		ans.dthetaza += anp3.dthetaza;
+		ans.dthetazb += anp3.dthetazb;
 	}
 
 
-	ArmPoint* anp4 = getPointPart(&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHU],
+	ArmPoint anp4 = getPointPart(&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHU],
 		&points[KTROBO_ARMPOINT8_MMS], &points[KTROBO_ARMPOINT8_UMU], moku);
 
-	if (anp4) {
+	if (anp4.is_ok) {
 		c++;
-		ans.dthetaxa += anp4->dthetaxa;
-		ans.dthetaxb += anp4->dthetaxb;
-		ans.dthetaya += anp4->dthetaya;
-		ans.dthetayb += anp4->dthetayb;
-		ans.dthetaza += anp4->dthetaza;
-		ans.dthetazb += anp4->dthetazb;
+		ans.dthetaxa += anp4.dthetaxa;
+		ans.dthetaxb += anp4.dthetaxb;
+		ans.dthetaya += anp4.dthetaya;
+		ans.dthetayb += anp4.dthetayb;
+		ans.dthetaza += anp4.dthetaza;
+		ans.dthetazb += anp4.dthetazb;
 	}
 	
 	if (c ==0) {
-		return NULL;
+		return ans;
 	} else {
 		ans.dthetaxa /= c;
 		ans.dthetaxb /= c;
@@ -1684,8 +1684,8 @@ ArmPoint* ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 		ans.pos = *moku;
 	}
 
-
-	return &ans;
+	ans.is_ok = true;
+	return ans;
 }
 
 bool isInPointPart(MYVECTOR3* moku, MYVECTOR3* pos1, MYVECTOR3* pos2, MYVECTOR3* pos3, MYVECTOR3* jyusin8) {

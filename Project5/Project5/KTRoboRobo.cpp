@@ -133,7 +133,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	atarihan->draw(g,view,proj,0,NULL,NULL,true,false,true,true);
 	LockOnSystem sys;
 
-	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
+	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,6,10,6,10,300,300,500);
 	//sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
 
 
@@ -144,7 +144,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 	AtariUnitAnsKWSK ans[128];
 	static float vdayo =0;
-	static float iunko = 0;
+	static int iunko = 8;
 	bool setdayo = false;
 	move_state->exec(g, this, dt, stamp);
 
@@ -334,13 +334,53 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			int i=0;
 			for (i=0;i<1;i++) {
 				LockOnSystem los;
+				static ArmPoint8Positioner posit;
+				if (iunko > 8) {
 				
-				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,300,300,500);
+					static int r =0;
+					bool t=false;
+					
+					r = iunko % 8;
+				
+					
+					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,300,300,100);
+					MyVec3TransformCoord(te,te,atarihan->world);
+					OBB ob;
+					ob.c = te;
+					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,300,300,100);
+					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+
+					
+					ArmPoint app = posit.points[r];
+					app.is_ok = true;
+					//getPoint(&te);
+					if (app.is_ok) {
+						ap->setTheta(app.dthetaxa,app.dthetaxb,app.dthetaya, app.dthetayb, app.dthetaza, app.dthetazb);
+					}
+					
+				
+				
+				
+				
+				
+				} else {
+				te = los.getPosOfStudyPoint(iunko, 10,100,6,10,6,10,300,300,500);
 				MyVec3TransformCoord(te,te,atarihan->world);
 				OBB ob;
 				ob.c = te;
-				te = los.getPosOfStudyPoint(iunko, 10,100,10,20,10,20,300,300,500);
+				te = los.getPosOfStudyPoint(iunko, 10,100,6,10,6,10,300,300,500);
 				g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+
+
+
+
+
+				}
+			
+
+				
+
+					
 		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
 											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
 												
@@ -353,7 +393,14 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 												 
 												 
 												 arm->rarm->animate(40,false);
+												 ArmPoint app;
+												 app.pos = te;
+												 ap->getTheta(&app);
+											
+												 posit.setPoint(iunko,&app);
 												 iunko++;
+												 
+												 
 												 break;
 		} else {
 		//	ap->resetTheta();

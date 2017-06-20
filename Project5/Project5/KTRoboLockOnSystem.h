@@ -11,6 +11,7 @@ class LockOnSystem
 public:
 	LockOnSystem(void);
 	~LockOnSystem(void);
+
 	int getStudyPointNum(float rmin, float rmax, float mintate, float maxtate, 
 		float minyoko, float maxyoko,float dtate, float dyoko, float dr);
 	MYVECTOR3 getPosOfStudyPoint(int index, float rmin, float rmax, float mintate, float maxtate, 
