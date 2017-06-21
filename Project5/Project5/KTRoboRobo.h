@@ -6,7 +6,7 @@
 #include "MyTokenAnalyzer.h"
 #include "KTRoboAtari.h"
 #include "KTRoboInput.h"
-#include "KTROBOArmPositioner.h"
+//#include "KTROBOArmPositioner.h"
 namespace KTROBO {
 
 struct RoboDataPart {
@@ -982,12 +982,14 @@ public:
 	void animate(UMesh* umesh, bool calculateoffsetmatrix);
 };
 
-
+class ArmPositioner;
+class ArmPositionerHelper;
 class Robo : public INPUTSHORICLASS
 {
 private:
 public:
 	ArmPositioner* ap;
+	ArmPositionerHelper* aphelper;
 private:
 	RoboHead* head;
 	RoboBody* body;

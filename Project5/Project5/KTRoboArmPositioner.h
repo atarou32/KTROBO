@@ -207,7 +207,8 @@ class ArmPositioner
 	float dthetaza;
 	float dthetazb;
 
-
+	bool reseted;
+	MYVECTOR3 dmoku;
 public:
 	ArmPositioner(float theta, float theta2, float nobabairitu) {
 		this->theta = theta;
@@ -223,6 +224,8 @@ public:
 		dthetayb=0;
 		dthetaza=0;
 		dthetazb=0;
+		reseted = false;
+		dmoku = MYVECTOR3(0,0,0);
 	}
 
 	~ArmPositioner(void);
@@ -230,6 +233,8 @@ public:
 	bool positionArm(Graphics* g , MYMATRIX* view, float framecnt, Robo* robo, MYVECTOR3* mokuhyou, bool is_migi);
 	bool positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* mokuhyou, bool is_migi);
 
+	bool getReseted() {return reseted;}
+	MYVECTOR3 getDMOKU() {return dmoku;}
 
 	int positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	bool positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
@@ -252,7 +257,39 @@ public:
 		this->dthetayb = dthetayb;
 		this->dthetaza = dthetaza;
 		this->dthetazb = dthetazb;
+		reseted = false;
 	}
+
+};
+class Robo;
+class ArmPositionerHelper {
+private:
+	Robo* robo;
+	ArmPositioner* ap;
+	ArmPoint8Positioner ap8;
+	MYVECTOR3 dmoku;
+	MYVECTOR3 moku;
+	MYVECTOR3 tempmoku;
+	bool is_migi;
+	bool nocalcyet;
+	bool is_calced;
+public:
+	ArmPositionerHelper(Robo* robo, ArmPositioner* ap, bool is_migi) {
+		this->robo = robo;
+		this->ap = ap;
+		this->is_migi = is_migi;
+	}
+
+	void setMoku(MYVECTOR3* moku) {
+		this->moku = *moku;
+		tempmoku = *moku;
+		dmoku = MYVECTOR3(0,0,0);
+		nocalcyet = true;
+		is_calced = false;
+	}
+	bool getIsCalced() {return is_calced;}
+
+	void calc(Graphics* g, MYMATRIX* view);
 
 };
 }

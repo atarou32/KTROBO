@@ -6,6 +6,8 @@
 #include "MyGyouretuKeisan.h"
 #include <iostream>
 #include <cmath>
+
+
 using namespace KTROBO;
 
 ArmPositioner::~ArmPositioner(void)
@@ -503,6 +505,7 @@ void ArmPositioner::resetTheta() {
 		dthetaxb=(rand()%256)/256.0/1;
 		dthetayb=(rand()%256)/256.0*0.1;
 		dthetazb=(rand()%256)/256.0*0.3;
+		reseted = true;
 }
 
 void ArmPositioner::setArm3(Robo* robo, bool is_migi, MeshBone* arm1, MeshBone* arm2) {
@@ -762,6 +765,9 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 	float ddd = MyVec3Length(mokutoarm2);
 	float dddd = sqrt(ddd * ddd - dd* dd);// kyori
 
+	MYVECTOR3 tempmoku;
+	tempmoku = arm2_pos + unkovec * dd;
+	dmoku = tempmoku - *moku;
 
 
 	float len = dddd;
@@ -1562,14 +1568,14 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 	float hi2 = x2a / MyVec3Length(vec2);
 	float hi3 = x3a / MyVec3Length(vec3);
 
-	if ((hi1 <0) || (hi2 < 0) ||(hi3 <0)) {
+/*	if ((hi1 <0) || (hi2 < 0) ||(hi3 <0)) {
 		return ans;
 	}
 
 	if ((hi1 > 1) || (hi2 > 1) || (hi3 > 1)) {
 		return ans;
 	}
-
+*/
 	// dtheta の計算を行う
 	float dthetaxa1 = kitenpoint->dthetaxa * ( 1-hi1) + point1->dthetaxa * hi1;
 	float dthetaxb1 = kitenpoint->dthetaxb * ( 1-hi1) + point1->dthetaxb * hi1;
@@ -1592,12 +1598,14 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 	float dthetaza3 = kitenpoint->dthetaza * ( 1-hi3) + point3->dthetaza * hi3;
 	float dthetazb3 = kitenpoint->dthetazb * ( 1-hi3) + point3->dthetazb * hi3;
 
-	ans.dthetaxa = (dthetaxa1 + dthetaxa2 + dthetaxa3) / 3;
-	ans.dthetaxb = (dthetaxb1 + dthetaxb2 + dthetaxb3) / 3;
-	ans.dthetaya = (dthetaya1 + dthetaya2 + dthetaya3) / 3;
-	ans.dthetayb = (dthetayb1 + dthetayb2 + dthetayb3) / 3;
-	ans.dthetaza = (dthetaza1 + dthetaza2 + dthetaza3) / 3;
-	ans.dthetazb = (dthetazb1 + dthetazb2 + dthetazb3) / 3;
+	ans.dthetaxa = (dthetaxa1 + dthetaxa2 + dthetaxa3)/3;//- 2*kitenpoint->dthetaxa;
+	ans.dthetaxb = (dthetaxb1 + dthetaxb2 + dthetaxb3)/3;//- 2*kitenpoint->dthetaxb;
+	ans.dthetaya = (dthetaya1 + dthetaya2 + dthetaya3)/3;//- 2*kitenpoint->dthetaya;
+	ans.dthetayb = (dthetayb1 + dthetayb2 + dthetayb3)/3;//- 2*kitenpoint->dthetayb;
+	ans.dthetaza = (dthetaza1 + dthetaza2 + dthetaza3)/3;//- 2*kitenpoint->dthetaza;
+	ans.dthetazb = (dthetazb1 + dthetazb2 + dthetazb3)/3;//- 2*kitenpoint->dthetazb;
+	ans.pos = kitenpoint->pos + n_vec1 * x1a+ n_vec2*x2a+ n_vec3*x3a;
+
 	ans.is_ok = true;
 	return ans;
 }
@@ -1617,6 +1625,65 @@ ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 	// 表現できない場合でも　計算に加える
 	// そして平均（重心）を取る
 
+	// 8近傍から一番近い点を取得する
+	// その点でgetPointPartする
+	MYVECTOR3 kyoriv[8];
+	float kyori[8];
+	for (int i=0;i<8;i++) {
+		kyoriv[i] = *moku - points[i].pos;
+		kyori[i] = MyVec3Length(kyoriv[i]);
+	}
+
+	float minkyori = kyori[0];
+	int index = 0;
+	for (int i=0;i<8;i++) {
+		if (minkyori > kyori[i]) {
+			index = i;
+			minkyori = kyori[i];
+		}
+	}
+
+	ArmPoint anp;
+	if (index == KTROBO_ARMPOINT8_MHS) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_MHS], &points[KTROBO_ARMPOINT8_MHU],
+			&points[KTROBO_ARMPOINT8_MMS], &points[KTROBO_ARMPOINT8_UHS], moku);
+	} else if(index == KTROBO_ARMPOINT8_MHU) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_MHU],&points[KTROBO_ARMPOINT8_UHU],
+		&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHS],moku);
+	} else if(index == KTROBO_ARMPOINT8_MMS) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_MMS], &points[KTROBO_ARMPOINT8_MMU],
+			&points[KTROBO_ARMPOINT8_MHS], &points[KTROBO_ARMPOINT8_UMS], moku);
+	} else if(index == KTROBO_ARMPOINT8_MMU) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHU],
+		&points[KTROBO_ARMPOINT8_MMS], &points[KTROBO_ARMPOINT8_UMU], moku);
+	} else if(index == KTROBO_ARMPOINT8_UHS) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_UHS], &points[KTROBO_ARMPOINT8_UHU],
+		&points[KTROBO_ARMPOINT8_MHS],&points[KTROBO_ARMPOINT8_UMS], moku);
+	} else if(index == KTROBO_ARMPOINT8_UHU) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_UHU], &points[KTROBO_ARMPOINT8_MHU],
+			&points[KTROBO_ARMPOINT8_UMU], &points[KTROBO_ARMPOINT8_UHS],moku);
+	} else if(index == KTROBO_ARMPOINT8_UMS) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_UMS],&points[KTROBO_ARMPOINT8_UHS],
+		&points[KTROBO_ARMPOINT8_UMU], &points[KTROBO_ARMPOINT8_MMS], moku);
+	} else if(index == KTROBO_ARMPOINT8_UMU) {
+		anp = getPointPart(&points[KTROBO_ARMPOINT8_UMU], &points[KTROBO_ARMPOINT8_MMU],
+			&points[KTROBO_ARMPOINT8_UHU], &points[KTROBO_ARMPOINT8_UMS],moku);
+	} else {
+		anp.is_ok = false;
+	}
+
+	if (anp.is_ok) {
+		ans.dthetaxa += anp.dthetaxa;
+		ans.dthetaxb += anp.dthetaxb;
+		ans.dthetaya += anp.dthetaya;
+		ans.dthetayb += anp.dthetayb;
+		ans.dthetaza += anp.dthetaza;
+		ans.dthetazb += anp.dthetazb;
+		ans.is_ok = true;
+		ans.pos = anp.pos;
+		return ans;
+	}
+
 	ArmPoint anp1 = getPointPart(&points[KTROBO_ARMPOINT8_MHU],&points[KTROBO_ARMPOINT8_UHU],
 		&points[KTROBO_ARMPOINT8_MMU], &points[KTROBO_ARMPOINT8_MHS],moku);
 	
@@ -1630,6 +1697,9 @@ ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 		ans.dthetayb += anp1.dthetayb;
 		ans.dthetaza += anp1.dthetaza;
 		ans.dthetazb += anp1.dthetazb;
+		ans.pos = ans.pos +  anp1.pos;
+		ans.is_ok = true;
+		return ans;
 	}
 	
 	
@@ -1644,6 +1714,9 @@ ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 		ans.dthetayb += anp2.dthetayb;
 		ans.dthetaza += anp2.dthetaza;
 		ans.dthetazb += anp2.dthetazb;
+		ans.pos = ans.pos +  anp2.pos;
+		ans.is_ok = true;
+		return ans;
 	}
 	ArmPoint anp3 = getPointPart(&points[KTROBO_ARMPOINT8_UHS], &points[KTROBO_ARMPOINT8_UHU],
 		&points[KTROBO_ARMPOINT8_MHS],&points[KTROBO_ARMPOINT8_UMS], moku);
@@ -1656,6 +1729,9 @@ ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 		ans.dthetayb += anp3.dthetayb;
 		ans.dthetaza += anp3.dthetaza;
 		ans.dthetazb += anp3.dthetazb;
+		ans.pos = ans.pos +  anp3.pos;
+		ans.is_ok = true;
+		return ans;
 	}
 
 
@@ -1670,8 +1746,11 @@ ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 		ans.dthetayb += anp4.dthetayb;
 		ans.dthetaza += anp4.dthetaza;
 		ans.dthetazb += anp4.dthetazb;
+		ans.pos = ans.pos +  anp4.pos;
+		ans.is_ok = true;
+		return ans;
 	}
-	
+	/*
 	if (c ==0) {
 		return ans;
 	} else {
@@ -1681,10 +1760,10 @@ ArmPoint ArmPoint8Positioner::getPoint(MYVECTOR3* moku) {
 		ans.dthetayb /= c;
 		ans.dthetaza /= c;
 		ans.dthetazb /= c;
-		ans.pos = *moku;
+		ans.pos = ans.pos / c;
 	}
-
-	ans.is_ok = true;
+	*/
+	//ans.is_ok = true;
 	return ans;
 }
 
@@ -1753,3 +1832,135 @@ bool ArmPoint8Positioner::isInPoint(MYVECTOR3* moku) {
 
 
 
+
+void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
+		static MYVECTOR3 ddmoku(0,0,0);
+		static MYVECTOR3 ddunko(0,0,0);
+		static float dbb=100000;
+		static float bairitu = 1;
+		static bool uunko=false;
+
+	if (is_calced) {
+		return;
+	}
+
+	if (nocalcyet) {
+		ddmoku = MYVECTOR3(0,0,0);
+		ddunko = MYVECTOR3(0,0,0);
+		dbb = 100000;
+		bairitu = 1;
+		uunko = false;
+
+		ArmPoint anp = ap8.getPoint(&moku);
+		if (anp.is_ok) {
+			ap->setTheta(anp.dthetaxa,anp.dthetaxb,anp.dthetaya,anp.dthetayb,anp.dthetaza,anp.dthetazb);
+		}
+	
+
+	} else {
+		// dmokuをしようする
+	
+		// tempmokuを計算する
+		float unko = MyVec3Length(dmoku);
+		//unko = unko/10;
+		if (unko < 0.000001) {
+			unko = 1;
+		}
+
+		bairitu = MyVec3Length(moku);
+		tempmoku = moku - ddunko/2.0f; //*unko/bairitu;
+		MYVECTOR3 dd = dmoku;
+		MYVECTOR3 dd2 = ddmoku;
+		float dotdd = MyVec3Dot(dd,dd2);
+		float ddd = MyVec3Length(dd);
+		if (dotdd < 0) {
+		//	bairitu *= 0.399992f;
+			float ddunkod = MyVec3Length(ddunko);
+			if (abs(ddunkod) ==0) {
+				ddunkod = 1;
+				ddunko.float3.z = 1.0f;
+			}
+			if (ddunkod > 1000) {
+				ddunko = ddunko /100;
+			}
+			ddunko = ddunko - dmoku/bairitu/ddunkod;
+			uunko = false;
+		} else {
+			// 近づいているので
+		//	bairitu *= 1.2002f;
+			uunko = false;
+			float ddunkod = MyVec3Length(ddunko);
+			if (abs(ddunkod) ==0) {
+				ddunkod =1;
+				ddunko.float3.z = 1.0f;
+			}
+			if (ddunkod > 100) {
+				ddunko = ddunko /10000;
+			}
+			ddunko = ddunko + dmoku/bairitu/ddunkod;/// ddunkod;
+		}
+		dbb = ddd;
+
+		ddmoku = dmoku;
+		if (uunko && MyVec3Length(dd) < 0.1 && MyVec3Length(dmoku) > 0.55f) {
+			// ないときはsetthetaしない
+			//ap->resetTheta();
+		} else {
+
+		MYMATRIX wo;
+		MyMatrixIdentity(wo);
+		OBB ob;
+
+		//if (ap8.isInPoint(&tempmoku)) {
+
+		ob.c = tempmoku;
+		g->drawOBBFill(g,0xFFFFFF00,&wo,view,g->getProj(),&ob);
+		ArmPoint anp = ap8.getPoint(&tempmoku);
+		if (anp.is_ok) {
+			
+			ap->setTheta(anp.dthetaxa,anp.dthetaxb,anp.dthetaya,anp.dthetayb,anp.dthetaza,anp.dthetazb);
+		}else {
+			
+		}
+		}
+		//}
+
+	}
+
+	MYVECTOR3 ttmp =moku;
+	if (ap->positionArm3(g,view,robo,&ttmp, is_migi) != KTROBO_ARMPOSITION_DAME) {
+
+
+
+		
+												 ap->setArm3(robo,true, robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]],
+													 robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 if (nocalcyet) {
+													 dmoku = MYVECTOR3(0,0,0);
+													nocalcyet = false;
+													} else {
+													dmoku = ap->getDMOKU();
+													}
+												 
+												 robo->arm->rarm->animate(40,false);
+												
+
+		is_calced = true;
+	} else {
+
+		if (nocalcyet) {
+			nocalcyet = false;
+			dmoku = MYVECTOR3(0,0,0);
+		} else {
+		dmoku = ap->getDMOKU();
+		}
+		robo->arm->rarm->animate(40,false);
+
+	}
+
+	if (ap->getReseted()) {
+		nocalcyet = true;
+	}
+}

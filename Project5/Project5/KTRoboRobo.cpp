@@ -1,6 +1,7 @@
 #include "KTRoboRobo.h"
 #include "KTRoboGameError.h"
 #include "KTRoboLockOnSystem.h"
+#include "KTRoboArmPositioner.h"
 
 using namespace KTROBO;
 Robo::Robo(void)
@@ -27,6 +28,7 @@ Robo::Robo(void)
 	setkabe_state = &kuutyuu;
 	resetCount();
 	ap = 0;
+	aphelper = 0;
 }
 
 
@@ -144,7 +146,8 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 	AtariUnitAnsKWSK ans[128];
 	static float vdayo =0;
-	static int iunko = 8;
+	static int iunko = 9;
+	static bool bunko = false;
 	bool setdayo = false;
 	move_state->exec(g, this, dt, stamp);
 
@@ -340,23 +343,29 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					static int r =0;
 					bool t=false;
 					
-					r = iunko % 8;
+					r = iunko % 800;
 				
 					
-					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,300,300,100);
+					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,3,3,10);
 					MyVec3TransformCoord(te,te,atarihan->world);
 					OBB ob;
 					ob.c = te;
-					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,300,300,100);
+					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,3,3,10);
 					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
-
-					
-					ArmPoint app = posit.points[r];
-					app.is_ok = true;
-					//getPoint(&te);
-					if (app.is_ok) {
-						ap->setTheta(app.dthetaxa,app.dthetaxb,app.dthetaya, app.dthetayb, app.dthetaza, app.dthetazb);
+					if (!bunko) {
+					aphelper->setMoku(&te);
+					bunko = true;
 					}
+					//ArmPoint app = posit.getPoint(&te);//posit.points[r];
+					//app.is_ok = true;
+					//getPoint(&te);
+					//if (app.is_ok) {
+					//	if (!setdayo || ap->getReseted()) {
+						//ap->setTheta(app.dthetaxa,app.dthetaxb,app.dthetaya, app.dthetayb, app.dthetaza, app.dthetazb);
+					//	setdayo = true;
+					//	}
+				//		//iunko++;
+				//	}
 					
 				
 				
@@ -377,41 +386,46 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 				}
 			
-
-				
+		for (int i= 0;i<10;i++) {
+		aphelper->calc(g,&temp);
+		}
+		if (aphelper->getIsCalced()) {
+			iunko++;
+			bunko = false;
+		}
 
 					
-		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
+//		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+//											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
 												
 												 
 							
-												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+//												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+//													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
 												 
 												 
 												 
-												 arm->rarm->animate(40,false);
-												 ArmPoint app;
-												 app.pos = te;
-												 ap->getTheta(&app);
+//												 arm->rarm->animate(40,false);
+//												 ArmPoint app;
+//												 app.pos = te;
+//												 ap->getTheta(&app);
 											
-												 posit.setPoint(iunko,&app);
-												 iunko++;
+												// posit.setPoint(iunko,&app);
+//												 iunko++;
+//												 setdayo = false;
 												 
-												 
-												 break;
-		} else {
+	//											 break;
+	//	} else {
 		//	ap->resetTheta();
 		//			 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
 			//										 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
 			
 												 
 												 
-												 
-											 arm->rarm->animate(40,false);
-		}
+											 
+	//										 arm->rarm->animate(40,false);
+	//	}
 			}
 			
 		//	if ( i == 15) {
@@ -706,6 +720,8 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 //	world = atarihan->world;
 	ap = new ArmPositioner(3.14/60000,3.14/3,0.62);
 	ap->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
+	aphelper = new ArmPositionerHelper(this,ap,true);
+	
 }
 
 void Robo::release() {
@@ -785,6 +801,11 @@ void Robo::release() {
 	if (ap) {
 		delete ap;
 		ap = 0;
+	}
+
+	if (aphelper) {
+		delete aphelper;
+		aphelper = 0;
 	}
 
 }

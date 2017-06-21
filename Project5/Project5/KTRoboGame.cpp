@@ -1396,7 +1396,7 @@ void Game::Run() {
 	bbc[511] = 0;
 	stringconverter ssf;
 	ssf.charToWCHAR(bbf,bbc);
-	DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
+	//DebugTexts::instance()->setText(g,wcslen(bbc), bbc);
 	
 	
 	MyMatrixScaling(world,0.6,0.6,0.6);
