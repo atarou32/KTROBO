@@ -1725,7 +1725,10 @@ void Game::Run() {
 		robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
-		sap->update();
+		if (sap->update()) {
+			robodayo->aphelper->setNoCalcYet(false);
+		}
+		//sap->update();
 	}
 	static float h = 0.0f;
 	h += 0.001f;

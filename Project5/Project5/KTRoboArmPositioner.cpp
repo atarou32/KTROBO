@@ -1469,7 +1469,7 @@ void ShudouArmPositioner::Del() {
 	}
 }
 
-void ShudouArmPositioner::update() {
+bool ShudouArmPositioner::update() {
 	bool t=false;
 
 	if (gui->getTriedToSendFromSlider(slider_dxa)) {
@@ -1504,7 +1504,7 @@ void ShudouArmPositioner::update() {
 		dthetazb = gui->getNowFromSlider(slider_dzb);
 		ap->setTheta(dthetaxa, dthetaxb, dthetaya, dthetayb, dthetaza, dthetazb);
 	}
-
+	return t;
 }
 
 
@@ -1835,8 +1835,6 @@ bool ArmPoint8Positioner::isInPoint(MYVECTOR3* moku) {
 }
 
 
-
-
 void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		
 	if (is_calced) {
@@ -2106,10 +2104,13 @@ void ArmPointIndexInfo::loadFile() {
 			ap->point.dthetayb = dthetayb;
 			ap->point.dthetaza = dthetaza;
 			ap->point.dthetazb = dthetazb;
+			ponums.insert(ap->index);
 			points.push_back(ap);
 		}
 		mt.GetToken(); // next
 	}
+	mt.deletedayo();
+	setNextIndex();
 }
 bool ArmPointIndexInfo::hasFile() {
 
@@ -2180,28 +2181,92 @@ void ArmPointIndexInfo::saveFileWithA() {
 
 }
 
-void ArmPointIndexInfo::setNextIndex() {
+#define KTROBO_ARMPOINT_NONNUM -1
+int ArmPointIndexInfo::getNonCalcedIndex() {
+	LockOnSystem los;
+	int pointnum = los.getStudyPointNum(dmin,dmax,mintate,maxtate,minyoko,maxyoko,dtate,dyoko,dd);
+	for (int i=0;i<pointnum;i++) {
+		if (ponums.find(i) != ponums.end()) {
+			continue;
+		}
+		return i;
+	}
 
+	return KTROBO_ARMPOINT_NONNUM;
+
+}
+
+void ArmPointIndexInfo::setNextIndex() {
+	if (!apw || apw->is_calced) {
+			// next index ‚ðƒZƒbƒg‚·‚é
+			int nexindex = getNonCalcedIndex();
+			if (apw && (apw->index == -1)) return;
+			apw = new ArmPointWithIndex();
+			apw->indexinfo = this;
+			apw->index = nexindex;
+	
+			apw->point.pos = getIndexPos();
+			apw->point.dthetaxa = 0;
+			apw->point.dthetaxb = 0;
+			apw->point.dthetaya = 0;
+			apw->point.dthetayb = 0;
+			apw->point.dthetaza = 0;
+			apw->point.dthetazb = 0;
+			apw->is_calced = false;
+			apw->point.is_ok = false;
+			points.push_back(apw);
+			ponums.insert(apw->index);
+	}
+		
 }
 MYVECTOR3 ArmPointIndexInfo::getIndexPos() {
+	LockOnSystem los;
+	if (apw) {
+		MYVECTOR3 test = los.getPosOfStudyPoint(apw->index, dmin, dmax, mintate, maxtate, minyoko, maxyoko, dtate, dyoko, dd);
+		return test;
+	}
 
+	return MYVECTOR3(0,0,0);
 }
-
+bool ArmPointIndexInfo::isCalced() {
+		if (apw) {
+			return apw->is_calced;
+		}
+		return false;
+}
 bool ArmPointIndexInfo::isCalcFinished() {
+	LockOnSystem los;
+	int pointnum = los.getStudyPointNum(dmin,dmax,mintate,maxtate,minyoko,maxyoko,dtate,dyoko,dd);
 
+	if (pointnum != points.size()) {
+		return false;
+	}
+	return true;
 }
 
 int ArmPointIndexInfo::getNowIndex() {
 
-
+	if (apw) {
+		return apw->index;
+	}
+	return KTROBO_ARMPOINT_NONNUM;
 
 }
 
 
 void ArmPointIndexInfo::saveDtheta(ArmPoint* save_data, int index) {
 
-
+	if (apw) {
+		if (apw->index != index) {
+			mylog::writelog(KTROBO::WARNING, "armpoint index savedthetaerror");
+			return;
+		} else {
+			apw->point = *save_data;
+			apw->point.is_ok = true;
+			apw->is_calced = true;
+			return;
+		}
+	}
 
 
 }
-

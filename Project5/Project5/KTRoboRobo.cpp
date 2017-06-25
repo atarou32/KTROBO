@@ -29,6 +29,7 @@ Robo::Robo(void)
 	resetCount();
 	ap = 0;
 	aphelper = 0;
+	apinfo = 0;
 }
 
 
@@ -346,11 +347,11 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					r = iunko % 800+200;
 				
 					
-					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
+					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
 					MyVec3TransformCoord(te,te,atarihan->world);
 					OBB ob;
 					ob.c = te;
-					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
+					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
 					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
 					if (!bunko) {
 					aphelper->setMoku(&te);
@@ -387,10 +388,20 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 				}
 			
 		for (int t=0;t<50;t++) {
-		aphelper->calc(g,&temp);
+			aphelper->calc(g,&temp);
 		}
+
 		if (aphelper->getIsCalced()) {
 			iunko++;
+			if (!apinfo->isCalcFinished()) {
+				ArmPoint app = aphelper->getArmPoint();
+				app.is_ok = true;
+				app.pos = apinfo->getIndexPos();
+			apinfo->saveDtheta(&app, apinfo->getNowIndex());
+			apinfo->saveFileWithA();
+			apinfo->setNextIndex();
+			}
+
 			bunko = false;
 		}
 
@@ -721,6 +732,15 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	ap = new ArmPositioner(3.14/60000,3.14/3,0.62);
 	ap->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
 	aphelper = new ArmPositionerHelper(this,ap,true);
+
+	apinfo = new ArmPointIndexInfo("ktrobofcs1.txt", 10,100,6,10,6,10,1,1,3);
+	if (apinfo->hasFile()) {
+		apinfo->loadFile();
+	} else {
+		apinfo->makeNewFile();
+		apinfo->loadFile();
+	}
+	
 	
 }
 
@@ -807,7 +827,10 @@ void Robo::release() {
 		delete aphelper;
 		aphelper = 0;
 	}
-
+	if (apinfo) {
+		delete apinfo;
+		apinfo = 0;
+	}
 }
 
 

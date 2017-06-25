@@ -984,12 +984,14 @@ public:
 
 class ArmPositioner;
 class ArmPositionerHelper;
+class ArmPointIndexInfo;
 class Robo : public INPUTSHORICLASS
 {
 private:
 public:
 	ArmPositioner* ap;
 	ArmPositionerHelper* aphelper;
+	ArmPointIndexInfo* apinfo;
 private:
 	RoboHead* head;
 	RoboBody* body;

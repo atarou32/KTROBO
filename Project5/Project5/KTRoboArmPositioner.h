@@ -187,7 +187,7 @@ public:
 
 	void Init(HWND hw, Texture* tex, lua_State* l, int screen_width, int screen_height);
 	void Del();
-	void update();
+	bool update();
 
 };
 class ArmPositioner
@@ -279,6 +279,7 @@ private:
 	float dyoko;
 	float dd;
 	vector<ArmPointWithIndex*> points;
+	set<int> ponums;
 	ArmPointWithIndex* apw;
 	int now_index;
 
@@ -293,9 +294,12 @@ public:
 	void saveFile();
 	void saveFileWithA();
 
+	int getNonCalcedIndex();
 	void setNextIndex();
 	MYVECTOR3 getIndexPos();
 	bool isCalcFinished();
+	bool isCalced();
+	
 	int getNowIndex();
 	void saveDtheta(ArmPoint* save_data, int index);
 
@@ -339,7 +343,10 @@ public:
 		uunko = false;
 		unko_count = 0;
 	}
-
+	void setNoCalcYet(bool t) {
+		nocalcyet = t;
+		unko_count = 10000;
+	}
 	void setMoku(MYVECTOR3* moku) {
 		this->moku = *moku;
 		tempmoku = *moku;
@@ -358,6 +365,11 @@ public:
 
 	void calc(Graphics* g, MYMATRIX* view);
 
+	ArmPoint getArmPoint() {
+		ArmPoint app;
+		this->ap->getTheta(&app);
+		return app;
+	}
 };
 }
 #endif
