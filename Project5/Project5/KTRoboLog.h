@@ -29,7 +29,7 @@ public:
 	mylog(void);
 	~mylog(void);
 
-	static char* writelog(char* filename, const char* buffer, ...);
+	static char* writelog(const char* filename, const char* buffer, ...);
 	static char* writelog(int error_num, const char* buffer, ...);
 
 };

@@ -49,7 +49,7 @@ char* mylog::writelog(int error_num, const char* buffer, ...)
 
 
 }
-char* mylog::writelog(char* filename, const char* buffer, ...)
+char* mylog::writelog(const char* filename, const char* buffer, ...)
 {
 	va_list ap;
 	va_start(ap, buffer);

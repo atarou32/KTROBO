@@ -6,6 +6,10 @@
 #include "MyGyouretuKeisan.h"
 #include <iostream>
 #include <cmath>
+#include "KTRoboLockOnSystem.h"
+#include "KTRoboLog.h"
+#include <string>
+#include "MyTokenAnalyzer.h"
 
 
 using namespace KTROBO;
@@ -791,7 +795,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 			//und = true;
 		} else if (mlen < 0.12f) {
 			mada_count = 0;
-			warukazu = 3800;
+			warukazu = 380;
 			und = true;
 		} else if (mlen < 0.9f) {
 			mada_count -=1;
@@ -1834,12 +1838,7 @@ bool ArmPoint8Positioner::isInPoint(MYVECTOR3* moku) {
 
 
 void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
-		static MYVECTOR3 ddmoku(0,0,0);
-		static MYVECTOR3 ddunko(0,0,0);
-		static float dbb=100000;
-		static float bairitu = 1;
-		static bool uunko=false;
-
+		
 	if (is_calced) {
 		return;
 	}
@@ -1848,6 +1847,7 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		ddmoku = MYVECTOR3(0,0,0);
 		ddunko = MYVECTOR3(0,0,0);
 		dbb = 100000;
+		unko_count = 0;
 		bairitu = 1;
 		uunko = false;
 
@@ -1880,10 +1880,15 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 				ddunkod = 1;
 				ddunko.float3.z = 1.0f;
 			}
-			if (ddunkod > 1000) {
+			if (ddunkod > 100000) {
 				ddunko = ddunko /100;
 			}
-			ddunko = ddunko - dmoku/bairitu/ddunkod;
+			MYVECTOR3 dmokudayo = dmoku/bairitu*1.5;
+			if (abs(dmokudayo.float3.z) > 3.3f) {
+			dmokudayo.float3.z /= 100.0f;
+			dd.float3.z /=100;
+			}
+			ddunko = ddunko - dmokudayo/bairitu/*ddunkod**/*2.5;
 			uunko = false;
 		} else {
 			// 近づいているので
@@ -1894,17 +1899,27 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 				ddunkod =1;
 				ddunko.float3.z = 1.0f;
 			}
-			if (ddunkod > 100) {
-				ddunko = ddunko /10000;
+			if (ddunkod > 100000) {
+				ddunko = ddunko /100;
 			}
-			ddunko = ddunko + dmoku/bairitu/ddunkod;/// ddunkod;
+			MYVECTOR3 dmokudayo = dmoku/bairitu*1.5;
+			if (abs(dmokudayo.float3.z) > 3.3f) {
+			dmokudayo.float3.z /= 1000.0f;
+			dd.float3.z /=100;
+			}
+			ddunko = ddunko + dmokudayo/ddunkod*MyVec3Length(dmoku)*2.5;/// ddunkod;
 		}
 		dbb = ddd;
 
 		ddmoku = dmoku;
-		if (uunko && MyVec3Length(dd) < 0.1 && MyVec3Length(dmoku) > 0.55f) {
+		MYVECTOR3 dddmoku = ddmoku - dmoku;
+		if (unko_count ||((abs(dd.float3.z) < 1.95 && MyVec3Length(dddmoku) < 0.7f))) {
 			// ないときはsetthetaしない
 			//ap->resetTheta();
+			if (unko_count ==0) {
+				unko_count = 10;
+			}
+			unko_count--;
 		} else {
 
 		MYMATRIX wo;
@@ -1964,3 +1979,229 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		nocalcyet = true;
 	}
 }
+
+
+
+ArmPointIndexInfo::ArmPointIndexInfo(string filename, float dmin, float dmax,
+									 float mintate, float maxtate, float minyoko, float maxyoko,
+									 float dtate, float dyoko, float dd) {
+	this->filename = filename;
+	this->dmin = dmin;
+	this->dmax = dmax;
+	this->mintate = mintate;
+	this->maxtate = maxtate;
+	this->minyoko = minyoko;
+	this->maxyoko = maxyoko;
+	this->dtate = dtate;
+	this->dyoko = dyoko;
+	this->dd = dd;
+	apw = 0;
+}
+ArmPointIndexInfo::~ArmPointIndexInfo() {
+	vector<ArmPointWithIndex*>::iterator it;
+	it = points.begin();
+	while(it != points.end()) {
+
+		ArmPointWithIndex* i = *it;
+		delete i;
+		i = 0;
+		it = it + 1;
+	}
+	points.clear();
+}
+
+void ArmPointIndexInfo::makeNewFile() {
+	FILE* file;
+	CS::instance()->enter(CS_LOG_CS, "armpoint make");
+	if(0 != fopen_s(&file,filename.c_str(),"w")) {
+		KTROBO::mylog::writelog(KTROBO::WARNING, "%s の書き込みに失敗", filename.c_str());
+		CS::instance()->leave(CS_LOG_CS, "armpoint makel");
+		return;
+	}
+	fclose(file);
+
+	LockOnSystem los;
+	int max_pointnum = los.getStudyPointNum(dmin,dmax,mintate,maxtate,minyoko,maxyoko,dtate,dyoko,dd);
+
+	// lockonsysteminfo 
+	KTROBO::mylog::writelog(filename.c_str(), "LOCKONSYSTEMINFO {\n");
+	mylog::writelog(filename.c_str(), "filename=\"%s\";\n", filename.c_str());
+	mylog::writelog(filename.c_str(), "pointnum=%d;\n",max_pointnum);
+	mylog::writelog(filename.c_str(), "dmin=%f;\n", dmin);
+	mylog::writelog(filename.c_str(), "dmax=%f;\n", dmax);
+	mylog::writelog(filename.c_str(), "mintate=%f;\n", mintate);
+	mylog::writelog(filename.c_str(), "maxtate=%f;\n", maxtate);
+	mylog::writelog(filename.c_str(), "minyoko=%f;\n", minyoko);
+	mylog::writelog(filename.c_str(), "maxyoko=%f;\n", maxyoko);
+	mylog::writelog(filename.c_str(), "dtate=%f;\n", dtate);
+	mylog::writelog(filename.c_str(), "dyoko=%f;\n", dyoko);
+	mylog::writelog(filename.c_str(), "dd=%f;\n", dd);
+	mylog::writelog(filename.c_str(), "}\n");
+	CS::instance()->leave(CS_LOG_CS, "armpoint makel");
+}
+
+void ArmPointIndexInfo::loadFile() {
+	MyTokenAnalyzer mt;
+	if (!mt.load(filename.c_str())) {
+		KTROBO::mylog::writelog(KTROBO::WARNING, "%s の書き込みに失敗", filename.c_str());
+		return;
+	}
+
+	mt.GetToken(); // LOCKONSYSTEMINFO
+	mt.GetToken(); // {
+	mt.GetToken(); // filename
+	mt.GetToken();
+	char buf[512];
+	memset(buf,0,512);
+	mystrcpy(buf,512,0,mt.Toke());
+	filename = string(buf);
+	mt.GetToken(); // pointnum
+	int max_pointnum = mt.GetIntToken();
+	mt.GetToken(); // dmin
+	float tempdmin = mt.GetFloatToken();
+	dmin = tempdmin;
+	mt.GetToken(); // dmax
+	dmax = mt.GetFloatToken();
+	mt.GetToken(); // mintate
+	mintate = mt.GetFloatToken();
+	mt.GetToken(); // maxtate
+	maxtate = mt.GetFloatToken();
+	mt.GetToken(); // minyoko
+	minyoko = mt.GetFloatToken();
+	mt.GetToken(); // maxyoko
+	maxyoko = mt.GetFloatToken();
+	mt.GetToken(); // dtate
+	dtate = mt.GetFloatToken();
+	mt.GetToken(); // dyoko
+	dyoko = mt.GetFloatToken();
+	mt.GetToken(); // dd
+	dd = mt.GetFloatToken();
+
+	mt.GetToken(); // }
+
+	// 以下はarmpointwithindex
+	mt.GetToken();
+	while(!mt.enddayo()) {
+		if (strcmp("APWITHINDEX",mt.Toke())==0) {
+			mt.GetToken(); // {
+			int tempindex = mt.GetIntToken();
+			float posx = mt.GetFloatToken();
+			float posy = mt.GetFloatToken();
+			float posz = mt.GetFloatToken();
+			float dthetaxa = mt.GetFloatToken();
+			float dthetaxb = mt.GetFloatToken();
+			float dthetaya = mt.GetFloatToken();
+			float dthetayb = mt.GetFloatToken();
+			float dthetaza = mt.GetFloatToken();
+			float dthetazb = mt.GetFloatToken();
+			mt.GetToken(); // }
+			ArmPointWithIndex* ap = new ArmPointWithIndex();
+			ap->index = tempindex;
+			ap->indexinfo = this;
+			ap->is_calced = true;
+			ap->point.pos = MYVECTOR3(posx,posy,posz);
+			ap->point.dthetaxa = dthetaxa;
+			ap->point.dthetaxb = dthetaxb;
+			ap->point.dthetaya = dthetaya;
+			ap->point.dthetayb = dthetayb;
+			ap->point.dthetaza = dthetaza;
+			ap->point.dthetazb = dthetazb;
+			points.push_back(ap);
+		}
+		mt.GetToken(); // next
+	}
+}
+bool ArmPointIndexInfo::hasFile() {
+
+	FILE* file;
+	CS::instance()->enter(CS_LOG_CS, "armpoint hasfile");
+	if(0 != fopen_s(&file,filename.c_str(),"r")) {
+		CS::instance()->leave(CS_LOG_CS, "armpoint hasfile");
+		return false;
+	}
+	fclose(file);
+	CS::instance()->leave(CS_LOG_CS, "armpoint hasfile");
+	return true;
+
+}
+
+// 現状のデータを全てセーブする
+void ArmPointIndexInfo::saveFile() {
+	makeNewFile();
+	vector<ArmPointWithIndex*>::iterator it;
+	it = points.begin();
+	while(points.end() != it) {
+
+		ArmPointWithIndex* apwi = *it;
+		if (apwi->is_calced) {
+
+			mylog::writelog(filename.c_str(), "APWITHINDEX {\n");
+			mylog::writelog(filename.c_str(), "%d,",apwi->index);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.pos.float3.x);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.pos.float3.y);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.pos.float3.z);
+
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaxa);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaxb);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaya);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetayb);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaza);
+			mylog::writelog(filename.c_str(), "%f;\n",apwi->point.dthetazb);
+
+
+			mylog::writelog(filename.c_str(), "}\n");
+		}
+		it = it + 1;
+	}
+
+}
+void ArmPointIndexInfo::saveFileWithA() {
+	ArmPointWithIndex* apwi = apw;
+	if (apwi) {
+	if (apwi->is_calced) {
+
+			mylog::writelog(filename.c_str(), "APWITHINDEX {\n");
+			mylog::writelog(filename.c_str(), "%d,",apwi->index);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.pos.float3.x);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.pos.float3.y);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.pos.float3.z);
+
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaxa);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaxb);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaya);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetayb);
+			mylog::writelog(filename.c_str(), "%f,",apwi->point.dthetaza);
+			mylog::writelog(filename.c_str(), "%f;\n",apwi->point.dthetazb);
+
+
+			mylog::writelog(filename.c_str(), "}\n");
+		}
+	}
+
+}
+
+void ArmPointIndexInfo::setNextIndex() {
+
+}
+MYVECTOR3 ArmPointIndexInfo::getIndexPos() {
+
+}
+
+bool ArmPointIndexInfo::isCalcFinished() {
+
+}
+
+int ArmPointIndexInfo::getNowIndex() {
+
+
+
+}
+
+
+void ArmPointIndexInfo::saveDtheta(ArmPoint* save_data, int index) {
+
+
+
+
+}
+

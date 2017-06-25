@@ -343,14 +343,14 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					static int r =0;
 					bool t=false;
 					
-					r = iunko % 800;
+					r = iunko % 800+200;
 				
 					
-					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,3,3,10);
+					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
 					MyVec3TransformCoord(te,te,atarihan->world);
 					OBB ob;
 					ob.c = te;
-					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,3,3,10);
+					te = los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
 					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
 					if (!bunko) {
 					aphelper->setMoku(&te);
@@ -386,7 +386,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 				}
 			
-		for (int i= 0;i<10;i++) {
+		for (int t=0;t<50;t++) {
 		aphelper->calc(g,&temp);
 		}
 		if (aphelper->getIsCalced()) {

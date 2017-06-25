@@ -4,6 +4,7 @@
 #pragma once
 #include "MyDefine.h"
 #include "KTRoboGUI.h"
+#include <string>
 
 using namespace MYDEFINE;
 
@@ -262,6 +263,51 @@ public:
 
 };
 class Robo;
+
+struct ArmPointWithIndex;
+
+class ArmPointIndexInfo {
+private:
+	string filename;
+	float dmin;
+	float dmax;
+	float mintate;
+	float maxtate;
+	float minyoko;
+	float maxyoko;
+	float dtate;
+	float dyoko;
+	float dd;
+	vector<ArmPointWithIndex*> points;
+	ArmPointWithIndex* apw;
+	int now_index;
+
+public:
+	ArmPointIndexInfo(string filename, float dmin, float dmax, float mintate, float maxtate, float minyoko, float maxyoko,
+		float dtate, float dyoko, float dd);
+	~ArmPointIndexInfo();
+
+	void makeNewFile();
+	void loadFile();
+	bool hasFile();
+	void saveFile();
+	void saveFileWithA();
+
+	void setNextIndex();
+	MYVECTOR3 getIndexPos();
+	bool isCalcFinished();
+	int getNowIndex();
+	void saveDtheta(ArmPoint* save_data, int index);
+
+};
+
+struct ArmPointWithIndex {
+	ArmPoint point;
+	int index;
+	ArmPointIndexInfo* indexinfo;
+	bool is_calced;
+};
+
 class ArmPositionerHelper {
 private:
 	Robo* robo;
@@ -273,11 +319,25 @@ private:
 	bool is_migi;
 	bool nocalcyet;
 	bool is_calced;
+
+
+	MYVECTOR3 ddmoku;
+	MYVECTOR3 ddunko;
+	float dbb;
+	float bairitu;
+	bool uunko;
+	int unko_count;
 public:
 	ArmPositionerHelper(Robo* robo, ArmPositioner* ap, bool is_migi) {
 		this->robo = robo;
 		this->ap = ap;
 		this->is_migi = is_migi;
+		ddmoku = MYVECTOR3(0,0,0);
+		ddunko = MYVECTOR3(0,0,0);
+		dbb = 100000;
+		bairitu = 1;
+		uunko = false;
+		unko_count = 0;
 	}
 
 	void setMoku(MYVECTOR3* moku) {
@@ -286,6 +346,13 @@ public:
 		dmoku = MYVECTOR3(0,0,0);
 		nocalcyet = true;
 		is_calced = false;
+
+		ddmoku = MYVECTOR3(0,0,0);
+		ddunko = MYVECTOR3(0,0,0);
+		dbb = 100000;
+		bairitu = 1;
+		uunko = false;
+		unko_count = 0;
 	}
 	bool getIsCalced() {return is_calced;}
 
