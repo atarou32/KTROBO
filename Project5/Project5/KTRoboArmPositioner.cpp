@@ -1560,7 +1560,7 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 	detA = A11*A22*A33 + A12*A23*A31 + A13*A21*A32 - A13*A22*A31 - A11*A23*A32- A12*A21*A33;
 
 	if (abs(detA) <0.000001f) {
-		detA = 1;
+              		detA = 1;
 	}
 
 	float x1a = ((A22*A33- A32*A23)* kitentomoku.float3.x - (A21* A33 - A31 * A23)* kitentomoku.float3.y + (A21 * A32 - A31*A22)*kitentomoku.float3.z) /detA;
@@ -1834,7 +1834,19 @@ bool ArmPoint8Positioner::isInPoint(MYVECTOR3* moku) {
 
 }
 
+void ArmPositionerHelper::setArmPoint8(int index, ArmPoint* po) {
+	ap8.setPoint(index,po);
+}
 
+
+void ArmPositionerHelper::byougaAP8(Graphics* g, MYMATRIX* view) {
+	OBB ob;
+	ob.e.float3.y = 5;
+	for (int i=0;i<8;i++) {
+	ob.c = ap8.points[i].pos;
+	g->drawOBB(g,0xFFFFFFFF, &robo->atarihan->world,view,g->getProj(), &ob);
+	}
+}
 void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		
 	if (is_calced) {
@@ -1905,6 +1917,11 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 			dmokudayo.float3.z /= 1000.0f;
 			dd.float3.z /=100;
 			}
+			if (abs(dmokudayo.float3.x) > 3.3f) {
+			dmokudayo.float3.x/= 1000.0f;
+			dd.float3.x /=100;
+			}
+
 			ddunko = ddunko + dmokudayo/ddunkod*MyVec3Length(dmoku)*2.5;/// ddunkod;
 		}
 		dbb = ddd;
@@ -2008,6 +2025,36 @@ ArmPointIndexInfo::~ArmPointIndexInfo() {
 	points.clear();
 }
 
+
+ArmPoint* ArmPointIndexInfo::getArmPointFromPointindex(int pointindex, MYVECTOR3* pos) {
+	LockOnSystem los;
+	int index = los.getIndexOfPoint8(pointindex, pos, dmin,dmax,mintate,maxtate,minyoko,maxyoko,dtate,dyoko,dd);
+	if (index == -1) {
+		return NULL;
+	}
+
+	return getArmPoint(index);
+}
+
+ArmPoint* ArmPointIndexInfo::getArmPoint(int index) {
+	if (index >=0 && index < points.size()) {
+		if (points[index]->index == index) {
+			return &points[index]->point;
+		} else {
+			vector<ArmPointWithIndex*>::iterator it;
+			it = points.begin();
+			while(it != points.end()) {
+				ArmPointWithIndex* ii = *it;
+				if (ii->index == index) {
+					return &ii->point;
+				}
+				it = it + 1;
+			}
+		}
+	}
+
+	return NULL;
+}
 void ArmPointIndexInfo::makeNewFile() {
 	FILE* file;
 	CS::instance()->enter(CS_LOG_CS, "armpoint make");

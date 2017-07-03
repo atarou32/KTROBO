@@ -14,6 +14,10 @@ public:
 
 	int getStudyPointNum(float rmin, float rmax, float mintate, float maxtate, 
 		float minyoko, float maxyoko,float dtate, float dyoko, float dr);
+
+	int getIndexOfPoint8(int pointindex, MYVECTOR3* pos, float rmin, float rmax, float mintate, float maxtate, 
+		float minyoko, float maxyoko,float dtate, float dyoko, float dr);
+
 	MYVECTOR3 getPosOfStudyPoint(int index, float rmin, float rmax, float mintate, float maxtate, 
 		float minyoko, float maxyoko,float dtate, float dyoko, float dr);
 	void byougaStudyPoint(Graphics* g, MYMATRIX* world,MYMATRIX* view, 
@@ -22,6 +26,11 @@ public:
 	void byougaBigStudyPoint(int index, Graphics* g, MYMATRIX* world,MYMATRIX* view, 
 		float rmin, float rmax, float mintate, float maxtate, 
 		float minyoko, float maxyoko,float dtate, float dyoko, float dr);
+	
+	bool isIn(MYVECTOR3* pos, float rmin, float rmax, float mintate, float maxtate, 
+		float minyoko, float maxyoko,float dtate, float dyoko, float dr);
+
+
 };
 
 }

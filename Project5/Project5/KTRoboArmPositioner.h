@@ -269,6 +269,7 @@ struct ArmPointWithIndex;
 class ArmPointIndexInfo {
 private:
 	string filename;
+public:
 	float dmin;
 	float dmax;
 	float mintate;
@@ -278,11 +279,12 @@ private:
 	float dtate;
 	float dyoko;
 	float dd;
+private:
 	vector<ArmPointWithIndex*> points;
 	set<int> ponums;
 	ArmPointWithIndex* apw;
 	int now_index;
-
+	ArmPoint8Positioner ap8;
 public:
 	ArmPointIndexInfo(string filename, float dmin, float dmax, float mintate, float maxtate, float minyoko, float maxyoko,
 		float dtate, float dyoko, float dd);
@@ -302,6 +304,8 @@ public:
 	
 	int getNowIndex();
 	void saveDtheta(ArmPoint* save_data, int index);
+	ArmPoint* getArmPoint(int index);
+	ArmPoint* getArmPointFromPointindex(int pointindex, MYVECTOR3* pos);
 
 };
 
@@ -364,6 +368,8 @@ public:
 	bool getIsCalced() {return is_calced;}
 
 	void calc(Graphics* g, MYMATRIX* view);
+	void byougaAP8(Graphics* g, MYMATRIX* view);
+	void setArmPoint8(int index, ArmPoint* po);
 
 	ArmPoint getArmPoint() {
 		ArmPoint app;

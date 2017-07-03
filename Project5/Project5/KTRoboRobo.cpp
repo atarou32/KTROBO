@@ -30,6 +30,7 @@ Robo::Robo(void)
 	ap = 0;
 	aphelper = 0;
 	apinfo = 0;
+	target = MYVECTOR3(0,0,0);
 }
 
 
@@ -138,7 +139,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,6,10,6,10,300,300,500);
 	//sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
-
+	aphelper->byougaAP8(g,view);
 
 
 }
@@ -354,8 +355,14 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
 					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
 					if (!bunko) {
-					aphelper->setMoku(&te);
-					bunko = true;
+						if (apinfo->isCalcFinished()) {
+							aim(g, view);
+							bunko = false;
+						} else {
+							aphelper->setMoku(&te);
+							bunko = true;
+						}
+				
 					}
 					//ArmPoint app = posit.getPoint(&te);//posit.points[r];
 					//app.is_ok = true;
@@ -388,7 +395,9 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 				}
 			
 		for (int t=0;t<50;t++) {
+			if (!aphelper->getIsCalced() && !apinfo->isCalcFinished()) {
 			aphelper->calc(g,&temp);
+			}
 		}
 
 		if (aphelper->getIsCalced()) {
@@ -400,9 +409,17 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			apinfo->saveDtheta(&app, apinfo->getNowIndex());
 			apinfo->saveFileWithA();
 			apinfo->setNextIndex();
+				bunko = false;
+			} else {
+				if (bunko) {
+				
+				bunko = false;
+				} else {
+				bunko = true;
+				}
 			}
 
-			bunko = false;
+		
 		}
 
 					
@@ -486,6 +503,38 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 	}
 
 	atarihan->calcJyusinAndR();
+}
+
+void Robo::aim(Graphics* g, MYMATRIX* view) {
+
+	// ƒƒ{‹óŠÔ‚ÌtargetÀ•W‚ðŽæ“¾‚·‚é
+	MYMATRIX mat;
+	MyMatrixInverse(mat,NULL,atarihan->world);
+	MYVECTOR3 tempmo;
+	MyVec3TransformCoord(tempmo,target, mat);
+//	tempmo = target;
+	ArmPoint* podayo8[8];
+	LockOnSystem los;
+	if (!los.isIn(&tempmo,apinfo->dmin,apinfo->dmax, apinfo->mintate, apinfo->maxtate, apinfo->minyoko, apinfo->maxyoko,apinfo->dtate, apinfo->dyoko, apinfo->dd)) return;
+
+    for (int i=0;i<8;i++) {
+    		podayo8[i] = apinfo->getArmPointFromPointindex(i, &tempmo);
+	}
+
+	
+	if (podayo8[0] && podayo8[1] && podayo8[2] && podayo8[3] &&
+		podayo8[4] && podayo8[5] && podayo8[6] && podayo8[7]) {
+		for (int i=0;i<8;i++) {
+   			aphelper->setArmPoint8(i,podayo8[i]);
+		}
+		aphelper->setMoku(&tempmo);
+		aphelper->setNoCalcYet(true);
+		aphelper->calc(g, view);
+	}
+
+
+
+
 }
 
 void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
@@ -733,7 +782,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	ap->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
 	aphelper = new ArmPositionerHelper(this,ap,true);
 
-	apinfo = new ArmPointIndexInfo("ktrobofcs1.txt", 10,100,6,10,6,10,1,1,3);
+	apinfo = new ArmPointIndexInfo("ktrobofcs2.txt", 10,100,6,10,6,10,2,2,10);
 	if (apinfo->hasFile()) {
 		apinfo->loadFile();
 	} else {

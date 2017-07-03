@@ -1062,11 +1062,13 @@ public:
 	UMesh* atari_leg;
 	RoboAnimeLoop anime_loop_leg;
 
-
+	MYVECTOR3 target;
 
 
 
 	//MYMATRIX world;
+	void aim(Graphics* g, MYMATRIX* view);
+;
 	bool handleMessage(int msg, void* data, DWORD time);
 public:
 	Robo(void);
