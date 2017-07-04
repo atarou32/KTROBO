@@ -13,7 +13,8 @@ const char* yumes[] = {
 	"Battle-forHonor_loop",
 	"am_white",
 	"omoide_loft",
-	"yume_akari"
+	"yume_akari",
+	"se_maoudamashii_battle_gun01",
 };
 }
 

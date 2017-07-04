@@ -124,7 +124,7 @@ bool TempInputShori::handleMessage(int msg, void * data, DWORD time) {
 
 			CS::instance()->enter(CS_SOUND_CS, "enter");
 			sound->stopCue(yumes[sound_index]);
-			sound_index =(sound_index+1) % 6;
+			sound_index =(sound_index+1) % 7;
 			sound->playCue(yumes[sound_index]);
 			CS::instance()->leave(CS_SOUND_CS, "leave");
 		}
@@ -1723,6 +1723,7 @@ void Game::Run() {
 	if (robodayo->atarihan) {
 	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
 		robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+		robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
 		if (sap->update()) {

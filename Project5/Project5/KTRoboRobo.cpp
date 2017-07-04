@@ -2,6 +2,10 @@
 #include "KTRoboGameError.h"
 #include "KTRoboLockOnSystem.h"
 #include "KTRoboArmPositioner.h"
+#include "KTRoboWeapon.h"
+#include "KTRoboGame.h"
+#include "KTRoboTexture.h"
+#include "KTRoboWeapon.h"
 
 using namespace KTROBO;
 Robo::Robo(void)
@@ -29,8 +33,11 @@ Robo::Robo(void)
 	resetCount();
 	ap = 0;
 	aphelper = 0;
+	ap_hidari = 0;
+	aphelper_hidari = 0;
 	apinfo = 0;
 	target = MYVECTOR3(0,0,0);
+	is_fireraweapon = false;
 }
 
 
@@ -140,6 +147,13 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,6,10,6,10,300,300,500);
 	//sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
 	aphelper->byougaAP8(g,view);
+	if (raweapon) {
+		raweapon->weapon->draw(g, &atarihan->world,view,proj);
+	}
+
+	if (laweapon) {
+		laweapon->weapon->draw(g, &atarihan->world,view,proj);
+	}
 
 
 }
@@ -281,10 +295,10 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			MyMatrixInverse(temp,NULL,atarihan->world);
 			MyVec3TransformCoord(te,te,temp);
 			
-			arm->larm->animate(40,true);
-			if (ap->positionArm3(g,&temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-													 ,80+40*sin(test))*/, false)) {
-			arm->larm->animate(40,false);//false);
+		//	arm->larm->animate(40,true);
+		//	if (ap->positionArm3(g,&temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+						//							 ,80+40*sin(test))*/, false)) {
+		//	arm->larm->animate(40,false);//false);
 			{
 			RAY ra;
 			
@@ -304,7 +318,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 			}
 			}
-			}
+			//}
 
 			}
 			if (this->arm->rarm) {
@@ -360,6 +374,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 							bunko = false;
 						} else {
 							aphelper->setMoku(&te);
+							
 							bunko = true;
 						}
 				
@@ -398,6 +413,10 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			if (!aphelper->getIsCalced() && !apinfo->isCalcFinished()) {
 			aphelper->calc(g,&temp);
 			}
+			if (!aphelper_hidari->getIsCalced() && !apinfo->isCalcFinished()) {
+			aphelper_hidari->calc(g,&temp);
+			}
+
 		}
 
 		if (aphelper->getIsCalced()) {
@@ -503,6 +522,8 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 	}
 
 	atarihan->calcJyusinAndR();
+
+	raweapon->wf_rifle.update(dt,stamp);
 }
 
 void Robo::aim(Graphics* g, MYMATRIX* view) {
@@ -526,10 +547,40 @@ void Robo::aim(Graphics* g, MYMATRIX* view) {
 		podayo8[4] && podayo8[5] && podayo8[6] && podayo8[7]) {
 		for (int i=0;i<8;i++) {
    			aphelper->setArmPoint8(i,podayo8[i]);
+		//	aphelper_hidari->setArmPoint8(i,podayo8[i]);
 		}
 		aphelper->setMoku(&tempmo);
 		aphelper->setNoCalcYet(true);
 		aphelper->calc(g, view);
+
+		// weapon ‚É”½‰f
+		if (raweapon) {
+			raweapon->weapon->animate(0,false);
+		}
+
+	}
+
+	tempmo.float3.x *= -1;
+	 for (int i=0;i<8;i++) {
+    		podayo8[i] = apinfo->getArmPointFromPointindex(i, &tempmo);
+	}
+
+	
+	if (podayo8[0] && podayo8[1] && podayo8[2] && podayo8[3] &&
+		podayo8[4] && podayo8[5] && podayo8[6] && podayo8[7]) {
+		for (int i=0;i<8;i++) {
+   		//	aphelper->setArmPoint8(i,podayo8[i]);
+			aphelper_hidari->setArmPoint8(i,podayo8[i]);
+		}
+
+
+             		aphelper_hidari->setMoku(&tempmo);
+		aphelper_hidari->setNoCalcYet(true);
+		aphelper_hidari->calc(g,view);
+		// weapon ‚É”½‰f
+		if (laweapon) {
+			laweapon->weapon->animate(0,false);
+		}
 	}
 
 
@@ -694,6 +745,95 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	}
 
 
+
+	{
+	// RWEAPON
+	ma.load("resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt");
+	RoboDataMetaData* rweapon_md = new RoboDataMetaData();
+	RoboMetaDataPart rmdp;
+	rmdp.clear();
+	int dnum = ma.GetIntToken();
+	for (int i=0;i<dnum;i++) {
+		rmdp.clear();
+		rmdp.readline(&ma);
+		rweapon_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
+	}
+
+	ma.deletedayo();
+	ma.load("resrc/ktrobo/info/rweapon/ktroborarmweaponrifle.txt");
+	
+	raweapon = new RArmWeapon();
+	try {
+	raweapon->init(&ma,rweapon_md,g,tex_loader);
+		} catch (GameError* err) {
+		
+	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		delete rweapon_md;
+		ma.deletedayo();
+		throw err;
+	}
+	delete rweapon_md;
+	ma.deletedayo();
+
+	// handbone ‚ÆÚ’…
+	raweapon->weapon->RootBone->parent_bone = arm->rarm->Bones[arm->rarm->BoneIndexes["handBone"]];
+	raweapon->weapon->RootBone->parent_bone_index = arm->rarm->BoneIndexes["handBone"];
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	wo._11 = 0;
+	wo._22 = 0;
+	wo._12 = -1;
+	wo._21 = 1;
+	wo._33 = -1;
+	raweapon->weapon->rootbone_matrix_local_kakeru = wo;
+	raweapon->weapon->animate(0,true);
+
+	}
+
+	{
+	// LWEAPON
+	ma.load("resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt");
+	RoboDataMetaData* lweapon_md = new RoboDataMetaData();
+	RoboMetaDataPart rmdp;
+	rmdp.clear();
+	int dnum = ma.GetIntToken();
+	for (int i=0;i<dnum;i++) {
+		rmdp.clear();
+		rmdp.readline(&ma);
+		lweapon_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
+	}
+
+	ma.deletedayo();
+	ma.load("resrc/ktrobo/info/lweapon/ktrobolarmweaponrifle.txt");
+	
+	laweapon = new LArmWeapon();
+	try {
+	laweapon->init(&ma,lweapon_md,g,tex_loader);
+		} catch (GameError* err) {
+		
+	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		delete lweapon_md;
+		ma.deletedayo();
+		throw err;
+	}
+	delete lweapon_md;
+	ma.deletedayo();
+	laweapon->weapon->RootBone->parent_bone = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
+	laweapon->weapon->RootBone->parent_bone_index = arm->larm->BoneIndexes["handBone"];
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	wo._11 = 0;
+	wo._22 = 0;
+	wo._12 = -1;
+	wo._21 = 1;
+	wo._33 = -1;
+	laweapon->weapon->rootbone_matrix_local_kakeru = wo;
+	laweapon->weapon->animate(0,true);
+
+
+	}
+
+
 	// atarihan‚Ìumesh‚ð‚Â‚­‚é
 	MYMATRIX wor;
 	MyMatrixIdentity(wor);
@@ -781,6 +921,10 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	ap = new ArmPositioner(3.14/60000,3.14/3,0.62);
 	ap->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
 	aphelper = new ArmPositionerHelper(this,ap,true);
+
+	ap_hidari = new ArmPositioner(3.14/60000,3.14/3,0.62);
+	ap_hidari->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
+	aphelper_hidari = new ArmPositionerHelper(this,ap_hidari,false);
 
 	apinfo = new ArmPointIndexInfo("ktrobofcs2.txt", 10,100,6,10,6,10,2,2,10);
 	if (apinfo->hasFile()) {
@@ -876,6 +1020,19 @@ void Robo::release() {
 		delete aphelper;
 		aphelper = 0;
 	}
+
+	
+	if (ap_hidari) {
+		delete ap_hidari;
+		ap_hidari = 0;
+	}
+
+	if (aphelper_hidari) {
+		delete aphelper_hidari;
+		aphelper_hidari = 0;
+	}
+
+
 	if (apinfo) {
 		delete apinfo;
 		apinfo = 0;
@@ -1731,7 +1888,11 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 			}
 
 			
-
+			if (input->getKEYSTATE()['T'] & KTROBO_INPUT_BUTTON_DOWN) {
+				is_fireraweapon = true;
+			} else {
+				is_fireraweapon = false;
+			}
 
 
 
@@ -2180,3 +2341,14 @@ void RoboState::enter(Robo* robo, RoboState* now_state, RoboState* before_state)
 	{
 		robo->resetCount();
 	}
+
+
+
+void Robo::fireUpdate(Graphics* g, MyTextureLoader* tex_loader, MYMATRIX* view, AtariHantei* hantei, float dt, int stamp, Game* game, KTROBO::Texture* tex) {
+
+
+	if (is_fireraweapon) {
+		raweapon->wf_rifle.fire(g,NULL,hantei, game->getSound(),tex,NULL,view, NULL,NULL);
+	}
+
+}

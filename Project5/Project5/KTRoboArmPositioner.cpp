@@ -303,6 +303,7 @@ bool ArmPositioner::positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* 
 		arm2 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]];
 		handjoint = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["handBone"]];
 	} else {
+		robo->arm->larm->animate(40,true);
 		arm1 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]];
 		arm2 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]];
 		handjoint = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["handBone"]];
@@ -555,7 +556,11 @@ void ArmPositioner::setArm3(Robo* robo, bool is_migi, MeshBone* arm1, MeshBone* 
 		unsigned short ans_minmax;
 		unsigned short ans_maxmin;
 		float weight;
+		if (is_migi) {
 		robo->arm->rarm->getOffsetMatrixToGetMinMaxAndWeightIndex(bn, frame, &ans_minmax, &ans_maxmin, &weight);
+		} else {
+				robo->arm->larm->getOffsetMatrixToGetMinMaxAndWeightIndex(bn, frame, &ans_minmax, &ans_maxmin, &weight);
+		}
 		MYMATRIX mat1 = bn->animes[ans_minmax]->matrix_basis;
 		MYMATRIX mat2 = bn->animes[ans_maxmin]->matrix_basis;
 		MYMATRIX mat3;
@@ -634,7 +639,12 @@ void ArmPositioner::setArm3(Robo* robo, bool is_migi, MeshBone* arm1, MeshBone* 
 		unsigned short ans_minmax;
 		unsigned short ans_maxmin;
 		float weight;
+		if (is_migi) {
 		robo->arm->rarm->getOffsetMatrixToGetMinMaxAndWeightIndex(bn, frame, &ans_minmax, &ans_maxmin, &weight);
+		} else {
+			robo->arm->larm->getOffsetMatrixToGetMinMaxAndWeightIndex(bn, frame, &ans_minmax, &ans_maxmin, &weight);
+
+		}
 		MYMATRIX mat1 = bn->animes[ans_minmax]->matrix_basis;
 		MYMATRIX mat2 = bn->animes[ans_maxmin]->matrix_basis;
 		MYMATRIX mat3;
@@ -911,41 +921,91 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 		robo->arm->rarm->animate(40,false);
 
 		}
-
 	} else {
-		float dthetaxa=0;
-		float dthetaya=0;
-		float dthetaza=0;
-		MyIKMODOKI modoki(robo->arm->larm,&wo,&mokuhf,"uparmBone", "handBone");
-			modoki.setXFreeBone("downarmBone");
+
+			
+			MyIKMODOKI modoki(robo->arm->larm,&robo->atarihan->world,&mokuhf,"modoruBone", "handBone");
+		modoki.setXFreeBone("downarmBone");
 		modoki.setYFreeBone("downarmBone");
 		modoki.setZFreeBone("downarmBone");
-		for (int i= 0;i<5;i++) {
-	
-	
-		for(int i = 0;i < 1;i++) {
-			modoki.updateStep();
-		}
-		float dthetax = modoki.getdthetaXBone("downarmBone")/3.14/60;
-		float dthetay = modoki.getdthetaYBone("downarmBone")/3.14/60;
-		float dthetaz = modoki.getdthetaZBone("downarmBone")/3.14/60;
-		dthetaxa += dthetax;
-		dthetaya += dthetay;
-		dthetaza += dthetaz;
 		
-		MYMATRIX rotxmat;
-		MYMATRIX rotymat;
-		MYMATRIX rotzmat;
-		MyMatrixRotationY(rotxmat, dthetaxa);
-		MyMatrixRotationY(rotymat, dthetaya);
-		MyMatrixRotationY(rotzmat, dthetaza);
-		MYMATRIX offmat;
-		MyMatrixMultiply(offmat, rotzmat, rotxmat);
-		MyMatrixMultiply(offmat, offmat, rotymat);
-		robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]]->offset_matrix = offmat;
+		modoki.setXFreeBone("uparmBone");
+		modoki.setYFreeBone("uparmBone");
+		modoki.setZFreeBone("uparmBone");
+		
+		for (int i = 0; i<13;i++) {
+	
+		
+		for(int k = 0;k < 1;k++) {
+		modoki.updateStep();
 		}
-	}
+		float dthetax = modoki.getdthetaXBone("uparmBone")/60.0/warukazu;
+		float dthetay = modoki.getdthetaYBone("uparmBone")/60.0/warukazu;
+		float dthetaz = modoki.getdthetaZBone("uparmBone")/60.0/warukazu;
+		unsigned int unko_count=0;
+		if (abs(dthetax) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetay) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetaz) < 0.000001) {
+			unko_count++;
+		}
 
+		if (und) {
+			dthetax /= 2.0f;
+			dthetay /= 2.0f;
+			dthetaz /= 2.0f;
+		}
+
+		dthetaxa += dthetax;
+	
+
+		dthetaya += dthetay;
+		
+		dthetaza += dthetaz;
+
+
+
+		dthetax = modoki.getdthetaXBone("downarmBone")/60/warukazu;
+		dthetay = modoki.getdthetaYBone("downarmBone")/60/warukazu;
+		dthetaz = modoki.getdthetaZBone("downarmBone")/60/warukazu;
+		if (abs(dthetax) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetay) < 0.000001) {
+			unko_count++;
+		}
+		if (abs(dthetaz) < 0.000001) {
+			unko_count++;
+		}
+
+		if (und) {
+			dthetax /= 2.0f;
+			dthetay /= 2.0f;
+			dthetaz /= 2.0f;
+		}
+
+
+
+
+
+
+		dthetaxb += dthetax;
+		dthetayb += dthetay;
+		dthetazb += dthetaz;
+	
+		if ((unko_count == 6) && !und) {
+			resetTheta();
+		}
+
+		this->setArm3(robo,false,arm1,arm2);
+		robo->arm->larm->animate(40,false);
+
+		}
+
+	}
 
 //	if (und) {
 //		return KTROBO_ARMPOSITION_OK;
@@ -1961,21 +2021,26 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 	if (ap->positionArm3(g,view,robo,&ttmp, is_migi) != KTROBO_ARMPOSITION_DAME) {
 
 
-
+											if (is_migi) {
 		
 												 ap->setArm3(robo,true, robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]],
 													 robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]]);
-			
-												 
+											} else {
+												 ap->setArm3(robo,false, robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]],
+													 robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]]);
+								
+											}
 												 if (nocalcyet) {
 													 dmoku = MYVECTOR3(0,0,0);
 													nocalcyet = false;
 													} else {
 													dmoku = ap->getDMOKU();
 													}
-												 
+											if (is_migi) {	 
 												 robo->arm->rarm->animate(40,false);
-												
+											} else {
+												robo->arm->larm->animate(40,false);
+											}
 
 		is_calced = true;
 	} else {
@@ -1986,8 +2051,11 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		} else {
 		dmoku = ap->getDMOKU();
 		}
+		if (is_migi) {
 		robo->arm->rarm->animate(40,false);
-
+		} else {
+			robo->arm->larm->animate(40,false);
+		}
 	}
 
 	if (ap->getReseted()) {

@@ -95,9 +95,20 @@ void UMeshUnit::calcJyusinAndR() {
 				henkanobb.e.float3.z = henkanobb.e.float3.z * MyVec3Length(henkanobb.u[2]);
 				MyVec3Normalize(henkanobb.u[2],henkanobb.u[2]);
 				// henkanobb ‚Ì‘å‚«‚³‚ð‚––‚„‚”‚É‰ž‚¶‚Ä‘å‚«‚­‚·‚é
-				henkanobb.e.float3.x += abs(v.float3.x) * dt;
+			/*	henkanobb.e.float3.x += abs(v.float3.x) * dt;
 				henkanobb.e.float3.y += abs(v.float3.y) * dt;
 				henkanobb.e.float3.z += abs(v.float3.z) * dt;
+				pp.c -= v * dt/2;
+				pp.e[0] += abs(MyVec3Dot(&pp.u[0], &v)) * dt;
+				pp.e[1] += abs(MyVec3Dot(&pp.u[1], &v)) * dt;
+				pp.e[2] += abs(MyVec3Dot(&pp.u[2], &v)) * dt;
+				*/
+				henkanobb.c = henkanobb.c - v * dt/2;
+				henkanobb.e.float3.x += abs(MyVec3Dot(henkanobb.u[0], v)) * dt;
+				henkanobb.e.float3.y += abs(MyVec3Dot(henkanobb.u[1], v)) * dt;
+				henkanobb.e.float3.z += abs(MyVec3Dot(henkanobb.u[2], v)) * dt;
+
+
 
 				em->is_bone_obbs_use[i] = true;
 				em->bone_obbs[i] = henkanobb;
@@ -211,6 +222,7 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 		UMeshUnit* um = umesh_units[i];
 		AtariUnit::AtariType type = umesh_unit_types[i];
 		int umsize = um->meshs.size();
+		if (umsize && um->getIsEnabled()) {
 		for (int k=0;k<umsize;k++) {
 			UMesh* umm = um->meshs[k];
 			if (atari_unit_count >= KTROBO_MAX_ATARI_HANTEI_UNIT_NUM) {
@@ -221,6 +233,7 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 			units[atari_unit_count].umesh = umm;
 			units[atari_unit_count].umesh_unit = um;
 			atari_unit_count++;
+		}
 		}
 	}
 	au_count = atari_unit_count;

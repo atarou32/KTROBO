@@ -7,6 +7,8 @@
 #include "KTRoboAtari.h"
 #include "KTRoboInput.h"
 //#include "KTROBOArmPositioner.h"
+#include "KTRoboWeapon.h"
+
 namespace KTROBO {
 
 struct RoboDataPart {
@@ -332,6 +334,8 @@ class RArmWeapon {
 public:
 	Mesh* weapon;
 	RoboData* data;
+
+	WeaponFireRifle wf_rifle;
 public:
 	RArmWeapon() {
 		weapon = 0;
@@ -985,12 +989,19 @@ public:
 class ArmPositioner;
 class ArmPositionerHelper;
 class ArmPointIndexInfo;
+class Game;
+class Texture;
+class WeaponFireRifle;
 class Robo : public INPUTSHORICLASS
 {
 private:
 public:
 	ArmPositioner* ap;
 	ArmPositionerHelper* aphelper;
+
+	ArmPositioner* ap_hidari;
+	ArmPositionerHelper* aphelper_hidari;
+
 	ArmPointIndexInfo* apinfo;
 private:
 	RoboHead* head;
@@ -1063,6 +1074,7 @@ public:
 	RoboAnimeLoop anime_loop_leg;
 
 	MYVECTOR3 target;
+	bool is_fireraweapon;
 
 
 
@@ -1078,6 +1090,8 @@ public:
 	void init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei);
 	void release();
 	void atarishori(Graphics* g , MYMATRIX* view, AtariHantei* hantei, float dt, int stamp);
+	void fireUpdate(Graphics* g, MyTextureLoader* tex_loader, MYMATRIX* view, AtariHantei* hantei, float dt, int stamp, Game* game, Texture* tex);
+
 };
 
 }

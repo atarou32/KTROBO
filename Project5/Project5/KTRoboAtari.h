@@ -100,6 +100,9 @@ private:
 	
 	bool is_updated;
 	// p¨‚ÆˆÊ’u‚Ìî•ñ
+
+	bool is_enabled;
+
 public:
 	float x;
 	float y;
@@ -126,6 +129,8 @@ public:
 	}
 
 public:
+	bool getIsEnabled() {return is_enabled;}
+	void setIsEnabled(bool t) { is_enabled = t;}
 	UMeshUnit() {
 		x = 0;
 		y = 0;
@@ -145,6 +150,7 @@ public:
 		r = 1;
 		MyMatrixIdentity(world);
 		is_updated = true;
+		is_enabled = true;
 		dt = 0;
 	}
 	void setXYZ(float x, float y, float z);
