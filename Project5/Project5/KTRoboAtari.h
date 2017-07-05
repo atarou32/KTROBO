@@ -303,13 +303,24 @@ struct AtariHanteiTempCount {
 #define KTROBO_ATARI_SHADER_COMPUTE "resrc/shader/simple_atari_compute.cso"
 #define KTROBO_ATARI_SHADER_COMPUTE2 "resrc/shader/simple_atari_compute_kuwasiku.cso"
 
+#define KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET 0
+#define KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALC 1
+#define KTROBO_ATARI_CALC_KUWASIKU_NONCALCKUWASIKUYET 2
+#define KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALCKUWASIKU 3
+#define KTROBO_ATARI_CALC_KUWASIKU_CALCED 4
+#define KTROBO_ATARI_CALC_KUWASIKU_GETTED 5
+
 class AtariHantei {
 private:
 	static const int kakuho_max = 7;
 	static const int kakuho_counts[]; 
 	static int getKakuhoCountsFromCount(int count);
 	bool is_updated;
+	bool is_unit_updated;
+	int is_calc_kuwasiku;
+	bool atari_start;
 public:
+
 	AtariUnit units[KTROBO_MAX_ATARI_HANTEI_UNIT_NUM];
 private:
 	AtariHanteiTempCount max_count;
@@ -323,7 +334,7 @@ private:
 	int atatta_count;
 public:
 	bool getIsUpdated() {return is_updated;}
-
+	bool setIsUnitUpdated() {return is_unit_updated = true;}
 	vector<UMeshUnit*> umesh_units;
 private:
 	vector<AtariUnit::AtariType> umesh_unit_types;
@@ -341,13 +352,16 @@ public:
 	void setUMeshUnit(UMeshUnit* u, AtariUnit::AtariType type) {
 		umesh_units.push_back(u);
 		umesh_unit_types.push_back(type);
+		is_unit_updated = true;
 	}
-
+	void ataristart() {atari_start =true;}
 	void maecalcdayo(Graphics* g);
+public:
 	void calcKumi(Graphics* g);
 	void calcKumiKuwasiku(Graphics* g);
 	void calcAuInfo(Graphics* g, bool calc_vertex_and_index);
 	void calcObb(Graphics* g);
+public:
 	void drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 	int getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya,UMesh* oya2, int out_ans_num);
 private:
@@ -394,13 +408,69 @@ public:
 	static HRESULT createShaderResourceView(Graphics* g, ID3D11Buffer* pBuffer, ID3D11ShaderResourceView** ppSrvOut);
 	static HRESULT createBufferUnorderedAccessView(Graphics* g, ID3D11Buffer* pBuffer, ID3D11UnorderedAccessView** ppUavOut);
 	static HRESULT createBufferForCopy(Graphics* g, ID3D11Buffer* pBuffer, ID3D11Buffer** ppBufOut);
+public:
 	HRESULT copyKekkaToBufferForCopy(Graphics* g,bool isans1);
+public:
 	void clearKekkaOfBuffer(Graphics* g);
 
 	// åvéZÇ∑ÇÈÇÃÇÕÇ¢Ç¡ÇπÇ¢Ç…çsÇ§
+
 	void runComputeShader(Graphics* g);
 	void runComputeShaderKuwasiku(Graphics* g);
+public:
 
+	bool setIsCalcKuwasikuGetted() {
+		if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_CALCED) {
+			is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_GETTED;
+			return true;
+		}
+		return false;
+	}
+
+	bool canGetAns() {
+		if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_CALCED) {
+			return true;
+		}
+		return false;
+	}
+
+	HRESULT copyKekkaForBufferCopy(Graphics* g) {
+		if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALC) {
+			HRESULT hr = copyKekkaToBufferForCopy(g, true);
+			is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_NONCALCKUWASIKUYET;
+			return hr;
+		}
+		if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALCKUWASIKU) {
+			HRESULT hr = copyKekkaToBufferForCopy(g, false);
+			is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_CALCED;
+			return hr;
+		}
+		return S_OK;
+	}
+
+	void calc(Graphics* g) {
+		if (!atari_start) return;
+		if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_GETTED) {
+			is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET;
+		}
+
+		if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET) {
+			
+			calcAuInfo(g,true);
+			calcKumi(g);
+			calcObb(g);
+			clearKekkaOfBuffer(g);
+			runComputeShader(g);
+			
+			
+		
+			is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALC;
+		} else if (is_calc_kuwasiku == KTROBO_ATARI_CALC_KUWASIKU_NONCALCKUWASIKUYET){
+			calcKumiKuwasiku(g);
+			runComputeShaderKuwasiku(g);
+			is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALCKUWASIKU;
+		}
+	}
 	~AtariHantei() {
 		// UMeshUnitÇÕäOÇ≈è¡Ç∑
 		/*
@@ -489,8 +559,11 @@ public:
 		au_waza_count = 0;
 		au_object_count = 0;
 		au_obbs_count=0;
-
+		atari_start = false;
 		is_updated = false;
+		is_unit_updated = false;
+		//KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET
+		is_calc_kuwasiku = KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET;
 		/*
 		ID3D11Buffer* buffer_vertexs;
 		ID3D11Buffer* buffer_indexs;

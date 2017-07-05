@@ -216,6 +216,8 @@ int AtariHantei::getKakuhoCountsFromCount(int count) {
 
 void AtariHantei::maecalcdayo(Graphics* g) {
 // maecalcdayo‚Å‚Í“o˜^‚³‚ê‚½UMeshUnit‚©‚çatariunit‚ÌŒvZ‚ğs‚¤
+	//if (!atari_start) return;
+	//if (!is_unit_updated) return;
 	int atari_unit_count = 0;
 	int size = umesh_units.size();
 	for (int i=0;i<size;i++) {
@@ -584,12 +586,13 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 		}
 	}
 
-
+	is_unit_updated = false;
 }
 
 
 void AtariHantei::calcKumi(Graphics* g) {
 		// ‘g‚Ì•Ï”‚É’l‚ğ“ü‚ê‚é
+	if (!atari_start) return;
 
 	int temp = 0;
 	int temp_igaidousi = 0;
@@ -702,7 +705,7 @@ void AtariHantei::calcKumi(Graphics* g) {
 
 void AtariHantei::calcKumiKuwasiku(Graphics* g) {
 		// ‘g‚Ì•Ï”‚É’l‚ğ“ü‚ê‚é
-
+	if (!atari_start) return;
 	int temp = 0;
 	int temp_igaidousi = 0;
 	int temp_tosoreigai = 0;
@@ -795,7 +798,7 @@ void AtariHantei::calcKumiKuwasiku(Graphics* g) {
 
 
 void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
-
+	if (!atari_start) return;
 	int temp_index_place=0;
 	int temp_vertex_place=0;
 
@@ -901,6 +904,7 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 
 
 void AtariHantei::calcObb(Graphics* g) {
+	if (!atari_start) return;
 	for (int i = 0;i<au_count;i++) {
 		AtariUnit* au = &units[i];
 		for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
@@ -1016,7 +1020,7 @@ HRESULT AtariHantei::createBufferForCopy(Graphics* g, ID3D11Buffer* pBuffer, ID3
 }
 
 HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
-	if (!is_updated) return S_OK;
+	//if (!is_updated) return S_OK;
 	if (!buffer_ans || !buffer_ans2 || !buffer_ans_copy || !buffer_ans2_copy) return S_OK;
 	if (isans1) {
 
@@ -1033,6 +1037,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 		int i_count=0;
 		g->getDeviceContext()->Map(buffer_ans_copy, 0, D3D11_MAP_READ, 0, &subRes );
 		anspo = (AtariUnitAns*)subRes.pData;
+		if (anspo) {
 		for (int i=0;i<temp_count.kumi_count;i++) {
 			if (anspo[i].is_use) {
 			ans[i_count].atari_idx = anspo[i].atari_idx;
@@ -1045,6 +1050,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 
 			i_count++;
 			}
+		}
 		}
 		g->getDeviceContext()->Unmap(buffer_ans_copy,0);
 		atatta_count = i_count;
@@ -1062,6 +1068,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 		int i_count=0;
 		g->getDeviceContext()->Map(buffer_ans2_copy, 0, D3D11_MAP_READ, 0, &subRes );
 		anspo = (AtariUnitAns*)subRes.pData;
+		if (anspo) {
 		for (int i=0;i<temp_count.ans_count;i++) {
 			if (anspo[i].is_use) {
 			ans[i_count].atari_idx = anspo[i].atari_idx;
@@ -1074,6 +1081,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 
 			i_count++;
 			}
+		}
 		}
 		g->getDeviceContext()->Unmap(buffer_ans2_copy,0);
 		atatta_count = i_count;
@@ -1380,6 +1388,7 @@ void AtariHantei::releaseBufferAndView() {
 
 int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, int out_ans_num) {
 	int tmp = 0;
+	if (is_calc_kuwasiku) return -1; // ŒvZ’†‚È‚Ì‚Å
 	for (int k = 0; k < atatta_count;k++) {
 		if (oya2) {
 		if ((units[ans[k].atari_idx].umesh == oya2) && (units[ans[k].atari_idx].umesh_unit == oya)
