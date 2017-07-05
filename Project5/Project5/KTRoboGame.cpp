@@ -251,7 +251,10 @@ void BUTUKARIPOSTCB2(TCB* thisTCB) {
 	CS::instance()->enter(CS_RENDERDATA_CS,"def");
 	//CS::instance()->enter(CS_RENDERDATA_CS,"unko");
 	
-
+	
+	hantei->maecalcdayo(g);
+	hantei->ataristart();
+	hantei->calc(g);
 /*
 	hantei->calcAuInfo(g,true);
 	hantei->calcKumi(g);
@@ -1823,14 +1826,14 @@ void Game::Run() {
 	//	g->drawOBB(g,0xFF0000FF,&iden,&view,&proj,&umesh_units[0]->meshs[0]->bone_obbs[0]);
 	}
 	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
+	
+	
+	hantei->calc(g);
+	hantei->copyKekkaForBufferCopy(g);
+	hantei->calc(g);
+	hantei->copyKekkaForBufferCopy(g);
 	/*
-	hantei->maecalcdayo(g);
 	hantei->ataristart();
-	hantei->calc(g);
-	hantei->copyKekkaForBufferCopy(g);
-	hantei->calc(g);
-	hantei->copyKekkaForBufferCopy(g);
-	*/
 	hantei->maecalcdayo(g);
 	hantei->calcAuInfo(g,true);
 	hantei->calcKumi(g);
@@ -1839,17 +1842,21 @@ void Game::Run() {
 	hantei->runComputeShader(g);
 
 	hantei->copyKekkaToBufferForCopy(g,true);
-
+	
 	hantei->calcKumiKuwasiku(g);
 	hantei->runComputeShaderKuwasiku(g);
 	hantei->copyKekkaToBufferForCopy(g,false);
-	//if (hantei->canGetAns()) {
+	*/
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+
+	if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
 			robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		}
+		
 		hantei->drawKekka(g,&view,&proj);
 		hantei->setIsCalcKuwasikuGetted();
-	//}
+	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 
 	g->getSwapChain()->Present(0,0);

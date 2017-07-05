@@ -1020,7 +1020,7 @@ HRESULT AtariHantei::createBufferForCopy(Graphics* g, ID3D11Buffer* pBuffer, ID3
 }
 
 HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
-	//if (!is_updated) return S_OK;
+	if (!is_updated) return S_OK;
 	if (!buffer_ans || !buffer_ans2 || !buffer_ans_copy || !buffer_ans2_copy) return S_OK;
 	if (isans1) {
 
@@ -1388,7 +1388,7 @@ void AtariHantei::releaseBufferAndView() {
 
 int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, int out_ans_num) {
 	int tmp = 0;
-	if (is_calc_kuwasiku) return -1; // ŒvŽZ’†‚È‚Ì‚Å
+
 	for (int k = 0; k < atatta_count;k++) {
 		if (oya2) {
 		if ((units[ans[k].atari_idx].umesh == oya2) && (units[ans[k].atari_idx].umesh_unit == oya)

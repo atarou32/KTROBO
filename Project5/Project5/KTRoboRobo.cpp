@@ -238,7 +238,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 		// ‹ó’†‚É‚¢‚é
 		if (dt <200) {
 		vdayo = atarihan->v.float3.z;
-		vdayo = vdayo - 0.00000098*dt;
+		vdayo = vdayo - 0.000098*dt;
 		float xx = vdayo * dt;
 		atarihan->setDT(dt);
 		atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + xx);
@@ -2072,9 +2072,13 @@ void RoboMovingState_RIGHTTURN::exec(Graphics* g, Robo* robo, float dsecond, int
 }
 
 void RoboMovingState_JUMP::enter(Robo* robo, RoboState* now_state, RoboState* before_state) {
+
+	if (before_state->isJump()) return;
+
 	RoboState::enter(robo,now_state,before_state);
 	robo->anime_loop_leg.setAnime(105,115,false);
-	robo->atarihan->v = MYVECTOR3(0,0,0.0019f);
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f);
+	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_JUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
@@ -2088,12 +2092,14 @@ void RoboMovingState_JUMP::exec(Graphics* g, Robo* robo, float dsecond, int stam
 
 
 void RoboMovingState_FORWARDJUMP::enter(Robo* robo, RoboState* now_state, RoboState* before_state) {
+	if (before_state->isJump()) return;
 	RoboState::enter(robo,now_state,before_state);
 	robo->anime_loop_leg.setAnime(105,115,false);
 	MYVECTOR3 ve(0,-1,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.0019f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_FORWARDJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
@@ -2109,17 +2115,18 @@ void RoboMovingState_FORWARDJUMP::exec(Graphics* g, Robo* robo, float dsecond, i
 	pos = pos + dpos;
 	robo->atarihan->setXYZ(pos.float3.x,pos.float3.y, pos.float3.z);
 
-
 }
 
 
 void RoboMovingState_BACKJUMP::enter(Robo* robo, RoboState* now_state, RoboState* before_state) {
+	if (before_state->isJump()) return;
 	RoboState::enter(robo,now_state,before_state);
 	robo->anime_loop_leg.setAnime(105,115,false);
 	MYVECTOR3 ve(0,1,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.0019f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_BACKJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
@@ -2138,12 +2145,14 @@ void RoboMovingState_BACKJUMP::exec(Graphics* g, Robo* robo, float dsecond, int 
 
 
 void RoboMovingState_LEFTJUMP::enter(Robo* robo, RoboState* now_state, RoboState* before_state) {
+	if (before_state->isJump()) return;
 	RoboState::enter(robo,now_state,before_state);
 	robo->anime_loop_leg.setAnime(105,115,false);
 	MYVECTOR3 ve(1,0,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.0019f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_LEFTJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
@@ -2162,12 +2171,14 @@ void RoboMovingState_LEFTJUMP::exec(Graphics* g, Robo* robo, float dsecond, int 
 
 
 void RoboMovingState_RIGHTJUMP::enter(Robo* robo, RoboState* now_state, RoboState* before_state) {
+	if (before_state->isJump()) return;
 	RoboState::enter(robo,now_state,before_state);
 	robo->anime_loop_leg.setAnime(105,115,false);
 	MYVECTOR3 ve(-1,0,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.0019f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_RIGHTJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
