@@ -160,7 +160,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float dt, int stamp) {
 
-	AtariUnitAnsKWSK ans[128];
+	AtariUnitAnsKWSK ans[512];
 	static float vdayo =0;
 	static int iunko = 9;
 	static bool bunko = false;
@@ -169,7 +169,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 
 
-	int atari_num = hantei->getAns(ans,atarihan,atari_leg,128);
+	int atari_num = hantei->getAns(ans,atarihan,atari_leg,512);
 	if (atari_num > 0 ) {
 		for (int i=0;i<atari_num;i++) {
 			if (ans[i].aite_type == AtariUnit::AtariType::ATARI_TIKEI) {
@@ -179,12 +179,12 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					OBB* ob = &atari_leg->bone_obbs[atari_leg->mesh->BoneIndexes["rightLegDownBone"]];
 					MYVECTOR3 a;
 					MyVec3Subtract(a,ob->c, ans[i].ans->kouten_jyusin);
-					float f = min((ob->e[0]/2 + ob->e[1]/2 + ob->e[2]/2)/3,abs(MyVec3Length(a) - abs(MyVec3Dot(ob->u[0],ans[i].ans->kouten_housen) * ob->e[0])
+					float f = min(MyVec3Length(atarihan->v)*dt,abs(MyVec3Length(a) - abs(MyVec3Dot(ob->u[0],ans[i].ans->kouten_housen) * ob->e[0])
 						- abs(MyVec3Dot(ob->u[1], ans[i].ans->kouten_housen)) * ob->e[1]
 					- abs(MyVec3Dot(ob->u[2], ans[i].ans->kouten_housen)) * ob->e[2]));
 					
 					if (ans[i].ans->kouten_housen.float3.z > 0) {
-					atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.1f*f*f);
+					atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.02f*f*f);
 					setti_state = &setti;
 					//atarihan->setV(&MYVECTOR3(0,0,atarihan->v.float3.z));
 					/*if ((move_state != &movestop) && move_state->isJump()) {
@@ -199,7 +199,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					
 					
 				}
-				
+				if (strpos(leg->data->getData("name")->string_data, "KTLTK") == -1) {
 				if (atari_leg && atari_leg->mesh && ((ans[i].ans->obbidx == atari_leg->bone_obbs_idx[atari_leg->mesh->BoneIndexes["leftLegDownBone"]]) ||
 					(ans[i].ans->obbidx2 == atari_leg->bone_obbs_idx[atari_leg->mesh->BoneIndexes["leftLegDownBone"]]))) {
 			
@@ -207,11 +207,11 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					OBB* ob = &atari_leg->bone_obbs[atari_leg->mesh->BoneIndexes["leftLegDownBone"]];
 					MYVECTOR3 a;
 					MyVec3Subtract(a,ob->c, ans[i].ans->kouten_jyusin);
-					float f = min((ob->e[0]/2 + ob->e[1]/2 + ob->e[2]/2)/3,abs(MyVec3Length(a) - abs(MyVec3Dot(ob->u[0],ans[i].ans->kouten_housen) * ob->e[0])
+					float f = min(MyVec3Length(atarihan->v)*dt,abs(MyVec3Length(a) - abs(MyVec3Dot(ob->u[0],ans[i].ans->kouten_housen) * ob->e[0])
 						- abs(MyVec3Dot(ob->u[1], ans[i].ans->kouten_housen)) * ob->e[1]
 					- abs(MyVec3Dot(ob->u[2], ans[i].ans->kouten_housen)) * ob->e[2]));
 					if (ans[i].ans->kouten_housen.float3.z > 0) {
-					atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.1f*f*f);
+					atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.02f*f*f);
 					/*if ((move_state != &movestop) && move_state->isJump()) {
 					move_state->leave(this,&movestop, move_state);
 					movestop.enter(this, &movestop, move_state);
@@ -226,6 +226,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 				
 					
 					
+				}
 				}
 				}
 				
@@ -522,6 +523,13 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 	}
 
 	atarihan->calcJyusinAndR();
+	OBB* ob = &atari_leg->bone_obbs[atari_leg->mesh->BoneIndexes["leftLegDownBone"]];
+	OBB* ob2 = &atari_leg->bone_obbs[atari_leg->mesh->BoneIndexes["rightLegDownBone"]];
+	// ŠÑ’Ê‚µ‚È‚¢‚æ‚¤‚É‘å‚«‚­‚·‚é
+	//ob->e = ob->e * 1.3;
+	//ob2->e = ob2->e * 1.3;
+
+
 
 	raweapon->wf_rifle.update(dt,stamp);
 }
@@ -727,7 +735,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 
 	ma.deletedayo();
 
-	ma.load("resrc/ktrobo/info/leg/ktrobolegt2.txt");
+	ma.load("resrc/ktrobo/info/leg/ktrobolegj2.txt");
 
 	leg = new RoboLeg();
 	try { 
@@ -2098,7 +2106,7 @@ void RoboMovingState_FORWARDJUMP::enter(Robo* robo, RoboState* now_state, RoboSt
 	MYVECTOR3 ve(0,-1,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.05f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_FORWARDJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
@@ -2125,7 +2133,7 @@ void RoboMovingState_BACKJUMP::enter(Robo* robo, RoboState* now_state, RoboState
 	MYVECTOR3 ve(0,1,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.05f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_BACKJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
@@ -2151,7 +2159,7 @@ void RoboMovingState_LEFTJUMP::enter(Robo* robo, RoboState* now_state, RoboState
 	MYVECTOR3 ve(1,0,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.05f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_LEFTJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
@@ -2177,7 +2185,7 @@ void RoboMovingState_RIGHTJUMP::enter(Robo* robo, RoboState* now_state, RoboStat
 	MYVECTOR3 ve(-1,0,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.005f;
+	robo->atarihan->v = MYVECTOR3(0,0,0.039f)+ve * 0.05f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
 void RoboMovingState_RIGHTJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
