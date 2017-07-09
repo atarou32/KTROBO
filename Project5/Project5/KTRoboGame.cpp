@@ -247,14 +247,15 @@ void BUTUKARIPOSTCB2(TCB* thisTCB) {
 	Task* t = (Task*)thisTCB->Work[0];
 	Graphics* g = (Graphics*)thisTCB->Work[1];
 	vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
-	CS::instance()->enter(CS_DEVICECON_CS, "ref");
-	CS::instance()->enter(CS_RENDERDATA_CS,"def");
+//	CS::instance()->enter(CS_DEVICECON_CS, "ref");
+//	CS::instance()->enter(CS_RENDERDATA_CS,"def");
 	//CS::instance()->enter(CS_RENDERDATA_CS,"unko");
 	
-	
+/**	
 	hantei->maecalcdayo(g);
 	hantei->ataristart();
 	hantei->calc(g);
+	**/
 /*
 	hantei->calcAuInfo(g,true);
 	hantei->calcKumi(g);
@@ -273,8 +274,8 @@ void BUTUKARIPOSTCB2(TCB* thisTCB) {
 	//CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	
 	
-	CS::instance()->leave(CS_RENDERDATA_CS, "def");
-	CS::instance()->leave(CS_DEVICECON_CS, "ref");
+//	CS::instance()->leave(CS_RENDERDATA_CS, "def");
+//	CS::instance()->leave(CS_DEVICECON_CS, "ref");
 	
 }
 
@@ -1827,7 +1828,8 @@ void Game::Run() {
 	}
 	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
 	
-	
+	hantei->maecalcdayo(g);
+	hantei->ataristart();
 	hantei->calc(g);
 	hantei->copyKekkaForBufferCopy(g);
 	hantei->calc(g);

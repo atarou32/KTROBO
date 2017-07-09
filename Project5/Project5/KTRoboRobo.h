@@ -1029,6 +1029,7 @@ public:
 	RoboState* booster_state;
 	int kuutyuu_count;
 	int setti_count;
+	float jump_f_z;
 	void resetCount() {
 		kuutyuu_count = 0;
 		setti_count = 0;
