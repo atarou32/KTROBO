@@ -1677,7 +1677,12 @@ void Game::Run() {
 
 	}
 
-
+	static float tester = 0;
+	tester += 0.1f;
+	UMeshUnit* umesh_unit = umesh_units[2+30];
+	umesh_unit->setXYZ(0,0,10);
+	umesh_unit->setROTXYZ(1.57,tester,0);
+	umesh_unit->calcJyusinAndR();
 	for(int i=0;i<100;i++) {
 	{
 		UMeshUnit* umesh_unit = umesh_units[2+i];
@@ -1859,6 +1864,7 @@ void Game::Run() {
 		hantei->drawKekka(g,&view,&proj);
 		hantei->setIsCalcKuwasikuGetted();
 	}
+	
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 
 	g->getSwapChain()->Present(0,0);

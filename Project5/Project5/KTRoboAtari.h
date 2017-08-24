@@ -262,6 +262,7 @@ struct AtariUnitAnsKWSK {
 	AtariUnitAns* ans;
 	UMeshUnit* aite;
 	UMesh* aite_umesh;
+	UMesh* my_umesh;
 };
 
 // このOBBはアニメーションと位置姿勢が適用されたOBB
@@ -545,14 +546,14 @@ public:
 		temp_count.soreigai_count = 0;
 		temp_count.vertexs_count = 0;
 
-		max_tikei_vertexs = new AtariUnitVertexs[kakuho_counts[0]];
-		max_tikei_indexs = new AtariUnitIndexs[kakuho_counts[0]];
-		au_info = new AtariUnitInfo[kakuho_counts[0]];
-		autid = new AtariUnitTikeiIgaiDousi[kakuho_counts[0]];
-		autts = new AtariUnitTikeiToSoreigai[kakuho_counts[0]];
-		kumi = new AtariUnitKumi[kakuho_counts[0]];
-		ans = new AtariUnitAns[kakuho_counts[0]];
-		obbs = new AtariUnitOBB[kakuho_counts[0]];
+		max_tikei_vertexs = new AtariUnitVertexs[kakuho_counts[2]];
+		max_tikei_indexs = new AtariUnitIndexs[kakuho_counts[2]];
+		au_info = new AtariUnitInfo[kakuho_counts[2]];
+		autid = new AtariUnitTikeiIgaiDousi[kakuho_counts[2]];
+		autts = new AtariUnitTikeiToSoreigai[kakuho_counts[2]];
+		kumi = new AtariUnitKumi[kakuho_counts[2]];
+		ans = new AtariUnitAns[kakuho_counts[2]];
+		obbs = new AtariUnitOBB[kakuho_counts[2]];
 		au_count = 0;
 		au_tikei_count = 0;
 		au_chara_count = 0;

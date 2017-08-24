@@ -60,10 +60,10 @@ void UMeshUnit::calcJyusinAndR() {
 	MyMatrixRotationZ(temp3,rotz);
 	MyMatrixTranslation(temp4,x,y,z);
 	MyMatrixScaling(temp5,scalex,scaley,scalez);
-	MyMatrixMultiply(world,temp3,temp);
+	MyMatrixMultiply(world,temp5,temp3);
+	MyMatrixMultiply(world,world,temp);
 	MyMatrixMultiply(world,world,temp2);
-	MyMatrixMultiply(world,world,temp5);
-	MyMatrixMultiply(world,world,temp4);
+	MyMatrixMultiply(world,world,temp4);	
 
 	// 現在のアニメフレームと位置と姿勢のときの各umesh のbone_obbs の計算を行う
 	// combined_matrix はすでにcalcanimeframe で計算されている
@@ -1396,6 +1396,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 			out_ans[tmp].ans = &ans[k];
 			out_ans[tmp].aite = units[ans[k].atari_idx2].umesh_unit;
 			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
+			out_ans[tmp].my_umesh = units[ans[k].atari_idx].umesh;
 			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
 
 			tmp++;
@@ -1408,6 +1409,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 				out_ans[tmp].ans = &ans[k];
 				out_ans[tmp].aite = units[ans[k].atari_idx].umesh_unit;
 				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
+				out_ans[tmp].my_umesh = units[ans[k].atari_idx2].umesh;
 				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
 			tmp++;
 			if (tmp >= out_ans_num) {
@@ -1422,6 +1424,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 				out_ans[tmp].ans = &ans[k];
 				out_ans[tmp].aite = units[ans[k].atari_idx2].umesh_unit;
 			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
+					out_ans[tmp].my_umesh = units[ans[k].atari_idx].umesh;
 			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
 			tmp++;
 			if (tmp >= out_ans_num) {
@@ -1433,6 +1436,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 				out_ans[tmp].aite = units[ans[k].atari_idx].umesh_unit;
 				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
 				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
+				out_ans[tmp].my_umesh = units[ans[k].atari_idx2].umesh;
 			tmp++;
 			if (tmp >= out_ans_num) {
 				return tmp;

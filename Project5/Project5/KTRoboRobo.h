@@ -670,6 +670,7 @@ class Robo;
 class RoboState {
 public:
 	bool isJump();
+	bool isJumpKABE();
 	virtual void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
 	virtual void leave(Robo* robo, RoboState* now_state, RoboState* before_state)=0;
 	virtual int getStateID()=0;
@@ -746,6 +747,53 @@ public:
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
 };
 
+
+class RoboMovingState_LEFTFORWARD : public RoboState {
+public:
+	RoboMovingState_LEFTFORWARD(){};
+	~RoboMovingState_LEFTFORWARD(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+class RoboMovingState_RIGHTFORWARD : public RoboState {
+public:
+	RoboMovingState_RIGHTFORWARD(){};
+	~RoboMovingState_RIGHTFORWARD(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+class RoboMovingState_LEFTBACK : public RoboState {
+public:
+	RoboMovingState_LEFTBACK(){};
+	~RoboMovingState_LEFTBACK(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+class RoboMovingState_RIGHTBACK : public RoboState {
+public:
+	RoboMovingState_RIGHTBACK(){};
+	~RoboMovingState_RIGHTBACK(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+
+
 class RoboMovingState_JUMP : public RoboState {
 private:
 	float t;
@@ -807,6 +855,71 @@ public:
 	int getStateID();
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
 };
+
+
+
+class RoboMovingState_JUMPKABE : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_JUMPKABE(){t = 0;};
+	~RoboMovingState_JUMPKABE(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+
+
+class RoboMovingState_FORWARDJUMPKABE : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_FORWARDJUMPKABE(){};
+	~RoboMovingState_FORWARDJUMPKABE(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_BACKJUMPKABE : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_BACKJUMPKABE(){};
+	~RoboMovingState_BACKJUMPKABE(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_LEFTJUMPKABE : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_LEFTJUMPKABE(){};
+	~RoboMovingState_LEFTJUMPKABE(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
+class RoboMovingState_RIGHTJUMPKABE : public RoboState {
+private:
+	float t;
+public:
+	RoboMovingState_RIGHTJUMPKABE(){};
+	~RoboMovingState_RIGHTJUMPKABE(){};
+	void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
+	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
+	int getStateID();
+	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+};
+
 
 class RoboSETTIState_SETTI : public RoboState {
 
@@ -1023,13 +1136,18 @@ private:
 
 public:
 	RoboState* move_state;
+	RoboState* moveturn_state;
+
 	RoboState* setti_state;
 	RoboState* setkabe_state;
 	RoboState* settenjyou_state;
 	RoboState* booster_state;
 	int kuutyuu_count;
 	int setti_count;
+	int setkabe_count;
 	float jump_f_z;
+	float jump_f_z_kabe;
+
 	void resetCount() {
 		kuutyuu_count = 0;
 		setti_count = 0;
@@ -1041,6 +1159,13 @@ public:
 		setti_count++;
 	};
 
+	void resetSetKabe() {
+		setkabe_count = 0;
+	}
+
+	void incSetKabe() {
+		setkabe_count++;
+	}
 
 	RoboBoosterState_BOOSTBACK boostback;
 	RoboBoosterState_BOOSTFORWARD boostforward;
@@ -1063,8 +1188,23 @@ public:
 	RoboMovingState_BACKJUMP movejumpback;
 	RoboMovingState_LEFTJUMP movejumpleft;
 	RoboMovingState_RIGHTJUMP movejumpright;
+
+	RoboMovingState_JUMPKABE movejumpkabe;
+	RoboMovingState_FORWARDJUMPKABE movejumpforwardkabe;
+	RoboMovingState_BACKJUMPKABE movejumpbackkabe;
+	RoboMovingState_LEFTJUMPKABE movejumpleftkabe;
+	RoboMovingState_RIGHTJUMPKABE movejumprightkabe;
+
+
+
 	RoboMovingState_LEFT moveleft;
 	RoboMovingState_RIGHT moveright;
+	RoboMovingState_LEFTBACK moveleftback;
+	RoboMovingState_RIGHTBACK moverightback;
+	RoboMovingState_LEFTFORWARD moveleftforward;
+	RoboMovingState_RIGHTFORWARD moverightforward;
+
+
 	RoboMovingState_STOP movestop;
 	RoboMovingState_LEFTTURN moveleftturn;
 	RoboMovingState_RIGHTTURN moverightturn;
