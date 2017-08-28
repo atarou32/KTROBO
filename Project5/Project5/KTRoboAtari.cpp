@@ -1398,7 +1398,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
 			out_ans[tmp].my_umesh = units[ans[k].atari_idx].umesh;
 			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
-
+			out_ans[tmp].my_umeshunit = units[ans[k].atari_idx].umesh_unit;
 			tmp++;
 			if (tmp >= out_ans_num) {
 				return tmp;
@@ -1411,6 +1411,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
 				out_ans[tmp].my_umesh = units[ans[k].atari_idx2].umesh;
 				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
+				out_ans[tmp].my_umeshunit = units[ans[k].atari_idx2].umesh_unit;
 			tmp++;
 			if (tmp >= out_ans_num) {
 				return tmp;
@@ -1426,6 +1427,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
 					out_ans[tmp].my_umesh = units[ans[k].atari_idx].umesh;
 			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
+			out_ans[tmp].my_umeshunit = units[ans[k].atari_idx].umesh_unit;
 			tmp++;
 			if (tmp >= out_ans_num) {
 				return tmp;
@@ -1437,6 +1439,7 @@ int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, 
 				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
 				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
 				out_ans[tmp].my_umesh = units[ans[k].atari_idx2].umesh;
+				out_ans[tmp].my_umeshunit = units[ans[k].atari_idx2].umesh_unit;
 			tmp++;
 			if (tmp >= out_ans_num) {
 				return tmp;
@@ -1457,10 +1460,20 @@ void AtariHantei::drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 		ray.org = ans[k].kouten_jyusin;
 		ray.dir = ans[k].kouten_housen;
+		
 
 		if ((units[ans[k].atari_idx].type == AtariUnit::AtariType::ATARI_TIKEI) ||
 			(units[ans[k].atari_idx2].type == AtariUnit::AtariType::ATARI_TIKEI)) {
-			g->drawRAY(g,0xFF2200FF,&idenmat,view,proj,50,&ray);
+
+			DWORD color = 0xFFFFFF00;
+			if (MyVec3Length(ray.dir) < 0.5) {
+				ray.dir = MYVECTOR3(0,0,1);
+
+				g->drawRAY(g,color,&idenmat,view,proj,50,&ray);
+			} else {
+
+				g->drawRAY(g,0xFF2222FF,&idenmat,view,proj,50,&ray);
+			}
 		}else {
 			// ’nŒ`ˆÈŠO‚È‚Ì‚Ådrawobb
 			OBB ob;

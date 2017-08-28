@@ -133,6 +133,8 @@ private:
 	KendoSinaiGenerator* ksgene;
 	SinaiFuruAnimeMakers* makers;
 	Robo* robodayo;
+	Robo* roboaitedayo;
+
 	ShudouArmPositioner* sap;
 public:
 	Game(void);

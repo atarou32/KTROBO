@@ -1,4 +1,5 @@
 #include "MyTokenAnalyzer.h"
+#include "KTRoboGameError.h"
 
 CRITICAL_SECTION MyTokenAnalyzer::cs;
 
@@ -50,12 +51,14 @@ bool MyTokenAnalyzer::load(const char* filename) {
 	if (strlen(filename) > 1024) {
 		KTROBO::mylog::writelog(KTROBO::WARNING, "長すぎるファイル名");
 		LeaveCriticalSection(&cs);
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, filename);
 		return false;
 	}
 
 	if(0 != fopen_s(&file,filename,"r")) {
 		KTROBO::mylog::writelog(KTROBO::WARNING, "%s の読み込みに失敗", filename);
 		LeaveCriticalSection(&cs);
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, filename);
 		return false;
 	}
 
@@ -68,6 +71,7 @@ bool MyTokenAnalyzer::load(const char* filename) {
 		KTROBO::mylog::writelog(KTROBO::WARNING, "%s　は大きすぎる", filename);
 		fclose(file);
 		LeaveCriticalSection(&cs);
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, filename);
 		return false;
 	}
 	char* buffer=new char[(unsigned int)fsize+1];
@@ -81,6 +85,7 @@ bool MyTokenAnalyzer::load(const char* filename) {
 		KTROBO::mylog::writelog(KTROBO::WARNING, "%c,%c,%c",buffer[0],buffer[1],buffer[2]);
 		fclose(file);
 		LeaveCriticalSection(&cs);
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, filename);
 		return false;
 	}
 	buffer[readsize]='\0';

@@ -263,6 +263,7 @@ struct AtariUnitAnsKWSK {
 	UMeshUnit* aite;
 	UMesh* aite_umesh;
 	UMesh* my_umesh;
+	UMeshUnit* my_umeshunit;
 };
 
 // このOBBはアニメーションと位置姿勢が適用されたOBB

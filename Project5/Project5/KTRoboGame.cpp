@@ -83,6 +83,7 @@ Game::Game(void)
 	ksgene = 0;
 	makers = 0;
 	robodayo = 0;
+	roboaitedayo = 0;
 	ss = 0;
 	sap = 0;
 }
@@ -480,6 +481,12 @@ bool Game::Init(HWND hwnd) {
 	robodayo = new Robo();
 	robodayo->init(g,demo->tex_loader,hantei);
 	InputMessageDispatcher::registerImpl(robodayo, NULL,NULL);
+	robodayo->atarihan->setXYZ(0,3,5);
+	roboaitedayo = new Robo();
+	roboaitedayo->init(g,demo->tex_loader,hantei);
+
+
+
 
 	for (int i=0;i<1;i++) {
 	{
@@ -990,6 +997,13 @@ void Game::Del() {
 		delete robodayo;
 		robodayo = 0;
 	}
+
+	if (roboaitedayo) {
+		roboaitedayo->release();
+		delete roboaitedayo;
+		roboaitedayo = 0;
+	}
+
 
 	 if (cmeshs) {
 		 delete cmeshs;
@@ -1680,8 +1694,8 @@ void Game::Run() {
 	static float tester = 0;
 	tester += 0.1f;
 	UMeshUnit* umesh_unit = umesh_units[2+30];
-	umesh_unit->setXYZ(0,0,10);
-	umesh_unit->setROTXYZ(1.57,tester,0);
+	umesh_unit->setXYZ(0,0,5);
+	umesh_unit->setROTXYZ(1.57,0,0);
 	umesh_unit->calcJyusinAndR();
 	for(int i=0;i<100;i++) {
 	{
@@ -1762,11 +1776,31 @@ void Game::Run() {
 		robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
+		
 		if (sap->update()) {
 			robodayo->aphelper->setNoCalcYet(false);
 		}
 		//sap->update();
 	}
+
+	roboaitedayo->byouga(g,&view,&proj);
+	if (roboaitedayo->atarihan) {
+	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
+		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
+		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
+		roboaitedayo->atarihan->calcJyusinAndR();
+	/*	
+		if (sap->update()) {
+			robodayo->aphelper->setNoCalcYet(false);
+		}
+		*/
+		//sap->update();
+	}
+
+
+
+
 	static float h = 0.0f;
 	h += 0.001f;
 	MYMATRIX wor;
@@ -1860,6 +1894,11 @@ void Game::Run() {
 		if (robodayo->atarihan) {
 			robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		}
+
+		if (roboaitedayo->atarihan) {
+			roboaitedayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+		}
+
 		
 		hantei->drawKekka(g,&view,&proj);
 		hantei->setIsCalcKuwasikuGetted();

@@ -10,7 +10,7 @@
 #include "KTRoboWeapon.h"
 
 namespace KTROBO {
-
+class Robo;
 struct RoboDataPart {
 public:
 	int int_data;
@@ -665,12 +665,15 @@ public:
 };
 
 
-class Robo;
+
 
 class RoboState {
 public:
 	bool isJump();
 	bool isJumpKABE();
+	bool isBoosterHi();
+	virtual bool isCanBoost(Robo* robo);
+	virtual bool isCanMoveWhenBoost(Robo* robo);
 	virtual void enter(Robo* robo, RoboState* now_state, RoboState* before_state);
 	virtual void leave(Robo* robo, RoboState* now_state, RoboState* before_state)=0;
 	virtual int getStateID()=0;
@@ -984,7 +987,46 @@ class RoboBoosterState_ONTAIKI : public RoboState {
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
 };
 
+
+class RoboBoosterCalc {
+private:
+	Robo* robo;
+	RoboBooster* booster;
+public:
+	RoboBoosterCalc();
+	~RoboBoosterCalc();
+private:
+	float time_maxspeed_made;
+	float maxspeed;
+
+	float time_maxspeed_jizoku_made;
+
+	float time_maxato_made;
+	float maxatospeed;
+
+	float time_backto_fudan;
+	float fudanspeed;
+
+	float time_to_reload;
+	float time_to_canmove;
+
+	float energy_drain;
+public:
+	void Init(Robo* robo, RoboBooster* booster);
+	float getSpeed(float dsecond);
+	bool isCanReload(float dsecond);
+	bool isCanMove(float dsecond) {
+		if (dsecond > time_to_canmove) {
+			return true;
+		}
+		return false;
+	}
+};
+
 class RoboBoosterState_BOOSTUP : public RoboState { 
+private:
+	float t;
+
 	public:
 	RoboBoosterState_BOOSTUP(){};
 	~RoboBoosterState_BOOSTUP(){};
@@ -992,9 +1034,14 @@ class RoboBoosterState_BOOSTUP : public RoboState {
 	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
 	int getStateID();
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+	bool isCanBoost(Robo* robo);
+	bool isCanMoveWhenBoost(Robo* robo);
 };
 
-class RoboBoosterState_BOOSTFORWARD : public RoboState { 
+class RoboBoosterState_BOOSTFORWARD : public RoboState {
+private:
+	float t;
+
 	public:
 	RoboBoosterState_BOOSTFORWARD(){};
 	~RoboBoosterState_BOOSTFORWARD(){};
@@ -1002,9 +1049,13 @@ class RoboBoosterState_BOOSTFORWARD : public RoboState {
 	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
 	int getStateID();
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+	bool isCanBoost(Robo* robo);
+	bool isCanMoveWhenBoost(Robo* robo);
 };
 
-class RoboBoosterState_BOOSTBACK : public RoboState { 
+class RoboBoosterState_BOOSTBACK : public RoboState {
+private:
+	float t;
 	public:
 	RoboBoosterState_BOOSTBACK(){};
 	~RoboBoosterState_BOOSTBACK(){};
@@ -1012,9 +1063,13 @@ class RoboBoosterState_BOOSTBACK : public RoboState {
 	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
 	int getStateID();
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+	bool isCanBoost(Robo* robo);
+	bool isCanMoveWhenBoost(Robo* robo);
 };
 
-class RoboBoosterState_BOOSTLEFT : public RoboState { 
+class RoboBoosterState_BOOSTLEFT : public RoboState {
+private:
+	float t;
 	public:
 	RoboBoosterState_BOOSTLEFT(){};
 	~RoboBoosterState_BOOSTLEFT(){};
@@ -1022,9 +1077,13 @@ class RoboBoosterState_BOOSTLEFT : public RoboState {
 	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
 	int getStateID();
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+	bool isCanBoost(Robo* robo);
+	bool isCanMoveWhenBoost(Robo* robo);
 };
 
-class RoboBoosterState_BOOSTRIGHT : public RoboState { 
+class RoboBoosterState_BOOSTRIGHT : public RoboState {
+private:
+	float t;
 	public:
 	RoboBoosterState_BOOSTRIGHT(){};
 	~RoboBoosterState_BOOSTRIGHT(){};
@@ -1032,6 +1091,8 @@ class RoboBoosterState_BOOSTRIGHT : public RoboState {
 	void leave(Robo* robo, RoboState* now_state, RoboState* before_state);
 	int getStateID();
 	void exec(Graphics* g, Robo* robo, float dsecond, int stamp);
+	bool isCanBoost(Robo* robo);
+	bool isCanMoveWhenBoost(Robo* robo);
 };
 
 
@@ -1105,6 +1166,23 @@ class ArmPointIndexInfo;
 class Game;
 class Texture;
 class WeaponFireRifle;
+
+class RoboParam {
+private:
+	Robo* robo;
+public:
+	RoboBoosterCalc boostercalc;
+public:
+	RoboParam();
+	~RoboParam();
+
+
+
+
+
+
+
+};
 class Robo : public INPUTSHORICLASS
 {
 private:
@@ -1132,7 +1210,8 @@ private:
 	RShoulderWeapon* rsweapon;
 	LShoulderWeapon* lsweapon;
 	InsideWeapon* iweapon;
-
+public:
+	RoboParam roboparam;
 
 public:
 	RoboState* move_state;
