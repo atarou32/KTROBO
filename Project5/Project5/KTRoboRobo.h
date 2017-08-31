@@ -1187,6 +1187,7 @@ class Robo : public INPUTSHORICLASS
 {
 private:
 public:
+	static const int KTROBO_ROBO_JUMPKABE_COUNT = 20;
 	ArmPositioner* ap;
 	ArmPositionerHelper* aphelper;
 
@@ -1224,6 +1225,8 @@ public:
 	int kuutyuu_count;
 	int setti_count;
 	int setkabe_count;
+	MYVECTOR3 kabe_housen;
+
 	float jump_f_z;
 	float jump_f_z_kabe;
 
@@ -1240,6 +1243,7 @@ public:
 
 	void resetSetKabe() {
 		setkabe_count = 0;
+		setkabe_state = &kuutyuu;
 	}
 
 	void incSetKabe() {

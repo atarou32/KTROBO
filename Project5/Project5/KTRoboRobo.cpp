@@ -38,6 +38,7 @@ Robo::Robo(void)
 	aphelper_hidari = 0;
 	apinfo = 0;
 	target = MYVECTOR3(0,0,0);
+	kabe_housen = MYVECTOR3(0,0,1);
 	is_fireraweapon = false;
 	jump_f_z = 0;
 	jump_f_z_kabe = 0;
@@ -317,6 +318,10 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 						
 							setkabe_state = &setkabe;
 							setkabedayo = true;
+
+							if ((uedot < 0.7) && (sitadot < 0.7)) {
+							kabe_housen = ans[i].ans->kouten_housen;
+							}
 							break;
 							//vdayo = 0;
 						}
@@ -396,12 +401,27 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 	if (setkabedayo == false) {
 
 		// ˆê’è‚ÌƒJƒEƒ“ƒg”Œã@‹ó’†‚É–ß‚·
-		if (setkabe_count > 45) {
+		if (setkabe_count > this->KTROBO_ROBO_JUMPKABE_COUNT) {
 			setkabe_state = &kuutyuu;
 			resetSetKabe();
 		} else {
 
-			if (move_state->isJumpKABE() && (setkabe_state != &kuutyuu)) {
+			if (move_state->isJumpKABE()) {
+				
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
+				incSetKabe();
 				incSetKabe();
 				incSetKabe();
 			} else {
@@ -410,10 +430,15 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 					incSetKabe();
 				}
+				
 			}
 		}
 	} else {
+		// ƒWƒƒƒ“ƒv’†‚Ì‚Æ‚«‚Í‚O‚É‚µ‚È‚¢
+		if (move_state->isJump() || move_state->isJumpKABE()) {
+		}else {
 			atarihan->setV(&MYVECTOR3(0, 0,vdayo));
+		}
 	}
 
 
@@ -786,12 +811,13 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 	}
 
 	atarihan->calcJyusinAndR();
+	/*
 	OBB* ob = &atari_leg->bone_obbs[atari_leg->mesh->BoneIndexes["leftLegDownBone"]];
 	OBB* ob2 = &atari_leg->bone_obbs[atari_leg->mesh->BoneIndexes["rightLegDownBone"]];
 	// ŠÑ’Ê‚µ‚È‚¢‚æ‚¤‚É‘å‚«‚­‚·‚é
 	//ob->e = ob->e * 1.3;
 	//ob2->e = ob2->e * 1.3;
-
+	*/
 
 
 	raweapon->wf_rifle.update(dt,stamp);
@@ -998,7 +1024,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 
 	ma.deletedayo();
 
-	ma.load("resrc/ktrobo/info/leg/ktrobolegj2.txt");
+	ma.load("resrc/ktrobo/info/leg/ktrobolegt2.txt");
 
 	leg = new RoboLeg();
 	try { 
@@ -2096,7 +2122,30 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 		CS::instance()->enter(CS_MESSAGE_CS, "enter");
 		if (move_state->isBoosterHi() && !move_state->isCanMoveWhenBoost(this)) {
 			// ƒnƒCƒu[ƒXƒg’†‚È‚Ì‚Å‰½‚à‚Å‚«‚È‚¢
-			Sleep(1);
+				if (input->getKEYSTATE()['T'] & KTROBO_INPUT_BUTTON_DOWN) {
+				is_fireraweapon = true;
+			} else {
+				is_fireraweapon = false;
+			}
+			if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+			if (input->getKEYSTATE()['F'] & KTROBO_INPUT_BUTTON_DOWN) {
+				if (booster_state == &boostoff) {
+					booster_state->leave(this, &boostoff, &boostontaiki);
+					boostontaiki.enter(this,&boostoff, &boostontaiki);
+					booster_state = &boostontaiki;
+				} else if( booster_state == &boostontaiki) {
+					booster_state->leave(this, &boostontaiki, &boostoff);
+					boostoff.enter(this, &boostontaiki, &boostoff);
+					booster_state = &boostoff;
+					if (move_state->isBoosterHi()) {
+						move_state->leave(this, &movestop, move_state);
+						movestop.enter(this, &movestop, move_state);
+						move_state = &movestop;
+					}
+				}
+			}
+			}
+			//Sleep(1);
 		} else {
 
 			if (move_state->isCanBoost(this)) {
@@ -2150,7 +2199,7 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 
 				if (input->getKEYSTATE()[VK_SPACE] & KTROBO_INPUT_BUTTON_PRESSED) {
 
-					if ((move_state != &movejumpforward) && (setti_state != &kuutyuu)) {
+					if ((move_state != &movejumpforward) && !move_state->isJumpKABE() &&  (setti_state != &kuutyuu)) {
 						move_state->leave(this, &movejumpforward, move_state);
 						movejumpforward.enter(this, &movejumpforward, move_state);
 						move_state = &movejumpforward;
@@ -2261,7 +2310,7 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 			} else if(input->getKEYSTATE()['S'] & KTROBO_INPUT_BUTTON_PRESSED) {
 				if (input->getKEYSTATE()[VK_SPACE] & KTROBO_INPUT_BUTTON_PRESSED) {
 
-					if ((move_state != &movejumpback)  && (setti_state != &kuutyuu)) {
+					if ((move_state != &movejumpback)  && !move_state->isJumpKABE() && (setti_state != &kuutyuu)) {
 						move_state->leave(this, &movejumpback, move_state);
 						movejumpback.enter(this, &movejumpback, move_state);
 						move_state = &movejumpback;
@@ -2290,7 +2339,7 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 					move_state->leave(this, &movejump, move_state);
 					movejump.enter(this, &movejump, move_state);
 					move_state = &movejump;
-				} else if ((!move_state->isJumpKABE()) && (setti_state != &kuutyuu)) {
+				} else if ((!move_state->isJumpKABE()) && (setkabe_state != &kuutyuu)) {
 					move_state->leave(this, &movejumpkabe, move_state);
 					movejumpkabe.enter(this, &movejumpkabe, move_state);
 					move_state = &movejumpkabe;
@@ -2786,6 +2835,8 @@ void RoboMovingState_JUMP::enter(Robo* robo, RoboState* now_state, RoboState* be
 void RoboMovingState_JUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
 	robo->jump_f_z = 0;
+	robo->setkabe_count = 10000000;
+
 
 }
 int RoboMovingState_JUMP::getStateID() {
@@ -2814,6 +2865,7 @@ void RoboMovingState_FORWARDJUMP::enter(Robo* robo, RoboState* now_state, RoboSt
 void RoboMovingState_FORWARDJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
 	robo->jump_f_z = 0;
+	robo->setkabe_count = 10000000;
 }
 int RoboMovingState_FORWARDJUMP::getStateID() {
 	return KTROBO_ID_ROBOMOVINGSTATE_FORWARDJUMP;
@@ -2846,6 +2898,7 @@ void RoboMovingState_BACKJUMP::enter(Robo* robo, RoboState* now_state, RoboState
 void RoboMovingState_BACKJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
 	robo->jump_f_z = 0;
+	robo->setkabe_count = 10000000;
 }
 int RoboMovingState_BACKJUMP::getStateID() {
 	return KTROBO_ID_ROBOMOVINGSTATE_BACKJUMP;
@@ -2877,6 +2930,7 @@ void RoboMovingState_LEFTJUMP::enter(Robo* robo, RoboState* now_state, RoboState
 void RoboMovingState_LEFTJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
 	robo->jump_f_z = 0;
+		robo->setkabe_count = 10000000;
 }
 int RoboMovingState_LEFTJUMP::getStateID() {
 	return KTROBO_ID_ROBOMOVINGSTATE_LEFTJUMP;
@@ -2908,12 +2962,13 @@ void RoboMovingState_RIGHTJUMP::enter(Robo* robo, RoboState* now_state, RoboStat
 void RoboMovingState_RIGHTJUMP::leave(Robo* robo, RoboState* now_state, RoboState* before_state) {
 	t = 0;
 	robo->jump_f_z = 0;
+	robo->setkabe_count = 10000000;
 }
 int RoboMovingState_RIGHTJUMP::getStateID() {
 	return KTROBO_ID_ROBOMOVINGSTATE_RIGHTJUMP;
 }
 void RoboMovingState_RIGHTJUMP::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
-		if (dsecond > 200) return;
+	if (dsecond > 200) return;
 	MYVECTOR3 pos(robo->atarihan->x, robo->atarihan->y, robo->atarihan->z);
 	MYVECTOR3 dpos = robo->atarihan->v * dsecond;
 	dpos.float3.z = 0; // zŠÖŒW‚Í‚ ‚½‚èˆ—‚Å
@@ -2933,7 +2988,7 @@ void RoboMovingState_JUMPKABE::enter(Robo* robo, RoboState* now_state, RoboState
 	RoboState::enter(robo,now_state,before_state);
 	robo->resetSetKabe();
 	robo->anime_loop_leg.setAnime(105,115,false);
-	robo->atarihan->v = MYVECTOR3(0,0,0.019f);
+	robo->atarihan->v = MYVECTOR3(0,0,0);//0.019f);
 	robo->jump_f_z_kabe = 0.00019f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
@@ -2948,8 +3003,8 @@ int RoboMovingState_JUMPKABE::getStateID() {
 void RoboMovingState_JUMPKABE::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
 	t += dsecond;
 		if (dsecond > 200) return;
-		if (robo->setkabe_count>0) {
-			robo->atarihan->v = robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
+		if ((robo->setkabe_count>0)&& (robo->setkabe_count < robo->KTROBO_ROBO_JUMPKABE_COUNT)) {
+			robo->atarihan->setV(&(robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond)));
 		}
 	
 }
@@ -2963,7 +3018,7 @@ void RoboMovingState_FORWARDJUMPKABE::enter(Robo* robo, RoboState* now_state, Ro
 	MYVECTOR3 ve(0,-1,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.019f)+ve * 0.02f;
+	robo->atarihan->setV(&MYVECTOR3(0,0,0.019f));//+ve * 0.02f;
 	robo->jump_f_z_kabe = 0.00019f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
@@ -2979,11 +3034,16 @@ void RoboMovingState_FORWARDJUMPKABE::exec(Graphics* g, Robo* robo, float dsecon
 		if (dsecond > 200) return;
 	MYVECTOR3 pos(robo->atarihan->x, robo->atarihan->y, robo->atarihan->z);
 	MYVECTOR3 dpos = robo->atarihan->v * dsecond;
+	MYVECTOR3 ve(0,-1,0);
+	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
+	MyVec3Normalize(ve,ve);
+	ve = (ve*0.8 + robo->kabe_housen*0.2);
+	MyVec3Normalize(ve,ve);
 	dpos.float3.z = 0; // zŠÖŒW‚Í‚ ‚½‚èˆ—‚Å
 	pos = pos + dpos;
 	robo->atarihan->setXYZ(pos.float3.x,pos.float3.y, pos.float3.z);
-	if (robo->setkabe_count>0) {
-		robo->atarihan->v = robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
+	if ((robo->setkabe_count>0)&& (robo->setkabe_count < robo->KTROBO_ROBO_JUMPKABE_COUNT)) {
+		robo->atarihan->setV(&(ve*0.002 + robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond)));
 	}
 
 }
@@ -2997,7 +3057,8 @@ void RoboMovingState_BACKJUMPKABE::enter(Robo* robo, RoboState* now_state, RoboS
 	MYVECTOR3 ve(0,1,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.019f)+ve * 0.02f;
+
+	robo->atarihan->setV(&MYVECTOR3(0,0,0.019f));//+ve * 0.02f;
 	robo->jump_f_z_kabe = 0.00019f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
@@ -3013,11 +3074,17 @@ void RoboMovingState_BACKJUMPKABE::exec(Graphics* g, Robo* robo, float dsecond, 
 		if (dsecond > 200) return;
 		MYVECTOR3 pos(robo->atarihan->x, robo->atarihan->y, robo->atarihan->z);
 	MYVECTOR3 dpos = robo->atarihan->v * dsecond;
+		MYVECTOR3 ve(0,1,0);
+	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
+	MyVec3Normalize(ve,ve);
+	ve = ve*0.8 + robo->kabe_housen*0.2;
+	MyVec3Normalize(ve,ve);
+
 	dpos.float3.z = 0; // zŠÖŒW‚Í‚ ‚½‚èˆ—‚Å
 	pos = pos + dpos;
 	robo->atarihan->setXYZ(pos.float3.x,pos.float3.y, pos.float3.z);
-	if (robo->setkabe_count>0) {
-		robo->atarihan->v = robo->atarihan->v+MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
+	if ((robo->setkabe_count>0)&& (robo->setkabe_count < robo->KTROBO_ROBO_JUMPKABE_COUNT)) {
+		robo->atarihan->setV(&(ve*0.002 + robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond)));//robo->atarihan->v = robo->atarihan->v+MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
 	}
 }
 
@@ -3030,7 +3097,7 @@ void RoboMovingState_LEFTJUMPKABE::enter(Robo* robo, RoboState* now_state, RoboS
 	MYVECTOR3 ve(1,0,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.019f)+ve * 0.02f;
+	robo->atarihan->setV(&MYVECTOR3(0,0,0.019f));//+ve * 0.02f;
 	robo->jump_f_z_kabe = 0.00019f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
@@ -3049,8 +3116,13 @@ void RoboMovingState_LEFTJUMPKABE::exec(Graphics* g, Robo* robo, float dsecond, 
 	dpos.float3.z = 0; // zŠÖŒW‚Í‚ ‚½‚èˆ—‚Å
 	pos = pos + dpos;
 	robo->atarihan->setXYZ(pos.float3.x,pos.float3.y, pos.float3.z);
-	if (robo->setkabe_count>0) {
-		robo->atarihan->v = robo->atarihan->v+ MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
+	if ((robo->setkabe_count>0)&& (robo->setkabe_count < robo->KTROBO_ROBO_JUMPKABE_COUNT)) {
+		MYVECTOR3 ve(1,0,0);
+	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
+	MyVec3Normalize(ve,ve);
+	ve = ve*0.8 + robo->kabe_housen*0.2;
+	MyVec3Normalize(ve,ve);
+		robo->atarihan->setV(&(ve*0.002 + robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond)));;//robo->atarihan->v = robo->atarihan->v+ MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
 	}
 }
 
@@ -3063,7 +3135,7 @@ void RoboMovingState_RIGHTJUMPKABE::enter(Robo* robo, RoboState* now_state, Robo
 	MYVECTOR3 ve(-1,0,0);
 	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
 	MyVec3Normalize(ve,ve);
-	robo->atarihan->v = MYVECTOR3(0,0,0.019f)+ve * 0.02f;
+	robo->atarihan->setV(&MYVECTOR3(0,0,0.019f));//+ve * 0.02f;
 	robo->jump_f_z_kabe = 0.00019f;
 	robo->atarihan->setXYZ(robo->atarihan->x, robo->atarihan->y , robo->atarihan->z + 0.01f);
 }
@@ -3082,8 +3154,13 @@ void RoboMovingState_RIGHTJUMPKABE::exec(Graphics* g, Robo* robo, float dsecond,
 	dpos.float3.z = 0; // zŠÖŒW‚Í‚ ‚½‚èˆ—‚Å
 	pos = pos + dpos;
 	robo->atarihan->setXYZ(pos.float3.x,pos.float3.y, pos.float3.z);
-	if (robo->setkabe_count>0) {
-		robo->atarihan->v = robo->atarihan->v+ MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
+	if ((robo->setkabe_count>0) && (robo->setkabe_count < robo->KTROBO_ROBO_JUMPKABE_COUNT)) {
+			MYVECTOR3 ve(-1,0,0);
+	MyVec3TransformNormal(ve,ve, robo->atarihan->world);
+	MyVec3Normalize(ve,ve);
+	ve = ve*0.8 + robo->kabe_housen*0.2;
+	MyVec3Normalize(ve,ve);
+		robo->atarihan->setV(&(ve*0.002 + robo->atarihan->v + MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond)));//robo->atarihan->v = robo->atarihan->v+ MYVECTOR3(0,0,robo->jump_f_z_kabe*dsecond);
 	}
 }
 

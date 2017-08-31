@@ -109,8 +109,13 @@ void UMeshUnit::calcJyusinAndR() {
 				henkanobb.e.float3.z += abs(MyVec3Dot(henkanobb.u[2], v)) * dt;
 
 
+				if ((MyVec3Length(henkanobb.e) < 0.00001f) || (MyVec3Length(henkanobb.u[0]) < 0.000001) ||
+					(MyVec3Length(henkanobb.u[1]) < 0.000001) ||(MyVec3Length(henkanobb.u[2]) < 0.000001)) {
+						em->is_bone_obbs_use[i] = false;
+				} else {
 
-				em->is_bone_obbs_use[i] = true;
+					em->is_bone_obbs_use[i] = true;
+				}
 				em->bone_obbs[i] = henkanobb;
 		
 			}
