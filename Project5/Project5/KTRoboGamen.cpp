@@ -38,14 +38,55 @@ void KoumokuList::clickedUp() {
 	if (size && (cursor < 0 )) {
 		cursor = size-1;
 	}
-
+	if (size) {
 	focused_koumoku = koumokus[cursor];
+	setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
 	if (!focused_koumoku->getEnabled() && this->hasEnabledKoumoku()) {
 		clickedUp();
 	}
-	
+	}
 
 }
+
+
+void KoumokuList::setFocusedKoumokuHyouji3Mode(Koumoku* kk,int index) {
+	// ó◊ê⁄ÇµÇΩçÄñ⁄à»äOÇÃçÄñ⁄Çdisable and disvisible
+	int size = koumokus.size();
+
+	int mae_index = index-1;
+	int ato_index= index+1;
+	if (mae_index < 0) {
+		mae_index = size-1;
+	}
+	if (ato_index >= size) {
+		ato_index = 0;
+	}
+
+	this->setVisible(t,false);
+	this->setEnable(false);
+	is_visible = true;
+	koumokus[mae_index]->setVisible(t,true);
+	koumokus[ato_index]->setVisible(t,true);
+	kk->setVisible(t,true);
+	is_enable = true;
+	koumokus[mae_index]->setEnabled(true);
+	koumokus[ato_index]->setEnabled(true);
+	kk->setEnabled(true);
+
+
+
+
+	// ó◊ê⁄ÇµÇΩçÄñ⁄Çenable and visible
+
+	// ó◊ê⁄ÇµÇΩçÄñ⁄ÇÃï\é¶à íuÇÇ∏ÇÁÇ∑
+	if (koumokus.size()) {
+		float dsize = (place.bottom - place.top)/koumokus.size();
+		kk->setSize(t,place.left,place.top + dsize,place.right - place.left , dsize);
+		koumokus[mae_index]->setSize(t,place.left + 30, place.top, place.right-place.left, dsize);
+		koumokus[ato_index]->setSize(t,place.left + 30, place.top+dsize*2, place.right-place.left, dsize);
+	}
+}
+
 void KoumokuList::clickedDown() {
 	if (!is_enable) return;
 	int size = koumokus.size();
@@ -56,6 +97,7 @@ void KoumokuList::clickedDown() {
 		}
 
 		focused_koumoku = koumokus[cursor];
+		setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
 		if (!focused_koumoku->getEnabled() && this->hasEnabledKoumoku()) {
 			clickedDown();
 		}
@@ -72,13 +114,18 @@ void KoumokuList::moved(int mouse_x, int mouse_y) {
 		if (k->moved(mouse_x, mouse_y)) {
 			cursor = i;
 			focused_koumoku = k;
+			setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
 			return;
 		}
 	}
 }
 
-void KoumokuList::setVisible(bool t) {
+void KoumokuList::setVisible(Texture* t, bool tt) {
 	is_visible = t;
+	int size = koumokus.size();
+	for (int i=0;i<size;i++) {
+		koumokus[i]->setVisible(t,tt);
+	}
 
 }
 
@@ -108,7 +155,7 @@ void KoumokuList::setDisableKoumoku(int index) {
 
 }
 
-void KoumokuList::setSize(int x, int y, int width, int height) {
+void KoumokuList::setSize(Texture* t, int x, int y, int width, int height) {
 	place.left = x;
 	place.top = y;
 	place.right = x + width;
@@ -119,7 +166,7 @@ void KoumokuList::setSize(int x, int y, int width, int height) {
 		float dheight = height / (float)size;
 
 		for (int i = 0 ; i<size;i++) {
-			koumokus[i]->setSize(x,y + dheight * i , width, y + dheight*(i+1));
+			koumokus[i]->setSize(t, x,y + dheight * i , width, dheight);
 		}
 	}
 }
@@ -162,11 +209,16 @@ void Koumoku::setEnabled(bool t) {
 	this->is_enable = t;
 }
 
-void Koumoku::setSize(int x, int y, int width, int height) {
+void Koumoku::setSize(Texture* t,int x, int y, int width, int height) {
 	place.left = x;
 	place.right = x + width;
 	place.top = y;
 	place.bottom = y + height;
+
+	t->setRenderTextPos(gui_koumoku_name_id,x,y);
+	t->setRenderTexPos(gui_koumoku_name_bg_id,x,y);
+	t->setRenderTexWH(gui_koumoku_name_bg_id,width,height);
+
 
 }
 

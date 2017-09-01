@@ -15,6 +15,8 @@ public:
 	Gamen(void);
 	~Gamen(void);
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;
+	virtual void clickedShori(int id)=0;
+
 };
 
 class GamenPart {
@@ -30,13 +32,15 @@ class KoumokuList;
 class Koumoku {
 private:
 	bool is_enable;
+	bool is_visible;
+protected:
 	MYRECT place;
 	int clicked_id;
 protected:
 	int gui_koumoku_name_id;
 	int gui_koumoku_name_bg_id;
 public:
-	Koumoku(int clicked_) {is_enable = true;
+	Koumoku(int clicked_) {is_enable = true;is_visible=true;
 		place.left = 0;
 		place.right = 100;
 		place.top = 0;
@@ -51,7 +55,18 @@ public:
 	bool moved(int mouse_x, int mouse_y);
 	void setEnabled(bool t);
 	bool getEnabled() {return is_enable;}
-	void setSize(int x, int y, int width, int height);
+	bool setVisible(Texture* t, bool tt) {
+		if (gui_koumoku_name_id) {
+			t->setRenderTextIsRender(gui_koumoku_name_id,tt);
+		}
+		if (gui_koumoku_name_bg_id) {
+			t->setRenderTexIsRender(gui_koumoku_name_bg_id,tt);
+		}
+		return true;
+	}
+
+
+	void setSize(Texture* t,int x, int y, int width, int height);
 	int getID();
 
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
@@ -60,6 +75,7 @@ public:
 };
 class KoumokuList {
 private:
+	Texture* t;
 	int cursor;
 	vector<Koumoku*> koumokus;
 	Koumoku* focused_koumoku;
@@ -67,6 +83,7 @@ private:
 	bool is_enable;
 	char title[128];
 	MYRECT place;
+	bool hyouji3_mode;
 	bool hasEnabledKoumoku() {
 	  int size = koumokus.size();
 	  for (int i = 0; i< size; i++) {
@@ -77,7 +94,18 @@ private:
 	  return false;
 	}
 public:
-	KoumokuList() {
+	int getCursor() {return cursor;}
+	int getCursorIndex(Koumoku* k) {
+		int size= koumokus.size();
+		for (int i=0;i<size; i++) {
+			if (k == koumokus[i]) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	KoumokuList(Texture* t) {
 		for(int i=0;i<128;i++) {
 			title[i] = 0;
 		}
@@ -86,6 +114,8 @@ public:
 		place.bottom = 100;
 		place.right = 100;
 		place.top = 0;
+		hyouji3_mode = false;
+		this->t = t;
 	};
 
 	~KoumokuList() {
@@ -106,18 +136,35 @@ public:
 	void clickedUp();
 	void clickedDown();
 	void moved(int mouse_x, int mouse_y);
-	void setVisible(bool t);
+	void setVisible(Texture* t, bool tt);
 	void setEnable(bool t);
+	bool getEnable() {
+		return is_enable;
+	}
+
+
+
 	void setEnableKoumoku(int index);
 	void setDisableKoumoku(int index);
-	void setSize(int x, int y, int width, int height);
+	void setSize(Texture* t, int x, int y, int width, int height);
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
+	void setHyouji3Mode(bool t) {
+		hyouji3_mode = t;
+	}
+	void setFocusedKoumokuHyouji3Mode(Koumoku* kk, int index);
+	bool getHyouji3Mode() {
+		return hyouji3_mode;
+	}
+
 	void setname(char* na) {
 		int len = strlen(na);
 		for (int i=0;i<127 && i < len;i++) {
 			title[i] = na[i];
 		}
 		title[127] = 0;
+	}
+	void setKoumoku(Koumoku* k ) {
+		koumokus.push_back(k);
 	}
 };
 

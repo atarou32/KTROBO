@@ -1304,7 +1304,10 @@ public:
 
 	//MYMATRIX world;
 	void aim(Graphics* g, MYMATRIX* view);
-;
+	void setTarget(MYVECTOR3* t) {
+		target = *t;
+	}
+
 	bool handleMessage(int msg, void* data, DWORD time);
 public:
 	Robo(void);

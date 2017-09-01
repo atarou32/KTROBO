@@ -200,6 +200,7 @@ void DebugTexts::setText(Graphics* g, int wchar_num, WCHAR* text) {
 }
 
 void DebugTexts::render(Graphics* g) {
+	
 	unsigned int stride = sizeof(SimpleDebugTextVertex);
 	unsigned int offset = 0;
 	

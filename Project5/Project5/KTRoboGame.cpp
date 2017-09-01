@@ -86,6 +86,7 @@ Game::Game(void)
 	roboaitedayo = 0;
 	ss = 0;
 	sap = 0;
+	gg = 0;
 }
 
 
@@ -826,6 +827,11 @@ bool Game::Init(HWND hwnd) {
 	
 	j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,0,0,200,200,0,0,512,512);//,0.021,0.021,0,0,500,500);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
+
+
+	gg = new Gamen_GARAGE();
+	gg->Init(g,hantei,texdayo->getInstance(0),demo->tex_loader);
+
 //	MyMatrixTranslation(world,0,0,0);
 //	texdayo->getRenderBillBoard(i,0xFFFF00FF,&world,0.30,0.30,100,100,250,250);
 //	texdayo->setRenderBillBoardIsRender(1,true);
@@ -875,7 +881,7 @@ bool Game::Init(HWND hwnd) {
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	//InputMessageDispatcher::registerImpl(&k,NULL,NULL);
-
+	
 	/*
 	ONEMESSAGE* mes = new ONEMESSAGE();
 
@@ -1153,7 +1159,11 @@ void Game::Del() {
 		ss = 0;
 	}
 	
-	
+	if (gg) {
+		gg->Release();
+		delete gg;
+		gg = 0;
+	}
 
 
 }
@@ -1372,6 +1382,7 @@ void Game::Run() {
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+
 	KTROBO::DebugTexts::instance()->render(g);
 	//telop_texts->render(g);
 
@@ -1852,12 +1863,7 @@ void Game::Run() {
 	texdayo->sendinfoToVertexTexture(g);
 	
 
-	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
-	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
-	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
-	//g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
-
-	texdayo->render(g);
+	
 
 
 	if(TestOBBOBB(&hantei->umesh_units[0]->meshs[0]->bone_obbs[0],&hantei->umesh_units[1]->meshs[0]->bone_obbs[0])) {
@@ -1904,6 +1910,17 @@ void Game::Run() {
 		hantei->setIsCalcKuwasikuGetted();
 	}
 	
+	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
+	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+
+	texdayo->render(g);
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+	gg->byouga(g,NULL,frameTime, (int)frame);
+
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 
 	g->getSwapChain()->Present(0,0);

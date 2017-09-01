@@ -32,6 +32,7 @@
 #include "KTRoboKendoSinaiGenerator.h"
 #include "KTRoboRobo.h"
 #include "KTRoboArmPositioner.h"
+#include "KTRoboGamen_GARAGE.h"
 
 namespace KTROBO {
 
@@ -136,6 +137,7 @@ private:
 	Robo* roboaitedayo;
 
 	ShudouArmPositioner* sap;
+	Gamen_GARAGE* gg;
 public:
 	Game(void);
 	~Game(void);
