@@ -94,6 +94,10 @@ private:
 	  return false;
 	}
 public:
+	int getKoumokuSize() {
+		return koumokus.size();
+	}
+
 	int getCursor() {return cursor;}
 	int getCursorIndex(Koumoku* k) {
 		int size= koumokus.size();

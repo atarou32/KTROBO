@@ -831,7 +831,8 @@ bool Game::Init(HWND hwnd) {
 
 	gg = new Gamen_GARAGE();
 	gg->Init(g,hantei,texdayo->getInstance(0),demo->tex_loader);
-
+	InputMessageDispatcher::registerImpl(gg, NULL,NULL);
+	
 //	MyMatrixTranslation(world,0,0,0);
 //	texdayo->getRenderBillBoard(i,0xFFFF00FF,&world,0.30,0.30,100,100,250,250);
 //	texdayo->setRenderBillBoardIsRender(1,true);

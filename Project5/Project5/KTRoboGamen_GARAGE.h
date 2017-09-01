@@ -10,7 +10,10 @@
 namespace KTROBO {
 
 class Koumoku_Parts_Category : public Koumoku {
+private:
+	Texture* t;
 public:
+
 	Koumoku_Parts_Category(int clicked_) : Koumoku(clicked_) {
 	}
 	~Koumoku_Parts_Category();
@@ -23,12 +26,19 @@ public:
 
 class Gamen_GARAGE : public Gamen , public INPUTSHORICLASS
 {
+private:
+	int pressed_up_count;
+	int pressed_down_count;
+
+
+
 public:
 	Gamen_GARAGE(void);
 	~Gamen_GARAGE(void);
 	Robo* robo;
+private:
 	int clearrobogamen;
-
+public:
 	KoumokuList* parts_category_list;
 	KoumokuList* parts_leg_category_list;
 	KoumokuList* parts_rweapon_category_list;
@@ -36,6 +46,8 @@ public:
 	KoumokuList* parts_rkata_category_list;
 	KoumokuList* parts_lkata_category_list;
 	KoumokuList* parts_inside_category_list;
+
+
 
 
 	void Init(Graphics* g, AtariHantei* hantei,Texture* t, MyTextureLoader* loader);

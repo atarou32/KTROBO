@@ -13,6 +13,8 @@ Gamen_GARAGE::Gamen_GARAGE(void)
 	parts_inside_category_list=0;
 	robo = 0;
 	clearrobogamen = 0;
+	pressed_up_count = 0;
+	pressed_down_count = 0;
 }
 
 
@@ -55,7 +57,8 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 
 
 	g->getDeviceContext()->RSSetViewports(1,&ggg2);
-
+	
+	parts_category_list->byouga(g,gui,dsecond,stamp);
 }
 
 #define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
@@ -82,17 +85,19 @@ void Koumoku_Parts_Category::Init(Texture* t, MyTextureLoader* loader, char* nam
 	gui_koumoku_name_bg_id = t->getRenderTex(tex_id,0xFFFFFFFF,place.left,place.top,place.right-place.left,place.bottom - place.top,
 		0,0,100,100);
 	t->setRenderTexIsRender(gui_koumoku_name_bg_id,true);
-	
+	this->t = t;
 }
 
 void Koumoku_Parts_Category::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
-
+	t->setRenderTexColor(gui_koumoku_name_bg_id, 0xFFFFFFFFF);
 	
 	
 }
 void Koumoku_Parts_Category::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
-
+	int stt = stamp % 130;
+	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
+	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 }
 
 void Gamen_GARAGE::clickedShori(int id) {
@@ -168,14 +173,38 @@ void Koumoku_Parts_Category::clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList
 	if (kl->getHyouji3Mode()) {
 		int temp = kl->getCursorIndex(this);
 		int cursor = kl->getCursor();
+		if (cursor == kl->getKoumokuSize()-1) {
+			if (cursor == temp) {
+				_exedayo(gamen,gp,kl);
+			} else {
+				if (temp == 0) {
+					kl->clickedDown();
+				} else {
+					kl->clickedUp();
+				}
+			}
+		} else if(cursor == 0) {
+			if (temp == cursor) {
+				_exedayo(gamen,gp,kl);
+			} else {
+				if (temp == 1) {
+					kl->clickedDown();
+				} else {
+					kl->clickedUp();
+				}
+			}
+		}else {
 
 		if (cursor > temp) {
 			kl->clickedUp();
 		} else if(cursor < temp) {
+			
 			kl->clickedDown();
+			
 		} else {
 			// ˆ—‚ð‘‚­
 			_exedayo(gamen,gp,kl);
+		}
 		}
 	} else {
 
@@ -308,10 +337,62 @@ void Gamen_GARAGE::Release() {
 bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 
 
+	MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*) data;
+	float x = input->getMOUSESTATE()->mouse_x;
+	float y = input->getMOUSESTATE()->mouse_y;
+
+
+	CS::instance()->enter(CS_MESSAGE_CS, "enter");
+	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
+		if (input->getMOUSESTATE()->mouse_l_button_pressed) {
+			parts_category_list->clicked(this,NULL,x,y);
+		}
+	}
+	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
+		
+		
+		if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_DOWN) {
+			pressed_down_count++;
+			parts_category_list->clickedDown();
+		}
+		if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_DOWN) {
+			pressed_up_count++;
+			parts_category_list->clickedUp();
+		}
+		if (input->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) {
+			parts_category_list->clickedEnter(this,NULL);
+		}
+	}
+
+	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYUP) {
+		if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_UP) {
+			pressed_down_count = 0;
+		}
+		if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_UP) {
+			pressed_up_count = 0;
+		}
+	}
+	if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_PRESSED) {
+		if (pressed_down_count > 30) {
+			if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_PRESSED) {
+				parts_category_list->clickedUp();
+			}
 
 
 
+		}
+		if (pressed_up_count > 30) {
 
+			if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_PRESSED) {
+				parts_category_list->clickedDown();
+			}
+
+
+		}
+
+
+	}
+	CS::instance()->leave(CS_MESSAGE_CS, "enter");
 	return true;
 
 
