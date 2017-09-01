@@ -1433,7 +1433,7 @@ void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_w
 
 
 	gui = new GUI();
-	gui->Init(hw, tex,l,screen_width,screen_height);
+	//gui->Init(hw, tex,l,screen_width,screen_height);
 
 	screen_window_id = gui->makeWindow(0,0,screen_width,screen_height);
 	gui->setEffect(screen_window_id,true);
@@ -1442,17 +1442,6 @@ void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_w
 
 
 	MYRECT zentai;
-	zentai.left = 600;
-	zentai.right = 800;
-	zentai.top = 0;
-	zentai.bottom = 30;
-
-	slider_dxa = gui->makeSliderH(&zentai,3.5,-0.37,0,"test.lua");
-	gui->setEffect(slider_dxa,true);
-	gui->setEnable(slider_dxa,true);
-	gui->setRender(slider_dxa,true);
-	gui->setCallLuaToSlider(slider_dxa , false);
-	gui->setPartToWindow(screen_window_id, slider_dxa);
 
 	zentai.left = 600;
 	zentai.right = 800;
@@ -1465,6 +1454,22 @@ void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_w
 	gui->setRender(slider_dxb,true);
 	gui->setCallLuaToSlider(slider_dxb , false);
 	gui->setPartToWindow(screen_window_id, slider_dxb);
+
+
+
+	zentai.left = 600;
+	zentai.right = 800;
+	zentai.top = 0;
+	zentai.bottom = 30;
+
+	slider_dxa = gui->makeSliderH(&zentai,3.5,-0.37,0,"test.lua");
+	gui->setEffect(slider_dxa,true);
+	gui->setEnable(slider_dxa,true);
+	gui->setRender(slider_dxa,true);
+	gui->setCallLuaToSlider(slider_dxa , false);
+	gui->setPartToWindow(screen_window_id, slider_dxa);
+	
+
 
 
 	zentai.left = 600;
@@ -1518,7 +1523,7 @@ void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_w
 	gui->setCallLuaToSlider(slider_dzb , false);
 	gui->setPartToWindow(screen_window_id, slider_dzb);
 	gui->setRootWindowToInputMessageDispatcher(screen_window_id);
-
+	
 }
 
 void ShudouArmPositioner::Del() {

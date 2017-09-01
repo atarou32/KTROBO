@@ -78,13 +78,15 @@ Game::Game(void)
 	temp_input_shori = 0;
 	//umesh_unit = 0;
 	hantei = 0;
+	/*
 	sinai = 0;
 	sfuru = 0;
 	ksgene = 0;
 	makers = 0;
+	*/
 	robodayo = 0;
 	roboaitedayo = 0;
-	ss = 0;
+	//ss = 0;
 	sap = 0;
 	gg = 0;
 }
@@ -329,7 +331,7 @@ void MessageDispatcherTCB(TCB* thisTCB) {
 
 bool Game::Init(HWND hwnd) {
 	// ‡”Ô‚ð‚©‚¦‚È‚¢‚±‚Æ cs ‚Æƒ^ƒXƒN‚ÌŠÔ‚ÉˆË‘¶ŠÖŒW‚ª‚ ‚é
-	ss = 0;
+
 	g = new Graphics();
 	if (!g->Init(hwnd)) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "graphics init error");
@@ -530,18 +532,20 @@ bool Game::Init(HWND hwnd) {
 
 	umesh_unit->calcJyusinAndR();
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	sinai = new Sinai();
+	/*sinai = new Sinai();
 	sinai->init(g, demo->tex_loader,hantei);
 	ss = new SinaiNigiru(sinai,umesh_unit);
 
 	sfuru = new SinaiFuru(sinai,umesh_unit);
-
+	*/
+	/*
 	SinaiFuruPart p;
 	p.dt =0.1;
 	p.rotx = 0;
 	p.rotz = 0;
 	p.tuka_dpos = MYVECTOR3(0,0,0);
 	sfuru->setMenParts(&p);
+	*/
 /*
 	p.dt = 10;
 	p.rotx = -1.57;
@@ -555,7 +559,7 @@ bool Game::Init(HWND hwnd) {
 	p.tuka_dpos = MYVECTOR3(0,0,1);
 	sfuru->setMenParts(&p);
 	*/
-	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
+//	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
 
 	}
 	/*
@@ -750,23 +754,25 @@ bool Game::Init(HWND hwnd) {
 	//InputMessageDispatcher::registerImpl(but, NULL,NULL);
 	//InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
-/*	int j = texdayo->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
+	int j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	
-	texdayo->setRenderTexIsRender(j,true);
-	*/
+	texdayo->getInstance(0)->setRenderTexIsRender(j,false);
+		
 
 	GUI::Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
 
-	ksgene = new KendoSinaiGenerator();
+/*	ksgene = new KendoSinaiGenerator();
 	ksgene->Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
+	*/
 	sap = new ShudouArmPositioner(robodayo, robodayo->ap);
 	sap->Init(hwnd, texdayo->getInstance(0), L , g->getScreenWidth(),g->getScreenHeight());
+	/*
 	makers = new SinaiFuruAnimeMakers();
 	MyLuaGlueSingleton::getInstance()->setColSinaiFuruAnimeMakers(makers);
 	MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(0)->getInstance(0)->Init(ksgene,uum,sinai);
-
+	
 	InputMessageDispatcher::registerImpl(ksgene,NULL,NULL);
-
+	*/
 
 	MYMATRIX jiken;
 
@@ -783,13 +789,13 @@ bool Game::Init(HWND hwnd) {
 	MYVECTOR3 ppos(0,0,0);
 	MyVec3TransformCoord(ppos,ppos,jiken);
 	MyMatrixTranslation(jiken,ppos.float3.x,ppos.float3.y,0);//ppos.float3.z);
-	int j =0;
+
 	/*texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF, &jiken,3,3,150,150,112,112);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,true);*/
 //	MyMatrixTranslation(jiken,0,0,0);
 	MyMatrixRotationX(jiken,0.157);
-	j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,5,5,0,0,512,512);
-	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
+//	j = texdayo->getInstance(0)->getRenderBillBoard(i,0x00FFFFFF, &jiken,5,5,0,0,512,512);
+//	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 
 	//texdayo->getInstance(0)->getRenderText("0.00",0,0,30,400,100);
 
@@ -825,8 +831,8 @@ bool Game::Init(HWND hwnd) {
 	
 	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
 	
-	j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,0,0,200,200,0,0,512,512);//,0.021,0.021,0,0,500,500);
-	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
+//	j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,0,0,200,200,0,0,512,512);//,0.021,0.021,0,0,500,500);
+//	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 
 
 	gg = new Gamen_GARAGE();
@@ -1023,7 +1029,7 @@ void Game::Del() {
 		 cltf= 0;
 	 }
 
-	 if (makers) {
+/*	 if (makers) {
 		makers->Release();
 		delete makers;
 		makers = 0;
@@ -1033,6 +1039,7 @@ void Game::Del() {
 		delete ksgene;
 		ksgene = 0;
 	}
+	*/
 	 if (sap) {
 		 sap->Del();
 		 delete sap;
@@ -1144,6 +1151,7 @@ void Game::Del() {
 		itttt++;
 	}
 	umesh_units.clear();
+	/*
 	if (sinai) {
 	delete sinai;
 	sinai = 0;
@@ -1158,7 +1166,7 @@ void Game::Del() {
 	if (ss) {
 		delete ss;
 		ss = 0;
-	}
+	}*/
 	
 	if (gg) {
 		gg->Release();
@@ -1665,7 +1673,7 @@ void Game::Run() {
 //	umesh_unit->setXYZ(0,3,-5);//5-testcc/*-testcc*/);
 	//umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 
-	sinai->umesh_unit->setSCALEXYZ(3,3,3);
+	//sinai->umesh_unit->setSCALEXYZ(3,3,3);
 	MYVECTOR3 oo;
 	MYVECTOR3 moto(0,1.9,-0.20);
 	oo = oo + moto; 
@@ -1675,14 +1683,14 @@ void Game::Run() {
 //	sinai->umesh_unit->setXYZ(oo.float3.x,oo.float3.y,oo.float3.z);//10*sin(testcc),-4,10*cos(testcc));
 //	sinai->umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 //	sinai->umesh_unit->calcJyusinAndR();
-	MYVECTOR3 p = sinai->getHidaritePos();
+//	MYVECTOR3 p = sinai->getHidaritePos();
 	OBB b;
-	p = MYVECTOR3(-0.78,-3.02,6.15);
+	MYVECTOR3 p = MYVECTOR3(-0.78,-3.02,6.15);
 	b.c = p;
 	b.e = MYVECTOR3(0.3,0.3,0.3);
 	g->drawOBBFill(g,0xFFFF0000FF,&idenmat,&view,&proj,&b);
 	
-	 p = sinai->getMigitePos();
+/*	 p = sinai->getMigitePos();*/
 	 p = MYVECTOR3(-1.56,-0.36,6.4);
 	b.c = p;
 	b.e = MYVECTOR3(0.3,0.3,0.3);
@@ -1690,13 +1698,17 @@ void Game::Run() {
 	
 	//umesh_unit->calcJyusinAndR();
 	//ss->nigiraseru(g,&view, &proj);
-	float t = this->ksgene->getNigiruhitoAnimeTemp();
+
+
+
+
+//	float t = this->ksgene->getNigiruhitoAnimeTemp();
 	
-	this->makers->getInstance(0)->update(testcc,sfuru);
-	sfuru->men_furaseru(g,&view,&proj,testcc,t);
-	SinaiNigiru sn(sinai, umesh_unit);
-	sn.setDefaultAnimeFrameAll(testcc);
-	sn.nigiraseru(g,&view,&proj);
+//	this->makers->getInstance(0)->update(testcc,sfuru);
+//	sfuru->men_furaseru(g,&view,&proj,testcc,t);
+//	SinaiNigiru sn(sinai, umesh_unit);
+//	sn.setDefaultAnimeFrameAll(testcc);
+//	sn.nigiraseru(g,&view,&proj);
 
 	bool calcom = true;
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
@@ -1779,7 +1791,9 @@ void Game::Run() {
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
+	/*
 	sinai->draw(g,&view,&proj);
+	*/
 	MyMatrixTranslation(world,3,0,1);
 	robodayo->byouga(g,&view,&proj);
 	if (robodayo->atarihan) {
@@ -1789,7 +1803,7 @@ void Game::Run() {
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
 		
-		if (sap->update()) {
+		if (sap && sap->update()) {
 			robodayo->aphelper->setNoCalcYet(false);
 		}
 		//sap->update();
@@ -1855,7 +1869,7 @@ void Game::Run() {
 //	MyMatrixMultiply(world,te,world);
 	//texdayo->getInstance(0)->setRenderBillBoardIsRender(0,false);
 
-	texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
+	//texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
 	
 
 

@@ -1249,7 +1249,9 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	}
 
 	atarihan->calcAnimeFrame(atarihan->meshs.size(),frames,matrs);
-	hantei->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_CHARA);
+	if (hantei) {
+		hantei->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_CHARA);
+	}
 	atarihan->setDT(0);
 	atarihan->setROTXYZ(0,0,0);
 	atarihan->setSCALEXYZ(1,1,1);

@@ -17,6 +17,8 @@ void KoumokuList::clicked(Gamen* gamen, GamenPart* gp, int mouse_x, int mouse_y)
 	while(it != koumokus.end()) {
 		Koumoku* k = *it;
 		if (k->clicked(mouse_x, mouse_y)) {
+			setFocusedKoumoku(k);
+			cursor = this->getCursorIndex(k);
 			k->clickedExe(gamen, gp, this);
 			return;
 		}
@@ -39,8 +41,8 @@ void KoumokuList::clickedUp() {
 		cursor = size-1;
 	}
 	if (size) {
-	focused_koumoku = koumokus[cursor];
-	setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
+
+	setFocusedKoumoku(koumokus[cursor]);
 	if (!focused_koumoku->getEnabled() && this->hasEnabledKoumoku()) {
 		clickedUp();
 	}
@@ -51,6 +53,7 @@ void KoumokuList::clickedUp() {
 
 void KoumokuList::setFocusedKoumokuHyouji3Mode(Koumoku* kk,int index) {
 	// —×Ú‚µ‚½€–ÚˆÈŠO‚Ì€–Ú‚ğdisable and disvisible
+	if (!hyouji3_mode) return;
 	int size = koumokus.size();
 
 	int mae_index = index-1;
@@ -96,8 +99,7 @@ void KoumokuList::clickedDown() {
 			cursor = 0;
 		}
 
-		focused_koumoku = koumokus[cursor];
-		setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
+		setFocusedKoumoku(koumokus[cursor]);
 		if (!focused_koumoku->getEnabled() && this->hasEnabledKoumoku()) {
 			clickedDown();
 		}
@@ -224,4 +226,50 @@ void Koumoku::setSize(Texture* t,int x, int y, int width, int height) {
 
 int Koumoku::getID() {
 	return clicked_id;
+}
+
+
+void Koumoku::clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl) { // set_enable ‚ªfalse ‚Ì‚Æ‚«‚ÍƒŠƒ^[ƒ“‚·‚é‚±‚Æ 
+	if (!this->getEnabled()) return;
+	if (kl->getHyouji3Mode()) {
+		int temp = kl->getCursorIndex(this);
+		int cursor = kl->getCursor();
+		if (cursor == kl->getKoumokuSize()-1) {
+			if (cursor == temp) {
+				_exedayo(gamen,gp,kl);
+			} else {
+				if (temp == 0) {
+					kl->clickedDown();
+				} else {
+					kl->clickedUp();
+				}
+			}
+		} else if(cursor == 0) {
+			if (temp == cursor) {
+				_exedayo(gamen,gp,kl);
+			} else {
+				if (temp == 1) {
+					kl->clickedDown();
+				} else {
+					kl->clickedUp();
+				}
+			}
+		}else {
+
+		if (cursor > temp) {
+			kl->clickedUp();
+		} else if(cursor < temp) {
+			
+			kl->clickedDown();
+			
+		} else {
+			// ˆ—‚ğ‘‚­
+			_exedayo(gamen,gp,kl);
+		}
+		}
+	} else {
+
+		// ˆ—‚ğ‘‚­
+		_exedayo(gamen,gp,kl);
+	}
 }

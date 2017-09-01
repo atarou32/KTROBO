@@ -128,11 +128,11 @@ private:
 	Messages* messages;
 	MySound* sound;
 	TempInputShori* temp_input_shori;
-	Sinai* sinai;
-	SinaiNigiru* ss;
-	SinaiFuru* sfuru;
-	KendoSinaiGenerator* ksgene;
-	SinaiFuruAnimeMakers* makers;
+//	Sinai* sinai;
+//	SinaiNigiru* ss;
+//	SinaiFuru* sfuru;
+//	KendoSinaiGenerator* ksgene;
+//	SinaiFuruAnimeMakers* makers;
 	Robo* robodayo;
 	Robo* roboaitedayo;
 

@@ -71,7 +71,8 @@ public:
 
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;// focused_koumoku のkoumokuでもbyougaは呼ばれる
 	virtual void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;
-	virtual void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl)=0; // set_enable がfalse のときはリターンすること 
+	void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable がfalse のときはリターンすること
+	virtual void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl)=0;
 };
 class KoumokuList {
 private:
@@ -84,6 +85,12 @@ private:
 	char title[128];
 	MYRECT place;
 	bool hyouji3_mode;
+	void setFocusedKoumoku(Koumoku* k) {
+		focused_koumoku = k;
+		setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
+	}
+
+
 	bool hasEnabledKoumoku() {
 	  int size = koumokus.size();
 	  for (int i = 0; i< size; i++) {

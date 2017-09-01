@@ -20,7 +20,7 @@ public:
 	void Init(Texture* t, MyTextureLoader* loader, char* name);
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);// focused_koumoku のkoumokuでもbyougaは呼ばれる
 	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp);
-	void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable がfalse のときはリターンすること
+	//void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable がfalse のときはリターンすること
 	void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl);
 };
 

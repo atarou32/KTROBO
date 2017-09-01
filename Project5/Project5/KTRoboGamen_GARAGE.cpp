@@ -39,7 +39,7 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	unko += dsecond/3333;
 	MYMATRIX view;
 	MYVECTOR3 lookat(0,0,0);
-	MYVECTOR3 lookfrom(0,7,4);
+	MYVECTOR3 lookfrom(0,7,2);
 	MYVECTOR3 up(0,0,1);
 	MYMATRIX tes;
 	MyMatrixRotationZ(tes,unko);
@@ -168,50 +168,6 @@ void Koumoku_Parts_Category::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* 
 	gamen->clickedShori(this->getID());
 
 }
-void Koumoku_Parts_Category::clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl) { // set_enable がfalse のときはリターンすること 
-	if (!this->getEnabled()) return;
-	if (kl->getHyouji3Mode()) {
-		int temp = kl->getCursorIndex(this);
-		int cursor = kl->getCursor();
-		if (cursor == kl->getKoumokuSize()-1) {
-			if (cursor == temp) {
-				_exedayo(gamen,gp,kl);
-			} else {
-				if (temp == 0) {
-					kl->clickedDown();
-				} else {
-					kl->clickedUp();
-				}
-			}
-		} else if(cursor == 0) {
-			if (temp == cursor) {
-				_exedayo(gamen,gp,kl);
-			} else {
-				if (temp == 1) {
-					kl->clickedDown();
-				} else {
-					kl->clickedUp();
-				}
-			}
-		}else {
-
-		if (cursor > temp) {
-			kl->clickedUp();
-		} else if(cursor < temp) {
-			
-			kl->clickedDown();
-			
-		} else {
-			// 処理を書く
-			_exedayo(gamen,gp,kl);
-		}
-		}
-	} else {
-
-		// 処理を書く
-		_exedayo(gamen,gp,kl);
-	}
-}
 
 void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureLoader* loader) {
 	parts_category_list = new KoumokuList(t);
@@ -242,8 +198,7 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	c10->setEnabled(true);
 	c11->setEnabled(true);
 	c12->setEnabled(true);
-	parts_category_list->setEnable(true);
-	parts_category_list->setVisible(t,true);
+	
 	
 	parts_category_list->setKoumoku(c);
 	parts_category_list->setKoumoku(c2);
@@ -258,6 +213,8 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	parts_category_list->setKoumoku(c11);
 	parts_category_list->setKoumoku(c12);
 
+	parts_category_list->setEnable(true);
+	parts_category_list->setVisible(t,true);
 	parts_category_list->setSize(t,0,0,170,300);
 
 	c->Init(t,loader,"ヘッド");
@@ -273,13 +230,13 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	c11->Init(t,loader, "右肩武器");
 	c12->Init(t,loader, "左肩武器");
 
-	parts_category_list->setHyouji3Mode(true);
+	parts_category_list->setHyouji3Mode(false);
 	parts_category_list->clickedDown();
 	parts_category_list->clickedUp();
 
 
 	robo = new Robo();
-	robo->init(g, loader,hantei);
+	robo->init(g, loader,NULL);
 	robo->atarihan->setXYZ(0,0,0);
 	
 	ArmPoint* ap = robo->apinfo->getArmPoint(502);
@@ -287,7 +244,7 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	//pp.float3.y = - pp.float3.y;
 	robo->setTarget(&pp);
 
-	int tex_id = t->getTexture(KTROBO_GUI_PNG);
+	int tex_id = t->getTexture(KTROBO_GUI_PNG,4096);
 	clearrobogamen = t->getRenderTex(tex_id,0xDDEEFFDD, 50,300,400,400,0,0,128,128);
 	t->setRenderTexIsRender(clearrobogamen,true);
 }
@@ -352,11 +309,11 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 		
 		
 		if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_DOWN) {
-			pressed_down_count++;
+			pressed_down_count=1;
 			parts_category_list->clickedDown();
 		}
 		if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_DOWN) {
-			pressed_up_count++;
+			pressed_up_count=1;
 			parts_category_list->clickedUp();
 		}
 		if (input->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) {
@@ -372,26 +329,37 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 			pressed_up_count = 0;
 		}
 	}
-	if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_PRESSED) {
-		if (pressed_down_count > 30) {
+	if (pressed_up_count > 0 ) {
+		if (pressed_up_count > 1) {
 			if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_PRESSED) {
 				parts_category_list->clickedUp();
 			}
 
 
 
+		}else {
+			if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_PRESSED) {
+				pressed_up_count++;
+			}
 		}
-		if (pressed_up_count > 30) {
+	}
+		if (pressed_down_count>0) {
+		if (pressed_down_count > 1) {
 
 			if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_PRESSED) {
 				parts_category_list->clickedDown();
 			}
 
 
+		}else {
+			if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_PRESSED) {
+				pressed_down_count++;
+			}
+
 		}
+		}
+	
 
-
-	}
 	CS::instance()->leave(CS_MESSAGE_CS, "enter");
 	return true;
 
