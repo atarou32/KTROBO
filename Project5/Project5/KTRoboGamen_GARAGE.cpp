@@ -59,6 +59,7 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	g->getDeviceContext()->RSSetViewports(1,&ggg2);
 	
 	parts_category_list->byouga(g,gui,dsecond,stamp);
+	parts_leg_category_list->byouga(g,gui,dsecond,stamp);
 }
 
 #define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
@@ -75,6 +76,12 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID 110
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID 111
 
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_K2_ID 112
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_T2_ID 113
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_J2_ID 114
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_TK_ID 115
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_R_ID 116
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_4K_ID 117
 
 void Koumoku_Parts_Category::Init(Texture* t, MyTextureLoader* loader, char* name) {
 	int tex_id = t->getTexture(KTROBO_GAMEN_GARAGE_GUI_PNG);
@@ -90,11 +97,13 @@ void Koumoku_Parts_Category::Init(Texture* t, MyTextureLoader* loader, char* nam
 
 void Koumoku_Parts_Category::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
+	if (!getEnabled())return;
 	t->setRenderTexColor(gui_koumoku_name_bg_id, 0xFFFFFFFFF);
 	
 	
 }
 void Koumoku_Parts_Category::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
+	if (!getEnabled()) return;
 	int stt = stamp % 130;
 	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
@@ -137,7 +146,9 @@ void Gamen_GARAGE::clickedShori(int id) {
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID == id) {
-
+		parts_leg_category_list->setVisible(parts_leg_category_list->t,true);
+		parts_leg_category_list->setEnable(true);
+		parts_category_list->setEnable(false);
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID == id) {
@@ -170,6 +181,46 @@ void Koumoku_Parts_Category::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* 
 }
 
 void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureLoader* loader) {
+
+	parts_leg_category_list = new KoumokuList(t);
+	parts_leg_category_list->setname("ƒŒƒbƒOƒJƒeƒSƒŠ");
+	Koumoku_Parts_Category* f = new Koumoku_Parts_Category(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_K2_ID);
+	Koumoku_Parts_Category* f2 = new Koumoku_Parts_Category(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_T2_ID);
+	Koumoku_Parts_Category* f3 = new Koumoku_Parts_Category(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_J2_ID);
+	Koumoku_Parts_Category* f4 = new Koumoku_Parts_Category(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_TK_ID);
+	Koumoku_Parts_Category* f5 = new Koumoku_Parts_Category(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_R_ID);
+	Koumoku_Parts_Category* f6 = new Koumoku_Parts_Category(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_4K_ID);
+	f->setEnabled(true);
+	f2->setEnabled(true);
+	f3->setEnabled(true);
+	f4->setEnabled(true);
+	f5->setEnabled(true);
+	f6->setEnabled(true);
+	parts_leg_category_list->setKoumoku(f);
+	parts_leg_category_list->setKoumoku(f2);
+	parts_leg_category_list->setKoumoku(f3);
+	parts_leg_category_list->setKoumoku(f4);
+	parts_leg_category_list->setKoumoku(f5);
+	parts_leg_category_list->setKoumoku(f6);
+	parts_leg_category_list->setEnable(true);
+	parts_leg_category_list->setVisible(t,true);
+	parts_leg_category_list->setSize(t,200,0,170,150);
+
+	f->Init(t,loader,"Œy—Ê‚Q‹r");
+	f2->Init(t,loader, "’†—Ê‚Q‹r");
+	f3->Init(t,loader, "d—Ê‚Q‹r");
+	f4->Init(t,loader,"ƒ^ƒ“ƒN");
+	f5->Init(t,loader, "‹tŠÔÚ");
+	f6->Init(t,loader, "‚S‹r");
+
+	parts_leg_category_list->setHyouji3Mode(false);
+	parts_leg_category_list->clickedDown();
+	parts_leg_category_list->clickedUp();
+	parts_leg_category_list->setEnable(false);
+
+
+
+
 	parts_category_list = new KoumokuList(t);
 	parts_category_list->setname("ƒp[ƒcƒJƒeƒSƒŠ");
 

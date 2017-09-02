@@ -75,8 +75,9 @@ public:
 	virtual void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl)=0;
 };
 class KoumokuList {
-private:
+public:
 	Texture* t;
+private:
 	int cursor;
 	vector<Koumoku*> koumokus;
 	Koumoku* focused_koumoku;

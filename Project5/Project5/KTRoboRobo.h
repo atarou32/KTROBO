@@ -1291,8 +1291,36 @@ public:
 	RoboMovingState_STOP movestop;
 	RoboMovingState_LEFTTURN moveleftturn;
 	RoboMovingState_RIGHTTURN moverightturn;
+	float updown_muki;
+	int screen_height;
+	MYMATRIX world_without_rotx;
 
 public:
+	MYMATRIX* getWorldWithoutRotX() {
+		return &world_without_rotx;
+	}
+
+	void calcWorldWithoutRotX() {
+		MYMATRIX world;
+		MYMATRIX temp;
+		MYMATRIX temp2;
+		MYMATRIX temp3;
+		MYMATRIX temp4;
+		MYMATRIX temp5;	
+		MyMatrixRotationX(temp,0);
+		MyMatrixRotationY(temp2,atarihan->roty);
+		MyMatrixRotationZ(temp3,atarihan->rotz);
+		MyMatrixTranslation(temp4,atarihan->x,atarihan->y,atarihan->z);
+		MyMatrixScaling(temp5,atarihan->scalex,atarihan->scaley,atarihan->scalez);
+		MyMatrixMultiply(world,temp5,temp);
+		MyMatrixMultiply(world,world,temp3);
+		MyMatrixMultiply(world,world,temp2);
+		MyMatrixMultiply(world,world,temp4);	
+
+
+		world_without_rotx = world;
+	}
+
 	UMeshUnit* atarihan;
 	UMesh* atari_leg;
 	RoboAnimeLoop anime_loop_leg;
@@ -1301,6 +1329,8 @@ public:
 	bool is_fireraweapon;
 
 
+
+	void upDownMuki(float mouse_y, float dmouse_y);
 
 	//MYMATRIX world;
 	void aim(Graphics* g, MYMATRIX* view);

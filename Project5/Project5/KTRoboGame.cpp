@@ -755,7 +755,8 @@ bool Game::Init(HWND hwnd) {
 	//InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
 
 	int j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
-	
+	int kk = texdayo->getInstance(0)->getRenderText("ganbaru",0,0,10,100,100);
+	texdayo->getInstance(0)->setRenderTextIsRender(kk,false);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,false);
 		
 

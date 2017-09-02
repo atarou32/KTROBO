@@ -24,6 +24,7 @@ void UMesh::setInfo() {
 	this->mesh->RootBone_connect_without_material_local = this->RootBone_connect_without_material_local;
 	this->mesh->RootBone->parent_bone = this->rootbone_parent;
 	this->mesh->RootBone->parent_bone_index = this->rootbone_parent_index;
+	
 }
 
 void UMeshUnit::calcAnimeFrame(int meshnum, float* frames, bool* calculateoffsetmatrixs) {
@@ -60,8 +61,8 @@ void UMeshUnit::calcJyusinAndR() {
 	MyMatrixRotationZ(temp3,rotz);
 	MyMatrixTranslation(temp4,x,y,z);
 	MyMatrixScaling(temp5,scalex,scaley,scalez);
-	MyMatrixMultiply(world,temp5,temp3);
-	MyMatrixMultiply(world,world,temp);
+	MyMatrixMultiply(world,temp5,temp);
+	MyMatrixMultiply(world,world,temp3);
 	MyMatrixMultiply(world,world,temp2);
 	MyMatrixMultiply(world,world,temp4);	
 

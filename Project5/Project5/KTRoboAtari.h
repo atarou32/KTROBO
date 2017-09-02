@@ -40,6 +40,9 @@ public:
 			mesh->animate(anime_frame, calculateOffsetMatrix);
 		}
 	}
+	void setMatrixKakeru(MYMATRIX* mat) {
+		RootBone_matrix_local_kakeru = *mat;
+	}
 
 	UMesh() {
 		mesh = 0;

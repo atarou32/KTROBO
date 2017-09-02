@@ -10,9 +10,8 @@
 namespace KTROBO {
 
 class Koumoku_Parts_Category : public Koumoku {
-private:
-	Texture* t;
 public:
+	Texture* t;
 
 	Koumoku_Parts_Category(int clicked_) : Koumoku(clicked_) {
 	}
