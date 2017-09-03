@@ -69,8 +69,8 @@ public:
 	void setSize(Texture* t,int x, int y, int width, int height);
 	int getID();
 
-	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
-	virtual void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;
+	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp,bool has_clicked)=0;// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
+	virtual void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked)=0;
 	void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable ‚ªfalse ‚Ì‚Æ‚«‚ÍƒŠƒ^[ƒ“‚·‚é‚±‚Æ
 	virtual void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl)=0;
 };
@@ -83,6 +83,7 @@ private:
 	Koumoku* focused_koumoku;
 	bool is_visible;
 	bool is_enable;
+	bool has_clicked_forbyouga;
 	char title[128];
 	MYRECT place;
 	bool hyouji3_mode;
@@ -90,7 +91,9 @@ private:
 		focused_koumoku = k;
 		setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
 	}
-
+	void setHasClicked(bool t) {
+		has_clicked_forbyouga = t;
+	}
 
 	bool hasEnabledKoumoku() {
 	  int size = koumokus.size();
@@ -101,7 +104,11 @@ private:
 	  }
 	  return false;
 	}
+	
 public:
+	bool getHasClicked() {
+		return has_clicked_forbyouga;
+	}
 	int getKoumokuSize() {
 		return koumokus.size();
 	}
@@ -128,6 +135,8 @@ public:
 		place.top = 0;
 		hyouji3_mode = false;
 		this->t = t;
+		has_clicked_forbyouga = false;
+		
 	};
 
 	~KoumokuList() {

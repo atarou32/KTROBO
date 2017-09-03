@@ -56,19 +56,9 @@ void Robo::upDownMuki(float mouse_y, float dmouse_y) {
 
 	float dy;
 	dy = (mouse_y - screen_height/2);
-
-	if ((abs(dy) >240) && (abs(dy) < 400) && (abs(mouse_y) > 1)) {
-	updown_muki += dy/10000.0f;
-	if (updown_muki > 1.57) {
-		updown_muki = 1.57;
-	}
-	if (updown_muki < -1.57) {
-		updown_muki = -1.57;
-	}
-	}else {
-		if (abs(dmouse_y) < 400 && abs(dmouse_y) > 1) {
-
-			updown_muki += dy/10000.0f;
+	if (abs(dmouse_y) < 700 && abs(dmouse_y) > 1) {
+			dy = dmouse_y/10;
+			updown_muki += dy/10.0f;
 			if (updown_muki > 1.57) {
 				updown_muki = 1.57;
 			}
@@ -77,9 +67,20 @@ void Robo::upDownMuki(float mouse_y, float dmouse_y) {
 			}
 		} else {
 
+	if ((abs(dy) >120) && (abs(dy) < 800) && (abs(mouse_y) > 1)) {
+	updown_muki += dy/10000.0f;
+	if (updown_muki > 1.57) {
+		updown_muki = 1.57;
+	}
+	if (updown_muki < -1.57) {
+		updown_muki = -1.57;
+	}
+	}else {
+		
 
 
-		if (abs(dy) < 150) {
+
+		if (abs(dy) < 50) {
 		updown_muki = updown_muki/1.1f;
 		}
 		}
@@ -348,13 +349,18 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 							f2 = max ( f2, 0.5f);
 							f2 = min (f2,1.0f);
 							if (!move_state->isJumpKABE()) {
-							f2 = min (f2, 0.9f);
+								if (MyVec3Length(atarihan->v) < 1) {
+									float speed = 0.1;
+									f2 = min (f2, 0.10f +speed);
+								} else {
+									f2 = min (f2, 0.8f);
+								}
 							} else {
-								f2 = max(f2, 1.1f);
+								f2 = max(f2, 0.4f);
 							}
 
 							if (move_state->isJump()) {
-								f2 = max(f2, 1.1f);
+								f2 = max(f2, 0.4f);
 							}
 
 						if ((sitadot < 0.8f) || (uedot <0.8f)) {// &&(MyVec3Dot(a2, ans[i].ans->kouten_housen) > -0.85f)) {
@@ -480,9 +486,9 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 				incSetKabe();
 				incSetKabe();
 				incSetKabe();
-				incSetKabe();
-				incSetKabe();
-				incSetKabe();
+				//incSetKabe();
+				//incSetKabe();
+				//incSetKabe();
 			} else {
 
 				if (setkabe_state != &kuutyuu) {
@@ -867,6 +873,11 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			}
 		}
 	
+	}
+
+
+	if (MyVec3Length(atarihan->v) > 5) {// seigen
+		atarihan->setV(&MYVECTOR3(atarihan->v.float3.x/1.5f,atarihan->v.float3.y/1.5f, atarihan->v.float3.z/1.5f));
 	}
 
 	atarihan->calcJyusinAndR();

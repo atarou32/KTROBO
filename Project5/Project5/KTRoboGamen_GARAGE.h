@@ -17,8 +17,8 @@ public:
 	}
 	~Koumoku_Parts_Category();
 	void Init(Texture* t, MyTextureLoader* loader, char* name);
-	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
-	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp);
+	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
+	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);
 	//void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable ‚ªfalse ‚Ì‚Æ‚«‚ÍƒŠƒ^[ƒ“‚·‚é‚±‚Æ
 	void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl);
 };
@@ -46,6 +46,7 @@ public:
 	KoumokuList* parts_lkata_category_list;
 	KoumokuList* parts_inside_category_list;
 
+	KoumokuList* temp_focused_list;
 
 
 
@@ -53,7 +54,7 @@ public:
 	void Release();
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
 	void clickedShori(int id);
-
+	void clickedEscape();
 	bool handleMessage(int msg, void* data, DWORD time);
 };
 

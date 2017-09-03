@@ -19,6 +19,7 @@ void KoumokuList::clicked(Gamen* gamen, GamenPart* gp, int mouse_x, int mouse_y)
 		if (k->clicked(mouse_x, mouse_y)) {
 			setFocusedKoumoku(k);
 			cursor = this->getCursorIndex(k);
+			setHasClicked(true);
 			k->clickedExe(gamen, gp, this);
 			return;
 		}
@@ -177,13 +178,19 @@ void KoumokuList::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	if (!is_visible) return;
 
 	int size = koumokus.size();
+
+
 	for (int i=0;i<size;i++) {
 		Koumoku* k  = koumokus[i];
-		k->byouga(g,gui,dsecond,stamp);
+		k->byouga(g,gui,dsecond,stamp,getHasClicked());
 	}
 
 	if (focused_koumoku) {
-		focused_koumoku->focusedByouga(g,gui,dsecond, stamp);
+		focused_koumoku->focusedByouga(g,gui,dsecond, stamp,getHasClicked());
+	}
+
+	if (getHasClicked()) {
+		setHasClicked(false);
 	}
 }
 
