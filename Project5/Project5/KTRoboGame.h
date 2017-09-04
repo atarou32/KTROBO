@@ -137,7 +137,7 @@ private:
 	Robo* roboaitedayo;
 
 	ShudouArmPositioner* sap;
-	Gamen_GARAGE* gg;
+	//Gamen_GARAGE* gg;
 public:
 	Game(void);
 	~Game(void);
@@ -154,9 +154,17 @@ public:
 	Task** getTask() {
 		return task_threads;
 	}
+	long getTimeStamp() {
+		return timestamp;
+	}
 
-	
+	float getDMSecond() {
+		return dmsecond;
+	}
 
+	MyTextureLoader* getTexLoader() {
+		return demo->tex_loader;
+	}
 	// AIƒXƒŒƒbƒh‚©‚çŒÄ‚Ô‚±‚Æ
 	void setScene(Scene* scene) {
 

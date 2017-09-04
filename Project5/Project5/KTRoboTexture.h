@@ -530,7 +530,7 @@ public:
 	void lightdeleteRenderBillBoard(int bill_id);
 	
 	void lightdeleteAllRenderTex();
-	void lightdeleteAllRenderBillBoard();
+	void lightdeleteAllBillBoard();
 
 	void deleteAll();
 

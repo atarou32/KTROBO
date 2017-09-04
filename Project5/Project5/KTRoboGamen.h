@@ -52,22 +52,24 @@ public:
 		gui_koumoku_name_id = 0;
 		gui_koumoku_name_bg_id = 0;
 	};
-	~Koumoku() {};
+	virtual ~Koumoku(){};
 
 	bool clicked(int mouse_x, int mouse_y);
 	bool moved(int mouse_x, int mouse_y);
 	void setEnabled(bool t);
 	bool getEnabled() {return is_enable;}
-	bool setVisible(Texture* t, bool tt) {
+	void setVisible(Texture* t, bool tt) {
 		if (gui_koumoku_name_id) {
 			t->setRenderTextIsRender(gui_koumoku_name_id,tt);
 		}
 		if (gui_koumoku_name_bg_id) {
 			t->setRenderTexIsRender(gui_koumoku_name_bg_id,tt);
 		}
-		return true;
+		return;
 	}
-
+	bool getVisible() {
+		return is_visible;
+	}
 
 	void setSize(Texture* t,int x, int y, int width, int height);
 	int getID();
@@ -76,23 +78,28 @@ public:
 	virtual void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked)=0;
 	void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable Ç™false ÇÃÇ∆Ç´ÇÕÉäÉ^Å[ÉìÇ∑ÇÈÇ±Ç∆
 	virtual void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl)=0;
+	virtual bool hasLoad() {return false;}
+	virtual void load(Graphics* g, MyTextureLoader* loader) {};
 };
 class KoumokuList {
 public:
 	Texture* t;
 private:
 	int cursor;
+protected:
 	vector<Koumoku*> koumokus;
+protected:
 	Koumoku* focused_koumoku;
+private:
 	bool is_visible;
 	bool is_enable;
 	bool has_clicked_forbyouga;
 	char title[128];
 	MYRECT place;
 	bool hyouji3_mode;
-	void setFocusedKoumoku(Koumoku* k) {
+	void setFocusedKoumoku(Koumoku* k, int index) {
 		focused_koumoku = k;
-		setFocusedKoumokuHyouji3Mode(focused_koumoku,cursor);
+		setFocusedKoumokuHyouji3Mode(focused_koumoku,index);
 	}
 	void setHasClicked(bool t) {
 		has_clicked_forbyouga = t;
@@ -142,18 +149,8 @@ public:
 		
 	};
 
-	~KoumokuList() {
-		vector<Koumoku*>::iterator it = koumokus.begin();
-		while(it != koumokus.end()) {
-			Koumoku* k = *it;
-			delete k;
-			k = 0;
-
-			it ++;
-		}
-		koumokus.clear();
+	virtual ~KoumokuList();
 	
-	};
 
 	void clicked(Gamen* gamen, GamenPart* gp, int mouse_x, int mouse_y);
 	void clickedEnter(Gamen* gamen, GamenPart* gp);
@@ -165,7 +162,9 @@ public:
 	bool getEnable() {
 		return is_enable;
 	}
-
+	bool getVisible() {
+		return is_visible;
+	}
 
 
 	void setEnableKoumoku(int index);
@@ -190,6 +189,10 @@ public:
 	void setKoumoku(Koumoku* k ) {
 		koumokus.push_back(k);
 	}
+	virtual bool hasLoad() {
+		return true;
+	}
+	virtual void load(Graphics* g, MyTextureLoader* loader){};
 };
 
 }

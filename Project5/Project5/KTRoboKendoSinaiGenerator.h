@@ -8,11 +8,11 @@
 #include "KTRoboInput.h"
 
 class lua_State;
-class Texture;
+
 
 namespace KTROBO {
 
-
+class Texture;
 class KendoSinaiNigiruhitoPart {
 public:
 	float dt;

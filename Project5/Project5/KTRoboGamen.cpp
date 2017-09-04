@@ -17,7 +17,7 @@ void KoumokuList::clicked(Gamen* gamen, GamenPart* gp, int mouse_x, int mouse_y)
 	while(it != koumokus.end()) {
 		Koumoku* k = *it;
 		if (k->clicked(mouse_x, mouse_y)) {
-			setFocusedKoumoku(k);
+			setFocusedKoumoku(k,getCursorIndex(k));
 			cursor = this->getCursorIndex(k);
 			setHasClicked(true);
 			k->clickedExe(gamen, gp, this);
@@ -43,7 +43,7 @@ void KoumokuList::clickedUp() {
 	}
 	if (size) {
 
-	setFocusedKoumoku(koumokus[cursor]);
+	setFocusedKoumoku(koumokus[cursor],cursor);
 	if (!focused_koumoku->getEnabled() && this->hasEnabledKoumoku()) {
 		clickedUp();
 	}
@@ -100,7 +100,7 @@ void KoumokuList::clickedDown() {
 			cursor = 0;
 		}
 
-		setFocusedKoumoku(koumokus[cursor]);
+		setFocusedKoumoku(koumokus[cursor],cursor);
 		if (!focused_koumoku->getEnabled() && this->hasEnabledKoumoku()) {
 			clickedDown();
 		}
@@ -124,7 +124,7 @@ void KoumokuList::moved(int mouse_x, int mouse_y) {
 }
 
 void KoumokuList::setVisible(Texture* t, bool tt) {
-	is_visible = t;
+	is_visible = tt;
 	int size = koumokus.size();
 	for (int i=0;i<size;i++) {
 		koumokus[i]->setVisible(t,tt);
@@ -141,6 +141,22 @@ void KoumokuList::setEnable(bool t) {
 	}
 
 }
+
+
+KoumokuList::~KoumokuList(){
+		if (koumokus.size()) {
+		vector<Koumoku*>::iterator it = koumokus.begin();
+		while(it != koumokus.end()) {
+			Koumoku* k = *it;
+			
+			delete k;
+			k = 0;
+
+			it++;
+		}
+		koumokus.clear();
+		}
+};
 
 void KoumokuList::setEnableKoumoku(int index) {
 	if (!is_enable) return;

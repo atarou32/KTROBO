@@ -6,7 +6,7 @@
 #include "KTRoboGameError.h"
 #include "stringconverter.h"
 #include "tolua_glue/tolua_glue.h"
-
+#include "KTRoboSceneGarage.h"
 
 using namespace KTROBO;
 
@@ -88,7 +88,7 @@ Game::Game(void)
 	roboaitedayo = 0;
 	//ss = 0;
 	sap = 0;
-	gg = 0;
+	//gg = 0;
 }
 
 
@@ -835,11 +835,11 @@ bool Game::Init(HWND hwnd) {
 //	j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,0,0,200,200,0,0,512,512);//,0.021,0.021,0,0,500,500);
 //	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
 
-
+/*
 	gg = new Gamen_GARAGE();
 	gg->Init(g,hantei,texdayo->getInstance(0),demo->tex_loader);
 	InputMessageDispatcher::registerImpl(gg, NULL,NULL);
-	
+	*/
 //	MyMatrixTranslation(world,0,0,0);
 //	texdayo->getRenderBillBoard(i,0xFFFF00FF,&world,0.30,0.30,100,100,250,250);
 //	texdayo->setRenderBillBoardIsRender(1,true);
@@ -900,6 +900,11 @@ bool Game::Init(HWND hwnd) {
 	
 	//hantei->ataristart();
 
+
+	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), demo->tex_loader);
+
+	this->setScene(sg);
+
 	return true;
 }
 void Game::Del() {
@@ -907,7 +912,12 @@ void Game::Del() {
 	
 
 	// シーンは別の場所でデストラクトを呼ぶ　とかいてあったがすべてデストラクトすることにした
-	
+	int sizz = scenes.size();
+	while(sizz) {
+		this->removeScene();
+		sizz--;
+	}
+	/*
 	vector<Scene*>::iterator scene_it = scenes.begin();
 	while (scene_it != scenes.end()) {
 		Scene* s = *scene_it;
@@ -919,6 +929,7 @@ void Game::Del() {
 		scene_it++;
 	}
 	scenes.clear();
+	*/
 	
 
 	Scene::Del();
@@ -1168,13 +1179,13 @@ void Game::Del() {
 		delete ss;
 		ss = 0;
 	}*/
-	
+	/*
 	if (gg) {
 		gg->Release();
 		delete gg;
 		gg = 0;
 	}
-
+	*/
 
 }
 
@@ -1221,9 +1232,9 @@ void Game::Run() {
 	c->plus((float)millisecond);
 
 	big_timestamp =	c->getBigTimeStamp();
-	timestamp = c->getTimeStamp();
+	
 	dt = (float)millisecond;
-	dmsecond = c->getDMSecond();
+	dmsecond = (float)millisecond;// c->getDMSecond();
 	second = c->getSecond();
 
 	frameTime = (float)millisecond;
@@ -1260,7 +1271,7 @@ void Game::Run() {
 	static float frame = 0;
 	static int frameint = 0;
 	frame += millisecond/ (float)RENDERTIME_SETTIME;
-	
+	timestamp = frame;//c->getTimeStamp();
 	
 
 
@@ -1848,17 +1859,7 @@ void Game::Run() {
 	texdayo->setRenderBillBoardColor(0,color);*/
 	
 	
-	int siz = scenes.size();
-	if (siz) {
-		Scene* now_scene = scenes.back();
-		for (int i=0;i<siz;i++) {
-			Scene* s = scenes[i];
-			if (now_scene != s) {
-				s->mainrender(false);
-			}
-		}
-		now_scene->mainrender(true);
-	}
+	
 	
 
 //	inputtext->render(g);
@@ -1934,11 +1935,25 @@ void Game::Run() {
 
 	texdayo->render(g);
 
+	int siz = scenes.size();
+	if (siz) {
+		Scene* now_scene = scenes.back();
+		for (int i=0;i<siz;i++) {
+			Scene* s = scenes[i];
+			if (now_scene != s) {
+				s->mainrender(false);
+			}
+		}
+		now_scene->mainrender(true);
+	}
+
+
+	/*
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 	gg->byouga(g,NULL,frameTime, (int)frame);
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
-
+	*/
 	g->getSwapChain()->Present(0,0);
 
 

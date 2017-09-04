@@ -98,6 +98,7 @@ public:
 	void loaddestruct(Task* task, TCB* thisTCB){
 		loaddestructIMPL(task,thisTCB,gs[TASKTHREADS_LOADDESTRUCT], Ls[TASKTHREADS_LOADDESTRUCT], game);
 	};
+	
 };
 
 class ONEMESSAGE : public Scene, public INPUTSHORICLASS {

@@ -21,13 +21,34 @@ public:
 		category2_id = c2id;
 		metadata = 0;
 	}
-	~KoumokuList_Parts() {
-		~KoumokuList();
+	virtual ~KoumokuList_Parts() {
+	
+		Release();
+		KoumokuList::~KoumokuList();
+	}
+	void Release() {
+		if (metadata) {
+			delete metadata;
+			metadata = 0;
+		}
+	}
+	void setMetaData(RoboDataMetaData* meta) {
+		metadata = meta;
+	}
+	void InitKoumokus(Texture* t, MyTextureLoader* loader);
+	char* getFilenameFromCID();
+	bool hasLoad() {
+		int size = koumokus.size();
+		for (int i=0; i< size; i++) {
+			if (!koumokus[i]->hasLoad()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
-	static char* getFilenameFromCID();
-
-
+	void load(Graphics* g, MyTextureLoader* loader);
+	
 };
 
 class Koumoku_Parts : public Koumoku {
@@ -35,10 +56,28 @@ private:
 	RoboParts* parts;
 public:
 	Texture* t;
-	Koumoku_Parts(int clicked_) : Koumoku(clicked_) {
+	
+	Koumoku_Parts(int clicked_, RoboParts* p) : Koumoku(clicked_) {
+	  parts = p;
 	}
-	~Koumoku_Parts(){};
+	virtual ~Koumoku_Parts(){
+	  Release();
+	};
+	void Release() {
+		if (parts) {
+			parts->Release();
+			delete parts;
+			parts = 0;
+		}
+	}
+	bool hasLoad();
+	void load(Graphics* g, MyTextureLoader* loader);
+	void Init(Texture* t, MyTextureLoader* loader);
 
+	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);// focused_koumoku ÇÃkoumokuÇ≈Ç‡byougaÇÕåƒÇŒÇÍÇÈ
+	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);
+	//void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable Ç™false ÇÃÇ∆Ç´ÇÕÉäÉ^Å[ÉìÇ∑ÇÈÇ±Ç∆
+	void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl);
 };
 
 
@@ -48,7 +87,7 @@ public:
 
 	Koumoku_Parts_Category(int clicked_) : Koumoku(clicked_) {
 	}
-	~Koumoku_Parts_Category();
+	~Koumoku_Parts_Category(){};
 	void Init(Texture* t, MyTextureLoader* loader, char* name);
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);// focused_koumoku ÇÃkoumokuÇ≈Ç‡byougaÇÕåƒÇŒÇÍÇÈ
 	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);
@@ -62,7 +101,7 @@ private:
 	int pressed_up_count;
 	int pressed_down_count;
 	Texture* t;
-
+	MyTextureLoader* loader;
 
 public:
 	Gamen_GARAGE(void);
@@ -70,6 +109,7 @@ public:
 	Robo* robo;
 private:
 	int clearrobogamen;
+	int clearpartsgamen;
 public:
 	KoumokuList* parts_category_list;
 	KoumokuList* parts_leg_category_list;
@@ -80,12 +120,14 @@ public:
 	KoumokuList* parts_inside_category_list;
 
 	KoumokuList* temp_focused_list;
+	KoumokuList_Parts* parts_head_list;
 
 
 
 	void Init(Graphics* g, AtariHantei* hantei,Texture* t, MyTextureLoader* loader);
 	void Release();
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
+	void loadData(Graphics* g, float dsecond, int stamp);
 	void clickedShori(int id);
 	void clickedShoriWithData(int id, void* data);
 	void clickedEscape();

@@ -155,14 +155,19 @@ public:
 };
 
 class RoboParts {
-protected:
+public:
 	RoboData* data;
+private:
 	bool mesh_loaded;
 public:
 	RoboParts() {data = 0;mesh_loaded=false;}
-	virtual ~RoboParts()=0;
+	virtual ~RoboParts();
+	
+	virtual float getR(){return 1;};
 	void loadData(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
 	virtual void loadMesh(Graphics* g, MyTextureLoader* loader){mesh_loaded=true;};
+	virtual void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj){};
+	virtual void Release()=0;
 	bool hasMeshLoaded() {return mesh_loaded;}
 };
 
@@ -181,6 +186,31 @@ public:
 		head2 = 0;
 		head3 = 0;
 		data = 0;
+	}
+
+	float getR() {
+		float R=0;
+		int count=0;
+		if (head) {
+			R += sqrt(MyVec3Dot(head->houkatuobb.e,head->houkatuobb.e));
+			count++;
+		}
+
+		if (head2) {
+			R += sqrt(MyVec3Dot(head2->houkatuobb.e,head2->houkatuobb.e));
+			count++;
+		}
+
+		if (head3) {
+			R += sqrt(MyVec3Dot(head3->houkatuobb.e,head3->houkatuobb.e));
+			count++;
+		}
+
+		if (count) {
+			R = R / count;
+		}
+
+		return R;
 	}
 
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
@@ -222,6 +252,7 @@ public:
 		}
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 };
 
 class RoboArm : public RoboParts{

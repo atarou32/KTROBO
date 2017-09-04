@@ -1461,9 +1461,24 @@ void Robo::release() {
 	}
 }
 
+void RoboHead::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (head) {
+		head->draw(g,&wor,view,proj);
+	}
+	if (head2) {
+		head2->draw(g,&wor,view,proj);
+	}
+	if (head3) {
+		head3->draw(g,&wor,view,proj);
+	}
+}
 
 void RoboHead::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
 	if (!data) return;
+	if (hasMeshLoaded()) return;
+
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
 		if (strcmp("@", rdp->string_data) != 0) {
@@ -1515,6 +1530,11 @@ void RoboHead::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
 	RoboParts::loadMesh(g,tex_loader);
 
 }
+
+RoboParts::~RoboParts() {
+	//Release();
+}
+
 void RoboHead::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 	data = new RoboData();

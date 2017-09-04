@@ -3,13 +3,25 @@
 
 #pragma once
 #include "KTRoboScene.h"
+#include "KTRoboGamen_GARAGE.h"
+#ifndef KTROBO_TEXTURE_H
+#include "KTRoboTexture.h"
+#endif
 
 namespace KTROBO {
 
 class SceneGarage : public Scene
 {
+private:
+	Graphics* g;
+	AtariHantei* hantei;
+	Texture* tex;
+	MyTextureLoader* loader;
+
+	Gamen_GARAGE* gg;
+
 public:
-	SceneGarage(void);
+	SceneGarage(Graphics* g, AtariHantei* hantei, Texture* tex, MyTextureLoader* loader);
 	~SceneGarage(void);
 
 public:

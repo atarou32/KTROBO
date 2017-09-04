@@ -13,10 +13,12 @@ Gamen_GARAGE::Gamen_GARAGE(void)
 	parts_inside_category_list=0;
 	robo = 0;
 	clearrobogamen = 0;
+	clearpartsgamen =0 ;
 	pressed_up_count = 0;
 	pressed_down_count = 0;
 	temp_focused_list = 0;
 	t = 0;
+	parts_head_list = 0;
 }
 
 
@@ -67,6 +69,9 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	parts_lweapon_category_list->byouga(g,gui,dsecond,stamp);
 	parts_rweapon_category_list->byouga(g,gui,dsecond,stamp);
 	parts_rkata_category_list->byouga(g,gui,dsecond,stamp);
+	if (parts_head_list) {
+		parts_head_list->byouga(g,gui,dsecond,stamp);
+	}
 }
 
 #define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
@@ -161,6 +166,7 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 
 
 
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID 176
 
 
 
@@ -172,7 +178,23 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 
 
 
+void Koumoku_Parts::Init(Texture* t, MyTextureLoader* loader) {
 
+	int tex_id = t->getTexture(KTROBO_GAMEN_GARAGE_GUI_PNG);
+	gui_koumoku_name_id = t->getRenderText(parts->data->getData("name")->string_data, place.left,place.top,place.bottom - place.top, place.right - place.left,
+		place.bottom - place.top);
+	t->setRenderTextIsRender(gui_koumoku_name_id,true);
+
+	gui_koumoku_name_bg_id = t->getRenderTex(tex_id,0xFFFFFFFF,place.left,place.top,place.right-place.left,place.bottom - place.top,
+		0,0,100,100);
+	t->setRenderTexIsRender(gui_koumoku_name_bg_id,true);
+	this->t = t;
+
+
+
+
+
+}
 
 
 void Koumoku_Parts_Category::Init(Texture* t, MyTextureLoader* loader, char* name) {
@@ -211,6 +233,78 @@ void Gamen_GARAGE::clickedShoriWithData(int id, void* data) {
 
 }
 
+void Koumoku_Parts::byouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
+	// focused_koumoku のkoumokuでもbyougaは呼ばれる
+	if (!getEnabled() && !has_clicked) return;
+	t->setRenderTexColor(gui_koumoku_name_bg_id, 0xFFFFFFFFF);
+	
+}// focused_koumoku のkoumokuでもbyougaは呼ばれる
+
+void Koumoku_Parts::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
+
+const D3D11_VIEWPORT* ggg = g->getViewPort();
+	D3D11_VIEWPORT ggg2;
+	D3D11_VIEWPORT ggg3;
+	ggg2= *ggg;
+	ggg3.TopLeftX = 550;
+	ggg3.TopLeftY = 150;
+	ggg3.Width = 330;
+	ggg3.Height = 330;
+	ggg3.MaxDepth = 1;
+	ggg3.MinDepth = 0;
+	g->getDeviceContext()->RSSetViewports(1,&ggg3);
+	static float unko=0;
+	unko += dsecond/3333;
+	MYMATRIX view;
+
+	float r = parts->getR();
+	MYVECTOR3 lookat(0,0,r);
+	MYVECTOR3 lookfrom(0,3*r,r*2);
+	MYVECTOR3 up(0,0,1);
+	MYMATRIX tes;
+	MyMatrixRotationZ(tes,unko);
+	MyVec3TransformNormal(lookfrom,lookfrom,tes);
+	MyMatrixLookAtRH(view,lookfrom,lookat,up);
+	float clearColor[4] = {
+		0.6f,0.6f,0.8f,1.0f};
+	
+	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(), clearColor);
+	if (this->hasLoad() && this->getVisible()) {
+		this->parts->drawMesh(g,&view,g->getProj());
+	}
+	g->getDeviceContext()->RSSetViewports(1,ggg);
+
+
+	if (!getEnabled() && !has_clicked) return;
+	int stt = stamp % 130;
+	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
+	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
+
+}
+//void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable がfalse のときはリターンすること
+
+void Koumoku_Parts::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl) {
+
+
+
+
+}
+void KoumokuList_Parts::InitKoumokus(Texture* t, MyTextureLoader* loader) {
+		int size = koumokus.size();
+		for (int i=0;i<size;i++) {
+			Koumoku_Parts* kp = (Koumoku_Parts*)koumokus[i];
+			kp->Init(t,loader);
+		}
+	}
+
+
+char* KoumokuList_Parts::getFilenameFromCID() {
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == category_id) {
+	return "resrc/ktrobo/info/metadata/ktroboheadpartsmetadata.txt";
+	}
+	
+	throw new GameError(KTROBO::FATAL_ERROR, "no cid");
+}
 
 void Gamen_GARAGE::clickedShori(int id) {
 
@@ -239,8 +333,75 @@ void Gamen_GARAGE::clickedShori(int id) {
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == id) {
+		if (!parts_head_list) {
+			parts_head_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_head_list->setname("ヘッドパーツ");
+			MyTokenAnalyzer ma;
+			ma.load(parts_head_list->getFilenameFromCID());
+			RoboDataMetaData* head_md = new RoboDataMetaData();
+			RoboMetaDataPart rmdp;
+			rmdp.clear();
+			int dnum = ma.GetIntToken();
+			for (int i=0;i<dnum;i++) {
+				rmdp.clear();
+				rmdp.readline(&ma);
+				head_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
+			}
+
+			ma.deletedayo();
+			parts_head_list->setMetaData(head_md);
+
+			ma.load("resrc/ktrobo/info/ktroboheadparts.txt");
+			while(!ma.enddayo()) {
+
+				if (strcmp(ma.Toke(), "{")==0) {
+					RoboHead* head = new RoboHead();
+					Koumoku_Parts* kp = new Koumoku_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID,head);
+					kp->setEnabled(false);
+					
+					parts_head_list->setKoumoku(kp);
+					
+					try {
+						head->loadData(&ma,head_md);
+						
+					
+					} catch (GameError* err) {
+		
+					//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+						ma.deletedayo();
+						throw err;
+					}
+				}
+				ma.GetToken();
+			}		
+			ma.deletedayo();
+		
+			parts_head_list->setEnable(false);
+			parts_head_list->setVisible(t,false);
+			int si = parts_head_list->getKoumokuSize();
+			parts_head_list->setSize(t,500,0,360,21*si);
+
+			
+			parts_head_list->InitKoumokus(t,loader);
 
 
+
+			parts_head_list->setHyouji3Mode(false);
+			parts_head_list->clickedDown();
+			parts_head_list->clickedUp();
+			parts_head_list->setEnable(false);
+			parts_head_list->setVisible(t,false);
+			
+		}
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		parts_head_list->setHyouji3Mode(true);
+		
+		parts_head_list->setVisible(parts_head_list->t, true);
+		parts_head_list->setEnable(true);
+		parts_head_list->clickedDown();
+		parts_head_list->clickedUp();
+		parts_category_list->setEnable(false);
+		temp_focused_list = parts_head_list;
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID == id) {
@@ -753,7 +914,14 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	int tex_id = t->getTexture(KTROBO_GUI_PNG,4096);
 	clearrobogamen = t->getRenderTex(tex_id,0xDDEEFFDD, 50,350,400,400,0,0,128,128);
 	t->setRenderTexIsRender(clearrobogamen,true);
+
+	clearpartsgamen = t->getRenderTex(tex_id, 0xDDEEFFDD, 550,150,330,330,0,0,128,128);
+	t->setRenderTexIsRender(clearpartsgamen,false);
+
+
+
 	this->t = t;
+	this->loader = loader;
 }
 
 void Gamen_GARAGE::Release() {
@@ -800,7 +968,32 @@ void Gamen_GARAGE::Release() {
 		t->lightdeleteAllRenderTex();
 		t->lightdeleteAllBillBoard();
 	}
+	if (parts_head_list) {
+		delete parts_head_list;
+		parts_head_list = 0;
+	}
+}
 
+void KoumokuList_Parts::load(Graphics* g, MyTextureLoader* loader) {
+
+	int size = koumokus.size();
+	for (int i=0;i<size;i++) {
+		if (!koumokus[i]->hasLoad()) {
+			koumokus[i]->load(g, loader);
+			return; // 一度に全てをロードしないで抜ける
+		}
+	}
+}
+
+
+void Gamen_GARAGE::loadData(Graphics* g, float dsecond, int stamp) {
+	
+	if (temp_focused_list) {
+		if (temp_focused_list->hasLoad()) {
+		} else {
+			temp_focused_list->load(g, g->getTexLoader());
+		}
+	}
 }
 
 void Gamen_GARAGE::clickedEscape() {
@@ -819,6 +1012,14 @@ void Gamen_GARAGE::clickedEscape() {
 	parts_inside_category_list->setVisible(parts_inside_category_list->t,false);
 	parts_category_list->setEnable(true);
 	parts_category_list->setVisible(parts_category_list->t,true);
+
+	if (parts_head_list) {
+		parts_head_list->setEnable(false);
+		parts_head_list->setVisible(parts_head_list->t, false);
+	}
+
+	t->setRenderTexIsRender(clearpartsgamen, false);
+
 }
 
 
@@ -900,3 +1101,22 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 
 
 }
+
+
+
+bool Koumoku_Parts::hasLoad() {
+	if (parts->hasMeshLoaded()) {
+		return true;
+	}
+	return false;
+}
+
+void Koumoku_Parts::load(Graphics* g, MyTextureLoader* loader) {
+	if (parts->hasMeshLoaded()) {
+
+	} else {
+		parts->loadMesh(g,loader);
+	
+	}
+}
+

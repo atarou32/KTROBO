@@ -424,7 +424,7 @@ void Texture::lightdeleteAllRenderTex() {
 }
 
 
-void Texture::lightdeleteAllRenderBillBoard() {
+void Texture::lightdeleteAllBillBoard() {
 	CS::instance()->enter(CS_RENDERDATA_CS, "tes");
 	vector<TexturePart*>::iterator it = parts.begin();
 	set<int> erasedayo_ids;
