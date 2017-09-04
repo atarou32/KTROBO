@@ -2,7 +2,9 @@
 #define KTROBO_GAMEN_H
 
 #pragma once
+#ifndef KTROBO_GRAPHICS_H
 #include "KTRoboGraphics.h"
+#endif
 #include "MyButukari.h"
 #include "KTRoboGUI.h"
 #include <vector>
@@ -16,6 +18,7 @@ public:
 	~Gamen(void);
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;
 	virtual void clickedShori(int id)=0;
+	virtual void clickedShoriWithData(int id, void* data)=0;
 
 };
 

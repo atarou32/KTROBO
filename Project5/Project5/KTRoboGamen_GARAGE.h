@@ -9,6 +9,39 @@
 
 namespace KTROBO {
 
+class KoumokuList_Parts : public KoumokuList {
+private:
+	int category_id;
+	int category2_id;
+	RoboDataMetaData* metadata;
+
+public:
+	KoumokuList_Parts(int cid, int c2id, Texture* t) : KoumokuList(t) {
+		category_id = cid;
+		category2_id = c2id;
+		metadata = 0;
+	}
+	~KoumokuList_Parts() {
+		~KoumokuList();
+	}
+
+	static char* getFilenameFromCID();
+
+
+};
+
+class Koumoku_Parts : public Koumoku {
+private:
+	RoboParts* parts;
+public:
+	Texture* t;
+	Koumoku_Parts(int clicked_) : Koumoku(clicked_) {
+	}
+	~Koumoku_Parts(){};
+
+};
+
+
 class Koumoku_Parts_Category : public Koumoku {
 public:
 	Texture* t;
@@ -28,7 +61,7 @@ class Gamen_GARAGE : public Gamen , public INPUTSHORICLASS
 private:
 	int pressed_up_count;
 	int pressed_down_count;
-
+	Texture* t;
 
 
 public:
@@ -54,6 +87,7 @@ public:
 	void Release();
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
 	void clickedShori(int id);
+	void clickedShoriWithData(int id, void* data);
 	void clickedEscape();
 	bool handleMessage(int msg, void* data, DWORD time);
 };

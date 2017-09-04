@@ -1462,7 +1462,59 @@ void Robo::release() {
 }
 
 
+void RoboHead::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->head = new Mesh();
+			head->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			head->readAnime(rdp->string_data);
+			head->animate(0,true);
+		}
+	}
 
+	rdp = data->getData("mesh2");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->head2 = new Mesh();
+			head2->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime2");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			head2->readAnime(rdp->string_data);
+			head2->animate(0,true);
+		}
+	}
+
+	rdp = data->getData("mesh3");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->head3 = new Mesh();
+			head3->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime3");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			head3->readAnime(rdp->string_data);
+			head3->animate(0,true);
+		}
+	}
+
+	RoboParts::loadMesh(g,tex_loader);
+
+}
 void RoboHead::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 	data = new RoboData();
@@ -1551,6 +1603,27 @@ void RoboHead::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* 
 
 }
 
+void RoboBody::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->body = new Mesh();
+			body->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			body->readAnime(rdp->string_data);
+			body->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
+}
+
 void RoboBody::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 //	throw new GameError(KTROBO::FATAL_ERROR,"there is no { in init robo");
 
@@ -1605,6 +1678,35 @@ void RoboBody::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* 
 
 }
 
+void RoboArm::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->larm = new Mesh();
+			this->rarm = new Mesh();
+			larm->readMesh(g,rdp->string_data,tex_loader);
+			rarm->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			larm->readAnime(rdp->string_data);
+			rarm->readAnime(rdp->string_data);
+			larm->animate(0,true);
+			rarm->animate(0,true);
+		}
+	}
+
+
+	RoboParts::loadMesh(g,tex_loader);
+
+
+}
 void RoboArm::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 	data = new RoboData();
@@ -1664,6 +1766,28 @@ void RoboArm::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g
 
 }
 
+void RoboLeg::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->leg = new Mesh();
+			leg->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			leg->readAnime(rdp->string_data);
+			leg->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
+}
+
+
 void RoboLeg::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 
@@ -1721,6 +1845,30 @@ void RoboLeg::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g
 
 }
 
+void RArmWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->weapon = new Mesh();
+			weapon->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			weapon->readAnime(rdp->string_data);
+			weapon->animate(0,true);
+		}
+	}
+
+	RoboParts::loadMesh(g,tex_loader);
+
+}
+
 void RArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 	data = new RoboData();
@@ -1775,6 +1923,27 @@ void RArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 
 }
 
+void LArmWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+		// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->weapon = new Mesh();
+			weapon->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			weapon->readAnime(rdp->string_data);
+			weapon->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
+}
+
 void LArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 
@@ -1827,6 +1996,27 @@ void LArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 		}
 	}
 
+}
+
+void RShoulderWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->weapon = new Mesh();
+			weapon->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			weapon->readAnime(rdp->string_data);
+			weapon->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
 }
 
 void RShoulderWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
@@ -1884,6 +2074,31 @@ void RShoulderWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Gra
 
 }
 
+void LShoulderWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->weapon = new Mesh();
+			weapon->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			weapon->readAnime(rdp->string_data);
+			weapon->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
+
+
+
+
+}
+
 void LShoulderWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
 
@@ -1935,6 +2150,35 @@ void LShoulderWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Gra
 			weapon->animate(0,true);
 		}
 	}
+
+}
+
+void InsideWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+		// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->weapon = new Mesh();
+			weapon->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			weapon->readAnime(rdp->string_data);
+			weapon->animate(0,true);
+		}
+	}
+
+
+	RoboParts::loadMesh(g,tex_loader);
+
+
+
+
+
 
 }
 
@@ -1995,6 +2239,32 @@ void InsideWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphi
 
 
 
+void RoboBooster::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->mesh = new Mesh();
+			mesh->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			mesh->readAnime(rdp->string_data);
+			mesh->animate(0,true);
+		}
+	}
+
+	RoboParts::loadMesh(g,tex_loader);
+
+
+
+
+}
+
 
 void RoboBooster::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader) {
 
@@ -2049,6 +2319,28 @@ void RoboBooster::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphic
 	}
 
 
+}
+
+
+void RoboEngine::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (!data) return;
+	// data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->mesh = new Mesh();
+			mesh->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			mesh->readAnime(rdp->string_data);
+			mesh->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
 }
 
 
@@ -2107,6 +2399,30 @@ void RoboEngine::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 
 
 }
+
+
+void RoboFCS::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
+
+	if (!data) return;
+    // data にデータが入っているので
+	RoboDataPart* rdp = data->getData("mesh");
+	if (rdp) {
+		if (strcmp("@", rdp->string_data) != 0) {
+			// 読み込む
+			this->mesh = new Mesh();
+			mesh->readMesh(g,rdp->string_data,tex_loader);
+			// 次はアニメ
+			rdp = data->getData("anime");
+			if (!rdp) { 
+				throw new GameError(KTROBO::FATAL_ERROR, "there is no anime in init robo");
+			}
+			mesh->readAnime(rdp->string_data);
+			mesh->animate(0,true);
+		}
+	}
+	RoboParts::loadMesh(g,tex_loader);
+}
+
 
 
 
@@ -3688,3 +4004,37 @@ bool RoboBoosterState_BOOSTBACK::isCanMoveWhenBoost(Robo* robo) {
 }
 
 
+void RoboParts::loadData(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data) {
+
+
+	data = new RoboData();
+	if (strcmp(ma->Toke(),"{") != 0) {
+		throw new GameError(KTROBO::FATAL_ERROR,"there is no { in init robo");
+	}
+
+	while(!ma->enddayo()) {
+		ma->GetToken();
+		if (strcmp(ma->Toke(), "}")==0) {
+			break;
+		}
+
+		char* p = ma->Toke();
+		RoboMetaDataPart* pp = meta_data->getData(p);
+		if (pp) {
+			if (strcmp(pp->data_type, "INT")==0) {
+				this->data->setData(ma->GetIntToken(), pp->data_name,pp->data_name2,"",0);
+			} else if(strcmp(pp->data_type, "STRING")==0) {
+				ma->GetToken();
+				this->data->setData(0,pp->data_name,pp->data_name2,ma->Toke(),0);
+			} else if(strcmp(pp->data_type, "FLOAT")==0) {
+				this->data->setData(0,pp->data_name,pp->data_name2,"",ma->GetFloatToken());
+			} else {
+				// UNKNOWN
+				throw new GameError(KTROBO::FATAL_ERROR,"unknown token in init robo");
+			}
+
+
+
+		}
+	}
+}

@@ -391,7 +391,73 @@ void Texture::deleteRenderBillBoard(int bill_id) {
 }
 
 
+void Texture::lightdeleteAllRenderTex() {
+	CS::instance()->enter(CS_RENDERDATA_CS, "tes");
+	vector<TexturePart*>::iterator it = parts.begin();
+	set<int> erasedayo_ids;
 
+	while (it != parts.end()) {
+		TexturePart* pp = *it;
+		set<int>::iterator itt = pp->render_tex_ids.begin();
+		while (itt != pp->render_tex_ids.end()) {
+
+			int ii = *itt;
+			erasedayo_ids.insert(ii);
+
+			itt++;
+		}
+
+		it++;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "tes");
+	set<int>::iterator ite = erasedayo_ids.begin();
+	CS::instance()->enter(CS_RENDERDATA_CS, "tes");
+	while(ite != erasedayo_ids.end()) {
+		int ii = *ite;
+		lightdeleteRenderTex(ii);
+		ite++;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "tes");
+
+	erasedayo_ids.clear();
+
+}
+
+
+void Texture::lightdeleteAllRenderBillBoard() {
+	CS::instance()->enter(CS_RENDERDATA_CS, "tes");
+	vector<TexturePart*>::iterator it = parts.begin();
+	set<int> erasedayo_ids;
+
+	while (it != parts.end()) {
+		TexturePart* pp = *it;
+		set<int>::iterator itt = pp->bill_board_ids.begin();
+		while (itt != pp->bill_board_ids.end()) {
+
+			int ii = *itt;
+			erasedayo_ids.insert(ii);
+
+			itt++;
+		}
+
+		it++;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "tes");
+	set<int>::iterator ite = erasedayo_ids.begin();
+	CS::instance()->enter(CS_RENDERDATA_CS, "tes");
+	while(ite != erasedayo_ids.end()) {
+		int ii = *ite;
+		lightdeleteRenderBillBoard(ii);
+		ite++;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "tes");
+
+	erasedayo_ids.clear();
+
+
+
+
+}
 
 void Texture::lightdeleteRenderTex(int render_tex_index) {
 	// ロックをどうするか考えどころ RENDERDATAだけで大丈夫そう・・？

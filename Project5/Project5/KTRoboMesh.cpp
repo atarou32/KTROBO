@@ -415,6 +415,7 @@ void Mesh::readAnime(char* filename) {
 Mesh* Mesh::clone() {
 
 	Mesh* nmesh = new Mesh();
+	nmesh->is_cloned = true;
 	nmesh->BoneIndexes = BoneIndexes;
 	std::vector<MeshMaterial*>::iterator it_mat;
 	it_mat = Materials.begin();

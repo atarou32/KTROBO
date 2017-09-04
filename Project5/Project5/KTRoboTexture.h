@@ -528,6 +528,9 @@ public:
 	void deleteRenderBillBoard(int bill_id); // ƒƒbƒN‚ğ‚Ç‚¤‚·‚é‚©l‚¦‚Ç‚±‚ë
 	void lightdeleteRenderTex(int render_tex_id);
 	void lightdeleteRenderBillBoard(int bill_id);
+	
+	void lightdeleteAllRenderTex();
+	void lightdeleteAllRenderBillBoard();
 
 	void deleteAll();
 

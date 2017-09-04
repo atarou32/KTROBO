@@ -8,6 +8,9 @@
 #include "KTRoboInput.h"
 //#include "KTROBOArmPositioner.h"
 #include "KTRoboWeapon.h"
+#ifndef KTROBO_GRAPHICS_H
+#include "KTRoboGraphics.h"
+#endif
 
 namespace KTROBO {
 class Robo;
@@ -151,14 +154,25 @@ public:
 	}
 };
 
+class RoboParts {
+protected:
+	RoboData* data;
+	bool mesh_loaded;
+public:
+	RoboParts() {data = 0;mesh_loaded=false;}
+	virtual ~RoboParts()=0;
+	void loadData(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
+	virtual void loadMesh(Graphics* g, MyTextureLoader* loader){mesh_loaded=true;};
+	bool hasMeshLoaded() {return mesh_loaded;}
+};
 
-class RoboHead {
+class RoboHead : public RoboParts {
 public:
 	Mesh* head;
 	Mesh* head2;
 	Mesh* head3;
 
-	RoboData* data;
+	//RoboData* data;
 
 public:
 	RoboHead() {
@@ -207,14 +221,14 @@ public:
 			head3 = 0;
 		}
 	}
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class RoboArm {
+class RoboArm : public RoboParts{
 public:
 	Mesh* rarm;
 	Mesh* larm;
-	RoboData* data;
+//	RoboData* data;
 public:
 	RoboArm() {
 		rarm = 0;
@@ -254,13 +268,14 @@ public:
 	
 	
 	}
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 
 };
 
-class RoboLeg {
+class RoboLeg : public RoboParts {
 public:
 	Mesh* leg;
-	RoboData* data;
+//	RoboData* data;
 public:
 	RoboLeg() {
 		leg = 0;
@@ -289,12 +304,13 @@ public:
 	
 	
 	}
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class RoboBody {
+class RoboBody : public RoboParts{
 public:
 	Mesh* body;
-	RoboData* data;
+//	RoboData* data;
 public:
 	RoboBody() {
 		body = 0;
@@ -327,13 +343,14 @@ public:
 	
 	
 	}
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
 
-class RArmWeapon {
+class RArmWeapon : public RoboParts {
 public:
 	Mesh* weapon;
-	RoboData* data;
+//	RoboData* data;
 
 	WeaponFireRifle wf_rifle;
 public:
@@ -366,13 +383,13 @@ public:
 	
 	}
 
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class LArmWeapon {
+class LArmWeapon : public RoboParts{
 public:
 	Mesh* weapon;
-	RoboData* data;
+//	RoboData* data;
 public:
 	LArmWeapon() {
 		weapon = 0;
@@ -405,13 +422,13 @@ public:
 	
 	
 	}
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class RShoulderWeapon {
+class RShoulderWeapon : public RoboParts {
 public:
 		Mesh* weapon;
-		RoboData* data;
+//		RoboData* data;
 public:
 	RShoulderWeapon() {
 		weapon = 0;
@@ -444,13 +461,13 @@ public:
 	
 	
 	}
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class LShoulderWeapon {
+class LShoulderWeapon : public RoboParts{
 public:
 	Mesh* weapon;
-	RoboData* data;
+//	RoboData* data;
 public:
 	LShoulderWeapon() {
 		weapon = 0;
@@ -484,12 +501,13 @@ public:
 	
 	
 	}
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class InsideWeapon {
+class InsideWeapon : public RoboParts {
 public:
 	Mesh* weapon;
-	RoboData* data;
+//	RoboData* data;
 public:
 	InsideWeapon() {
 		weapon = 0;
@@ -523,13 +541,14 @@ public:
 	
 	
 	}
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 };
 
-class RoboEngine {
+class RoboEngine : public RoboParts {
 
 public:
 	Mesh* mesh;
-	RoboData* data;
+//	RoboData* data;
 public:
 	RoboEngine() {
 		mesh = 0;
@@ -565,18 +584,18 @@ public:
 	}
 
 
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 
 
 
 };
 
-class RoboBooster {
+class RoboBooster : public RoboParts {
 
 
 public:
 	Mesh* mesh;
-	RoboData* data;
+//	RoboData* data;
 public:
 	RoboBooster() {
 		mesh = 0;
@@ -612,17 +631,17 @@ public:
 	}
 
 
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 
 
 };
 
-class RoboFCS {
+class RoboFCS : public RoboParts {
 
 
 public:
 	Mesh* mesh;
-	RoboData* data;
+//	RoboData* data;
 public:
 	RoboFCS() {
 		mesh = 0;
@@ -660,7 +679,7 @@ public:
 
 
 
-
+	void loadMesh(Graphics* g, MyTextureLoader* loader);
 
 };
 

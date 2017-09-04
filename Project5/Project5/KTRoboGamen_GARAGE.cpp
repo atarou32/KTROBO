@@ -16,6 +16,7 @@ Gamen_GARAGE::Gamen_GARAGE(void)
 	pressed_up_count = 0;
 	pressed_down_count = 0;
 	temp_focused_list = 0;
+	t = 0;
 }
 
 
@@ -69,6 +70,7 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 }
 
 #define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_NONE 0
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID 100
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID 101
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID 102
@@ -198,6 +200,17 @@ void Koumoku_Parts_Category::focusedByouga(Graphics* g, GUI* gui, float dsecond,
 	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 }
+void Gamen_GARAGE::clickedShoriWithData(int id, void* data) {
+	Koumoku_Parts* parts_k = (Koumoku_Parts*)data;
+
+	
+
+
+
+
+
+}
+
 
 void Gamen_GARAGE::clickedShori(int id) {
 
@@ -740,6 +753,7 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	int tex_id = t->getTexture(KTROBO_GUI_PNG,4096);
 	clearrobogamen = t->getRenderTex(tex_id,0xDDEEFFDD, 50,350,400,400,0,0,128,128);
 	t->setRenderTexIsRender(clearrobogamen,true);
+	this->t = t;
 }
 
 void Gamen_GARAGE::Release() {
@@ -781,6 +795,12 @@ void Gamen_GARAGE::Release() {
 		delete robo;
 		robo = 0;
 	}
+
+	if (t) {
+		t->lightdeleteAllRenderTex();
+		t->lightdeleteAllBillBoard();
+	}
+
 }
 
 void Gamen_GARAGE::clickedEscape() {
