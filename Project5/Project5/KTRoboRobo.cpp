@@ -1475,6 +1475,125 @@ void RoboHead::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	}
 }
 
+
+void RoboBooster::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (mesh) {
+		mesh->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RoboFCS::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (mesh) {
+		mesh->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RoboBody::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (body) {
+		body->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RoboEngine::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (mesh) {
+		mesh->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RoboArm::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (rarm) {
+		rarm->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RoboLeg::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (leg) {
+		leg->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RArmWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (weapon) {
+		weapon->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void LArmWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (weapon) {
+		weapon->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void RShoulderWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (weapon) {
+		weapon->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void LShoulderWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (weapon) {
+		weapon->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+void InsideWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (weapon) {
+		weapon->draw(g,&wor,view,proj);
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
 void RoboHead::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
 	if (!data) return;
 	if (hasMeshLoaded()) return;

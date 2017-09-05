@@ -14,12 +14,15 @@ private:
 	int category_id;
 	int category2_id;
 	RoboDataMetaData* metadata;
+public:
+	int parts_setumei_text;
 
 public:
 	KoumokuList_Parts(int cid, int c2id, Texture* t) : KoumokuList(t) {
 		category_id = cid;
 		category2_id = c2id;
 		metadata = 0;
+		parts_setumei_text=0;
 	}
 	virtual ~KoumokuList_Parts() {
 	
@@ -36,7 +39,8 @@ public:
 		metadata = meta;
 	}
 	void InitKoumokus(Texture* t, MyTextureLoader* loader);
-	char* getFilenameFromCID();
+	char* getPartsFilenameFromCID();
+	char* getMetaPartsFilenameFromCID();
 	bool hasLoad() {
 		int size = koumokus.size();
 		for (int i=0; i< size; i++) {
@@ -73,7 +77,7 @@ public:
 	bool hasLoad();
 	void load(Graphics* g, MyTextureLoader* loader);
 	void Init(Texture* t, MyTextureLoader* loader);
-
+	void setFocused(KoumokuList* kl);
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
 	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);
 	//void clickedExe(Gamen* gamen, GamenPart* gp, KoumokuList* kl); // set_enable ‚ªfalse ‚Ì‚Æ‚«‚ÍƒŠƒ^[ƒ“‚·‚é‚±‚Æ
@@ -110,6 +114,8 @@ public:
 private:
 	int clearrobogamen;
 	int clearpartsgamen;
+	int clearcommentgamen;
+	void clickedKoumokuListPartsdayo(KoumokuList_Parts* kp, RoboParts* kk);
 public:
 	KoumokuList* parts_category_list;
 	KoumokuList* parts_leg_category_list;
@@ -121,8 +127,11 @@ public:
 
 	KoumokuList* temp_focused_list;
 	KoumokuList_Parts* parts_head_list;
-
-
+	KoumokuList_Parts* parts_booster_list;
+	KoumokuList_Parts* parts_core_list;
+	KoumokuList_Parts* parts_engine_list;
+	KoumokuList_Parts* parts_fcs_list;
+	KoumokuList_Parts* parts_arm_list;
 
 	void Init(Graphics* g, AtariHantei* hantei,Texture* t, MyTextureLoader* loader);
 	void Release();

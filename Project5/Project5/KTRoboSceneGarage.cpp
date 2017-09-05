@@ -45,7 +45,12 @@ void SceneGarage::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Sta
 
 void SceneGarage::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game){
 	if (gg) {
+		try { 
 		gg->loadData(g,game->getDMSecond(), game->getTimeStamp());
+		} catch (GameError* err) {
+			KTROBO::mylog::writelog(KTROBO::FATAL_ERROR,err->getMessage());
+			throw err;
+		}
 	}
 }
 

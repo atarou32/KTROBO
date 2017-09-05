@@ -17,13 +17,13 @@ class Robo;
 struct RoboDataPart {
 public:
 	int int_data;
-	char data_name[16];
+	char data_name[32];
 	char data_name2[32];
 	char string_data[96];
 	float float_data;
 	RoboDataPart() {
 		int_data = 0;
-		memset(data_name,0,16);
+		memset(data_name,0,32);
 		memset(data_name2,0,32);
 		memset(string_data,0,96);
 		float_data = 0;
@@ -36,7 +36,7 @@ public:
 	void setData(int int_data, char* data_name, char* data_name2, char* string_data, float float_data) {
 		RoboDataPart* p = new RoboDataPart();
 		p->int_data = int_data;
-		strcpy_s(p->data_name,16,data_name);
+		strcpy_s(p->data_name,32,data_name);
 		strcpy_s(p->data_name2,32,data_name2);
 		strcpy_s(p->string_data,96,string_data);
 		p->float_data = float_data;
@@ -64,6 +64,7 @@ public:
 			it = it + 1;
 		}
 
+		throw new GameError(KTROBO::FATAL_ERROR, "no data");
 		return 0;
 	}
 
@@ -81,13 +82,13 @@ public:
 };
 struct RoboMetaDataPart {
 public:
-	char data_name[16];
+	char data_name[32];
 	char data_name2[32];
 	char data_type[32];
 	char data_sentence[32];
 	char data_compare[32];
 	void clear() {
-		memset(data_name,0,16);
+		memset(data_name,0,32);
 		memset(data_name2,0,32);
 		memset(data_type,0,32);
 		memset(data_sentence,0,32);
@@ -95,19 +96,29 @@ public:
 	}
 	void readline(MyTokenAnalyzer* ma) {
 		ma->GetToken();
-		strcpy_s(data_name,16,ma->Toke());
+		if (strlen(ma->Toke()) < 32) {
+		strcpy_s(data_name,32,ma->Toke());
+		}
 		ma->GetToken();
+		if (strlen(ma->Toke()) < 32) {
 		strcpy_s(data_name2,32,ma->Toke());
+		}
 		ma->GetToken();
+		if (strlen(ma->Toke()) < 32) {
 		strcpy_s(data_type,32,ma->Toke());
+		}
 		ma->GetToken();
+		if (strlen(ma->Toke()) < 32) {
 		strcpy_s(data_sentence,32,ma->Toke());
+		}
 		ma->GetToken();
+		if (strlen(ma->Toke()) < 32) {
 		strcpy_s(data_compare,32,ma->Toke());
+		}
 	}
 
 	RoboMetaDataPart() {
-		memset(data_name,0,16);
+		memset(data_name,0,32);
 		memset(data_name2,0,32);
 		memset(data_type,0,32);
 		memset(data_sentence,0,32);
@@ -120,7 +131,7 @@ class RoboDataMetaData {
 public:
 	void setData(char* data_name, char* data_name2, char* data_type, char* data_sentence, char* data_compare) {
 		RoboMetaDataPart* p = new RoboMetaDataPart();
-		strcpy_s(p->data_name,16,data_name);
+		strcpy_s(p->data_name,32,data_name);
 		strcpy_s(p->data_name2,32,data_name2);
 		strcpy_s(p->data_type, 32, data_type);
 		strcpy_s(p->data_sentence,32,data_sentence);
@@ -168,6 +179,7 @@ public:
 	virtual void loadMesh(Graphics* g, MyTextureLoader* loader){mesh_loaded=true;};
 	virtual void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj){};
 	virtual void Release()=0;
+	virtual RoboParts* myNew()=0;
 	bool hasMeshLoaded() {return mesh_loaded;}
 };
 
@@ -253,6 +265,9 @@ public:
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
 	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RoboHead();
+	}
 };
 
 class RoboArm : public RoboParts{
@@ -265,6 +280,20 @@ public:
 		rarm = 0;
 		larm = 0;
 		data = 0;
+	}
+
+	float getR() {
+		float R=0;
+		int count=0;
+		if (rarm) {
+			R += sqrt(MyVec3Dot(rarm->houkatuobb.e,rarm->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
+
+		return R;
 	}
 
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
@@ -300,7 +329,10 @@ public:
 	
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
-
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RoboArm();
+	}
 };
 
 class RoboLeg : public RoboParts {
@@ -311,6 +343,20 @@ public:
 	RoboLeg() {
 		leg = 0;
 		data = 0;
+	}
+
+	float getR() {
+		float R=0;
+		int count=0;
+		if (leg) {
+			R += sqrt(MyVec3Dot(leg->houkatuobb.e,leg->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
+
+		return R;
 	}
 
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
@@ -336,6 +382,10 @@ public:
 	
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RoboLeg();
+	}
 };
 
 class RoboBody : public RoboParts{
@@ -347,7 +397,19 @@ public:
 		body = 0;
 		data = 0;
 	}
+	float getR() {
+		float R=0;
+		int count=0;
+		if (body) {
+			R += sqrt(MyVec3Dot(body->houkatuobb.e,body->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RoboBody* sbody) {
 		if (sbody->body) {
@@ -375,6 +437,11 @@ public:
 	
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RoboBody();
+	}
+
 };
 
 
@@ -389,7 +456,19 @@ public:
 		weapon = 0;
 		data = 0;
 	}
+	float getR() {
+		float R=0;
+		int count=0;
+		if (weapon) {
+			R += sqrt(MyVec3Dot(weapon->houkatuobb.e,weapon->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(RArmWeapon* sweapon) {
 		if (sweapon->weapon) {
@@ -415,6 +494,10 @@ public:
 	}
 
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RArmWeapon();
+	}
 };
 
 class LArmWeapon : public RoboParts{
@@ -426,7 +509,19 @@ public:
 		weapon = 0;
 		data = 0;
 	}
+	float getR() {
+		float R=0;
+		int count=0;
+		if (weapon) {
+			R += sqrt(MyVec3Dot(weapon->houkatuobb.e,weapon->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
 	void init(LArmWeapon* sweapon) {
 		if (sweapon->weapon) {
@@ -454,6 +549,10 @@ public:
 	
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new LArmWeapon();
+	}
 };
 
 class RShoulderWeapon : public RoboParts {
@@ -465,7 +564,19 @@ public:
 		weapon = 0;
 		data = 0;
 	}
+	float getR() {
+		float R=0;
+		int count=0;
+		if (weapon) {
+			R += sqrt(MyVec3Dot(weapon->houkatuobb.e,weapon->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader); 
 	void init(RShoulderWeapon* sweapon) {
 		if (sweapon->weapon) {
@@ -493,6 +604,10 @@ public:
 	
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RShoulderWeapon();
+	}
 };
 
 class LShoulderWeapon : public RoboParts{
@@ -514,7 +629,19 @@ public:
 		data = sweapon->data->clone();
 		}
 	}
+	float getR() {
+		float R=0;
+		int count=0;
+		if (weapon) {
+			R += sqrt(MyVec3Dot(weapon->houkatuobb.e,weapon->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 	void Release(){
 	
 		if (data) {
@@ -533,6 +660,10 @@ public:
 	
 	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new LShoulderWeapon();
+	}
 };
 
 class InsideWeapon : public RoboParts {
@@ -572,7 +703,25 @@ public:
 	
 	
 	}
+
+	float getR() {
+		float R=0;
+		int count=0;
+		if (weapon) {
+			R += sqrt(MyVec3Dot(weapon->houkatuobb.e,weapon->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
+
+		return R;
+	}
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new InsideWeapon();
+	}
 };
 
 class RoboEngine : public RoboParts {
@@ -613,10 +762,25 @@ public:
 	
 	
 	}
+	float getR() {
+		float R=0;
+		int count=0;
+		if (mesh) {
+			R += sqrt(MyVec3Dot(mesh->houkatuobb.e,mesh->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
-
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RoboEngine();
+	}
 
 
 };
@@ -663,8 +827,24 @@ public:
 
 
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
+	float getR() {
+		float R=0;
+		int count=0;
+		if (mesh) {
+			R += sqrt(MyVec3Dot(mesh->houkatuobb.e,mesh->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 
+	RoboParts* myNew() {
+		return new RoboBooster();
+	}
 };
 
 class RoboFCS : public RoboParts {
@@ -708,10 +888,25 @@ public:
 	}
 
 
+	float getR() {
+		float R=0;
+		int count=0;
+		if (mesh) {
+			R += sqrt(MyVec3Dot(mesh->houkatuobb.e,mesh->houkatuobb.e));
+			count++;
+		}
+		if (count) {
+			R = R / count;
+		}
 
+		return R;
+	}
 
 	void loadMesh(Graphics* g, MyTextureLoader* loader);
-
+	void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	RoboParts* myNew() {
+		return new RoboFCS();
+	}
 };
 
 

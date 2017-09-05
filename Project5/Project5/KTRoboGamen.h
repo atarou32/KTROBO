@@ -73,6 +73,7 @@ public:
 
 	void setSize(Texture* t,int x, int y, int width, int height);
 	int getID();
+	virtual void setFocused(KoumokuList* kl){};
 
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp,bool has_clicked)=0;// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
 	virtual void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked)=0;
@@ -99,6 +100,7 @@ private:
 	bool hyouji3_mode;
 	void setFocusedKoumoku(Koumoku* k, int index) {
 		focused_koumoku = k;
+		k->setFocused(this);
 		setFocusedKoumokuHyouji3Mode(focused_koumoku,index);
 	}
 	void setHasClicked(bool t) {

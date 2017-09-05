@@ -14,11 +14,17 @@ Gamen_GARAGE::Gamen_GARAGE(void)
 	robo = 0;
 	clearrobogamen = 0;
 	clearpartsgamen =0 ;
+	clearcommentgamen = 0;
 	pressed_up_count = 0;
 	pressed_down_count = 0;
 	temp_focused_list = 0;
 	t = 0;
 	parts_head_list = 0;
+	parts_booster_list = 0;
+	parts_core_list = 0;
+	parts_engine_list = 0;
+	parts_fcs_list = 0;
+	parts_arm_list = 0;
 }
 
 
@@ -72,6 +78,23 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	if (parts_head_list) {
 		parts_head_list->byouga(g,gui,dsecond,stamp);
 	}
+	if (parts_booster_list) {
+		parts_booster_list->byouga(g, gui , dsecond, stamp);
+	}
+	if (parts_core_list) {
+		parts_core_list->byouga(g,gui,dsecond, stamp);
+	}
+	if (parts_engine_list) {
+		parts_engine_list->byouga(g,gui,dsecond,stamp);
+	}
+	if (parts_fcs_list) {
+		parts_fcs_list->byouga(g, gui,dsecond, stamp);
+	}
+	if (parts_arm_list) {
+		parts_arm_list->byouga(g,gui,dsecond,stamp);
+	}
+
+
 }
 
 #define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
@@ -255,22 +278,23 @@ const D3D11_VIEWPORT* ggg = g->getViewPort();
 	g->getDeviceContext()->RSSetViewports(1,&ggg3);
 	static float unko=0;
 	unko += dsecond/3333;
-	MYMATRIX view;
-
-	float r = parts->getR();
-	MYVECTOR3 lookat(0,0,r);
-	MYVECTOR3 lookfrom(0,3*r,r*2);
-	MYVECTOR3 up(0,0,1);
-	MYMATRIX tes;
-	MyMatrixRotationZ(tes,unko);
-	MyVec3TransformNormal(lookfrom,lookfrom,tes);
-	MyMatrixLookAtRH(view,lookfrom,lookat,up);
-	float clearColor[4] = {
-		0.6f,0.6f,0.8f,1.0f};
+	
 	
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(), clearColor);
 	if (this->hasLoad() && this->getVisible()) {
-		this->parts->drawMesh(g,&view,g->getProj());
+		MYMATRIX view;
+
+		float r = parts->getR();
+		MYVECTOR3 lookat(0,0,r);
+		MYVECTOR3 lookfrom(0,3*r,r*2);
+		MYVECTOR3 up(0,0,1);
+		MYMATRIX tes;
+		MyMatrixRotationZ(tes,unko);
+		MyVec3TransformNormal(lookfrom,lookfrom,tes);
+		MyMatrixLookAtRH(view,lookfrom,lookat,up);
+		float clearColor[4] = {
+			0.6f,0.6f,0.8f,1.0f};
+			this->parts->drawMesh(g,&view,g->getProj());
 	}
 	g->getDeviceContext()->RSSetViewports(1,ggg);
 
@@ -295,38 +319,260 @@ void KoumokuList_Parts::InitKoumokus(Texture* t, MyTextureLoader* loader) {
 			Koumoku_Parts* kp = (Koumoku_Parts*)koumokus[i];
 			kp->Init(t,loader);
 		}
+
+		parts_setumei_text = t->getRenderText("ここにテキストがきます",0,770,20,880,30);
+		t->setRenderTextIsRender(parts_setumei_text, false);
+
+
 	}
 
+void Koumoku_Parts::setFocused(KoumokuList* kl) {
+	KoumokuList_Parts* klp = (KoumokuList_Parts*)kl;
+	klp->t->setRenderTextChangeText(klp->parts_setumei_text, parts->data->getData("COMMENT")->string_data);
+	klp->t->setRenderTextIsRender(klp->parts_setumei_text,true);
+}
 
-char* KoumokuList_Parts::getFilenameFromCID() {
+
+
+char* KoumokuList_Parts::getMetaPartsFilenameFromCID() {
 	if (KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == category_id) {
 	return "resrc/ktrobo/info/metadata/ktroboheadpartsmetadata.txt";
 	}
-	
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID == category_id) {
+		return "resrc/ktrobo/info/metadata/ktroboboosterpartsmetadata.txt";
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID == category_id) {
+		return "resrc/ktrobo/info/metadata/ktrobocorepartsmetadata.txt";
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID == category_id) {
+		return "resrc/ktrobo/info/metadata/ktroboenginepartsmetadata.txt";
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID == category_id) {
+		return "resrc/ktrobo/info/metadata/ktrobofcspartsmetadata.txt";
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID == category_id) {
+		return "resrc/ktrobo/info/metadata/ktroboarmpartsmetadata.txt";
+	}
+
+
+
 	throw new GameError(KTROBO::FATAL_ERROR, "no cid");
 }
+
+
+char* KoumokuList_Parts::getPartsFilenameFromCID() {
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == category_id) {
+	return "resrc/ktrobo/info/ktroboheadparts.txt";
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID == category_id) {
+		return "resrc/ktrobo/info/ktroboboosterparts.txt";
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID == category_id) {
+		return "resrc/ktrobo/info/ktrobocoreparts.txt";
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID == category_id) {
+		return "resrc/ktrobo/info/ktroboengineparts.txt";
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID == category_id) {
+		return "resrc/ktrobo/info/ktrobofcsparts.txt";
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID == category_id) {
+		return "resrc/ktrobo/info/ktroboarmparts.txt";
+	}
+
+
+
+	throw new GameError(KTROBO::FATAL_ERROR, "no cid");
+}
+void Gamen_GARAGE::clickedKoumokuListPartsdayo(KoumokuList_Parts* kp, RoboParts* kk) {
+
+
+	
+	MyTokenAnalyzer ma;
+	ma.load(kp->getMetaPartsFilenameFromCID());
+	RoboDataMetaData* booster_md = new RoboDataMetaData();
+	RoboMetaDataPart rmdp;
+	rmdp.clear();
+	int dnum = ma.GetIntToken();
+	for (int i=0;i<dnum;i++) {
+		rmdp.clear();
+		rmdp.readline(&ma);
+		booster_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
+	}
+
+	ma.deletedayo();
+	kp->setMetaData(booster_md);
+
+	ma.load(kp->getPartsFilenameFromCID());//"resrc/ktrobo/info/ktroboboosterparts.txt");
+	while(!ma.enddayo()) {
+
+		if (strcmp(ma.Toke(), "{")==0) {
+			RoboParts* booster = kk->myNew();//new RoboBooster();
+			Koumoku_Parts* kpp = new Koumoku_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID,booster);
+			kpp->setEnabled(false);
+					
+			kp->setKoumoku(kpp);
+					
+			try {
+				booster->loadData(&ma,booster_md);
+						
+					
+			} catch (GameError* err) {
+		
+				//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+				ma.deletedayo();
+				throw err;
+			}
+		}
+		ma.GetToken();
+	}		
+	ma.deletedayo();
+		
+	kp->setEnable(false);
+	kp->setVisible(t,false);
+	int si = kp->getKoumokuSize();
+	kp->setSize(t,500,0,360,21*si);
+
+			
+	kp->InitKoumokus(t,loader);
+
+
+
+	kp->setHyouji3Mode(false);
+	kp->clickedDown();
+	kp->clickedUp();
+	kp->setEnable(false);
+	kp->setVisible(t,false);
+}
+
 
 void Gamen_GARAGE::clickedShori(int id) {
 
 	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID == id) {
 
+		if (!parts_arm_list) {
+
+			parts_arm_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_arm_list->setname("アームパーツ");
+			RoboArm booster = RoboArm();
+			this->clickedKoumokuListPartsdayo(parts_arm_list, &booster);
+		}
+
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		parts_arm_list->setHyouji3Mode(true);
+		t->setRenderTexIsRender(clearcommentgamen, true);
+
+
+
+		parts_arm_list->setVisible(parts_arm_list->t, true);
+		parts_arm_list->setEnable(true);
+		parts_arm_list->clickedDown();
+		parts_arm_list->clickedUp();
+		parts_category_list->setEnable(false);
+		temp_focused_list = parts_arm_list;
 
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID == id) {
+		if (!parts_booster_list) {
+
+			parts_booster_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_booster_list->setname("ブースタパーツ");
+			RoboBooster booster = RoboBooster();
+			this->clickedKoumokuListPartsdayo(parts_booster_list, &booster);
+		}
+
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		parts_booster_list->setHyouji3Mode(true);
+		t->setRenderTexIsRender(clearcommentgamen, true);
+
+
+
+		parts_booster_list->setVisible(parts_booster_list->t, true);
+		parts_booster_list->setEnable(true);
+		parts_booster_list->clickedDown();
+		parts_booster_list->clickedUp();
+		parts_category_list->setEnable(false);
+		temp_focused_list = parts_booster_list;
 
 
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID == id) {
+		if (!parts_core_list) {
+
+			parts_core_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_core_list->setname("コアパーツ");
+			RoboBody booster = RoboBody();
+			this->clickedKoumokuListPartsdayo(parts_core_list, &booster);
+		}
+
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		parts_core_list->setHyouji3Mode(true);
+		t->setRenderTexIsRender(clearcommentgamen, true);
+
+
+
+		parts_core_list->setVisible(parts_core_list->t, true);
+		parts_core_list->setEnable(true);
+		parts_core_list->clickedDown();
+		parts_core_list->clickedUp();
+		parts_category_list->setEnable(false);
+		temp_focused_list = parts_core_list;
 
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID == id) {
+		if (!parts_engine_list) {
+
+			parts_engine_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_engine_list->setname("エンジンパーツ");
+			RoboEngine booster = RoboEngine();
+			this->clickedKoumokuListPartsdayo(parts_engine_list, &booster);
+		}
+
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		parts_engine_list->setHyouji3Mode(true);
+		t->setRenderTexIsRender(clearcommentgamen, true);
+
+
+
+		parts_engine_list->setVisible(parts_engine_list->t, true);
+		parts_engine_list->setEnable(true);
+		parts_engine_list->clickedDown();
+		parts_engine_list->clickedUp();
+		parts_category_list->setEnable(false);
+		temp_focused_list = parts_engine_list;
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID == id) {
 
+		if (!parts_fcs_list) {
+
+			parts_fcs_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_fcs_list->setname("fcsパーツ");
+			RoboFCS booster = RoboFCS();
+			this->clickedKoumokuListPartsdayo(parts_fcs_list, &booster);
+		}
+
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		parts_fcs_list->setHyouji3Mode(true);
+		t->setRenderTexIsRender(clearcommentgamen, true);
+
+
+
+		parts_fcs_list->setVisible(parts_fcs_list->t, true);
+		parts_fcs_list->setEnable(true);
+		parts_fcs_list->clickedDown();
+		parts_fcs_list->clickedUp();
+		parts_category_list->setEnable(false);
+		temp_focused_list = parts_fcs_list;
 
 
 
@@ -336,66 +582,16 @@ void Gamen_GARAGE::clickedShori(int id) {
 		if (!parts_head_list) {
 			parts_head_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_head_list->setname("ヘッドパーツ");
-			MyTokenAnalyzer ma;
-			ma.load(parts_head_list->getFilenameFromCID());
-			RoboDataMetaData* head_md = new RoboDataMetaData();
-			RoboMetaDataPart rmdp;
-			rmdp.clear();
-			int dnum = ma.GetIntToken();
-			for (int i=0;i<dnum;i++) {
-				rmdp.clear();
-				rmdp.readline(&ma);
-				head_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-			}
-
-			ma.deletedayo();
-			parts_head_list->setMetaData(head_md);
-
-			ma.load("resrc/ktrobo/info/ktroboheadparts.txt");
-			while(!ma.enddayo()) {
-
-				if (strcmp(ma.Toke(), "{")==0) {
-					RoboHead* head = new RoboHead();
-					Koumoku_Parts* kp = new Koumoku_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID,head);
-					kp->setEnabled(false);
-					
-					parts_head_list->setKoumoku(kp);
-					
-					try {
-						head->loadData(&ma,head_md);
-						
-					
-					} catch (GameError* err) {
-		
-					//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
-						ma.deletedayo();
-						throw err;
-					}
-				}
-				ma.GetToken();
-			}		
-			ma.deletedayo();
-		
-			parts_head_list->setEnable(false);
-			parts_head_list->setVisible(t,false);
-			int si = parts_head_list->getKoumokuSize();
-			parts_head_list->setSize(t,500,0,360,21*si);
-
-			
-			parts_head_list->InitKoumokus(t,loader);
-
-
-
-			parts_head_list->setHyouji3Mode(false);
-			parts_head_list->clickedDown();
-			parts_head_list->clickedUp();
-			parts_head_list->setEnable(false);
-			parts_head_list->setVisible(t,false);
+			RoboHead head = RoboHead();
+			this->clickedKoumokuListPartsdayo(parts_head_list, &head);
 			
 		}
 		t->setRenderTexIsRender(clearpartsgamen, true);
 		parts_head_list->setHyouji3Mode(true);
-		
+		t->setRenderTexIsRender(clearcommentgamen, true);
+
+
+
 		parts_head_list->setVisible(parts_head_list->t, true);
 		parts_head_list->setEnable(true);
 		parts_head_list->clickedDown();
@@ -918,6 +1114,8 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 	clearpartsgamen = t->getRenderTex(tex_id, 0xDDEEFFDD, 550,150,330,330,0,0,128,128);
 	t->setRenderTexIsRender(clearpartsgamen,false);
 
+	clearcommentgamen = t->getRenderTex(tex_id, 0xDDEEFFDD, 0,770,880,20,0,0,128,128);
+	t->setRenderTexIsRender(clearcommentgamen,false);
 
 
 	this->t = t;
@@ -972,6 +1170,27 @@ void Gamen_GARAGE::Release() {
 		delete parts_head_list;
 		parts_head_list = 0;
 	}
+	if (parts_booster_list) {
+		delete parts_booster_list;
+		parts_booster_list = 0;
+	}
+	if (parts_core_list) {
+		delete parts_core_list;
+		parts_core_list = 0;
+	}
+	if (parts_engine_list) {
+		delete parts_engine_list;
+		parts_engine_list = 0;
+	}
+	if (parts_arm_list) {
+		delete parts_arm_list;
+		parts_arm_list = 0;
+	}
+	if (parts_fcs_list) {
+		delete parts_fcs_list;
+		parts_fcs_list = 0;
+	}
+
 }
 
 void KoumokuList_Parts::load(Graphics* g, MyTextureLoader* loader) {
@@ -1016,9 +1235,51 @@ void Gamen_GARAGE::clickedEscape() {
 	if (parts_head_list) {
 		parts_head_list->setEnable(false);
 		parts_head_list->setVisible(parts_head_list->t, false);
+		parts_head_list->t->setRenderTextIsRender(parts_head_list->parts_setumei_text,false);
 	}
 
+	if (parts_booster_list) {
+		parts_booster_list->setEnable(false);
+		parts_booster_list->setVisible(parts_booster_list->t, false);
+		parts_booster_list->t->setRenderTextIsRender(parts_booster_list->parts_setumei_text,false);
+	}
+
+	if (parts_core_list) {
+		parts_core_list->setEnable(false);
+		parts_core_list->setVisible(parts_core_list->t, false);
+		parts_core_list->t->setRenderTextIsRender(parts_core_list->parts_setumei_text,false);
+	}
+
+	if (parts_engine_list) {
+		parts_engine_list->setEnable(false);
+		parts_engine_list->setVisible(parts_engine_list->t, false);
+		parts_engine_list->t->setRenderTextIsRender(parts_engine_list->parts_setumei_text,false);
+	}
+
+
+	if (parts_booster_list) {
+		parts_booster_list->setEnable(false);
+		parts_booster_list->setVisible(parts_booster_list->t, false);
+		parts_booster_list->t->setRenderTextIsRender(parts_booster_list->parts_setumei_text,false);
+	}
+
+	if (parts_fcs_list) {
+		parts_fcs_list->setEnable(false);
+		parts_fcs_list->setVisible(parts_fcs_list->t,false);
+		parts_fcs_list->t->setRenderTextIsRender(parts_fcs_list->parts_setumei_text,false);
+	}
+
+	if (parts_arm_list) {
+		parts_arm_list->setEnable(false);
+		parts_arm_list->setVisible(parts_arm_list->t,false);
+		parts_arm_list->t->setRenderTextIsRender(parts_arm_list->parts_setumei_text,false);
+	}
+
+
+
+
 	t->setRenderTexIsRender(clearpartsgamen, false);
+	t->setRenderTexIsRender(clearcommentgamen,false);
 
 }
 
