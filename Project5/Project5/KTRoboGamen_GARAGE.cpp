@@ -431,6 +431,119 @@ char* KoumokuList_Parts::getMetaPartsFilenameFromCID() {
 
 	}
 
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID == category_id) {
+		if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BAZOOKA_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BLADE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_EBLADE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ERIFLE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_GRENEDE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponbakuhatumetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANABI_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANDGUN_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MACHINE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MISSILE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponyuudoumetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PILE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponpile.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PLAZUMA_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PULSE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_RIFLE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ROCKET_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SHOTGUN_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SNIPER_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		}
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID == category_id) {
+		if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BAZOOKA_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BLADE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_EBLADE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ERIFLE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_GRENEDE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponbakuhatumetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANABI_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANDGUN_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MACHINE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MISSILE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponyuudoumetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PILE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponpile.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PLAZUMA_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PULSE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_RIFLE_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ROCKET_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SHOTGUN_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SNIPER_ID) {
+			return "resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt";
+		}
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID == category_id) {
+		if (KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_CHAIN_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_GRENEDE_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatabakuhatumetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_HANABI_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_LASER_ID == category2_id ) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_MISSILE_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatamissilemetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PLAZUMA_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatabakuhatumetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PULSE_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatabakuhatumetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ROCKET_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		}
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID == category_id) {
+		if (KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_CHAIN_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_GRENEDE_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatabakuhatumetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_HANABI_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_LASER_ID == category2_id ) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_MISSILE_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatamissilemetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PLAZUMA_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatabakuhatumetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PULSE_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatabakuhatumetadata.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ROCKET_ID == category2_id) {
+			return "resrc/ktrobo/info/metadata/kata/ktrobopartskatametadata.txt";
+		}
+	}
+
+
 	throw new GameError(KTROBO::FATAL_ERROR, "no cid");
 }
 
@@ -529,11 +642,124 @@ if (KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID == category_id) {
 
 
 
+if (KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID == category_id) {
+		if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BAZOOKA_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponbazooka.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BLADE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_EBLADE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponenergyblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ERIFLE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponenergyrifle.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_GRENEDE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweapongrenede.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANABI_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponhanabigun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANDGUN_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponhandgun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MACHINE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponmachinegun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MISSILE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponmissile.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PILE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponpile.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PLAZUMA_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponplazumagun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PULSE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponpulsegun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_RIFLE_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponrifle.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ROCKET_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponrocket.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SHOTGUN_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponshotgun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SNIPER_ID) {
+			return "resrc/ktrobo/info/lweapon/ktrobolarmweaponsniperrifle.txt";
+		}
+	}
 
 
 
 
+if (KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID == category_id) {
+		if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BAZOOKA_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponbazooka.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BLADE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_EBLADE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponenergyblade.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ERIFLE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponenergyrifle.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_GRENEDE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweapongrenede.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANABI_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponhanabigun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANDGUN_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponhandgun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MACHINE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponmachinegun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MISSILE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponmissile.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PILE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponpile.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PLAZUMA_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponplazumagun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PULSE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponpulsegun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_RIFLE_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponrifle.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ROCKET_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponrocket.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SHOTGUN_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponshotgun.txt";
+		} else if(category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SNIPER_ID) {
+			return "resrc/ktrobo/info/rweapon/ktroborarmweaponsniperrifle.txt";
+		}
+	}
 
+
+
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID == category_id) {
+		if (KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_CHAIN_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkatachaingun.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_GRENEDE_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkatagrenede.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_HANABI_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkatahanabi.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_LASER_ID == category2_id ) {
+			return "resrc/ktrobo/info/rkata/ktroborkataraser.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_MISSILE_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkatamissile.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PLAZUMA_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkataplazuma.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PULSE_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkatapulse.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ROCKET_ID == category2_id) {
+			return "resrc/ktrobo/info/rkata/ktroborkatarocket.txt";
+		}
+	}
+
+	
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID == category_id) {
+		if (KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_CHAIN_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkatachaingun.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_GRENEDE_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkatagrenede.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_HANABI_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkatahanabi.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_LASER_ID == category2_id ) {
+			return "resrc/ktrobo/info/lkata/ktrobolkataraser.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_MISSILE_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkatamissile.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PLAZUMA_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkataplazuma.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PULSE_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkatapulse.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ROCKET_ID == category2_id) {
+			return "resrc/ktrobo/info/lkata/ktrobolkatarocket.txt";
+		}
+	}
 
 
 
@@ -887,8 +1113,182 @@ void Gamen_GARAGE::clickedShori(int id) {
 		InsideWeapon rk = InsideWeapon();
 		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_STEALTH_ID,"インサイド_ステルスパーツ");
 
-	}
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BAZOOKA_ID) {
+		LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BAZOOKA_ID,"左手_バズーカパーツ");
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BLADE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_BLADE_ID,"左手_ブレードパーツ");
 
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_EBLADE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_EBLADE_ID,"左手_Eブレードパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ERIFLE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ERIFLE_ID,"左手_Eライフルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_GRENEDE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_GRENEDE_ID,"左手_グレネードパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANABI_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANABI_ID,"左手_ハナビパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANDGUN_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_HANDGUN_ID,"左手_ハンドガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MACHINE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MACHINE_ID,"左手_マシンガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MISSILE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_MISSILE_ID,"左手_ミサイルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PILE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PILE_ID,"左手_パイルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PLAZUMA_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PLAZUMA_ID,"左手_プラズマガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PULSE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_PULSE_ID,"左手_パルスガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_RIFLE_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_RIFLE_ID,"左手_ライフルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ROCKET_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ROCKET_ID,"左手_ロケットパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SHOTGUN_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SHOTGUN_ID,"左手_ショットガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SNIPER_ID) {
+			LArmWeapon rk = LArmWeapon();
+		clickedShoriCParts(&parts_larmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_SNIPER_ID,"左手_スナイパーライフルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BAZOOKA_ID) {
+		RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BAZOOKA_ID,"右手_バズーカパーツ");
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BLADE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_BLADE_ID,"右手_ブレードパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_EBLADE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_EBLADE_ID,"右手_Eブレードパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ERIFLE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ERIFLE_ID,"右手_Eライフルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_GRENEDE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_GRENEDE_ID,"右手_グレネードパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANABI_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANABI_ID,"右手_ハナビパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANDGUN_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_HANDGUN_ID,"右手_ハンドガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MACHINE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MACHINE_ID,"右手_マシンガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MISSILE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_MISSILE_ID,"右手_ミサイルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PILE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PILE_ID,"右手_パイルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PLAZUMA_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PLAZUMA_ID,"右手_プラズマガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PULSE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_PULSE_ID,"右手_パルスガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_RIFLE_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_RIFLE_ID,"右手_ライフルパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ROCKET_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ROCKET_ID,"右手_ロケットパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SHOTGUN_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SHOTGUN_ID,"右手_ショットガンパーツ");
+
+	} else if( id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SNIPER_ID) {
+			RArmWeapon rk = RArmWeapon();
+		clickedShoriCParts(&parts_rarmweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_SNIPER_ID,"右手_スナイパーライフルパーツ");
+
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_CHAIN_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_CHAIN_ID, "右肩_チェインパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_GRENEDE_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_GRENEDE_ID, "右肩_グレネードパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_HANABI_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_HANABI_ID, "右肩_ハナビパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PULSE_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PULSE_ID, "右肩_パルスパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_LASER_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_LASER_ID, "右肩_レーザーパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ROCKET_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ROCKET_ID, "右肩_ロケットパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PLAZUMA_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_PLAZUMA_ID, "右肩_プラズマパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_MISSILE_ID) {
+		RShoulderWeapon rk = RShoulderWeapon();
+		clickedShoriCParts(&parts_rkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_MISSILE_ID, "右肩_ミサイルパーツ");
+	}
+	 else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_CHAIN_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_CHAIN_ID, "左肩_チェインパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_GRENEDE_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_GRENEDE_ID, "左肩_グレネードパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_HANABI_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_HANABI_ID, "左肩_ハナビパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PULSE_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PULSE_ID, "左肩_パルスパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_LASER_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_LASER_ID, "左肩_レーザーパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ROCKET_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ROCKET_ID, "左肩_ロケットパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PLAZUMA_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_PLAZUMA_ID, "左肩_プラズマパーツ");
+	} else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_MISSILE_ID) {
+		LShoulderWeapon rk = LShoulderWeapon();
+		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_MISSILE_ID, "左肩_ミサイルパーツ");
+	}
 }
 
 void Koumoku_Parts_Category::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl) {
