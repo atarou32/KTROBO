@@ -94,6 +94,50 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 		parts_arm_list->byouga(g,gui,dsecond,stamp);
 	}
 
+	vector<KoumokuList_Parts*>::iterator it;
+
+	it = parts_leg_lists.begin();
+	while(it != parts_leg_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->byouga(g,gui,dsecond,stamp);
+		it++;
+	}
+
+	it = parts_inside_lists.begin();
+	while(it != parts_inside_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->byouga(g,gui,dsecond,stamp);
+		it++;
+	}
+
+	it = parts_rarmweapon_lists.begin();
+	while(it != parts_rarmweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->byouga(g,gui,dsecond,stamp);
+		it++;
+	}
+
+	it = parts_larmweapon_lists.begin();
+	while(it != parts_larmweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->byouga(g,gui,dsecond,stamp);
+		it++;
+	}
+
+	it = parts_rkataweapon_lists.begin();
+	while(it != parts_rkataweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->byouga(g,gui,dsecond,stamp);
+		it++;
+	}
+
+	it = parts_lkataweapon_lists.begin();
+	while(it != parts_lkataweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->byouga(g,gui,dsecond,stamp);
+		it++;
+	}
+
 
 }
 
@@ -285,7 +329,8 @@ const D3D11_VIEWPORT* ggg = g->getViewPort();
 		MYMATRIX view;
 
 		float r = parts->getR();
-		MYVECTOR3 lookat(0,0,r);
+		MYVECTOR3 c = parts->getC();
+		MYVECTOR3 lookat(c.float3.x,c.float3.y,c.float3.z +r);
 		MYVECTOR3 lookfrom(0,3*r,r*2);
 		MYVECTOR3 up(0,0,1);
 		MYMATRIX tes;
@@ -357,9 +402,51 @@ char* KoumokuList_Parts::getMetaPartsFilenameFromCID() {
 		return "resrc/ktrobo/info/metadata/ktroboarmpartsmetadata.txt";
 	}
 
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID == category_id) {
+			return "resrc/ktrobo/info/metadata/ktrobolegpartsmetadata.txt";
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID == category_id) {
+				
+		if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_DECOY_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidedecoy.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ADDMISSILE_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidepartsaddmissile.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_APKAIFUKU_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidepartsapkaifuku.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_SUBCOMPUTER_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidesubcomputer.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ENERGYZOUFUKU_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsideenergyzoufuku.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ROCKET_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsiderocket.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_JAMMERROCKET_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidejyamarocket.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_KIRAI_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidekirai.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_BIT_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidepartsbit.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_STEALTH_ID) {
+			return "resrc/ktrobo/info/metadata/inside/ktroboinsidestealth.txt";
+		}
 
+	}
 
 	throw new GameError(KTROBO::FATAL_ERROR, "no cid");
+}
+
+
+KoumokuList_Parts* Gamen_GARAGE::getPartsList(vector<KoumokuList_Parts*>* lists, int category_id, int category_id2) {
+	vector<KoumokuList_Parts*>::iterator it;
+	it = lists->begin();
+	while(it != lists->end()) {
+		KoumokuList_Parts* kk = *it;
+		if (kk->isCID(category_id,category_id2)) {
+			return kk;
+		}
+
+		it++;
+	}
+	return 0;
 }
 
 
@@ -385,6 +472,68 @@ char* KoumokuList_Parts::getPartsFilenameFromCID() {
 	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID == category_id) {
 		return "resrc/ktrobo/info/ktroboarmparts.txt";
 	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID == category_id) {
+		if (KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_4K_ID == category2_id) {
+			return "resrc/ktrobo/info/leg/ktroboleg4k.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_J2_ID == category2_id) {
+			return "resrc/ktrobo/info/leg/ktrobolegj2.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_K2_ID == category2_id) {
+			return "resrc/ktrobo/info/leg/ktrobolegk2.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_R_ID == category2_id) {
+			return "resrc/ktrobo/info/leg/ktrobolegr.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_T2_ID == category2_id) {
+			return "resrc/ktrobo/info/leg/ktrobolegt2.txt";
+		} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_TK_ID == category2_id) {
+			return "resrc/ktrobo/info/leg/ktrobolegtk.txt";
+		}
+	}
+
+
+if (KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID == category_id) {
+				
+		if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_DECOY_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsidedecoy.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ADDMISSILE_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsideaddmissile.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_APKAIFUKU_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsideapkaifuku.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_SUBCOMPUTER_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsidesubcomputer.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ENERGYZOUFUKU_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsideenergyzoufuku.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ROCKET_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsiderocket.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_JAMMERROCKET_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsidejyamarocket.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_KIRAI_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsidekirai.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_BIT_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsidebit.txt";
+		} else 	if (category2_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_STEALTH_ID) {
+			return "resrc/ktrobo/info/inside/ktroboinsidestealth.txt";
+		}
+
+
+
+
+
+
+
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -451,6 +600,46 @@ void Gamen_GARAGE::clickedKoumokuListPartsdayo(KoumokuList_Parts* kp, RoboParts*
 	kp->setVisible(t,false);
 }
 
+KoumokuList* Gamen_GARAGE::getCategoryList(int category_id) {
+	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID) {
+		return parts_leg_category_list;
+	} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID) {
+		return parts_inside_category_list;
+	} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID) {
+		return parts_rweapon_category_list;
+	} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID) {
+		return parts_lweapon_category_list;
+	} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID) {
+		return parts_rkata_category_list;
+	} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID) {
+		return parts_lkata_category_list;
+	}
+	throw new GameError(KTROBO::FATAL_ERROR, "no category");
+}
+
+
+
+void Gamen_GARAGE::clickedShoriCParts(vector<KoumokuList_Parts*>* kp, RoboParts* kkp, int category_id, int category_id2, char* namedayo) {
+
+	KoumokuList_Parts* kk = this->getPartsList(kp, category_id, category_id2);
+		if (!kk) {
+			kk = new KoumokuList_Parts(category_id, category_id2,t);
+			kk->setname(namedayo);
+			this->clickedKoumokuListPartsdayo(kk, kkp);
+			kp->push_back(kk);
+		}
+		t->setRenderTexIsRender(clearpartsgamen, true);
+		kk->setHyouji3Mode(true);
+		t->setRenderTexIsRender(clearcommentgamen, true);
+		kk->setVisible(kk->t, true);
+		kk->setEnable(true);
+		kk->clickedDown();
+		kk->clickedUp();
+		KoumokuList* kkkk = getCategoryList(category_id);
+		kkkk->setEnable(false);
+		
+		temp_focused_list = kk;
+}
 
 void Gamen_GARAGE::clickedShori(int id) {
 
@@ -643,6 +832,61 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_rweapon_category_list->setEnable(true);
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_rweapon_category_list;
+	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_4K_ID == id) {
+		RoboLeg rk = RoboLeg();
+		clickedShoriCParts(&parts_leg_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_4K_ID,"レッグ_4脚パーツ");	
+	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_J2_ID == id) {
+		RoboLeg rk = RoboLeg();
+		clickedShoriCParts(&parts_leg_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_J2_ID,"レッグ_重量2脚パーツ");
+	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_K2_ID == id) {
+		RoboLeg rk = RoboLeg();
+		clickedShoriCParts(&parts_leg_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_K2_ID,"レッグ_軽量2脚パーツ");
+	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_T2_ID == id) {
+		RoboLeg rk = RoboLeg();
+		clickedShoriCParts(&parts_leg_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_T2_ID,"レッグ_中量2脚パーツ");
+	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_TK_ID == id) {
+		RoboLeg rk = RoboLeg();
+		clickedShoriCParts(&parts_leg_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_TK_ID,"レッグ_タンクパーツ");
+	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_R_ID == id) {
+		RoboLeg rk = RoboLeg();
+		clickedShoriCParts(&parts_leg_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_R_ID,"レッグ_逆間接パーツ");
+	} else if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_DECOY_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_DECOY_ID,"インサイド_デコイパーツ");
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ADDMISSILE_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ADDMISSILE_ID,"インサイド_増弾ミサイルパーツ");
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_APKAIFUKU_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_APKAIFUKU_ID,"インサイド_AP回復パーツ");
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_SUBCOMPUTER_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_SUBCOMPUTER_ID,"インサイド_サブコンピュータパーツ");
+
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ENERGYZOUFUKU_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ENERGYZOUFUKU_ID,"インサイド_エネルギー増幅パーツ");
+
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ROCKET_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ROCKET_ID,"インサイド_ロケットパーツ");
+
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_JAMMERROCKET_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_JAMMERROCKET_ID,"インサイド_ジャマーロケットパーツ");
+
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_KIRAI_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_KIRAI_ID,"インサイド_機雷パーツ");
+
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_BIT_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_BIT_ID,"インサイド_ビットパーツ");
+
+	} else 	if (id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_STEALTH_ID) {
+		InsideWeapon rk = InsideWeapon();
+		clickedShoriCParts(&parts_inside_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_STEALTH_ID,"インサイド_ステルスパーツ");
+
 	}
 
 }
@@ -1191,6 +1435,62 @@ void Gamen_GARAGE::Release() {
 		parts_fcs_list = 0;
 	}
 
+	vector<KoumokuList_Parts*>::iterator it;
+
+	it = parts_leg_lists.begin();
+	while(it != parts_leg_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		delete kk;
+		kk = 0;
+		it++;
+	}
+	parts_leg_lists.clear();
+
+	it = parts_inside_lists.begin();
+	while(it != parts_inside_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		delete kk;
+		kk = 0;
+		it++;
+	}
+	parts_inside_lists.clear();
+
+	it = parts_larmweapon_lists.begin();
+	while(it != parts_larmweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		delete kk;
+		kk = 0;
+		it++;
+	}
+	parts_larmweapon_lists.clear();
+
+	it = parts_rarmweapon_lists.begin();
+	while(it != parts_rarmweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		delete kk;
+		kk = 0;
+		it++;
+	}
+	parts_rarmweapon_lists.clear();
+
+	it = parts_lkataweapon_lists.begin();
+	while(it != parts_lkataweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		delete kk;
+		kk = 0;
+		it++;
+	}
+	parts_lkataweapon_lists.clear();
+
+	it = parts_rkataweapon_lists.begin();
+	while(it != parts_rkataweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		delete kk;
+		kk = 0;
+		it++;
+	}
+	parts_rkataweapon_lists.clear();
+
 }
 
 void KoumokuList_Parts::load(Graphics* g, MyTextureLoader* loader) {
@@ -1275,6 +1575,62 @@ void Gamen_GARAGE::clickedEscape() {
 		parts_arm_list->t->setRenderTextIsRender(parts_arm_list->parts_setumei_text,false);
 	}
 
+	vector<KoumokuList_Parts*>::iterator it;
+
+	it = parts_leg_lists.begin();
+	while(it != parts_leg_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->setEnable(false);
+		kk->setVisible(kk->t,false);
+		kk->t->setRenderTextIsRender(kk->parts_setumei_text,false);
+		it++;
+	}
+
+	it = parts_inside_lists.begin();
+	while(it != parts_inside_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->setEnable(false);
+		kk->setVisible(kk->t,false);
+		kk->t->setRenderTextIsRender(kk->parts_setumei_text,false);
+		it++;
+	}
+
+	it = parts_rkataweapon_lists.begin();
+	while(it != parts_rkataweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->setEnable(false);
+		kk->setVisible(kk->t,false);
+		kk->t->setRenderTextIsRender(kk->parts_setumei_text,false);
+		it++;
+	}
+
+	it = parts_lkataweapon_lists.begin();
+	while(it != parts_lkataweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->setEnable(false);
+		kk->setVisible(kk->t,false);
+		kk->t->setRenderTextIsRender(kk->parts_setumei_text,false);
+		it++;
+	}
+
+	it = parts_rarmweapon_lists.begin();
+	while(it != parts_rarmweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->setEnable(false);
+		kk->setVisible(kk->t,false);
+		kk->t->setRenderTextIsRender(kk->parts_setumei_text,false);
+		it++;
+	}
+
+	it = parts_larmweapon_lists.begin();
+	while(it != parts_larmweapon_lists.end()) {
+		KoumokuList_Parts* kk = *it;
+		kk->setEnable(false);
+		kk->setVisible(kk->t,false);
+		kk->t->setRenderTextIsRender(kk->parts_setumei_text,false);
+		it++;
+	}
+
 
 
 
@@ -1295,7 +1651,14 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 	CS::instance()->enter(CS_MESSAGE_CS, "enter");
 	if (msg == KTROBO_INPUT_MESSAGE_ID_MOUSERAWSTATE) {
 		if (input->getMOUSESTATE()->mouse_l_button_pressed) {
+
+			try {
 			temp_focused_list->clicked(this,NULL,x,y);
+			} catch(GameError* err) {
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+				delete err;
+				return true;
+			}
 		}
 	}
 	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
@@ -1310,7 +1673,18 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 			temp_focused_list->clickedUp();
 		}
 		if (input->getKEYSTATE()[VK_RETURN] & KTROBO_INPUT_BUTTON_DOWN) {
+			
+
+			
+			try {
 			temp_focused_list->clickedEnter(this,NULL);
+			} catch(GameError* err) {
+				CS::instance()->leave(CS_MESSAGE_CS, "leave");
+				delete err;
+				return true;
+			}
+
+
 		}
 		if (input->getKEYSTATE()[VK_ESCAPE] & KTROBO_INPUT_BUTTON_DOWN) {
 			clickedEscape();

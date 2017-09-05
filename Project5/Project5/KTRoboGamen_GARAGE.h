@@ -52,7 +52,14 @@ public:
 	}
 
 	void load(Graphics* g, MyTextureLoader* loader);
-	
+	bool isCID(int cid, int cid2) {
+		if (cid == category_id) {
+			if (cid2 == category2_id) {
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 class Koumoku_Parts : public Koumoku {
@@ -116,6 +123,9 @@ private:
 	int clearpartsgamen;
 	int clearcommentgamen;
 	void clickedKoumokuListPartsdayo(KoumokuList_Parts* kp, RoboParts* kk);
+	void clickedShoriCParts(vector<KoumokuList_Parts*>* kp, RoboParts* kk, int category_id, int category_id2, char* namedayo);
+	KoumokuList* getCategoryList(int category_id);
+
 public:
 	KoumokuList* parts_category_list;
 	KoumokuList* parts_leg_category_list;
@@ -132,6 +142,15 @@ public:
 	KoumokuList_Parts* parts_engine_list;
 	KoumokuList_Parts* parts_fcs_list;
 	KoumokuList_Parts* parts_arm_list;
+
+	vector<KoumokuList_Parts*> parts_inside_lists;
+	vector<KoumokuList_Parts*> parts_leg_lists;
+	vector<KoumokuList_Parts*> parts_rarmweapon_lists;
+	vector<KoumokuList_Parts*> parts_larmweapon_lists;
+	vector<KoumokuList_Parts*> parts_rkataweapon_lists;
+	vector<KoumokuList_Parts*> parts_lkataweapon_lists;
+
+	KoumokuList_Parts* getPartsList(vector<KoumokuList_Parts*>* lists, int category_id, int category_id2);
 
 	void Init(Graphics* g, AtariHantei* hantei,Texture* t, MyTextureLoader* loader);
 	void Release();

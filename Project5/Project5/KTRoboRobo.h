@@ -175,6 +175,7 @@ public:
 	virtual ~RoboParts();
 	
 	virtual float getR(){return 1;};
+	virtual MYVECTOR3 getC() {return MYVECTOR3(0,0,0);} 
 	void loadData(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
 	virtual void loadMesh(Graphics* g, MyTextureLoader* loader){mesh_loaded=true;};
 	virtual void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj){};
@@ -357,6 +358,9 @@ public:
 		}
 
 		return R;
+	}
+	MYVECTOR3 getC() {
+		return leg->houkatuobb.c;
 	}
 
 	void init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g, MyTextureLoader* tex_loader);
