@@ -32,6 +32,8 @@ public:
 
 class RoboData {
 	vector<RoboDataPart*> datas;
+	static RoboDataPart emptydata;
+
 public:
 	void setData(int int_data, char* data_name, char* data_name2, char* string_data, float float_data) {
 		RoboDataPart* p = new RoboDataPart();
@@ -64,8 +66,8 @@ public:
 			it = it + 1;
 		}
 
-		throw new GameError(KTROBO::FATAL_ERROR, "no data");
-		return 0;
+	//	throw new GameError(KTROBO::FATAL_ERROR, "no data");
+		return &emptydata;
 	}
 
 	~RoboData() {
@@ -129,6 +131,10 @@ public:
 class RoboDataMetaData {
 	vector<RoboMetaDataPart*> metadatas;
 public:
+	vector<RoboMetaDataPart*>* getMetaDatas() {
+		return &metadatas;
+	}
+
 	void setData(char* data_name, char* data_name2, char* data_type, char* data_sentence, char* data_compare) {
 		RoboMetaDataPart* p = new RoboMetaDataPart();
 		strcpy_s(p->data_name,32,data_name);
@@ -177,7 +183,7 @@ public:
 	virtual float getR(){return 1;};
 	virtual MYVECTOR3 getC() {return MYVECTOR3(0,0,0);} 
 	void loadData(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data);
-	virtual void loadMesh(Graphics* g, MyTextureLoader* loader){mesh_loaded=true;};
+	virtual void loadMesh(Graphics* g, MyTextureLoader* loader);
 	virtual void drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj){};
 	virtual void Release()=0;
 	virtual RoboParts* myNew()=0;
@@ -1419,17 +1425,51 @@ class WeaponFireRifle;
 class RoboParam {
 private:
 	Robo* robo;
+	int maxap;
+	int allweight;
+	int canweight;
+	int def;
+	int edef;
+	int amari_energy;
+	int energyshuturyoku;
+	int energy_pool;
+
+
+
+	int nowap;
+	int now_energy;
+
 public:
 	RoboBoosterCalc boostercalc;
+	
 public:
 	RoboParam();
 	~RoboParam();
+	void Init(Robo* robo) {
+		this->robo = robo;
+	}
 
-
-
-
-
-
+	void calcParam();
+	int getMaxAP();
+	int getAllWeight();
+	int getCanWeight();
+	int getDef();
+	int getEDef();
+	int getAmariEnergy();
+	int getEnergyShuturyoku();
+	int getEnergyPool();
+	char* getNameOfHead();
+	char* getNameOfBody();
+	char* getNameOfArm();
+	char* getNameOfLeg();
+	char* getNameOfInside();
+	char* getNameOfRArmWeapon();
+	char* getNameOfLArmWeapon();
+	char* getNameOfRShoulderWeapon();
+	char* getNameOfLShoulderWeapon();
+	char* getNameOfBooster();
+	char* getNameOfFCS();
+	char* getNameOfEngine();
 
 };
 class Robo : public INPUTSHORICLASS
@@ -1444,13 +1484,13 @@ public:
 	ArmPositionerHelper* aphelper_hidari;
 
 	ArmPointIndexInfo* apinfo;
-private:
+public:
 	RoboHead* head;
 	RoboBody* body;
 	RoboLeg* leg;
 public:
 	RoboArm* arm;
-private:
+public:
 	RoboBooster* booster;
 	RoboFCS* fcs;
 	RoboEngine* engine;

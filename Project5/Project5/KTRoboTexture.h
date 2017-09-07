@@ -539,6 +539,7 @@ public:
 	void setRenderTextColor(int text_id, unsigned int color);
 	void setRenderTextIsRender(int text_id, bool t);
 	void lightdeleteRenderText(int text_id);
+	void lightdeleteAllRenderText();
 	void setRenderTextPos(int text_id, int x, int y);
 	void setRenderTextChangeText(int text_id, char* t);
 	float getRenderTextWidth(int text_id, int height);

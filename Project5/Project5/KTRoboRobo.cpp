@@ -958,6 +958,13 @@ void Robo::aim(Graphics* g, MYMATRIX* view) {
 
 }
 
+void RoboParts::loadMesh(Graphics* g, MyTextureLoader* loader){
+	CS::instance()->enter(CS_RENDERDATA_CS, "test");	
+	mesh_loaded=true;
+	CS::instance()->leave(CS_RENDERDATA_CS, "test");
+
+
+}
 void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 /*	Mesh* head;
 	Mesh* body;
@@ -1356,6 +1363,8 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 		apinfo->loadFile();
 	}
 	
+
+	roboparam.calcParam();
 	
 }
 
@@ -4069,8 +4078,17 @@ bool RoboBoosterCalc::isCanReload(float dsecond) {
 }
 
 RoboParam::RoboParam() {
-
-
+	this->def = 1000;
+	this->edef = 1000;
+	this->maxap = 10000;
+	this->allweight = 4000;
+	this->canweight = 4500;
+	this->amari_energy = 3400;
+	this->energyshuturyoku = 7000;
+	this->energy_pool = 50000;
+	this->nowap = 10000;
+	this->now_energy = 50000;
+	robo = 0;
 }
 
 RoboParam::~RoboParam() {
@@ -4177,3 +4195,267 @@ void RoboParts::loadData(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data) {
 		}
 	}
 }
+
+
+
+void RoboParam::calcParam() {
+	def = 0;
+	edef = 0;
+	maxap = 0;
+	energyshuturyoku = 0;
+	energy_pool = 0;
+	int edrain = 0;
+	this->allweight = 0;
+	this->canweight = 0;
+	this->amari_energy = 0;
+
+	if (robo) {
+		if (robo->head) {
+			def += robo->head->data->getData("DEF")->int_data;
+			edef += robo->head->data->getData("EDEF")->int_data;
+			maxap += robo->head->data->getData("AP")->int_data;
+			edrain += robo->head->data->getData("EDRAIN")->int_data;
+			allweight += robo->head->data->getData("WEIGHT")->int_data;
+
+		}
+
+		if (robo->arm) {
+			def += robo->arm->data->getData("DEF")->int_data;
+			edef += robo->arm->data->getData("EDEF")->int_data;
+			maxap += robo->arm->data->getData("AP")->int_data;
+			edrain += robo->arm->data->getData("EDRAIN")->int_data;
+			allweight += robo->arm->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->leg) {
+			def += robo->leg->data->getData("DEF")->int_data;
+			edef += robo->leg->data->getData("EDEF")->int_data;
+			maxap += robo->leg->data->getData("AP")->int_data;
+			edrain += robo->leg->data->getData("EDRAIN")->int_data;
+			allweight += robo->leg->data->getData("WEIGHT")->int_data;
+			canweight = robo->leg->data->getData("LOADMAX")->int_data;
+		}
+
+		if (robo->body) {
+			def += robo->body->data->getData("DEF")->int_data;
+			edef += robo->body->data->getData("EDEF")->int_data;
+			maxap += robo->body->data->getData("AP")->int_data;
+			edrain += robo->body->data->getData("EDRAIN")->int_data;
+			allweight += robo->body->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->booster) {
+			
+			edrain += robo->booster->data->getData("EDRAIN")->int_data;
+			allweight += robo->booster->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->fcs) {
+			edrain += robo->fcs->data->getData("EDRAIN")->int_data;
+			allweight += robo->fcs->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->engine) {
+			this->energyshuturyoku = robo->engine->data->getData("EPOWER")->int_data;
+			this->energy_pool = robo->engine->data->getData("EPOOL")->int_data;
+			allweight += robo->engine->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->raweapon) {
+			edrain += robo->raweapon->data->getData("EDRAIN")->int_data;
+			allweight += robo->raweapon->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->laweapon) {
+			edrain += robo->laweapon->data->getData("EDRAIN")->int_data;
+			allweight += robo->laweapon->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->rsweapon) {
+			edrain += robo->rsweapon->data->getData("EDRAIN")->int_data;
+			allweight += robo->rsweapon->data->getData("WEIGHT")->int_data;
+		}
+
+		if (robo->lsweapon) {
+			edrain += robo->lsweapon->data->getData("EDRAIN")->int_data;
+			allweight += robo->lsweapon->data->getData("WEIGHT")->int_data;
+		}
+
+
+
+
+	}
+	amari_energy = this->energyshuturyoku - edrain;
+
+	nowap = maxap;
+	now_energy = energy_pool;
+}
+
+int RoboParam::getMaxAP() {
+
+	return this->maxap;
+
+}
+
+
+int RoboParam::getAllWeight() {
+	return this->allweight;
+
+}
+
+int RoboParam::getCanWeight() {
+
+	return this->canweight;
+
+}
+
+
+int RoboParam::getDef() {
+	return this->def;
+
+}
+
+int RoboParam::getEDef() {
+	return this->edef;
+
+}
+
+int RoboParam::getAmariEnergy() {
+
+	return this->amari_energy;
+
+}
+
+
+int RoboParam::getEnergyShuturyoku() {
+	return this->energyshuturyoku;
+
+}
+
+int RoboParam::getEnergyPool() {
+
+	return this->energy_pool;
+
+
+}
+
+
+char* RoboParam::getNameOfHead() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->head) {
+		return this->robo->head->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+
+}
+
+
+char* RoboParam::getNameOfBody() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->body) {
+		return this->robo->body->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+}
+
+
+char* RoboParam::getNameOfArm() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->arm) {
+		return this->robo->arm->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+
+}
+
+
+char* RoboParam::getNameOfLeg() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->leg) {
+		return this->robo->leg->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+
+}
+
+
+char* RoboParam::getNameOfInside() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->iweapon) {
+		return this->robo->iweapon->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+
+}
+
+
+char* RoboParam::getNameOfRArmWeapon() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->raweapon) {
+		return this->robo->raweapon->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+}
+
+char* RoboParam::getNameOfLArmWeapon() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->laweapon) {
+		return this->robo->laweapon->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+}
+
+
+char* RoboParam::getNameOfRShoulderWeapon() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->rsweapon) {
+		return this->robo->rsweapon->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+	
+}
+
+char* RoboParam::getNameOfLShoulderWeapon() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->lsweapon) {
+		return this->robo->lsweapon->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+}
+
+
+
+char* RoboParam::getNameOfBooster() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->booster) {
+		return this->robo->booster->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+}
+
+char* RoboParam::getNameOfFCS() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->fcs) {
+		return this->robo->fcs->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+}
+
+char* RoboParam::getNameOfEngine() {
+	if (!robo) return "‚È‚µ";
+	if (this->robo->engine) {
+		return this->robo->engine->data->getData("name")->string_data;
+	}
+	return "‚È‚µ";
+
+}
+
+RoboDataPart RoboData::emptydata;

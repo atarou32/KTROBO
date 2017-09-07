@@ -23,10 +23,13 @@ public:
 };
 
 class GamenPart {
+protected:
+	bool is_focused;
 public:
-	GamenPart() {};
+	GamenPart() {is_focused = false;};
 	~GamenPart() {};
 
+	virtual void setFocused(Gamen* g, bool t)=0;
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;
 };
 
@@ -98,11 +101,14 @@ private:
 	char title[128];
 	MYRECT place;
 	bool hyouji3_mode;
+private:
 	void setFocusedKoumoku(Koumoku* k, int index) {
 		focused_koumoku = k;
 		k->setFocused(this);
 		setFocusedKoumokuHyouji3Mode(focused_koumoku,index);
 	}
+private:
+
 	void setHasClicked(bool t) {
 		has_clicked_forbyouga = t;
 	}

@@ -1998,6 +1998,18 @@ void Texture::lightdeleteRenderText(int text_id) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "set text light delete");
 }
 
+
+void Texture::lightdeleteAllRenderText() {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "set text light delete");
+	int ss = render_texts.size();
+	for (int i=0;i<ss;i++) {
+		lightdeleteRenderText(i);
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "set text light delete");
+}
+
 void Texture::setRenderTextPos(int text_id, int x, int y) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "set text pos");
 	if (render_texts.size() > text_id  && text_id >=0) {
