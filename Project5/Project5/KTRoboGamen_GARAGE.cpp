@@ -784,6 +784,12 @@ void Gamen_GARAGE::clickedKoumokuListPartsdayo(KoumokuList_Parts* kp, RoboParts*
 	ma.deletedayo();
 	kp->setMetaData(booster_md);
 
+	if (this->canBeEmpty(kp->getCategoryID())) {
+		Koumoku_Parts* emptyk = new Koumoku_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID, new RoboPartsEmpty());
+		emptyk->setEnabled(false);
+		kp->setKoumoku(emptyk);
+	}
+
 	ma.load(kp->getPartsFilenameFromCID());//"resrc/ktrobo/info/ktroboboosterparts.txt");
 	while(!ma.enddayo()) {
 
@@ -884,6 +890,24 @@ RoboParts* Gamen_GARAGE::getRoboPartsFromCID(int category_id) {
 	return 0;
 }
 
+bool Gamen_GARAGE::canBeEmpty(int category_id) {
+	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID) {
+		return true;
+	}
+	if( category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID) {
+		return true;
+	}
+	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID) {
+		return true;
+	}
+	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID) {
+		return true;
+	}
+	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID) {
+		return true;
+	}
+	return false;
+}
 
 void Gamen_GARAGE::clickedShoriCParts(vector<KoumokuList_Parts*>* kp, RoboParts* kkp, int category_id, int category_id2, char* namedayo) {
 

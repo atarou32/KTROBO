@@ -112,6 +112,10 @@ public:
 	int parts_setumei_text;
 
 public:
+	int getCategoryID() {
+		return category_id;
+	}
+
 	KoumokuList_Parts(Gamen_GARAGE* g, int cid, int c2id, Texture* t) : KoumokuList(t) {
 		category_id = cid;
 		category2_id = c2id;
@@ -237,6 +241,7 @@ private:
 	void clickedKoumokuListPartsdayo(KoumokuList_Parts* kp, RoboParts* kk);
 	void clickedShoriCParts(vector<KoumokuList_Parts*>* kp, RoboParts* kk, int category_id, int category_id2, char* namedayo);
 	KoumokuList* getCategoryList(int category_id);
+	bool canBeEmpty(int category_id);
 
 public:
 	KoumokuList* parts_category_list;

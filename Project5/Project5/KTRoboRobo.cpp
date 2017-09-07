@@ -1604,7 +1604,7 @@ void InsideWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 
 void RoboHead::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || head) return;
 	if (hasMeshLoaded()) return;
 
 	RoboDataPart* rdp = data->getData("mesh");
@@ -1752,7 +1752,8 @@ void RoboHead::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* 
 }
 
 void RoboBody::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || body) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -1827,8 +1828,8 @@ void RoboBody::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* 
 }
 
 void RoboArm::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
-
+	if (!data || larm) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -1915,7 +1916,8 @@ void RoboArm::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g
 }
 
 void RoboLeg::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || leg) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -1995,7 +1997,8 @@ void RoboLeg::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g
 
 void RArmWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
 
-	if (!data) return;
+	if (!data || weapon) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2072,7 +2075,8 @@ void RArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 }
 
 void LArmWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || weapon) return;
+	if (hasMeshLoaded()) return;
 		// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2147,7 +2151,8 @@ void LArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 }
 
 void RShoulderWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || weapon) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2223,7 +2228,8 @@ void RShoulderWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Gra
 }
 
 void LShoulderWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || weapon) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2302,7 +2308,8 @@ void LShoulderWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Gra
 }
 
 void InsideWeapon::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || weapon) return;
+	if (hasMeshLoaded()) return;
 		// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2388,7 +2395,7 @@ void InsideWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphi
 
 
 void RoboBooster::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || mesh) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2471,7 +2478,8 @@ void RoboBooster::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphic
 
 
 void RoboEngine::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
-	if (!data) return;
+	if (!data || mesh) return;
+	if (hasMeshLoaded()) return;
 	// data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {
@@ -2551,7 +2559,8 @@ void RoboEngine::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 
 void RoboFCS::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
 
-	if (!data) return;
+	if (!data || mesh) return;
+	if (hasMeshLoaded()) return;
     // data にデータが入っているので
 	RoboDataPart* rdp = data->getData("mesh");
 	if (rdp) {

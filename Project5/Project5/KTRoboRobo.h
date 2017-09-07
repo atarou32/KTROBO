@@ -174,7 +174,7 @@ public:
 class RoboParts {
 public:
 	RoboData* data;
-private:
+protected:
 	bool mesh_loaded;
 public:
 	RoboParts() {data = 0;mesh_loaded=false;}
@@ -190,6 +190,25 @@ public:
 	bool hasMeshLoaded() {return mesh_loaded;}
 };
 
+class RoboPartsEmpty: public RoboParts {
+public:
+	RoboPartsEmpty() {
+		data = new RoboData();
+		data->setData(0,"name","–¼Ì","‚È‚µ",0);
+	}
+
+	void Release() {
+		if (data) {
+			delete data;
+			data = 0;
+		}
+	}
+
+	RoboParts* myNew() {
+		return new RoboPartsEmpty();
+	}
+};
+	
 class RoboHead : public RoboParts {
 public:
 	Mesh* head;
@@ -246,6 +265,7 @@ public:
 		if (shead->data) {
 			data = shead->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release(){
@@ -314,6 +334,7 @@ public:
 		if (sarm->data) {
 		data = sarm->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release(){
@@ -377,6 +398,7 @@ public:
 		if (sleg->data) {
 			data = sleg->data->clone();
 		}
+		mesh_loaded = true;
 	}
 	void Release(){
 		if (data) {
@@ -428,6 +450,7 @@ public:
 		if (sbody->data) {
 			data = sbody->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release() {
@@ -487,6 +510,7 @@ public:
 		if (sweapon->data) {
 		data = sweapon->data->clone();
 		}
+		mesh_loaded = true;
 	}
 	void Release(){
 	
@@ -540,6 +564,7 @@ public:
 		if (sweapon->data) {
 			data = sweapon->data->clone();
 		}
+		mesh_loaded = true;
 	}
 	void Release(){
 	
@@ -595,6 +620,7 @@ public:
 		if (sweapon->data) {
 		data = sweapon->data->clone();
 		}
+		mesh_loaded = true;
 	}
 	void Release(){
 	
@@ -638,6 +664,7 @@ public:
 		if (sweapon->data) {
 		data = sweapon->data->clone();
 		}
+		mesh_loaded = true;
 	}
 	float getR() {
 		float R=0;
@@ -694,6 +721,7 @@ public:
 		if (sweapon->data) {
 		data = sweapon->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release(){
@@ -753,6 +781,7 @@ public:
 		if (sengine->data) {
 		data = sengine->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release(){
@@ -815,6 +844,7 @@ public:
 		if (sengine->data) {
 		data = sengine->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release(){
@@ -877,6 +907,7 @@ public:
 		if (sengine->data) {
 		data = sengine->data->clone();
 		}
+		mesh_loaded = true;
 	}
 
 	void Release(){
