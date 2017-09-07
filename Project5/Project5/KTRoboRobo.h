@@ -1450,6 +1450,10 @@ public:
 	}
 
 	void calcParam();
+	int getKoumokuSize() {
+		return 8;
+	}
+
 	int getMaxAP();
 	int getAllWeight();
 	int getCanWeight();
@@ -1472,6 +1476,8 @@ public:
 	char* getNameOfEngine();
 
 };
+
+
 class Robo : public INPUTSHORICLASS
 {
 private:

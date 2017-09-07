@@ -31,6 +31,7 @@ public:
 
 	virtual void setFocused(Gamen* g, bool t)=0;
 	virtual void byouga(Graphics* g, GUI* gui, float dsecond, int stamp)=0;
+	
 };
 
 
@@ -162,8 +163,8 @@ public:
 
 	void clicked(Gamen* gamen, GamenPart* gp, int mouse_x, int mouse_y);
 	void clickedEnter(Gamen* gamen, GamenPart* gp);
-	void clickedUp();
-	void clickedDown();
+	virtual void clickedUp();
+	virtual void clickedDown();
 	void moved(int mouse_x, int mouse_y);
 	void setVisible(Texture* t, bool tt);
 	void setEnable(bool t);

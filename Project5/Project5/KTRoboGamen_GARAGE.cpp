@@ -379,7 +379,6 @@ void Koumoku_Parts::setFocused(KoumokuList* kl) {
 }
 
 
-
 char* KoumokuList_Parts::getMetaPartsFilenameFromCID() {
 	if (KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == category_id) {
 	return "resrc/ktrobo/info/metadata/ktroboheadpartsmetadata.txt";
@@ -879,6 +878,9 @@ RoboParts* Gamen_GARAGE::getRoboPartsFromCID(int category_id) {
 	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID) {
 		return robo->lsweapon;
 	}
+	if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID) {
+		return robo->leg;
+	}
 	return 0;
 }
 
@@ -887,7 +889,7 @@ void Gamen_GARAGE::clickedShoriCParts(vector<KoumokuList_Parts*>* kp, RoboParts*
 
 	KoumokuList_Parts* kk = this->getPartsList(kp, category_id, category_id2);
 		if (!kk) {
-			kk = new KoumokuList_Parts(category_id, category_id2,t);
+			kk = new KoumokuList_Parts(this,category_id, category_id2,t);
 			kk->setname(namedayo);
 			this->clickedKoumokuListPartsdayo(kk, kkp);
 			kp->push_back(kk);
@@ -905,9 +907,9 @@ void Gamen_GARAGE::clickedShoriCParts(vector<KoumokuList_Parts*>* kp, RoboParts*
 		temp_focused_list = kk;
 		RoboParts* temp_parts=0;
 		temp_parts = this->getRoboPartsFromCID(category_id);
-		gamenpart_roboparam.setRoboParts(kk->getFocusedParts(), kk->getMetaData(),temp_parts ); 
 		gamenpart_roboparam.setFocused(this,true);
-
+		gamenpart_roboparam.setRoboParts(kk->getFocusedParts(), kk->getMetaData(),temp_parts, category_id); 
+	
 }
 
 void Gamen_GARAGE::clickedShori(int id) {
@@ -916,7 +918,7 @@ void Gamen_GARAGE::clickedShori(int id) {
 
 		if (!parts_arm_list) {
 
-			parts_arm_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_arm_list = new KoumokuList_Parts(this,KTROBO_GAMEN_GARAGE_KOUMOKU_ARM_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_arm_list->setname("アームパーツ");
 			RoboArm booster = RoboArm();
 			this->clickedKoumokuListPartsdayo(parts_arm_list, &booster);
@@ -934,13 +936,14 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_arm_list->clickedUp();
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_arm_list;
-		gamenpart_roboparam.setRoboParts(parts_arm_list->getFocusedParts(), parts_arm_list->getMetaData(), robo->arm); 
-		gamenpart_roboparam.setFocused(this,true);
+			gamenpart_roboparam.setFocused(this,true);
+		gamenpart_roboparam.setRoboParts(parts_arm_list->getFocusedParts(), parts_arm_list->getMetaData(), robo->arm, id); 
+	
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID == id) {
 		if (!parts_booster_list) {
 
-			parts_booster_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_booster_list = new KoumokuList_Parts(this,KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_booster_list->setname("ブースタパーツ");
 			RoboBooster booster = RoboBooster();
 			this->clickedKoumokuListPartsdayo(parts_booster_list, &booster);
@@ -959,15 +962,15 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_booster_list;
 
-
-		gamenpart_roboparam.setRoboParts(parts_booster_list->getFocusedParts(), parts_booster_list->getMetaData(), robo->booster); 
-		gamenpart_roboparam.setFocused(this,true);
+			gamenpart_roboparam.setFocused(this,true);
+		gamenpart_roboparam.setRoboParts(parts_booster_list->getFocusedParts(), parts_booster_list->getMetaData(), robo->booster,id); 
+		//gamenpart_roboparam.setFocused(this,true);
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID == id) {
 		if (!parts_core_list) {
 
-			parts_core_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_core_list = new KoumokuList_Parts(this,KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_core_list->setname("コアパーツ");
 			RoboBody booster = RoboBody();
 			this->clickedKoumokuListPartsdayo(parts_core_list, &booster);
@@ -985,15 +988,15 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_core_list->clickedUp();
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_core_list;
-
-		gamenpart_roboparam.setRoboParts(parts_core_list->getFocusedParts(), parts_core_list->getMetaData(), robo->body); 
-		gamenpart_roboparam.setFocused(this,true);
+			gamenpart_roboparam.setFocused(this,true);
+		gamenpart_roboparam.setRoboParts(parts_core_list->getFocusedParts(), parts_core_list->getMetaData(), robo->body,id); 
+//		gamenpart_roboparam.setFocused(this,true);
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID == id) {
 		if (!parts_engine_list) {
 
-			parts_engine_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_engine_list = new KoumokuList_Parts(this,KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_engine_list->setname("エンジンパーツ");
 			RoboEngine booster = RoboEngine();
 			this->clickedKoumokuListPartsdayo(parts_engine_list, &booster);
@@ -1011,15 +1014,16 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_engine_list->clickedUp();
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_engine_list;
-		gamenpart_roboparam.setRoboParts(parts_engine_list->getFocusedParts(), parts_engine_list->getMetaData(), robo->engine); 
 		gamenpart_roboparam.setFocused(this,true);
+		gamenpart_roboparam.setRoboParts(parts_engine_list->getFocusedParts(), parts_engine_list->getMetaData(), robo->engine,id); 
+//		gamenpart_roboparam.setFocused(this,true);
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID == id) {
 
 		if (!parts_fcs_list) {
 
-			parts_fcs_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_fcs_list = new KoumokuList_Parts(this,KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_fcs_list->setname("fcsパーツ");
 			RoboFCS booster = RoboFCS();
 			this->clickedKoumokuListPartsdayo(parts_fcs_list, &booster);
@@ -1037,16 +1041,16 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_fcs_list->clickedUp();
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_fcs_list;
-
-		gamenpart_roboparam.setRoboParts(parts_fcs_list->getFocusedParts(), parts_fcs_list->getMetaData(), robo->fcs); 
-		gamenpart_roboparam.setFocused(this,true);
+	gamenpart_roboparam.setFocused(this,true);
+		gamenpart_roboparam.setRoboParts(parts_fcs_list->getFocusedParts(), parts_fcs_list->getMetaData(), robo->fcs,id); 
+//		gamenpart_roboparam.setFocused(this,true);
 
 
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == id) {
 		if (!parts_head_list) {
-			parts_head_list = new KoumokuList_Parts(KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
+			parts_head_list = new KoumokuList_Parts(this,KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_NONE,t);
 			parts_head_list->setname("ヘッドパーツ");
 			RoboHead head = RoboHead();
 			this->clickedKoumokuListPartsdayo(parts_head_list, &head);
@@ -1064,9 +1068,10 @@ void Gamen_GARAGE::clickedShori(int id) {
 		parts_head_list->clickedUp();
 		parts_category_list->setEnable(false);
 		temp_focused_list = parts_head_list;
-		
-		gamenpart_roboparam.setRoboParts(parts_head_list->getFocusedParts(), parts_head_list->getMetaData(), robo->head); 
-		gamenpart_roboparam.setFocused(this,true);
+	
+			gamenpart_roboparam.setFocused(this,true);
+		gamenpart_roboparam.setRoboParts(parts_head_list->getFocusedParts(), parts_head_list->getMetaData(), robo->head,id); 
+//		gamenpart_roboparam.setFocused(this,true);
 
 
 	} else if(KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID == id) {
@@ -2091,7 +2096,7 @@ void Gamen_GARAGE::clickedEscape() {
 		it++;
 	}
 
-
+	this->gamenpart_roboparam.setFocused(this,false);
 
 
 	t->setRenderTexIsRender(clearpartsgamen, false);
@@ -2127,6 +2132,7 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 		if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_DOWN) {
 			pressed_down_count=1;
 			temp_focused_list->clickedDown();
+			
 		}
 		if (input->getKEYSTATE()[VK_UP] & KTROBO_INPUT_BUTTON_DOWN) {
 			pressed_up_count=1;
@@ -2197,6 +2203,121 @@ bool Gamen_GARAGE::handleMessage(int msg, void* data, DWORD time) {
 
 }
 
+void KoumokuList_Parts::clickedDown() {
+
+
+	KoumokuList::clickedDown();
+	g->gamenpart_roboparam.setRoboParts(this->focused_parts, metadata, g->getRoboPartsFromCID(this->category_id),category_id);
+	//g->gamenpart_roboparam.setFocused(g,true);
+}
+
+void KoumokuList_Parts::clickedUp() {
+
+	KoumokuList::clickedUp();
+	g->gamenpart_roboparam.setRoboParts(this->focused_parts, metadata, g->getRoboPartsFromCID(this->category_id),category_id);
+	//g->gamenpart_roboparam.setRoboParts(this->focused_parts, metadata, g->getRoboPartsFromCID(this->category_id));
+
+}
+
+void GamenGARAGE_partRoboParam::calcRoboParam(RoboParts* new_parts, RoboParts* parts_compare, int category_id) {
+	if (!this->gamen_robo_params.size()) {
+		int test = robo->roboparam.getKoumokuSize();
+		
+		while(test > 0) {
+				GamenGARAGE_partsParam * pp = new GamenGARAGE_partsParam(this->t);
+				gamen_robo_params.push_back(pp);
+				test--;
+		}
+	}
+
+	// まずは全てノーユーズにする
+	int gsize = gamen_robo_params.size();
+	for (int i=0;i<gsize;i++) {
+		gamen_robo_params[i]->setNoUse();
+	}
+
+	int temp = 0;
+	MYRECT pla;
+	pla.left = 550;
+	pla.right = 850;
+	pla.top = 550;
+	pla.bottom = 550 + GamenGARAGE_partsParam::string_haba_place_height;
+
+	for (int i=0;i<gsize;i++) {
+		if (gamen_robo_params[temp]->setChara2(&pla,robo,robo_parts,category_id, i,robo_parts_compare)) {
+			temp++;
+			pla.top += GamenGARAGE_partsParam::string_haba_place_height;
+			pla.bottom += GamenGARAGE_partsParam::string_haba_place_height;
+		}
+	}
+
+}
+void GamenGARAGE_partsParam::setChara2dayo(Robo* robo, char* dataname, char* dataname_for_disp, int suuti, RoboParts* new_parts, RoboParts* compare_parts) {
+
+	// AP
+		int parts_ap = 0;
+		int parts_ap_new = 0;
+		if (new_parts) {
+			parts_ap_new = new_parts->data->getData(dataname)->int_data;
+		}
+		if (compare_parts) {
+			parts_ap = compare_parts->data->getData(dataname)->int_data;
+		}
+		int sa = parts_ap_new - parts_ap;
+		int suuti_chara_haba = 4;
+		char test[128];
+		char test2[128];
+		for(int i=0;i<128;i++) {
+			test[i] = 0;
+			test2[i] = 0;
+		}
+		this->getSuutiHikakuChara(sa,test);
+		this->getSuutiChara(suuti+sa, test2);
+		suuti_chara_haba = strlen(test2) * string_haba;
+
+		t->setRenderTextChangeText(this->robo_parts_param_name, dataname_for_disp);
+		t->setRenderTextChangeText(this->robo_parts_param_suuti, test2);
+		t->setRenderTextChangeText(this->robo_parts_param_suuti_hikaku, test);
+
+		// place にあわせて場所を移動させる
+		t->setRenderTextPos(this->robo_parts_param_name, place.left,place.top);
+		t->setRenderTextPos(this->robo_parts_param_suuti, place.right - suuti_chara_haba,place.top);
+		t->setRenderTextPos(this->robo_parts_param_suuti_hikaku, place.right + string_haba, place.top);
+		this->is_hikaku = true;
+		this->is_use = true;
+}
+
+bool GamenGARAGE_partsParam::setChara2(MYRECT* placedayo, Robo* robo, RoboParts* new_parts, int category_id, int index,RoboParts* compare_parts) {
+
+	if ((robo->roboparam.getKoumokuSize() <= index) || index < 0) {
+		this->is_use = false;
+		return false;
+	}
+	place = *placedayo;
+
+	if (index ==0) {
+		this->setChara2dayo(robo,"AP","AP",robo->roboparam.getMaxAP(),new_parts, compare_parts);
+	} else if(index ==1) {
+		this->setChara2dayo(robo,"LOADMAX","積載量",robo->roboparam.getCanWeight(),new_parts, compare_parts);
+	} else if(index==2) {
+		this->setChara2dayo(robo, "WEIGHT", "総重量", robo->roboparam.getAllWeight(), new_parts,compare_parts);
+	} else if(index==3) {
+		this->setChara2dayo(robo, "DEF", "実弾防御力", robo->roboparam.getDef(), new_parts,compare_parts);
+	} else if(index==4) {
+		this->setChara2dayo(robo, "EDEF", "エネルギー防御力", robo->roboparam.getEDef(), new_parts,compare_parts);
+	} else if(index==5) {
+		this->setChara2dayo(robo, "EPOWER", "エネルギー出力", robo->roboparam.getEnergyShuturyoku(), new_parts, compare_parts);
+	} else if(index == 6) {
+		this->setChara2dayo(robo,"EPOOL", "エネルギー容量", robo->roboparam.getEnergyPool(),new_parts, compare_parts);
+	} else if(index==7) {
+		this->setChara2dayo(robo, "EDRAIN", "エネルギー余剰", robo->roboparam.getAmariEnergy(), compare_parts, new_parts);
+	}
+	this->is_use = true;
+	return true;
+
+
+
+}
 
 
 bool Koumoku_Parts::hasLoad() {
@@ -2214,7 +2335,7 @@ void Koumoku_Parts::load(Graphics* g, MyTextureLoader* loader) {
 	
 	}
 }
-void GamenGARAGE_partRoboParam::setRoboParts(RoboParts* robo_parts, RoboDataMetaData* metadata, RoboParts* robo_parts_compare) {
+void GamenGARAGE_partRoboParam::setRoboParts(RoboParts* robo_parts, RoboDataMetaData* metadata, RoboParts* robo_parts_compare, int category_id) {
 	this->robo_parts = robo_parts;
 	this->metadata = metadata;
 	this->robo_parts_compare = robo_parts_compare;
@@ -2238,10 +2359,10 @@ void GamenGARAGE_partRoboParam::setRoboParts(RoboParts* robo_parts, RoboDataMeta
 
 		int temp = 0;
 		MYRECT pla;
-		pla.left = 500;
+		pla.left = 550;
 		pla.right = 800;
-		pla.top = 330;
-		pla.bottom = 330 + GamenGARAGE_partsParam::string_haba_place_height;
+		pla.top = 100;
+		pla.bottom = 100 + GamenGARAGE_partsParam::string_haba_place_height;
 
 		for (int i=0;i<size;i++) {
 			if (gamen_parts_params[temp]->setChara(&pla,metadata,robo_parts,i,robo_parts_compare)) {
@@ -2251,9 +2372,11 @@ void GamenGARAGE_partRoboParam::setRoboParts(RoboParts* robo_parts, RoboDataMeta
 			}
 		}
 	}
+
+	calcRoboParam(robo_parts,robo_parts_compare, category_id);
 }
 bool GamenGARAGE_partsParam::setChara(MYRECT* placedayo, RoboDataMetaData* metadata, RoboParts* parts, int index, RoboParts* compare_parts) {
-	
+	if (!parts || !metadata) return false;
 	vector<RoboMetaDataPart*>* vec = metadata->getMetaDatas();
 	if ((vec->size() <= index) || index < 0) return false;
 	if (strcmp(((*vec)[index])->data_sentence, "YES_SENTENCE")==0) {
@@ -2263,7 +2386,7 @@ bool GamenGARAGE_partsParam::setChara(MYRECT* placedayo, RoboDataMetaData* metad
 		t->setRenderTextChangeText(this->robo_parts_param_name,((*vec)[index])->data_name2);
 		// 次に数値もしくは文字のセット
 		if (strcmp(((*vec)[index])->data_type, "INT")==0) {
-			if (strcmp(((*vec)[index])->data_compare, "YES_COMPARE")==0) {
+			if (strcmp(((*vec)[index])->data_compare, "YES_SENTENCE")==0) {
 				char test[128];
 				char test2[128];
 				for (int i=0;i<128;i++) {
@@ -2335,6 +2458,7 @@ void GamenGARAGE_partsParam::getSuutiChara(int suuti, char* chara) {
 		return;
 	}
 	suut = suuti;
+	int tt = keta;
 	while(keta >0) {
 		int amari = suut % 10;
 		if (amari == 0) {
@@ -2358,9 +2482,10 @@ void GamenGARAGE_partsParam::getSuutiChara(int suuti, char* chara) {
 		} else if(amari == 9) {
 			chara[temp+keta-1] = '9';
 		}
+		suut = suut /10;
 		keta--;
 	}
-
+	chara[temp+tt] = 0;
 	return;
 
 
@@ -2518,7 +2643,20 @@ void GamenGARAGE_partRoboParam::setFocused(Gamen* g, bool te) {
 		for (int i=0;i<gsize;i++) {
 			gamen_parts_params[i]->setVisible(te);
 		}
+		gsize = gamen_robo_params.size();
+		for (int i=0;i<gsize;i++) {
+			gamen_robo_params[i]->setVisible(te);
+		}
 
+	} else {
+		int gsize = gamen_parts_params.size();
+		for (int i=0;i<gsize;i++) {
+			gamen_parts_params[i]->setVisible(te);
+		}
+			gsize = gamen_robo_params.size();
+		for (int i=0;i<gsize;i++) {
+			gamen_robo_params[i]->setVisible(te);
+		}
 	}
 
 

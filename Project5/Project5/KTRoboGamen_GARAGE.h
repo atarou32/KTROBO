@@ -21,9 +21,15 @@ private:
 	int robo_parts_param_suuti_hikaku;
 	bool is_hikaku;
 	bool is_use;
+
+	void setChara2dayo(Robo* robo, char* dataname, char* dataname_for_disp, int suuti, RoboParts* new_parts, RoboParts* compare_parts);
+
 public:
 	GamenGARAGE_partsParam(Texture* t) {
 		this->t = t;
+		place.left = 0;place.right = 1;
+		place.top = 0;
+		place.bottom = 1;
 
 		robo_parts_param_name = t->getRenderText("test",0,-50,string_haba,string_haba_place_width,string_haba_place_height);
 		robo_parts_param_suuti = t->getRenderText("test",0,-50,string_haba,string_haba_place_width,string_haba_place_height);
@@ -34,6 +40,8 @@ public:
 
 	~GamenGARAGE_partsParam(){};
 	bool setChara(MYRECT* placedayo, RoboDataMetaData* metadata, RoboParts* parts, int index, RoboParts* compare_parts);
+	bool setChara2(MYRECT* placedayo, Robo* robo, RoboParts* new_parts, int category_id, int index,RoboParts* compare_parts);
+	
 	void setVisible(bool t);
 	bool getIsUse() {
 		return is_use;
@@ -59,9 +67,7 @@ class GamenGARAGE_partRoboParam : public GamenPart {
 		vector<int> robo_parts_name_category;
 		vector<int> robo_parts_name;
 
-		vector<int> robo_param_name;
-		vector<int> robo_param_suuti;
-		vector<int> robo_param_suuti_hikaku;
+		vector<GamenGARAGE_partsParam*> gamen_robo_params;
 
 		vector<GamenGARAGE_partsParam*> gamen_parts_params;
 
@@ -76,32 +82,43 @@ class GamenGARAGE_partRoboParam : public GamenPart {
 				it++;
 			}
 			gamen_parts_params.clear();
+
+			it = gamen_robo_params.begin();
+			while(it != gamen_robo_params.end()) {
+				GamenGARAGE_partsParam* oo = *it;
+				delete oo;
+				oo = 0;
+				it++;
+			}
+			gamen_robo_params.clear();
 		}
-		void setRoboParts(RoboParts* robo_parts, RoboDataMetaData* metadata, RoboParts* robo_parts_compare);
+		void setRoboParts(RoboParts* robo_parts, RoboDataMetaData* metadata, RoboParts* robo_parts_compare, int category_id);
+		void calcRoboParam(RoboParts* new_parts, RoboParts* robo_parts_compare, int category_id);
 
 		void setFocused(Gamen* g, bool t);
 		void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
-
-
+	
 };
 
-
+class Gamen_GARAGE;
 class KoumokuList_Parts : public KoumokuList {
 private:
 	int category_id;
 	int category2_id;
 	RoboDataMetaData* metadata;
 	RoboParts* focused_parts;
+	Gamen_GARAGE* g;
 public:
 	int parts_setumei_text;
 
 public:
-	KoumokuList_Parts(int cid, int c2id, Texture* t) : KoumokuList(t) {
+	KoumokuList_Parts(Gamen_GARAGE* g, int cid, int c2id, Texture* t) : KoumokuList(t) {
 		category_id = cid;
 		category2_id = c2id;
 		metadata = 0;
 		parts_setumei_text=0;
 		focused_parts = 0;
+		this->g = g;
 	}
 	virtual ~KoumokuList_Parts() {
 	
@@ -149,6 +166,9 @@ public:
 		}
 		return false;
 	}
+	virtual void clickedUp();
+	virtual void clickedDown();
+
 };
 
 class Koumoku_Parts : public Koumoku {
@@ -202,8 +222,9 @@ private:
 	int pressed_down_count;
 	Texture* t;
 	MyTextureLoader* loader;
-
+public:
 	GamenGARAGE_partRoboParam gamenpart_roboparam;
+
 	RoboParts* getRoboPartsFromCID(int cid);
 public:
 	Gamen_GARAGE(void);

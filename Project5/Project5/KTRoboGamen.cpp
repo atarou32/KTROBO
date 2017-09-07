@@ -18,9 +18,10 @@ void KoumokuList::clicked(Gamen* gamen, GamenPart* gp, int mouse_x, int mouse_y)
 		Koumoku* k = *it;
 		if (k->clicked(mouse_x, mouse_y)) {
 			setFocusedKoumoku(k,getCursorIndex(k));
+		
+			k->clickedExe(gamen, gp, this);
 			cursor = this->getCursorIndex(k);
 			setHasClicked(true);
-			k->clickedExe(gamen, gp, this);
 			return;
 		}
 		it++;
