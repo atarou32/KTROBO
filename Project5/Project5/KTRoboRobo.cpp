@@ -216,6 +216,14 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	if (booster) {
 		booster->mesh->draw(g, &atarihan->world, view, proj);
 	}
+
+	if (rsweapon) {
+		rsweapon->weapon->draw(g, &atarihan->world, view,proj);
+	}
+	if (lsweapon) {
+		lsweapon->weapon->draw(g,&atarihan->world, view, proj);
+	}
+
 }
 
 void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
@@ -1137,10 +1145,10 @@ void Robo::settyakuRShoulderWeaponWithBody() {
 		rsweapon->weapon->RootBone->parent_bone_index = body->body->BoneIndexes["rightKataJointBone"];
 		MYMATRIX wo;
 		MyMatrixIdentity(wo);
-		wo._11 = 0;
-		wo._22 = 0;
-		wo._12 = -1;
-		wo._21 = 1;
+		//wo._11 = 0;
+		//wo._22 = 0;
+		//wo._12 = -1;
+		//wo._21 = 1;
 		wo._33 = -1;
 		rsweapon->weapon->rootbone_matrix_local_kakeru = wo;
 		rsweapon->weapon->animate(0,true);
@@ -1155,10 +1163,10 @@ void Robo::settyakuLShoulderWeaponWithBody() {
 		lsweapon->weapon->RootBone->parent_bone_index = body->body->BoneIndexes["leftKataJointBone"];
 		MYMATRIX wo;
 		MyMatrixIdentity(wo);
-		wo._11 = 0;
-		wo._22 = 0;
-		wo._12 = -1;
-		wo._21 = 1;
+		//wo._11 = 0;
+		//wo._22 = 0;
+		//wo._12 = -1;
+		//wo._21 = 1;
 		wo._33 = -1;
 		lsweapon->weapon->rootbone_matrix_local_kakeru = wo;
 		lsweapon->weapon->animate(0,true);
