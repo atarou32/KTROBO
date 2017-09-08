@@ -490,6 +490,14 @@ void Texture::lightdeleteRenderBillBoard(int bill_id) {
 
 }
 
+void Textures::setDeleteAll() {
+	if (texs.size()) {
+		texs[0]->deleteAll();
+		texs[1]->deleteAll();
+	}
+}
+
+
 void Texture::deleteAll() {
 	// 時間とか気にしないで全てdeleteする
 
@@ -1844,10 +1852,18 @@ Texture* Textures::getInstance(int index) {
 	int size = texs.size();
 
 	if (size) {
+		if (index ==0) {
 		return texs[0];
+		} else {
+			return texs[1];
+		}
 	} else {
 		makeInst();
+		if (index ==0) {
 		return texs[0];
+		} else {
+			return texs[1];
+		}
 	}
 
 	throw new GameError(KTROBO::WARNING, "no texture");
@@ -1858,7 +1874,12 @@ Texture* Textures::getInstance(int index) {
 ITexture* Textures::getInterface(int index) {
 	int size = texs.size();
 	if (size) {
+		if (index == 0) {
 		return texs[0];
+		} else {
+			return texs[1];
+		}
+
 	} else {
 		makeInst();
 		return texs[0];
@@ -1874,7 +1895,9 @@ int Textures::makeInst() {
 	}
 
 	Texture* t = new Texture(loader);
+	Texture* t2 = new Texture(loader);
 	texs.push_back(t);
+	texs.push_back(t2);
 	return 0;
 }
 
@@ -1887,15 +1910,22 @@ Textures::~Textures() {
 	if (size) {
 		texs[0]->Release();
 		delete texs[0];
+		texs[1]->Release();
+		delete texs[1];
 		texs.clear();
 	}
 }
 
-void Textures::render(Graphics* g) {
+void Textures::render(Graphics* g, int index) {
 	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
 	int size = texs.size();
 	if (size) {
-		texs[0]->render(g);
+		if (index ==0) {
+			texs[0]->render(g);
+		} else {
+			g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+			texs[1]->render(g);
+		}
 	}
 }
 void Textures::sendinfoToVertexTexture(Graphics* g) {
@@ -1903,6 +1933,7 @@ void Textures::sendinfoToVertexTexture(Graphics* g) {
 	int size = texs.size();
 	if (size) {
 		texs[0]->sendinfoToVertexTexture(g);
+		texs[1]->sendinfoToVertexTexture(g);
 	}
 }
 
@@ -1913,6 +1944,7 @@ void Textures::updateIndexBuffer(Graphics* g) {
 	int size= texs.size();
 	if (size) {
 		texs[0]->updateIndexBuffer(g);
+		texs[1]->updateIndexBuffer(g);
 	}
 }
 
@@ -1921,6 +1953,7 @@ void Textures::createIndexBuffer(Graphics* g) {
 	int size = texs.size();
 	if (size) {
 		texs[0]->createIndexBuffer(g);
+		texs[1]->createIndexBuffer(g);
 	}
 }
 void Textures::deletedayo() {
@@ -1928,6 +1961,7 @@ void Textures::deletedayo() {
 	int size = texs.size();
 	if (size) {
 		texs[0]->deletedayo();
+		texs[1]->deletedayo();
 	}
 }
 
@@ -2025,6 +2059,7 @@ void Texture::setRenderTextChangeText(int text_id, char* t) {
 		memset(buf,0,sizeof(WCHAR)*512);
 		stringconverter sc;
 		sc.charToWCHAR(t, buf);
+		render_texts[text_id]->width = wcslen(buf) * render_texts[text_id]->tex_h;
 		render_texts[text_id]->text->changeText(buf, wcslen(buf));
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "set text change");

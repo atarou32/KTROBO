@@ -137,11 +137,10 @@ void Gamen_GARAGE::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 		kk->byouga(g,gui,dsecond,stamp);
 		it++;
 	}
-
+	gamenpart_yesnoequip.byouga(g,gui,dsecond,stamp);
 
 }
 
-#define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_NONE 0
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID 100
 #define KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID 101
@@ -290,14 +289,16 @@ void Koumoku_Parts_Category::focusedByouga(Graphics* g, GUI* gui, float dsecond,
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 }
 void Gamen_GARAGE::clickedShoriWithData(int id, void* data) {
-	Koumoku_Parts* parts_k = (Koumoku_Parts*)data;
 
-	
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID == id) { 
+		KoumokuList_Parts* parts_k = (KoumokuList_Parts*)data;
 
-
-
-
-
+			// パーツのYESNOEQUIPにいく
+		gamenpart_yesnoequip.setMaeFocusedList(temp_focused_list);
+		gamenpart_yesnoequip.setRoboParts(gamenpart_roboparam.getRoboParts(),parts_k->getCategoryID());
+		gamenpart_yesnoequip.setFocused(this, true);
+		this->temp_focused_list = gamenpart_yesnoequip.kl;
+	}
 }
 
 void Koumoku_Parts::byouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
@@ -354,8 +355,7 @@ const D3D11_VIEWPORT* ggg = g->getViewPort();
 
 void Koumoku_Parts::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl) {
 
-
-
+	gamen->clickedShoriWithData(KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID, (void*)kl);
 
 }
 void KoumokuList_Parts::InitKoumokus(Texture* t, MyTextureLoader* loader) {
@@ -547,6 +547,47 @@ char* KoumokuList_Parts::getMetaPartsFilenameFromCID() {
 	throw new GameError(KTROBO::FATAL_ERROR, "no cid");
 }
 
+KoumokuList_Parts* Gamen_GARAGE::getPartsList(int cid, int cid2) {
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == cid ) {
+		return parts_head_list;
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_BOOSTER_ID == cid) {
+		return parts_booster_list;
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_CORE_ID == cid) {
+		return parts_core_list;
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_ENGINE_ID == cid) {
+		return parts_engine_list;
+	}
+
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_FCS_ID == cid) {
+		return parts_fcs_list;
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_HEAD_ID == cid) {
+		return parts_fcs_list;
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID == cid) {
+		return getPartsList(&parts_inside_lists, cid,cid2);
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LEG_ID == cid) {
+		return getPartsList(&parts_leg_lists,cid,cid2);
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID == cid) {
+		return getPartsList(&parts_lkataweapon_lists, cid, cid2);
+	}
+	if(KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID == cid) {
+		return getPartsList(&parts_rkataweapon_lists, cid, cid2);
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID == cid) {
+		return getPartsList(&parts_larmweapon_lists, cid, cid2);
+	}
+	if (KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID == cid) {
+		return getPartsList(&parts_rarmweapon_lists, cid, cid2);
+	}
+	throw new GameError(KTROBO::FATAL_ERROR, "no parts list");
+	return 0;
+}
 
 KoumokuList_Parts* Gamen_GARAGE::getPartsList(vector<KoumokuList_Parts*>* lists, int category_id, int category_id2) {
 	vector<KoumokuList_Parts*>::iterator it;
@@ -1372,6 +1413,17 @@ void Gamen_GARAGE::clickedShori(int id) {
 		LShoulderWeapon rk = LShoulderWeapon();
 		clickedShoriCParts(&parts_lkataweapon_lists, &rk, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID, KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_MISSILE_ID, "左肩_ミサイルパーツ");
 	}
+	
+	
+	/*
+	else if(id == KTROBO_GAMEN_GARAGE_KOUMOKU_PARTS_ID) {
+		// パーツのYESNOEQUIPにいく
+		gamenpart_yesnoequip.setMaeFocusedList(temp_focused_list);
+		gamenpart_yesnoequip.setRoboParts(gamenpart_roboparam.getRoboParts());
+		gamenpart_yesnoequip.setFocused(this, true);
+		this->temp_focused_list = gamenpart_yesnoequip.kl;
+	}
+	*/
 }
 
 void Koumoku_Parts_Category::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl) {
@@ -1380,7 +1432,7 @@ void Koumoku_Parts_Category::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* 
 
 }
 
-void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureLoader* loader) {
+void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, Texture* t2, MyTextureLoader* loader) {
 
 	parts_rkata_category_list = new KoumokuList(t);
 	parts_rkata_category_list->setname("右肩武器カテゴリ");
@@ -1846,11 +1898,20 @@ void Gamen_GARAGE::Init(Graphics* g, AtariHantei* hantei, Texture* t, MyTextureL
 
 
 	this->t = t;
+	this->t2 = t2;
 	this->loader = loader;
 	robo->roboparam.Init(robo);
 
 	gamenpart_roboparam.Init(robo,g,t,loader);
 
+	gamenpart_yesnoequip.setGG(this);
+	gamenpart_yesnoequip.setGraphics(g);
+	gamenpart_yesnoequip.setTexture(t2);
+	gamenpart_yesnoequip.setRobo(robo);
+	gamenpart_yesnoequip.setTextureLoader(loader);
+	gamenpart_yesnoequip.makeKL();
+	gamenpart_yesnoequip.setFocused(this, false);
+	
 
 }
 
@@ -1899,6 +1960,13 @@ void Gamen_GARAGE::Release() {
 		t->lightdeleteAllBillBoard();
 		t->lightdeleteAllRenderText();
 	}
+
+	if (t2) {
+		t2->lightdeleteAllRenderTex();
+		t2->lightdeleteAllBillBoard();
+		t2->lightdeleteAllRenderText();
+	}
+
 	if (parts_head_list) {
 		delete parts_head_list;
 		parts_head_list = 0;
@@ -2121,7 +2189,7 @@ void Gamen_GARAGE::clickedEscape() {
 	}
 
 	this->gamenpart_roboparam.setFocused(this,false);
-
+	this->gamenpart_yesnoequip.setFocused(this, false);
 
 	t->setRenderTexIsRender(clearpartsgamen, false);
 	t->setRenderTexIsRender(clearcommentgamen,false);
@@ -2268,7 +2336,7 @@ void GamenGARAGE_partRoboParam::calcRoboParam(RoboParts* new_parts, RoboParts* p
 	pla.bottom = 550 + GamenGARAGE_partsParam::string_haba_place_height;
 
 	for (int i=0;i<gsize;i++) {
-		if (gamen_robo_params[temp]->setChara2(&pla,robo,robo_parts,category_id, i,robo_parts_compare)) {
+		if (gamen_robo_params[temp]->setChara2(&pla,robo,new_parts,category_id, i,parts_compare)) {
 			temp++;
 			pla.top += GamenGARAGE_partsParam::string_haba_place_height;
 			pla.bottom += GamenGARAGE_partsParam::string_haba_place_height;
@@ -2573,7 +2641,13 @@ void GamenGARAGE_partRoboParam::Init(Robo* robo, Graphics* g, Texture* t, MyText
 	t->setRenderTextIsRender(laweapon_,true);
 	t->setRenderTextIsRender(rsweapon_,true);
 	t->setRenderTextIsRender(lsweapon_,true);
-	if (robo) {
+	hanneiPartsName();
+	
+}
+
+void GamenGARAGE_partRoboParam::hanneiPartsName() {
+	int offset = 80;
+	if (robo && (robo_parts_name.size() == 0)) {
 		char* headd = robo->roboparam.getNameOfHead();
 		int len = strlen(headd);
 		int headdd = t->getRenderText(headd,500-len*20,300+offset,20,20*len+20,22);
@@ -2583,63 +2657,149 @@ void GamenGARAGE_partRoboParam::Init(Robo* robo, Graphics* g, Texture* t, MyText
 		len = strlen(bodyd);
 		int bodydd = t->getRenderText(bodyd, 500-len*20,322+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(bodydd,true);
-
+		robo_parts_name.push_back(bodydd);
 		char* named = robo->roboparam.getNameOfArm();
 		len = strlen(named);
 		int namedd = t->getRenderText(named, 500-len*20,344+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+		robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfLeg();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,366+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfEngine();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,388+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfBooster();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,410+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfFCS();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,432+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfInside();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,454+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfRArmWeapon();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,476+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfLArmWeapon();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,498+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfRShoulderWeapon();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,520+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
-
+			robo_parts_name.push_back(namedd);
 		named = robo->roboparam.getNameOfLShoulderWeapon();
 		len = strlen(named);
 		namedd = t->getRenderText(named, 500-len*20,544+offset,20,20*len+20,22);
 		t->setRenderTextIsRender(namedd,true);
+			robo_parts_name.push_back(namedd);
+
+
+
+
+	} else if(robo && (robo_parts_name.size()  >=12)) {
+
+
+
+		char* headd = robo->roboparam.getNameOfHead();
+		int len = strlen(headd);
+		int headdd = robo_parts_name[0];
+		t->setRenderTextPos(headdd,500-len*20,300+offset);
+		//robo_parts_name.push_back(headdd);
+		//t->setRenderTextIsRender(headdd,true);
+		t->setRenderTextChangeText(headdd,headd);
+
+		char* bodyd = robo->roboparam.getNameOfBody();
+		len = strlen(bodyd);
+		int bodydd = robo_parts_name[1];
+			
+		t->setRenderTextPos(bodydd, 500-len*20,322+offset);
+		t->setRenderTextChangeText(bodydd,bodyd);
+
+		char* named = robo->roboparam.getNameOfArm();
+		len = strlen(named);
+		int namedd = robo_parts_name[2];
+		t->setRenderTextPos(namedd, 500-len*20,344+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfLeg();
+		len = strlen(named);
+		namedd = robo_parts_name[3];
+		t->setRenderTextPos(namedd, 500-len*20,366+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfEngine();
+		len = strlen(named);
+		namedd = robo_parts_name[4];
+		t->setRenderTextPos(namedd, 500-len*20,388+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfBooster();
+		len = strlen(named);
+		namedd = robo_parts_name[5];
+		t->setRenderTextPos(namedd, 500-len*20,410+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfFCS();
+		len = strlen(named);
+		namedd = robo_parts_name[6];
+		t->setRenderTextPos(namedd, 500-len*20,432+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfInside();
+		len = strlen(named);
+		namedd = robo_parts_name[7];
+		t->setRenderTextPos(namedd, 500-len*20,454+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfRArmWeapon();
+		len = strlen(named);
+		namedd = robo_parts_name[8];
+		t->setRenderTextPos(namedd, 500-len*20,476+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfLArmWeapon();
+		len = strlen(named);
+		namedd = robo_parts_name[9];
+		t->setRenderTextPos(namedd, 500-len*20,498+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfRShoulderWeapon();
+		len = strlen(named);
+		namedd = robo_parts_name[10];
+		t->setRenderTextPos(namedd, 500-len*20,520+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+		named = robo->roboparam.getNameOfLShoulderWeapon();
+		len = strlen(named);
+		namedd = robo_parts_name[11];
+		t->setRenderTextPos(namedd, 500-len*20,544+offset);
+		t->setRenderTextChangeText(namedd,named);
+
+
+
+
 
 
 
 
 
 	}
-	
 }
 void GamenGARAGE_partsParam::setVisible(bool te) {
 
@@ -2691,4 +2851,205 @@ void GamenGARAGE_partRoboParam::byouga(Graphics* g, GUI* gui, float dsecond, int
 
 
 
+}
+
+
+void GamenGARAGE_partYESNOEQUIP::setTexture(Texture* tex) {
+	this->t = tex;
+	question_str = t->getRenderText("sample", 200,400,20,400,22);
+	
+	
+}
+
+void GamenGARAGE_partYESNOEQUIP::setTextureLoader(MyTextureLoader* loader) {
+	this->tex_loader = loader;
+}
+
+void GamenGARAGE_partYESNOEQUIP::makeKL() {
+
+	this->kl = new KoumokuList(t);
+	kl->setname("YESNOEQUIP");
+	KoumokuYESEQUIP* y = new KoumokuYESEQUIP(t, this->gg,this);
+	y->setEnabled(true);
+	kl->setKoumoku(y);
+	KoumokuNOEQUIP* n = new KoumokuNOEQUIP(t, gg, this);
+	n->setEnabled(true);
+	kl->setKoumoku(n);
+
+	kl->setEnable(true);
+	kl->setVisible(t, true);
+	kl->setSize(t,870,450,120,60);
+	y->init();
+	n->init();
+	kl->setHyouji3Mode(false);
+	kl->clickedDown();
+	kl->clickedUp();
+	kl->setEnable(false);
+	kl->setVisible(t,false);
+
+	int gamen_id = t->getTexture(KTROBO_GUI_PNG);
+	clear_gamen = t->getRenderTex(gamen_id, 0xFFFFFFFF, 150,360,700,100,0,0,128,128); 
+	t->setRenderTexIsRender(clear_gamen,true);
+
+}
+
+void KoumokuYESEQUIP::byouga(Graphics* g, GUI* gui, float dsecond, int stamp,bool has_clicked) {
+
+
+if (!getEnabled() && !has_clicked) return;
+	t->setRenderTexColor(gui_koumoku_name_bg_id, 0xFFFFFFFFF);
+	
+
+}// focused_koumoku のkoumokuでもbyougaは呼ばれる
+
+void KoumokuYESEQUIP::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
+if (!getEnabled() && !has_clicked) return;
+	int stt = stamp % 130;
+	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
+	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
+
+
+}
+
+void KoumokuYESEQUIP::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl) {
+	KoumokuList_Parts* kkl = (KoumokuList_Parts*)g_part->mae_focused_list;
+
+	this->equipParts();
+	g->gamenpart_roboparam.setRoboParts(g_part->getRoboParts(), kkl->getMetaData(),g_part->getRoboParts(),g_part->getCategoryID());
+	g->gamenpart_roboparam.hanneiPartsName();
+	// 前の画面に戻る
+	this->g_part->setFocused(gamen,false);
+	this->g->temp_focused_list = g_part->mae_focused_list;
+	g->temp_focused_list->setEnable(true);
+	g->temp_focused_list->clickedUp();
+	g->temp_focused_list->clickedDown();
+}
+
+
+void KoumokuYESEQUIP::equipParts() {
+	if (this->g_part) {
+		g_part->equip();
+	
+	}
+}
+
+void GamenGARAGE_partYESNOEQUIP::equip() {
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "enter");
+	try {
+	if (!is_empty_mode) {
+	if (robo) {
+		if (robo_parts) {
+			robo_parts->equipRobo(robo,g,tex_loader);
+			//robo->roboparam.calcParam();
+		}
+	}
+	} else {
+		RoboPartsEmpty emp = RoboPartsEmpty();
+		if (category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_INSIDE_ID) {
+			emp.emptyInsideWeapon(robo,true);
+		} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RWEAPON_ID) {
+			emp.emptyRArmWeapon(robo,true);
+		} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LWEAPON_ID) {
+			emp.emptyLArmWeapon(robo,true);
+		} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_RKATA_ID) {
+			emp.emptyRShoulderWeapon(robo,true);
+		} else if(category_id == KTROBO_GAMEN_GARAGE_KOUMOKU_LKATA_ID) {
+			emp.emptyLShoulderWeapon(robo,true);
+		}
+		emp.Release();
+	}
+	if (robo) {
+		robo->roboparam.calcParam();
+		//gg->gamenpart_roboparam.hanneiPartsName();
+		//gg->gamenpart_roboparam.calcRoboParam(robo_parts,robo_parts, category_id);
+
+	}
+	} catch (GameError* error) {
+
+		delete error;
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "leave");
+}
+
+void GamenGARAGE_partYESNOEQUIP::setGraphics(Graphics* g) {
+	this->g = g;
+}
+
+void GamenGARAGE_partYESNOEQUIP::setRobo(Robo* robo) {
+	this->robo = robo;
+}
+
+void GamenGARAGE_partYESNOEQUIP::setRoboParts(RoboParts* robo_parts, int category_id) {
+	this->robo_parts = robo_parts;
+	this->category_id = category_id;
+	if (robo_parts && !robo_parts->isEmpty()) {
+		char str[256];
+		for (int i=0;i<256;i++) {
+			str[i] = 0;
+		}	
+		strcpy_s(str,256,robo_parts->data->getData("name")->string_data);
+		strcat_s(str,256-32," を装備しますか?");
+		t->setRenderTextChangeText(question_str, str);
+		setEmptyMode(false);
+	}
+
+	if (robo_parts && robo_parts->isEmpty()) {
+		t->setRenderTextChangeText(question_str, "パーツをはずしますか?");
+		setEmptyMode(true);
+	}
+
+
+}
+
+void GamenGARAGE_partYESNOEQUIP::setFocused(Gamen* g, bool te) {
+	if (te) {
+		t->setRenderTexIsRender(clear_gamen,true);
+		t->setRenderTextIsRender(question_str,true);
+		kl->setEnable(true);
+		kl->setVisible(t,true);
+		
+	} else {
+		t->setRenderTexIsRender(clear_gamen,false);
+		t->setRenderTextIsRender(question_str,false);
+		kl->setVisible(t,false);
+		kl->setEnable(false);
+	}
+}
+
+void GamenGARAGE_partYESNOEQUIP::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
+	if (this->kl) {
+		kl->byouga(g, gui, dsecond, stamp);
+	}
+}
+
+void GamenGARAGE_partYESNOEQUIP::setMaeFocusedList(KoumokuList* mae) {
+	this->mae_focused_list = mae;
+}
+
+
+
+
+void KoumokuNOEQUIP::_exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl) {
+
+	//this->equipParts();
+	// 前の画面に戻る
+	this->g_part->setFocused(gamen,false);
+	this->g->temp_focused_list = g_part->mae_focused_list;
+	g->temp_focused_list->setEnable(true);
+}
+
+
+void KoumokuNOEQUIP::byouga(Graphics* g, GUI* gui, float dsecond, int stamp,bool has_clicked) {
+
+
+if (!getEnabled() && !has_clicked) return;
+	t->setRenderTexColor(gui_koumoku_name_bg_id, 0xFFFFFFFFF);
+}// focused_koumoku のkoumokuでもbyougaは呼ばれる
+
+void KoumokuNOEQUIP::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
+if (!getEnabled() && !has_clicked) return;
+	int stt = stamp % 130;
+	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
+	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 }

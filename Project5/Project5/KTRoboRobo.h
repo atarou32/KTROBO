@@ -189,7 +189,7 @@ public:
 	virtual void Release()=0;
 	virtual RoboParts* myNew()=0;
 	bool hasMeshLoaded() {return mesh_loaded;}
-	virtual void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader){}; // clone ‚ð‘•”õ‚³‚¹‚é
+	virtual void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader){ return;}; // clone ‚ð‘•”õ‚³‚¹‚é
 	virtual bool isEmpty() {return false;}
 
 };
@@ -224,6 +224,7 @@ public:
 	void emptyInsideWeapon(Robo* robo, bool is_delete);
 	void equipRobo(Robo* robo) {
 		// ‚È‚É‚à‚µ‚È‚¢
+		return;
 	}
 };
 	

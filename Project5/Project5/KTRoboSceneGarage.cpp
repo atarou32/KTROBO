@@ -4,12 +4,13 @@
 
 using namespace KTROBO;
 
-SceneGarage::SceneGarage(Graphics* g, AtariHantei* hantei, Texture* tex, MyTextureLoader* loader) : Scene("garage",6)
+SceneGarage::SceneGarage(Graphics* g, AtariHantei* hantei, Texture* tex, Texture* tex2, MyTextureLoader* loader) : Scene("garage",6)
 {
 	gg = 0;
 	this->g = g;
 	this->hantei = hantei;
 	this->tex = tex;
+	this->tex2 = tex2;
 	this->loader = loader;
 
 	
@@ -56,7 +57,7 @@ void SceneGarage::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_St
 
 void SceneGarage::enter() {
 	gg = new Gamen_GARAGE();
-	gg->Init(g, hantei, tex,loader);
+	gg->Init(g, hantei, tex, tex2, loader);
 	INPUTGETBYMESSAGESTRUCT* ss  = InputMessageDispatcher::getRootInputGetStruct();
 	while (ss->getParent()) {
 		ss = ss->getParent();

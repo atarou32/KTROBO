@@ -735,6 +735,7 @@ bool Game::Init(HWND hwnd) {
 	texdayo = new Textures(demo->tex_loader);
 	MyLuaGlueSingleton::getInstance()->setColTextures(texdayo);	
 	texdayo->getInstance(0)->getTexture(KTROBO_GUI_PNG,4096);
+	int pp = texdayo->getInstance(1)->getTexture(KTROBO_GUI_PNG, 4096);
 	int i = texdayo->getInstance(0)->getTexture("resrc/model/ponko-niyake.png");
 //	GUI::Init(hwnd, texdayo->getInstance(0), Ls[TASKTHREADS_AIDECISION], g->getScreenWidth(), g->getScreenHeight());
 //	GUI_INPUTTEXT::Init(hwnd, texdayo->getInstance(0));
@@ -758,7 +759,12 @@ bool Game::Init(HWND hwnd) {
 	int kk = texdayo->getInstance(0)->getRenderText("ganbaru",0,0,10,100,100);
 	texdayo->getInstance(0)->setRenderTextIsRender(kk,false);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,false);
-		
+	{
+	int j = texdayo->getInstance(1)->getRenderTex(pp,0xFFFFFFFF,50,0,200,200,0,0,512,512);
+	int kk = texdayo->getInstance(1)->getRenderText("ganbaru",0,0,10,100,100);
+	texdayo->getInstance(1)->setRenderTextIsRender(kk,false);
+	texdayo->getInstance(1)->setRenderTexIsRender(j,false);
+	}
 
 	GUI::Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
 
@@ -901,7 +907,7 @@ bool Game::Init(HWND hwnd) {
 	//hantei->ataristart();
 
 
-	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), demo->tex_loader);
+	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 
 	this->setScene(sg);
 
@@ -1059,6 +1065,8 @@ void Game::Del() {
 	 }
 
 	 if (texdayo) {
+		 texdayo->setDeleteAll();
+		texdayo->deletedayo();
 		delete texdayo;
 		texdayo = 0;
 	}
@@ -1933,7 +1941,8 @@ void Game::Run() {
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 
-	texdayo->render(g);
+	texdayo->render(g,0);
+	texdayo->deletedayo();
 
 	int siz = scenes.size();
 	if (siz) {
@@ -1947,6 +1956,7 @@ void Game::Run() {
 		now_scene->mainrender(true);
 	}
 
+	texdayo->render(g,1);
 
 	/*
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");

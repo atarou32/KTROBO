@@ -635,12 +635,13 @@ public:
 	Textures(MyTextureLoader* l);
 	~Textures();
 
-	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+	void render(Graphics* g, int index); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
 	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
 	void updateIndexBuffer(Graphics* g);//描画補助スレッドで呼ぶ
 	void createIndexBuffer(Graphics* g);// ロードスレッドで呼ぶ 適正な初期値でcreateする
 	void deletedayo(); // delete処理を行う　ロードスレッドで呼ぶ 細切れにdeleteする
 
+	void setDeleteAll();
 };
 }
 #endif

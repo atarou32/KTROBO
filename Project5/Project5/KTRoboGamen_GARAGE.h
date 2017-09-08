@@ -53,6 +53,71 @@ public:
 	void getSuutiChara(int suuti, char* chara);
 
 };
+class Gamen_GARAGE;
+class GamenGARAGE_partYESNOEQUIP : public GamenPart {
+
+public:
+	KoumokuList* mae_focused_list;
+	KoumokuList* kl;
+	void equip();
+private:
+	bool is_empty_mode;
+	Robo* robo;
+	RoboParts* robo_parts;
+	Texture* t;
+	Graphics* g;
+	MyTextureLoader* tex_loader;
+	Gamen_GARAGE* gg;
+	int clear_gamen;
+	int question_str;
+	int category_id;
+public:
+	GamenGARAGE_partYESNOEQUIP() {
+		robo = 0;
+		robo_parts = 0;
+		t = 0;
+		tex_loader = 0;
+		clear_gamen = 0;
+		question_str = 0;
+		kl = 0;
+		mae_focused_list = 0;
+		g = 0;
+		gg = 0;
+		is_empty_mode = false;
+		category_id = 0;
+	}
+
+	~GamenGARAGE_partYESNOEQUIP() {
+		if (kl) {
+			delete kl;
+			kl = 0;
+
+		}
+	}
+public:
+	void setGG(Gamen_GARAGE* gg) {
+		this->gg = gg;
+	}
+	void setEmptyMode(bool ttt ) {
+		is_empty_mode = ttt;
+	}
+	RoboParts* getRoboParts() {
+		return robo_parts;
+	}
+	int getCategoryID() {
+		return category_id;
+	}
+
+	void setGraphics(Graphics* g);
+	void setTexture(Texture* tex);
+	void setTextureLoader(MyTextureLoader* loader);
+	void makeKL();
+	void setRobo(Robo* robo);
+	void setRoboParts(RoboParts* robo_parts, int category_id);
+	void setMaeFocusedList(KoumokuList* kll);
+	void setFocused(Gamen* g, bool te);
+	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
+};
 
 
 class GamenGARAGE_partRoboParam : public GamenPart {
@@ -92,15 +157,94 @@ class GamenGARAGE_partRoboParam : public GamenPart {
 			}
 			gamen_robo_params.clear();
 		}
+		RoboParts* getRoboParts() {
+			return this->robo_parts;
+		}
+
 		void setRoboParts(RoboParts* robo_parts, RoboDataMetaData* metadata, RoboParts* robo_parts_compare, int category_id);
 		void calcRoboParam(RoboParts* new_parts, RoboParts* robo_parts_compare, int category_id);
-
+		void hanneiPartsName();
 		void setFocused(Gamen* g, bool t);
 		void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
 	
 };
 
 class Gamen_GARAGE;
+
+// ‚Ù‚©‚ÌID‚Æ‚©‚Ô‚ç‚È‚¢‚æ‚¤‚É‚·‚é‚±‚Æ
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_YESNOEQUIP_YES_ID 1000000 
+#define KTROBO_GAMEN_GARAGE_KOUMOKU_YESNOEQUIP_NO_ID 1000001 
+#define KTROBO_GAMEN_GARAGE_GUI_PNG "resrc/sample/gui.png"
+
+
+class KoumokuNOEQUIP : public Koumoku {
+public:
+	Gamen_GARAGE* g;
+	GamenGARAGE_partYESNOEQUIP* g_part;
+	Texture* t;
+public:
+	KoumokuNOEQUIP(Texture* t, Gamen_GARAGE* g, GamenGARAGE_partYESNOEQUIP* g_part) : Koumoku(KTROBO_GAMEN_GARAGE_KOUMOKU_YESNOEQUIP_NO_ID) {
+		this->g = g;
+		this->g_part = g_part;
+		this->t = t;
+	}
+	~KoumokuNOEQUIP() {
+	}
+	void init() {
+			int tex_id = t->getTexture(KTROBO_GAMEN_GARAGE_GUI_PNG);
+		gui_koumoku_name_id = t->getRenderText("‚¢‚¢‚¦", place.left,place.top,place.bottom - place.top, place.right - place.left,
+			place.bottom - place.top);
+		t->setRenderTextIsRender(gui_koumoku_name_id,true);
+
+		gui_koumoku_name_bg_id = t->getRenderTex(tex_id,0xFFFFFFFF,place.left,place.top,place.right-place.left,place.bottom - place.top,
+			0,0,100,100);
+		t->setRenderTexIsRender(gui_koumoku_name_bg_id,true);
+	
+
+
+
+	}
+	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp,bool has_clicked);// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
+	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);
+	void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl);
+
+};
+
+class KoumokuYESEQUIP : public Koumoku {
+public:
+	Gamen_GARAGE* g;
+	GamenGARAGE_partYESNOEQUIP* g_part;
+	Texture* t;
+public:
+	~KoumokuYESEQUIP() {
+	}
+	KoumokuYESEQUIP(Texture* t, Gamen_GARAGE* g, GamenGARAGE_partYESNOEQUIP* g_part) : Koumoku(KTROBO_GAMEN_GARAGE_KOUMOKU_YESNOEQUIP_YES_ID) {
+		this->g = g;
+		this->g_part = g_part;
+		this->t = t;
+		}
+	void init() {
+			int tex_id = t->getTexture(KTROBO_GAMEN_GARAGE_GUI_PNG);
+		gui_koumoku_name_id = t->getRenderText("‚Í‚¢", place.left,place.top,place.bottom - place.top, place.right - place.left,
+			place.bottom - place.top);
+		t->setRenderTextIsRender(gui_koumoku_name_id,true);
+
+		gui_koumoku_name_bg_id = t->getRenderTex(tex_id,0xFFFFFFFF,place.left,place.top,place.right-place.left,place.bottom - place.top,
+			0,0,100,100);
+		t->setRenderTexIsRender(gui_koumoku_name_bg_id,true);
+
+
+
+	};
+
+	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp,bool has_clicked);// focused_koumoku ‚Ìkoumoku‚Å‚àbyouga‚ÍŒÄ‚Î‚ê‚é
+	void focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked);
+	void _exedayo(Gamen* gamen, GamenPart* gp, KoumokuList* kl);
+
+	void equipParts();
+
+};
+
 class KoumokuList_Parts : public KoumokuList {
 private:
 	int category_id;
@@ -114,6 +258,9 @@ public:
 public:
 	int getCategoryID() {
 		return category_id;
+	}
+	int getCategoryID2() {
+		return category2_id;
 	}
 
 	KoumokuList_Parts(Gamen_GARAGE* g, int cid, int c2id, Texture* t) : KoumokuList(t) {
@@ -225,9 +372,11 @@ private:
 	int pressed_up_count;
 	int pressed_down_count;
 	Texture* t;
+	Texture* t2;
 	MyTextureLoader* loader;
 public:
 	GamenGARAGE_partRoboParam gamenpart_roboparam;
+	GamenGARAGE_partYESNOEQUIP gamenpart_yesnoequip;
 
 	RoboParts* getRoboPartsFromCID(int cid);
 public:
@@ -268,8 +417,10 @@ public:
 	vector<KoumokuList_Parts*> parts_lkataweapon_lists;
 
 	KoumokuList_Parts* getPartsList(vector<KoumokuList_Parts*>* lists, int category_id, int category_id2);
+	KoumokuList_Parts* getPartsList(int category_id, int category_id2);
 
-	void Init(Graphics* g, AtariHantei* hantei,Texture* t, MyTextureLoader* loader);
+
+	void Init(Graphics* g, AtariHantei* hantei,Texture* t, Texture* t2, MyTextureLoader* loader);
 	void Release();
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
 	void loadData(Graphics* g, float dsecond, int stamp);

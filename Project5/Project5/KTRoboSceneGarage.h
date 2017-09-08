@@ -16,12 +16,13 @@ private:
 	Graphics* g;
 	AtariHantei* hantei;
 	Texture* tex;
+	Texture* tex2;
 	MyTextureLoader* loader;
 
 	Gamen_GARAGE* gg;
 
 public:
-	SceneGarage(Graphics* g, AtariHantei* hantei, Texture* tex, MyTextureLoader* loader);
+	SceneGarage(Graphics* g, AtariHantei* hantei, Texture* tex, Texture* tex2, MyTextureLoader* loader);
 	~SceneGarage(void);
 
 public:

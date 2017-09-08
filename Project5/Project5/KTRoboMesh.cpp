@@ -455,7 +455,11 @@ Mesh* Mesh::clone() {
 	it_bone = nmesh->Bones.begin();
 	while(it_bone != nmesh->Bones.end()) {
 		MeshBone* b = *it_bone;
-		b->parent_bone = nmesh->Bones[b->parent_bone_index];
+		if (b->parent_bone_index == KTROBO_MESH_BONE_NULL) {
+			b->parent_bone = NULL;
+		} else {
+			b->parent_bone = nmesh->Bones[b->parent_bone_index];
+		}
 		it_bone++;
 	}
 	

@@ -246,7 +246,7 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 		atarihan = 0;
 	}
 
-
+	atarihan = new UMeshUnit();
 	// atarihan‚Ìumesh‚ð‚Â‚­‚é
 	MYMATRIX wor;
 	MyMatrixIdentity(wor);
@@ -279,7 +279,7 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 			MyMatrixRotationY(wor3, 0);//-3.141592f);
 			wor3._11 = -1;
 			MyMatrixMultiply(arm->rarm->rootbone_matrix_local_kakeru, wor3, arm->rarm->rootbone_matrix_local_kakeru);
-			arm->rarm->animate(40,true);
+	//		arm->rarm->animate(40,true);
 			atari_rarm = um_rarm;
 
 	}
@@ -288,7 +288,7 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 		arm->larm, false, &wor,  body->body->Bones[body->body->BoneIndexes["leftArmJointBone"]],body->body->BoneIndexes["leftArmJointBone"],false);
 	atarihan->setUMesh(um_larm);
 		MyMatrixScaling(arm->larm->rootbone_matrix_local_kakeru,1.1,1.1,1.1);
-		arm->larm->animate(40,true);
+	//	arm->larm->animate(40,true);
 		atari_larm = um_larm;
 	}
 
@@ -331,8 +331,17 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 
 
 
-	atarihan->setXYZ(5,3,5.5);
+	//atarihan->setXYZ(5,3,5.5);
+	atarihan->setXYZ(0,0,0);
 	atarihan->calcJyusinAndR();
+
+	if (arm->larm) {
+		arm->larm->animate(40,true);
+	}
+	if (arm->rarm) {
+		arm->rarm->animate(40,true);
+	}
+
 }
 
 void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float dt, int stamp) {
