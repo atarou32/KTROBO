@@ -25,6 +25,12 @@ Robo::Robo(void)
 	atarihan = 0;
 //	MyMatrixIdentity(world);
 	atari_leg = 0;
+	atari_core = 0;
+	atari_head = 0;
+	atari_head2 = 0;
+	atari_head3 = 0;
+	atari_larm = 0;
+	atari_rarm = 0;
 	move_state = &movestop;
 	setti_state = &kuutyuu;
 	booster_state = &boostoff;
@@ -212,6 +218,123 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	}
 }
 
+void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
+	if (atari_core) {
+		atari_core = 0;
+	}
+	if (atari_head) {
+		atari_head = 0;
+	}
+	if (atari_head2) {
+		atari_head2 = 0;
+	}
+	if (atari_head3) {
+		atari_head3 = 0;
+	}
+	if (atari_larm) {
+		atari_larm = 0;
+	}
+	if (atari_rarm) {
+		atari_rarm = 0;
+	}
+	if (atari_leg) {
+		atari_leg = 0;
+	}
+
+	if(atarihan) {
+		delete atarihan;
+		atarihan = 0;
+	}
+
+
+	// atarihan‚Ìumesh‚ð‚Â‚­‚é
+	MYMATRIX wor;
+	MyMatrixIdentity(wor);
+	if (body->body) {
+	UMesh* um_core = new UMesh(g,body->body->filename, tex_loader,
+		body->body,true, &wor,NULL,KTROBO_MESH_BONE_NULL,false);
+	atarihan->setUMesh(um_core);
+	atari_core = um_core;
+	}
+	if (leg->leg) {
+	UMesh* um_leg = new UMesh(g, leg->leg->filename, tex_loader,
+		leg->leg,false, &wor, body->body->Bones[body->body->BoneIndexes["legJointBone"]],body->body->BoneIndexes["legJointBone"],false);
+	atarihan->setUMesh(um_leg);
+	atari_leg = um_leg;
+	}
+	if (arm->rarm) {
+	UMesh* um_rarm = new UMesh(g,arm->rarm->filename, tex_loader,
+		arm->rarm, false, &wor,  body->body->Bones[body->body->BoneIndexes["rightArmJointBone"]],body->body->BoneIndexes["rightArmJointBone"],false);
+	atarihan->setUMesh(um_rarm);
+
+			MyMatrixScaling(arm->rarm->rootbone_matrix_local_kakeru,1.1,1.1,1.1);
+			static int test=0;
+			test++;
+
+			MYMATRIX wor;
+			MYMATRIX wor2;
+			MYMATRIX wor3;
+		//	MyMatrixRotationZ(wor, 3.141592f);
+		//	MyMatrixRotationX(wor2, 3.141592f);
+			MyMatrixRotationY(wor3, 0);//-3.141592f);
+			wor3._11 = -1;
+			MyMatrixMultiply(arm->rarm->rootbone_matrix_local_kakeru, wor3, arm->rarm->rootbone_matrix_local_kakeru);
+			arm->rarm->animate(40,true);
+			atari_rarm = um_rarm;
+
+	}
+	if (arm->larm) {
+	UMesh* um_larm = new UMesh(g, arm->larm->filename, tex_loader,
+		arm->larm, false, &wor,  body->body->Bones[body->body->BoneIndexes["leftArmJointBone"]],body->body->BoneIndexes["leftArmJointBone"],false);
+	atarihan->setUMesh(um_larm);
+		MyMatrixScaling(arm->larm->rootbone_matrix_local_kakeru,1.1,1.1,1.1);
+		arm->larm->animate(40,true);
+		atari_larm = um_larm;
+	}
+
+	if (head->head) {
+	UMesh* um_head = new UMesh(g, head->head->filename, tex_loader,
+		head->head, false, &wor, body->body->Bones[body->body->BoneIndexes["headJointBone"]],body->body->BoneIndexes["headJointBone"],false);
+	atarihan->setUMesh(um_head);
+	atari_head = um_head;
+	}
+
+	if (head->head2) {
+	UMesh* um_head2 = new UMesh(g, head->head2->filename, tex_loader,
+		head->head2, false, &wor, body->body->Bones[body->body->BoneIndexes["headJointBone"]],body->body->BoneIndexes["headJointBone"],false);
+	atarihan->setUMesh(um_head2);
+	atari_head2  = um_head2;
+	}
+
+	if (head->head3) {
+	UMesh* um_head3 = new UMesh(g, head->head3->filename, tex_loader,
+		head->head3, false, &wor, body->body->Bones[body->body->BoneIndexes["headJointBone"]],body->body->BoneIndexes["headJointBone"],false);
+	atarihan->setUMesh(um_head3);
+	atari_head3 = um_head3;
+	}
+
+	float frames[16];
+	bool matrs[16];
+	for (int i=0;i<16;i++) {
+		frames[i] = 0;
+		matrs[i] = true;
+	}
+
+	atarihan->calcAnimeFrame(atarihan->meshs.size(),frames,matrs);
+
+	atarihan->setDT(0);
+	atarihan->setROTXYZ(0,0,0);
+	atarihan->setSCALEXYZ(1,1,1);
+	atarihan->setV(&MYVECTOR3(0,0,0));
+
+
+
+
+
+	atarihan->setXYZ(5,3,5.5);
+	atarihan->calcJyusinAndR();
+}
+
 void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float dt, int stamp) {
 
 	AtariUnitAnsKWSK ans[512];
@@ -242,7 +365,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					- abs(MyVec3Dot(ob->u[2], ans[i].ans->kouten_housen)) * ob->e[2]));
 					f = min ( f, 0.01f);
 					if (ans[i].ans->kouten_housen.float3.z > 0) {
-					atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f*f);
+					atarihan->setXYZD(atarihan->x, atarihan->y, atarihan->z + abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f*f, 0.2);
 					setti_state = &setti;
 					//atarihan->setV(&MYVECTOR3(0,0,atarihan->v.float3.z));
 					/*if ((move_state != &movestop) && move_state->isJump()) {
@@ -270,7 +393,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					- abs(MyVec3Dot(ob->u[2], ans[i].ans->kouten_housen)) * ob->e[2]));
 					f = min ( f, 0.01f);
 					if (ans[i].ans->kouten_housen.float3.z > 0) {
-					atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f*f);
+					atarihan->setXYZD(atarihan->x, atarihan->y, atarihan->z + abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f*f,0.2);
 					/*if ((move_state != &movestop) && move_state->isJump()) {
 					move_state->leave(this,&movestop, move_state);
 					movestop.enter(this, &movestop, move_state);
@@ -374,9 +497,9 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 							OBB obda = *ob2;
 							obda.e = MYVECTOR3(0.5f,0.5f,0.5f);
 							g->drawOBB(g,0xFF00FF00,&iden,view,g->getProj(),&obda);
-							atarihan->setXYZ(atarihan->x + ans[i].ans->kouten_housen.float3.x * 1.02f*f2*f2,
+							atarihan->setXYZD(atarihan->x + ans[i].ans->kouten_housen.float3.x * 1.02f*f2*f2,
 								atarihan->y + ans[i].ans->kouten_housen.float3.y * 1.02f*f2*f2,
-								atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.02f*f2*f2);
+								atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.02f*f2*f2,0.2);
 						
 							setkabe_state = &setkabe;
 							setkabedayo = true;
@@ -389,14 +512,14 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 						}
 
 						if ((sitadot > 0.7f) && MyVec3Dot(a2, ans[i].ans->kouten_housen) > 0.15f) {
-							atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z - abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f2*f2);
+							atarihan->setXYZD(atarihan->x, atarihan->y, atarihan->z - abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f2*f2,0.2);
 							settenjyou_state = &settenjyou;
 							vdayo = 0;
 						}
 
 						if (  MyVec3Dot(a, ans[i].ans->kouten_housen) < -0.3f) {
 							if (!setdayo) {
-							atarihan->setXYZ(atarihan->x, atarihan->y, atarihan->z + abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f*f);
+							atarihan->setXYZD(atarihan->x, atarihan->y, atarihan->z + abs(ans[i].ans->kouten_housen.float3.z) * 1.02f*f*f,0.2);
 						//	setti_state = &setti;
 							vdayo = 0;
 							}
@@ -965,6 +1088,93 @@ void RoboParts::loadMesh(Graphics* g, MyTextureLoader* loader){
 
 
 }
+
+void Robo::settyakuRArmWeaponWithArm() {
+	if (raweapon && arm) {
+	// handbone ‚ÆÚ’…
+	raweapon->weapon->RootBone->parent_bone = arm->rarm->Bones[arm->rarm->BoneIndexes["handBone"]];
+	raweapon->weapon->RootBone->parent_bone_index = arm->rarm->BoneIndexes["handBone"];
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	wo._11 = 0;
+	wo._22 = 0;
+	wo._12 = -1;
+	wo._21 = 1;
+	wo._33 = -1;
+	raweapon->weapon->rootbone_matrix_local_kakeru = wo;
+	raweapon->weapon->animate(0,true);
+	}
+}
+
+void Robo::settyakuLArmWeaponWithArm() {
+	if (laweapon && arm) {
+		laweapon->weapon->RootBone->parent_bone = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
+	laweapon->weapon->RootBone->parent_bone_index = arm->larm->BoneIndexes["handBone"];
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	wo._11 = 0;
+	wo._22 = 0;
+	wo._12 = -1;
+	wo._21 = 1;
+	wo._33 = -1;
+	laweapon->weapon->rootbone_matrix_local_kakeru = wo;
+	laweapon->weapon->animate(0,true);
+	}
+}
+void Robo::settyakuRShoulderWeaponWithBody() {
+	if (rsweapon && body) {
+
+		rsweapon->weapon->RootBone->parent_bone = body->body->Bones[body->body->BoneIndexes["rightKataJointBone"]];
+		rsweapon->weapon->RootBone->parent_bone_index = body->body->BoneIndexes["rightKataJointBone"];
+		MYMATRIX wo;
+		MyMatrixIdentity(wo);
+		wo._11 = 0;
+		wo._22 = 0;
+		wo._12 = -1;
+		wo._21 = 1;
+		wo._33 = -1;
+		rsweapon->weapon->rootbone_matrix_local_kakeru = wo;
+		rsweapon->weapon->animate(0,true);
+	}
+
+}
+
+void Robo::settyakuLShoulderWeaponWithBody() {
+	if (lsweapon && body) {
+
+		lsweapon->weapon->RootBone->parent_bone = body->body->Bones[body->body->BoneIndexes["leftKataJointBone"]];
+		lsweapon->weapon->RootBone->parent_bone_index = body->body->BoneIndexes["leftKataJointBone"];
+		MYMATRIX wo;
+		MyMatrixIdentity(wo);
+		wo._11 = 0;
+		wo._22 = 0;
+		wo._12 = -1;
+		wo._21 = 1;
+		wo._33 = -1;
+		lsweapon->weapon->rootbone_matrix_local_kakeru = wo;
+		lsweapon->weapon->animate(0,true);
+	}
+
+}
+
+void Robo::settyakuBoosterWithLeg() {
+	if (booster && leg) {
+	booster->mesh->RootBone->parent_bone = leg->leg->Bones[leg->leg->BoneIndexes["boosterBone"]];
+	booster->mesh->RootBone->parent_bone_index = leg->leg->BoneIndexes["boosterBone"];
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	wo._11 = 0;
+	wo._22 = 0;
+	wo._12 = -1;
+	wo._21 = 1;
+	wo._33 = -1;
+	booster->mesh->rootbone_matrix_local_kakeru = wo;
+	booster->mesh->animate(0,true);
+	}
+
+}
+
+
 void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 /*	Mesh* head;
 	Mesh* body;
@@ -1153,19 +1363,8 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	delete rweapon_md;
 	ma.deletedayo();
 
-	// handbone ‚ÆÚ’…
-	raweapon->weapon->RootBone->parent_bone = arm->rarm->Bones[arm->rarm->BoneIndexes["handBone"]];
-	raweapon->weapon->RootBone->parent_bone_index = arm->rarm->BoneIndexes["handBone"];
-	MYMATRIX wo;
-	MyMatrixIdentity(wo);
-	wo._11 = 0;
-	wo._22 = 0;
-	wo._12 = -1;
-	wo._21 = 1;
-	wo._33 = -1;
-	raweapon->weapon->rootbone_matrix_local_kakeru = wo;
-	raweapon->weapon->animate(0,true);
-
+	
+	settyakuRArmWeaponWithArm();
 	}
 
 	{
@@ -1196,18 +1395,8 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	}
 	delete lweapon_md;
 	ma.deletedayo();
-	laweapon->weapon->RootBone->parent_bone = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
-	laweapon->weapon->RootBone->parent_bone_index = arm->larm->BoneIndexes["handBone"];
-	MYMATRIX wo;
-	MyMatrixIdentity(wo);
-	wo._11 = 0;
-	wo._22 = 0;
-	wo._12 = -1;
-	wo._21 = 1;
-	wo._33 = -1;
-	laweapon->weapon->rootbone_matrix_local_kakeru = wo;
-	laweapon->weapon->animate(0,true);
 
+	settyakuLArmWeaponWithArm();
 
 	}
 
@@ -1241,17 +1430,8 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	}
 	delete booster_md;
 	ma.deletedayo();
-	booster->mesh->RootBone->parent_bone = leg->leg->Bones[leg->leg->BoneIndexes["boosterBone"]];
-	booster->mesh->RootBone->parent_bone_index = leg->leg->BoneIndexes["boosterBone"];
-	MYMATRIX wo;
-	MyMatrixIdentity(wo);
-	wo._11 = 0;
-	wo._22 = 0;
-	wo._12 = -1;
-	wo._21 = 1;
-	wo._33 = -1;
-	booster->mesh->rootbone_matrix_local_kakeru = wo;
-	booster->mesh->animate(0,true);
+
+	settyakuBoosterWithLeg();
 
 	// booster ‚ÌŒvŽZ@
 	roboparam.boostercalc.Init(this, booster);
@@ -1260,90 +1440,13 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 
 
 
-
-	// atarihan‚Ìumesh‚ð‚Â‚­‚é
-	MYMATRIX wor;
-	MyMatrixIdentity(wor);
-	if (body->body) {
-	UMesh* um_core = new UMesh(g,body->body->filename, tex_loader,
-		body->body,true, &wor,NULL,KTROBO_MESH_BONE_NULL,false);
-	atarihan->setUMesh(um_core);
-	}
-	if (leg->leg) {
-	UMesh* um_leg = new UMesh(g, leg->leg->filename, tex_loader,
-		leg->leg,false, &wor, body->body->Bones[body->body->BoneIndexes["legJointBone"]],body->body->BoneIndexes["legJointBone"],false);
-	atarihan->setUMesh(um_leg);
-	atari_leg = um_leg;
-	}
-	if (arm->rarm) {
-	UMesh* um_rarm = new UMesh(g,arm->rarm->filename, tex_loader,
-		arm->rarm, false, &wor,  body->body->Bones[body->body->BoneIndexes["rightArmJointBone"]],body->body->BoneIndexes["rightArmJointBone"],false);
-	atarihan->setUMesh(um_rarm);
-
-			MyMatrixScaling(arm->rarm->rootbone_matrix_local_kakeru,1.1,1.1,1.1);
-			static int test=0;
-			test++;
-
-			MYMATRIX wor;
-			MYMATRIX wor2;
-			MYMATRIX wor3;
-		//	MyMatrixRotationZ(wor, 3.141592f);
-		//	MyMatrixRotationX(wor2, 3.141592f);
-			MyMatrixRotationY(wor3, 0);//-3.141592f);
-			wor3._11 = -1;
-			MyMatrixMultiply(arm->rarm->rootbone_matrix_local_kakeru, wor3, arm->rarm->rootbone_matrix_local_kakeru);
-			arm->rarm->animate(40,true);
-
-
-	}
-	if (arm->larm) {
-	UMesh* um_larm = new UMesh(g, arm->larm->filename, tex_loader,
-		arm->larm, false, &wor,  body->body->Bones[body->body->BoneIndexes["leftArmJointBone"]],body->body->BoneIndexes["leftArmJointBone"],false);
-	atarihan->setUMesh(um_larm);
-		MyMatrixScaling(arm->larm->rootbone_matrix_local_kakeru,1.1,1.1,1.1);
-		arm->larm->animate(40,true);
-	}
-
-	if (head->head) {
-	UMesh* um_head = new UMesh(g, head->head->filename, tex_loader,
-		head->head, false, &wor, body->body->Bones[body->body->BoneIndexes["headJointBone"]],body->body->BoneIndexes["headJointBone"],false);
-	atarihan->setUMesh(um_head);
-	}
-
-	if (head->head2) {
-	UMesh* um_head2 = new UMesh(g, head->head2->filename, tex_loader,
-		head->head2, false, &wor, body->body->Bones[body->body->BoneIndexes["headJointBone"]],body->body->BoneIndexes["headJointBone"],false);
-	atarihan->setUMesh(um_head2);
-	}
-
-	if (head->head3) {
-	UMesh* um_head3 = new UMesh(g, head->head3->filename, tex_loader,
-		head->head3, false, &wor, body->body->Bones[body->body->BoneIndexes["headJointBone"]],body->body->BoneIndexes["headJointBone"],false);
-	atarihan->setUMesh(um_head3);
-	}
-
-	float frames[16];
-	bool matrs[16];
-	for (int i=0;i<16;i++) {
-		frames[i] = 0;
-		matrs[i] = true;
-	}
-
-	atarihan->calcAnimeFrame(atarihan->meshs.size(),frames,matrs);
+	this->remakeUMesh(g,tex_loader);
+	
 	if (hantei) {
 		hantei->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_CHARA);
 	}
-	atarihan->setDT(0);
-	atarihan->setROTXYZ(0,0,0);
-	atarihan->setSCALEXYZ(1,1,1);
-	atarihan->setV(&MYVECTOR3(0,0,0));
+	
 
-
-
-
-
-	atarihan->setXYZ(5,3,5.5);
-	atarihan->calcJyusinAndR();
 	anime_loop_leg.setAnime(10,30,true);
 	anime_loop_leg.setTimeAndSpeed(0.01,0);
 //	world = atarihan->world;
@@ -1600,8 +1703,173 @@ void InsideWeapon::drawMesh(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 
 
+void RoboHead::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboHead* new_parts = new RoboHead();
+	new_parts->init(this);
+
+	if (robo->head) {
+		robo->head->Release();
+		delete robo->head;
+		robo->head = 0;
+	}
+	robo->head = new_parts;
+	RoboHead*  head = new_parts;
+
+	robo->remakeUMesh(g,tex_loader); 
+}
+
+void RoboLeg::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboLeg* new_parts = new RoboLeg();
+	new_parts->init(this);
+
+	if (robo->leg) {
+		robo->leg->Release();
+		delete robo->leg;
+		robo->leg = 0;
+	}
+	robo->leg = new_parts;
+	RoboLeg*  leg = new_parts;
+
+	robo->remakeUMesh(g,tex_loader);
+	robo->settyakuBoosterWithLeg();
+}
+
+void RoboBody::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboBody* new_parts = new RoboBody();
+	new_parts->init(this);
+	if (robo->body) {
+		robo->body->Release();
+		delete robo->body;
+		robo->body = 0;
+	}
+	robo->body = new_parts;
+	robo->remakeUMesh(g,tex_loader);
+	robo->settyakuBoosterWithLeg();
+	robo->settyakuRArmWeaponWithArm();
+	robo->settyakuLArmWeaponWithArm();
+}
 
 
+void RoboArm::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboArm* new_parts = new RoboArm();
+	new_parts->init(this);
+	if (robo->arm) {
+		robo->arm->Release();
+		delete robo->arm;
+		robo->arm = 0;
+	}
+	robo->arm = new_parts;
+	robo->remakeUMesh(g,tex_loader);
+	//robo->settyakuBoosterWithLeg();
+	robo->settyakuRArmWeaponWithArm();
+	robo->settyakuLArmWeaponWithArm();
+}
+
+
+void RArmWeapon::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RArmWeapon* new_parts = new RArmWeapon();
+	new_parts->init(this);
+	if (robo->raweapon) {
+		robo->raweapon->Release();
+		delete robo->raweapon;
+		robo->raweapon = 0;
+	}
+	robo->raweapon = new_parts;
+	//robo->remakeUMesh(g,tex_loader);
+	//robo->settyakuBoosterWithLeg();
+	robo->settyakuRArmWeaponWithArm();
+	//robo->settyakuLArmWeaponWithArm();
+}
+
+void LArmWeapon::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	LArmWeapon* new_parts = new LArmWeapon();
+	new_parts->init(this);
+	if (robo->laweapon) {
+		robo->laweapon->Release();
+		delete robo->laweapon;
+		robo->laweapon = 0;
+	}
+	robo->laweapon = new_parts;
+	//robo->remakeUMesh(g,tex_loader);
+	//robo->settyakuBoosterWithLeg();
+	//robo->settyakuRArmWeaponWithArm();
+	robo->settyakuLArmWeaponWithArm();
+}
+
+void RoboBooster::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboBooster* new_parts = new RoboBooster();
+	new_parts->init(this);
+	if (robo->booster) {
+		robo->booster->Release();
+		delete robo->booster;
+		robo->booster = 0;
+	}
+	robo->booster = new_parts;
+	robo->settyakuBoosterWithLeg();
+	robo->roboparam.boostercalc.Init(robo, robo->booster);
+}
+
+void RoboFCS::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboFCS* new_parts = new RoboFCS();
+	new_parts->init(this);
+	if (robo->fcs) {
+		robo->fcs->Release();
+		delete robo->fcs;
+		robo->fcs  = 0;
+	}
+	robo->fcs = new_parts;
+	
+}
+
+
+void RoboEngine::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RoboEngine* new_parts = new RoboEngine();
+	new_parts->init(this);
+	if (robo->engine) {
+		robo->engine->Release();
+		delete robo->engine;
+		robo->engine  = 0;
+	}
+	robo->engine = new_parts;
+	
+}
+
+
+void RShoulderWeapon::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	RShoulderWeapon* new_parts = new RShoulderWeapon();
+	new_parts->init(this);
+	if (robo->rsweapon) {
+		robo->rsweapon->Release();
+		delete robo->rsweapon;
+		robo->rsweapon  = 0;
+	}
+	robo->rsweapon = new_parts;
+	robo->settyakuRShoulderWeaponWithBody();
+}
+
+
+void LShoulderWeapon::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	LShoulderWeapon* new_parts = new LShoulderWeapon();
+	new_parts->init(this);
+	if (robo->lsweapon) {
+		robo->lsweapon->Release();
+		delete robo->rsweapon;
+		robo->lsweapon  = 0;
+	}
+	robo->lsweapon = new_parts;
+	robo->settyakuLShoulderWeaponWithBody();
+}
+
+void InsideWeapon::equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader) {
+	InsideWeapon* new_parts = new InsideWeapon();
+	new_parts->init(this);
+	if (robo->iweapon) {
+		robo->iweapon->Release();
+		delete robo->iweapon;
+		robo->iweapon = 0;
+	}
+	robo->iweapon = new_parts;
+}
 
 void RoboHead::loadMesh(Graphics* g, MyTextureLoader* tex_loader) {
 	if (!data || head) return;
@@ -2147,6 +2415,59 @@ void LArmWeapon::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics
 			weapon->animate(0,true);
 		}
 	}
+
+}
+
+void RoboPartsEmpty::emptyRArmWeapon(Robo* robo, bool is_delete) {
+	if (robo->raweapon && is_delete) {
+		robo->raweapon->Release();
+		delete robo->raweapon;
+		robo->raweapon = 0;
+	}
+	robo->raweapon = 0;
+
+
+}
+
+void RoboPartsEmpty::emptyLArmWeapon(Robo* robo, bool is_delete) {
+	if (robo->laweapon && is_delete) {
+		robo->laweapon->Release();
+		delete robo->laweapon;
+		robo->laweapon = 0;
+	}
+	robo->laweapon = 0;
+
+}
+
+void RoboPartsEmpty::emptyRShoulderWeapon(Robo* robo, bool is_delete) {
+
+	if (robo->rsweapon && is_delete) {
+		robo->rsweapon->Release();
+		delete robo->rsweapon;
+		robo->rsweapon = 0;
+	}
+	robo->rsweapon = 0;
+
+}
+
+
+void RoboPartsEmpty::emptyLShoulderWeapon(Robo* robo, bool is_delete) {
+	if (robo->lsweapon && is_delete) {
+		robo->lsweapon->Release();
+		delete robo->lsweapon;
+		robo->lsweapon = 0;
+	}
+	robo->lsweapon = 0;
+
+}
+
+void RoboPartsEmpty::emptyInsideWeapon(Robo* robo, bool is_delete) {
+	if (robo->iweapon && is_delete) {
+		robo->iweapon->Release();
+		delete robo->iweapon;
+		robo->iweapon = 0;
+	}
+	robo->iweapon = 0;
 
 }
 

@@ -7,6 +7,28 @@ void UMeshUnit::setXYZ(float x, float y, float z) {
 	this->z = z;
 	is_updated = true;
 }
+
+void UMeshUnit::setXYZD(float x, float y, float z, float ddmax) {
+	
+	MYVECTOR3 tt = MYVECTOR3(this->x-x,this->y-y, this->z-z);
+	float td = MyVec3Dot(tt,tt);
+	if (td < ddmax) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		is_updated = true;
+	} else {
+		// ddmax ‚É‚µ‚ÄˆÚ“®‚³‚¹‚é
+		tt = -tt;
+		MyVec3Normalize(tt,tt);
+		this->x = this->x + tt.float3.x * ddmax;
+		this->y = this->y + tt.float3.y * ddmax;
+		this->z = this->z + tt.float3.z * ddmax;
+		is_updated = true;
+	}
+
+}
+
 void UMeshUnit::setROTXYZ(float rotx, float roty, float rotz) {
 	this->rotx = rotx;
 	this->roty = roty;
@@ -223,7 +245,7 @@ int AtariHantei::getKakuhoCountsFromCount(int count) {
 void AtariHantei::maecalcdayo(Graphics* g) {
 // maecalcdayo‚Å‚Í“o˜^‚³‚ê‚½UMeshUnit‚©‚çatariunit‚ÌŒvZ‚ğs‚¤
 	//if (!atari_start) return;
-	//if (!is_unit_updated) return;
+	if (!is_unit_updated) return;
 	int atari_unit_count = 0;
 	int size = umesh_units.size();
 	for (int i=0;i<size;i++) {

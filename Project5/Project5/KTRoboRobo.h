@@ -53,6 +53,7 @@ public:
 			new_data->setData(p->int_data,p->data_name,p->data_name2, p->string_data,p->float_data);
 			it = it + 1;
 		}
+		return new_data;
 	}
 
 	RoboDataPart* getData(char* data_name) {
@@ -188,6 +189,9 @@ public:
 	virtual void Release()=0;
 	virtual RoboParts* myNew()=0;
 	bool hasMeshLoaded() {return mesh_loaded;}
+	virtual void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader){}; // clone を装備させる
+	virtual bool isEmpty() {return false;}
+
 };
 
 class RoboPartsEmpty: public RoboParts {
@@ -195,6 +199,9 @@ public:
 	RoboPartsEmpty() {
 		data = new RoboData();
 		data->setData(0,"name","名称","なし",0);
+	}
+	~RoboPartsEmpty() {
+		Release();
 	}
 
 	void Release() {
@@ -206,6 +213,17 @@ public:
 
 	RoboParts* myNew() {
 		return new RoboPartsEmpty();
+	}
+
+	bool isEmpty() {return true;}
+
+	void emptyRArmWeapon(Robo* robo, bool is_delete);
+	void emptyLArmWeapon(Robo* robo, bool is_delete);
+	void emptyRShoulderWeapon(Robo* robo, bool is_delete);
+	void emptyLShoulderWeapon(Robo* robo, bool is_delete);
+	void emptyInsideWeapon(Robo* robo, bool is_delete);
+	void equipRobo(Robo* robo) {
+		// なにもしない
 	}
 };
 	
@@ -295,6 +313,13 @@ public:
 	RoboParts* myNew() {
 		return new RoboHead();
 	}
+
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
+	
+
+
 };
 
 class RoboArm : public RoboParts{
@@ -361,6 +386,9 @@ public:
 	RoboParts* myNew() {
 		return new RoboArm();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class RoboLeg : public RoboParts {
@@ -418,6 +446,9 @@ public:
 	RoboParts* myNew() {
 		return new RoboLeg();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class RoboBody : public RoboParts{
@@ -474,7 +505,9 @@ public:
 	RoboParts* myNew() {
 		return new RoboBody();
 	}
-
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 
@@ -532,6 +565,9 @@ public:
 	RoboParts* myNew() {
 		return new RArmWeapon();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class LArmWeapon : public RoboParts{
@@ -588,6 +624,9 @@ public:
 	RoboParts* myNew() {
 		return new LArmWeapon();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class RShoulderWeapon : public RoboParts {
@@ -644,6 +683,9 @@ public:
 	RoboParts* myNew() {
 		return new RShoulderWeapon();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class LShoulderWeapon : public RoboParts{
@@ -701,6 +743,9 @@ public:
 	RoboParts* myNew() {
 		return new LShoulderWeapon();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class InsideWeapon : public RoboParts {
@@ -760,6 +805,9 @@ public:
 	RoboParts* myNew() {
 		return new InsideWeapon();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class RoboEngine : public RoboParts {
@@ -821,7 +869,9 @@ public:
 		return new RoboEngine();
 	}
 
-
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class RoboBooster : public RoboParts {
@@ -885,6 +935,9 @@ public:
 	RoboParts* myNew() {
 		return new RoboBooster();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 class RoboFCS : public RoboParts {
@@ -948,6 +1001,9 @@ public:
 	RoboParts* myNew() {
 		return new RoboFCS();
 	}
+	// レンダースレッドとメッセージスレッドの両方をロックして行うこと
+	void equipRobo(Robo* robo, Graphics* g, MyTextureLoader* tex_loader);
+	
 };
 
 
@@ -1649,10 +1705,25 @@ public:
 
 	UMeshUnit* atarihan;
 	UMesh* atari_leg;
+	UMesh* atari_head;
+	UMesh* atari_head2;
+	UMesh* atari_head3;
+	UMesh* atari_core;
+	UMesh* atari_rarm;
+	UMesh* atari_larm;
+	
 	RoboAnimeLoop anime_loop_leg;
 
 	MYVECTOR3 target;
 	bool is_fireraweapon;
+
+	void remakeUMesh(Graphics* g, MyTextureLoader* tex_loader);
+	void settyakuRArmWeaponWithArm();
+	void settyakuLArmWeaponWithArm();
+	void settyakuBoosterWithLeg();
+	void settyakuRShoulderWeaponWithBody();
+	void settyakuLShoulderWeaponWithBody();
+
 
 
 

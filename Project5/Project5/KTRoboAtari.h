@@ -130,7 +130,24 @@ public:
 	void setUMesh(UMesh* mm) {
 		meshs.push_back(mm);
 	}
+	void removeUMesh(UMesh* mm, bool is_release) {
+		vector<UMesh*>::iterator it = meshs.begin();
+		while(it != meshs.end()) {
+			UMesh* mmm = *it;
+			if (mmm == mm) {
+				// ŠJ•ú‚µ‚ÄƒŠƒ€[ƒu‚·‚é
+				if (is_release) {
+					delete mmm;
+					mmm = 0;
+				}
+				meshs.erase(it);
+				return;
+			}
 
+
+			it++;
+		}
+	}
 public:
 	bool getIsEnabled() {return is_enabled;}
 	void setIsEnabled(bool t) { is_enabled = t;}
@@ -157,6 +174,8 @@ public:
 		dt = 0;
 	}
 	void setXYZ(float x, float y, float z);
+	void setXYZD(float x, float y, float z, float ddmax);
+
 	void setROTXYZ(float rotx, float roty, float rotz);
 	void setSCALEXYZ(float scalex,float scaley,float scalez) {
 		this->scalex = scalex;
