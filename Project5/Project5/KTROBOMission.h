@@ -36,12 +36,13 @@
 
 */
 
+namespace KTROBO {
 #pragma once
-class KTROBOMission
+class Mission
 {
 public:
-	KTROBOMission(void);
-	~KTROBOMission(void);
+	Mission(void);
+	~Mission(void);
 
 	void start();
 	void end();
@@ -52,7 +53,7 @@ public:
 
 };
 
-class KTROBOMissionBreefing {
+class MissionBreefing {
 public:
 	void waiting();
 	void ready(); 
@@ -61,4 +62,6 @@ public:
 	void roboChange();
 	int get_now_state();
 };
+
+}
 #endif

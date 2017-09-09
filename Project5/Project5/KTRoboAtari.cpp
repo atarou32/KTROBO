@@ -195,7 +195,11 @@ void UMeshUnit::calcJyusinAndR() {
 	r = ans_r + MyVec3Length(v) * dt; // ｖの長さの分だけ半径を大きくする
 	jyusin = ans_jyusin;
 }
-
+void UMeshUnit::setIsEnabled(AtariHantei* hantei, bool t){ 
+		
+		hantei->resetIsUnitUpdated();
+		is_enabled = t;
+}
 void UMeshUnit::draw(Graphics* g, MYMATRIX* view, MYMATRIX* proj, int meshnum, float* frames, bool* calculateoffsetmatrixs,
 					 bool is_draw_mesh, bool is_calc_animeframe, bool is_draw_jyusinR, bool is_draw_boneobb) {
 	if (is_calc_animeframe) {
@@ -388,8 +392,8 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 	// obbsをカウントするのは地形以外
 	int temp_obbs_count = 0;
 	for (int i=0;i<atari_unit_count;i++) {
-		if (units[i].type != AtariUnit::AtariType::ATARI_TIKEI
-			&& units[i].umesh && units[i].umesh->mesh) {
+		if ((units[i].type != AtariUnit::AtariType::ATARI_TIKEI)
+			&& units[i].umesh /*&& units[i].umesh->mesh*/) {
 				UMesh* um = units[i].umesh;
 				for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
 					if (um->is_bone_obbs_use[k]) {

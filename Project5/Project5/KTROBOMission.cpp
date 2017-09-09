@@ -1,11 +1,11 @@
 #include "KTROBOMission.h"
 
-
-KTROBOMission::KTROBOMission(void)
+using namespace KTROBO;
+Mission::Mission(void)
 {
 }
 
 
-KTROBOMission::~KTROBOMission(void)
+Mission::~Mission(void)
 {
 }

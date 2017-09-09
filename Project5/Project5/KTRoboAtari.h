@@ -98,6 +98,8 @@ public:
 
 };
 
+class AtariHantei;
+
 class UMeshUnit {
 private:
 	
@@ -150,7 +152,11 @@ public:
 	}
 public:
 	bool getIsEnabled() {return is_enabled;}
-	void setIsEnabled(bool t) { is_enabled = t;}
+	void setIsEnabled(AtariHantei* hantei, bool t);
+	
+	
+
+
 	UMeshUnit() {
 		x = 0;
 		y = 0;
@@ -208,6 +214,16 @@ public:
 		bool is_draw_mesh, bool is_calc_animeframe, bool is_draw_jyusinR, bool is_draw_boneobb);
 
 };
+
+class AtariBase {
+public:
+	UMeshUnit* atarihan;
+public:
+	AtariBase(){};
+	virtual ~AtariBase(){};// Atarihan‚Ìˆ—‚Íq‚ÌƒNƒ‰ƒX‚Å‚â‚é
+
+};
+
 
 class AtariUnit {
 public:
@@ -358,7 +374,7 @@ private:
 	int atatta_count;
 public:
 	bool getIsUpdated() {return is_updated;}
-	bool setIsUnitUpdated() {return is_unit_updated = true;}
+	void resetIsUnitUpdated() {is_unit_updated = true;}
 	vector<UMeshUnit*> umesh_units;
 private:
 	vector<AtariUnit::AtariType> umesh_unit_types;
@@ -380,6 +396,12 @@ public:
 	}
 	void ataristart() {atari_start =true;}
 	void maecalcdayo(Graphics* g);
+	void clearUMeshUnits() {
+		umesh_units.clear();
+		is_unit_updated = true;
+		atari_start = false;
+	}
+
 public:
 	void calcKumi(Graphics* g);
 	void calcKumiKuwasiku(Graphics* g);

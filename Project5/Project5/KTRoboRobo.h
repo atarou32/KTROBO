@@ -1566,7 +1566,7 @@ public:
 };
 
 
-class Robo : public INPUTSHORICLASS
+class Robo : public INPUTSHORICLASS, public AtariBase
 {
 private:
 public:
@@ -1704,7 +1704,7 @@ public:
 		world_without_rotx = world;
 	}
 
-	UMeshUnit* atarihan;
+	//UMeshUnit* atarihan;
 	UMesh* atari_leg;
 	UMesh* atari_head;
 	UMesh* atari_head2;
