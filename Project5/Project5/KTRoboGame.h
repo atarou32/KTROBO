@@ -109,7 +109,9 @@ private:
 	Clock* c;
 	Task* task_threads[TASKTHREAD_NUM];
 	Graphics* g_for_task_threads[TASKTHREAD_NUM];
-
+public:
+	MYMATRIX view;
+private:
 	Mesh* mesh;
 	Mesh* mesh2;
 	Mesh* mesh3[11];
@@ -133,6 +135,7 @@ private:
 //	SinaiFuru* sfuru;
 //	KendoSinaiGenerator* ksgene;
 //	SinaiFuruAnimeMakers* makers;
+public:
 	Robo* robodayo;
 	Robo* roboaitedayo;
 
@@ -155,7 +158,7 @@ public:
 		return task_threads;
 	}
 	long getTimeStamp() {
-		return timestamp;
+		return c->getSecond();
 	}
 
 	float getDMSecond() {

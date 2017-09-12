@@ -3371,6 +3371,10 @@ void RoboMovingState_FORWARD::exec(Graphics* g, Robo* robo, float dsecond, int s
 	if (robo->move_state->isBoosterHi()) return;
 	if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
+
 	MYVECTOR3 mae(0,-1,0);
 	MyVec3TransformNormal(mae,mae, *robo->getWorldWithoutRotX());//robo->atarihan->world);
 	MyVec3Normalize(mae,mae);
@@ -3410,6 +3414,9 @@ void RoboMovingState_LEFTFORWARD::exec(Graphics* g, Robo* robo, float dsecond, i
 	if (robo->move_state->isBoosterHi()) return;
 	if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 	MYVECTOR3 mae(0,-1,0);
 	MyVec3TransformNormal(mae,mae, *robo->getWorldWithoutRotX());//robo->atarihan->world);
 	MyVec3Normalize(mae,mae);
@@ -3455,6 +3462,9 @@ void RoboMovingState_RIGHTFORWARD::exec(Graphics* g, Robo* robo, float dsecond, 
 	if (robo->move_state->isBoosterHi()) return;
 	if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 	MYVECTOR3 mae(0,-1,0);
 	MyVec3TransformNormal(mae,mae, *robo->getWorldWithoutRotX());//robo->atarihan->world);
 	MyVec3Normalize(mae,mae);
@@ -3497,6 +3507,9 @@ void RoboMovingState_LEFTBACK::exec(Graphics* g, Robo* robo, float dsecond, int 
 	if (robo->move_state->isBoosterHi()) return;
 	if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 	MYVECTOR3 mae(0,1,0);
 	MyVec3TransformNormal(mae,mae, *robo->getWorldWithoutRotX());//robo->atarihan->world);
 	MyVec3Normalize(mae,mae);
@@ -3539,6 +3552,9 @@ void RoboMovingState_RIGHTBACK::exec(Graphics* g, Robo* robo, float dsecond, int
 	if (robo->move_state->isBoosterHi()) return;
 	if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 	MYVECTOR3 mae(0,1,0);
 	MyVec3TransformNormal(mae,mae, *robo->getWorldWithoutRotX());//robo->atarihan->world);
 	MyVec3Normalize(mae,mae);
@@ -3579,6 +3595,9 @@ int RoboMovingState_BACK::getStateID() {
 }
 void RoboMovingState_BACK::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 		if (dsecond > 200) return;
 		if (robo->move_state->isBoosterHi()) return;
 		if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
@@ -3615,6 +3634,9 @@ int RoboMovingState_LEFT::getStateID() {
 }
 void RoboMovingState_LEFT::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 		if (dsecond > 200) return;
 		if (robo->move_state->isBoosterHi()) return;
 		if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
@@ -3651,6 +3673,9 @@ int RoboMovingState_RIGHT::getStateID() {
 }
 void RoboMovingState_RIGHT::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
 	float speed = 0.005f;
+	if (robo->booster_state == &robo->boostontaiki) {
+		speed *= 3.14f;
+	}
 		if (dsecond > 200) return;
 		if (robo->move_state->isBoosterHi()) return;
 		if ((robo->setti_state == &robo->setti) || (robo->booster_state == &robo->boostontaiki)) {
@@ -3686,7 +3711,7 @@ int RoboMovingState_LEFTTURN::getStateID() {
 	return KTROBO_ID_ROBOMOVINGSTATE_LEFTTURN;
 }
 void RoboMovingState_LEFTTURN::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
-	float speed = -0.0015f;
+	float speed = 0.0015f;
 		if (dsecond > 200) return;
 	float dtheta =  speed * dsecond;
 	robo->atarihan->setROTXYZ(robo->atarihan->rotx, robo->atarihan->roty, robo->atarihan->rotz + dtheta);
@@ -3704,7 +3729,7 @@ int RoboMovingState_RIGHTTURN::getStateID() {
 	return KTROBO_ID_ROBOMOVINGSTATE_RIGHTTURN;
 }
 void RoboMovingState_RIGHTTURN::exec(Graphics* g, Robo* robo, float dsecond, int stamp) {
-	float speed = 0.0015f;
+	float speed = -0.0015f;
 		if (dsecond > 200) return;
 	float dtheta =  speed * dsecond;
 	robo->atarihan->setROTXYZ(robo->atarihan->rotx, robo->atarihan->roty, robo->atarihan->rotz + dtheta);

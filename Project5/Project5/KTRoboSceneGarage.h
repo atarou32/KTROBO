@@ -10,7 +10,7 @@
 
 namespace KTROBO {
 
-class SceneGarage : public Scene
+class SceneGarage : public Scene, public INPUTSHORICLASS
 {
 private:
 	Graphics* g;

@@ -36,10 +36,45 @@
 
 */
 
-namespace KTROBO {
 #pragma once
+#ifndef KTROBO_BULLET_H
+#include "KTRoboBullet.h"
+#endif
+
+#ifndef KTROBO_ROBO_H
+#include "KTRoboRobo.h"
+#endif
+
+#ifndef KTROBO_INPUT_H
+#include "KTRoboInput.h"
+#endif
+
+#ifndef KTROBO_GAMEN_H
+#include "KTRoboGamen.h"
+#endif
+
+#ifndef KTROBO_SCENE_H
+#include "KTRoboScene.h"
+#endif
+
+#ifndef KTROBO_GAMEN_GARAGE_H
+#include "KTRoboGamen_GARAGE.h"
+#endif
+
+#ifndef KTROBO_GRAPHICS_H
+#include "KTRoboGraphics.h"
+#endif
+
+namespace KTROBO {
+
+#define KTROBO_MISSION_GAMEN_PILOT_PNG "resrc/sample/pilot.png"
+
+	
+
 class Mission
 {
+private:
+	int nokori_second;
 public:
 	Mission(void);
 	~Mission(void);
@@ -50,8 +85,120 @@ public:
 	void failure();
 	void gift();
 	int get_now_state();
+	void decSecond() {
+		nokori_second--;
+	}
+	int getSecondSita() {
+		return nokori_second % 60;
+	}
+	int getSecondUe() {
+		return nokori_second / 60;
+	}
 
 };
+
+class Gamen_MISSION : public Gamen {
+private:
+	Texture* t;
+	Texture* t2;
+	int timer_suuji_tex[4];
+	int ap_suuji_tex[5];
+	int houi_tex;
+	int houi_tex2;
+	int a_tex;
+	int p_tex;
+	int timer_tex;
+	int energy_tex;
+	int n_tex;
+	int e_tex;
+	int s_tex;
+	int w_tex;
+
+	float lookatspeed;
+	float lookfromspeed;
+public:
+	MYVECTOR3 lookat;
+	MYVECTOR3 lookfrom;
+public:
+	MYMATRIX view;
+public:
+	Robo* robo;
+	Mission mis;
+public:
+	Gamen_MISSION(Texture* t, Texture* t2) {
+		this->t = t;
+		this->t2 = t2;
+		for (int i=0;i<4;i++) {
+		timer_suuji_tex[i] = 0;
+		}
+		for (int i=0;i<5;i++) {
+			ap_suuji_tex[i] = 0;
+		}
+		houi_tex = 0;
+		houi_tex2 = 0;
+		a_tex = 0;
+		p_tex=0;
+		timer_tex = 0;
+		energy_tex = 0;
+		n_tex = 0;
+		e_tex = 0;
+		s_tex = 0;
+		w_tex = 0;
+		lookat = MYVECTOR3(0,0,0);
+		lookfrom = MYVECTOR3(25,25,12);
+		MyMatrixIdentity(view);
+		lookatspeed = 0;
+		lookfromspeed = 0;
+	}
+	~Gamen_MISSION() {
+	}
+	void Init();
+	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
+	void clickedShori(int id);
+	void clickedShoriWithData(int id, void* data);
+
+	void setTimerTex(int second_sita, int second_ue);
+	void setTexSuuji(int suuji,int tex_id);
+	void setHoui(float rotz);
+	void setView(MYMATRIX* world, float R, float dsecond);
+
+
+};
+
+
+class Game_SCENE : public Scene, public INPUTSHORICLASS {
+
+private:
+	Graphics* g;
+	AtariHantei* hantei;
+	Texture* tex;
+	Texture* tex2;
+	MyTextureLoader* loader;
+
+	Gamen_GARAGE* gg;
+	Gamen_MISSION* gm;
+public:
+	Game_SCENE(Graphics* g, AtariHantei* hantei, Texture* tex, Texture* tex2, MyTextureLoader* loader);
+	~Game_SCENE(void);
+
+public:
+	void mainrenderIMPL(bool is_focused, Graphics* g, Game* game);
+	void renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+	void loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game);
+
+	void enter();
+	void leave();
+	bool handleMessage(int msg, void* data, DWORD time);
+};
+
+
+
+
+
+
+
 
 class MissionBreefing {
 public:

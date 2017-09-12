@@ -7,6 +7,7 @@
 #include "stringconverter.h"
 #include "tolua_glue/tolua_glue.h"
 #include "KTRoboSceneGarage.h"
+#include "KTROBOMission.h"
 
 using namespace KTROBO;
 
@@ -907,9 +908,9 @@ bool Game::Init(HWND hwnd) {
 	//hantei->ataristart();
 
 
-	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
-
-	this->setScene(sg);
+//	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
+	Game_SCENE* gs = new Game_SCENE(g,hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
+	this->setScene(gs);
 
 	return true;
 }
@@ -1218,26 +1219,29 @@ void Game::Run() {
 	memset(test2,0,sizeof(1024));
 	memset(test,0,sizeof(WCHAR)*512);
 
-
+	
 	if (millisecond > RENDERTIME_IGNORETIME) {
 		CS::instance()->leave(CS_MAINTHREAD_CS, "leave main");
 		//Sleep(1);
 		millisecond = RENDERTIME_SETTIME;
+		c->plus((float)millisecond);
 		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	} else if ( millisecond < RENDERTIME_SETTIME ) {
 		CS::instance()->leave(CS_MAINTHREAD_CS, "leave main");
+		c->plus((float)millisecond);
 		Sleep(DWORD(RENDERTIME_SETTIME - millisecond));
 		millisecond = RENDERTIME_SETTIME;
 		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	} else {
 		CS::instance()->leave(CS_MAINTHREAD_CS, "leave main");
+		c->plus((float)millisecond);
 		//Sleep(1);
 		CS::instance()->enter(CS_MAINTHREAD_CS, "enter main");
 	}
 	CS::instance()->enter(CS_SOUND_CS, "enter");
 	sound->run();
 	CS::instance()->leave(CS_SOUND_CS, "leave");
-	c->plus((float)millisecond);
+	
 
 	big_timestamp =	c->getBigTimeStamp();
 	
@@ -1261,7 +1265,7 @@ void Game::Run() {
 	byouga_count++;
 	if (byouga_count >= (int)(1000 / (float)RENDERTIME_SETTIME)) {
 		// •`‰æ‚µ‚È‚¢‚ÅƒŠƒ^[ƒ“‚·‚é
-		return;
+	//	return;
 	}
 
 
@@ -1279,7 +1283,7 @@ void Game::Run() {
 	static float frame = 0;
 	static int frameint = 0;
 	frame += millisecond/ (float)RENDERTIME_SETTIME;
-	timestamp = frame;//c->getTimeStamp();
+	timestamp = c->getTimeStamp();
 	
 
 
@@ -1320,14 +1324,14 @@ void Game::Run() {
 	//frame = 30.001;
 
 	MYMATRIX world;
-	MYMATRIX view;
+//	MYMATRIX view;
 	MYMATRIX proj;
 	MyMatrixIdentity(world);
 	MYVECTOR3 a(25,25,12);
 //	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
-	MyMatrixLookAtRH(view, a, b, up);
+//	MyMatrixLookAtRH(view, a, b, up);
 	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
 	
 	
@@ -1357,12 +1361,12 @@ void Game::Run() {
 
 	MYMATRIX rotzmat;
 	MyMatrixRotationZ(rotzmat, temp_input_shori->testdayo);
-	MyMatrixMultiply(view,rotzmat,view);
+//	MyMatrixMultiply(view,rotzmat,view);
 	MYVECTOR3 tesdt;
 	tesdt = b-a;
 	MyVec3TransformNormal(tesdt,tesdt,rotzmat);
 	a = b - tesdt;
-	MyMatrixLookAtRH(view, a, b, up);
+//	MyMatrixLookAtRH(view, a, b, up);
 	char bbuf[512];
 	memset(bbuf,0,512);
 	sprintf_s(bbuf,"%d,%d,%d,%d",fps,byouga_count
@@ -1540,8 +1544,8 @@ void Game::Run() {
 	CS::instance()->leave(CS_MESSAGE_CS, "testt");
 	CS::instance()->enter(CS_MESSAGE_CS, "test");
 	temp_input_shori->setMAT(&world,&view,&proj);
-	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
-	
+//	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
+//	texdayo->getInstance(1)->setViewProj(g,&view, &proj,&a,&b);
 	OBB testobb = mesh2->houkatuobb;
 
 	MYMATRIX idenmat;

@@ -27,7 +27,7 @@ void Bullet::setParam(Robo* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECT
 
 bool Bullet::fire() {
 
-
+	return true;
 
 }
 
