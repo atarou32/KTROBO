@@ -1356,6 +1356,7 @@ private:
 	float energy_drain;
 public:
 	void Init(Robo* robo, RoboBooster* booster);
+	float getFudanSpeed() {return fudanspeed;}
 	float getSpeed(float dsecond);
 	bool isCanReload(float dsecond);
 	bool isCanMove(float dsecond) {
@@ -1606,12 +1607,22 @@ public:
 	RoboState* settenjyou_state;
 	RoboState* booster_state;
 	int kuutyuu_count;
+	int pressed_space_count;
 	int setti_count;
 	int setkabe_count;
 	MYVECTOR3 kabe_housen;
 
 	float jump_f_z;
 	float jump_f_z_kabe;
+	void incPressedSpaceCount() {
+		pressed_space_count++;
+	}
+	void resetPressedSpaceCount() {
+		pressed_space_count = 0;
+	}
+	int getPressedSpaceCount() {
+		return pressed_space_count;
+	}
 
 	void resetCount() {
 		kuutyuu_count = 0;

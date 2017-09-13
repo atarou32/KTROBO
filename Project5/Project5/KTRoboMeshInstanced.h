@@ -26,6 +26,7 @@ public:
 	TO_LUA virtual void setIsRender(bool t)=0;
 	TO_LUA virtual bool getIsRender()=0;
 	TO_LUA virtual int getInstanceIndex()=0;
+
 };
 
 
@@ -522,7 +523,7 @@ public:
 		return skeleton_size;
 	}
 
-	void changeInstanceSkeleton(int instance_id, Mesh* skeleton);// ロックが外部で必要
+	void changeInstanceMeshSkeleton(int instance_id, Mesh* mesh, Mesh* skeleton);// ロックが外部で必要
 	int getInstanceSkeletonBoneIndex(int oya_instance_id, char* bonename) {
 		if (oya_instance_id >= 0 && mesh_instanceds.size() > oya_instance_id) {
 

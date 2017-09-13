@@ -111,12 +111,14 @@ void CALCCOMBINEDTCB(TCB* thisTCB) {
 	Graphics* g = (Graphics*)thisTCB->Work[0];
 
 	//if (!mis->getIsLoad()) {
-		
-		mis->loadAnimeMatrixBasisToTexture(g);
-		mis->loadMatrixLocalToTexture(g);
-		mis->calcCombinedMatrixToTexture(g);
-		mis->loadColorToTexture(g);
-
+	//CS::instance()->enter(CS_RENDERDATA_CS, "test");
+	CS::instance()->enter(CS_DEVICECON_CS, "lock");
+	mis->loadAnimeMatrixBasisToTexture(g);
+	mis->loadMatrixLocalToTexture(g);
+	mis->calcCombinedMatrixToTexture(g);
+	mis->loadColorToTexture(g);
+	CS::instance()->leave(CS_DEVICECON_CS, "unlock");
+	//CS::instance()->leave(CS_RENDERDATA_CS, "test");
 	//}
 }
 
@@ -576,6 +578,10 @@ bool Game::Init(HWND hwnd) {
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
 	}*/
 
+	MeshInstanceds::Init(g);
+	mesh_instanceds = new MeshInstanceds(g, this->demo->tex_loader);
+	mesh_instanceds->setSkeleton(mesh);
+
 	for(int i=0;i<10;i++) {
 		for(int k=0;k<10;k++) {
 	{
@@ -584,10 +590,16 @@ bool Game::Init(HWND hwnd) {
 	UMeshUnit* umesh_unit = new UMeshUnit();
 	UMesh* um = new UMesh(g,"resrc/model/cube/pkcube.MESH", demo->tex_loader,mesh,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL, true);
+
+	mesh_is[i+10*k] = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&idenmat);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
 	umesh_unit->setSCALEXYZ(10,10,2);
 	umesh_unit->setXYZ((i-5)*25,(k-5)*25,-3);
+	umesh_unit->calcJyusinAndR();
+	mesh_is[i+10*k]->setWorld(&umesh_unit->world);
+	mesh_is[i+10*k]->setIsRender(true);
+
 	bool tyo_unko=true;
 	float frame_anime = 0;
 
@@ -626,9 +638,7 @@ bool Game::Init(HWND hwnd) {
 	}
 	mesh3[7]->animate(frame,true);
 	mesh3[8]->animate(frame,true);
-	MeshInstanceds::Init(g);
-	mesh_instanceds = new MeshInstanceds(g, this->demo->tex_loader);
-	//mesh_instanceds->setSkeleton(mesh);
+
 	
 	MYMATRIX kakeru;
 	MyMatrixIdentity(kakeru);
@@ -1401,8 +1411,10 @@ void Game::Run() {
 
 //	mesh_i->setBoneIndexInfo(animf, animl, animw);
 //	mesh_i2->setBoneIndexInfo(animf,animl,animw);
-	for (int i=0;i<13;i++) {
-//		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
+	for (int i=0;i<100;i++) {
+		if (mesh_is[i]) {
+		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
+		}
 //		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
 	}
 
@@ -1544,8 +1556,33 @@ void Game::Run() {
 	CS::instance()->leave(CS_MESSAGE_CS, "testt");
 	CS::instance()->enter(CS_MESSAGE_CS, "test");
 	temp_input_shori->setMAT(&world,&view,&proj);
+	CS::instance()->leave(CS_MESSAGE_CS, "testt");
 //	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
 //	texdayo->getInstance(1)->setViewProj(g,&view, &proj,&a,&b);
+
+	MYVECTOR3 testr(0,0,-10);
+	MYMATRIX rotX;
+	static float ff=0;
+	ff += 0.01f;
+	MyMatrixRotationX(rotX,0);
+	MyVec3TransformNormal(testr,testr,rotX);
+	static Mesh* mm = mesh;
+	if (ff > 3.0f) {
+		CS::instance()->enter(CS_DEVICECON_CS, "lock");
+		for (int i=0;i<100;i++) {
+		mesh_instanceds->changeInstanceMeshSkeleton(mesh_is[i]->getInstanceIndex(), mm,mm);
+		}
+		CS::instance()->leave(CS_DEVICECON_CS, "unlock");
+		ff = 0;
+		if (mm == mesh ) {
+			mm = mesh2;
+		} else {
+			mm = mesh;
+		}
+
+	}
+
+	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(testr.float3.x,testr.float3.y,testr.float3.z,1));
 	OBB testobb = mesh2->houkatuobb;
 
 	MYMATRIX idenmat;
@@ -1563,7 +1600,7 @@ void Game::Run() {
 //		g->drawOBB(g,0xFF888888,&idenmat,&view,&proj,&testobb);
 	}
 
-	CS::instance()->leave(CS_MESSAGE_CS, "testt");
+
 
 
 	//g->drawRAY(g,0xFFFF0000,&idenmat,&view,&proj,50,&temp_input_shori->ray);
@@ -1753,7 +1790,8 @@ void Game::Run() {
 //	umesh_unit->setXYZ(0,0,0);
 //	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
-	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+	umesh_unit->calcJyusinAndR();
+//	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	}
 	}
 	{
@@ -1810,6 +1848,14 @@ void Game::Run() {
 	*/
 //	mesh_instanceds->calcCombinedMatrixToTexture(g);
 //	mesh_instanceds->loadColorToTexture(g);
+
+
+//	mesh_instanceds->loadAnimeMatrixBasisToTexture(g);
+//	mesh_instanceds->loadMatrixLocalToTexture(g);
+//	mesh_instanceds->calcCombinedMatrixToTexture(g);
+	//mesh_instanceds->loadColorToTexture(g);
+	
+
 	mesh_instanceds->render(g);
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);

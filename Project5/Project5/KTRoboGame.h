@@ -118,7 +118,7 @@ private:
 	MeshInstanceds* mesh_instanceds;
 	IMeshInstanced* mesh_i;
 	IMeshInstanced* mesh_i2;
-	IMeshInstanced* mesh_is[30];
+	MeshInstanced* mesh_is[100];
 	IMeshInstanced* mesh_is2[30];
 	vector<UMeshUnit*> umesh_units;
 	AtariHantei* hantei;

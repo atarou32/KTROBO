@@ -371,13 +371,25 @@ void MeshInstanceds::loadColorToTexture(Graphics* g) {
 }
 
 
-void MeshInstanceds::changeInstanceSkeleton(int instance_id, Mesh* new_skeleton) {
+void MeshInstanceds::changeInstanceMeshSkeleton(int instance_id, Mesh* mesh, Mesh* new_skeleton) {
 
 	if (instance_id >=0 && instance_id < mesh_instanceds.size()) {
 
 		MeshInstanced *mm = mesh_instanceds[instance_id];
+		mm->setMeshIndex(this->getMeshIndexOrSet(mesh));
 		mm->setSkeletonIndex(this->getSkeletonIndexOrSet(new_skeleton));
+		MYVECTOR4 colors[KTROBO_MESH_INSTANCED_COLOR_MAX];
+		memset(colors, 0, sizeof(colors));
+		
+		int msize = mesh->Materials.size();
+		for (int h = 0; h < msize && h < KTROBO_MESH_INSTANCED_COLOR_MAX; h++) {
+			colors[h] = mesh->Materials[h]->color;
+		}
+		mm->setColor(colors);
 
+		mm->setIsNeedColorTextureLoad(true);
+		mm->setIsNeedCombinedMatrixLoad(true);
+		is_need_calc_max_depth = true;
 	} else {
 		throw new GameError(KTROBO::WARNING, "out side vector of change skeleton");
 	}
@@ -1237,7 +1249,11 @@ void MeshInstanceds::calcCombinedMatrixToTexture(Graphics* g) {
 				}
 			} else {
 				is_root_bone = 0; connect_without_matrix_local = 0;
-				parent_bone_index = bone->parent_bone->bone_index;
+				if (bone->parent_bone) {
+					parent_bone_index = bone->parent_bone->bone_index;
+				} else {
+					parent_bone_index = KTROBO_MESH_BONE_NULL;
+				}
 				parent_skeleton_index = skeleton_index;
 				parent_instance_index = instance_index;
 			}
@@ -1480,7 +1496,7 @@ void MeshInstanceds::_render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp
 	g->getDeviceContext()->OMSetRenderTargets(1,&rr,Mesh::pDepthStencilView);//mss_for_render.depthstencilview);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	g->getDeviceContext()->VSSetConstantBuffers(0,1, &cbuf2_buffer);
-	//g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf2_buffer);
+	g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf2_buffer);
 	//g->getDeviceContext()->VSSetConstantBuffers(1,1, &cbuf3_buffer);
 	g->getDeviceContext()->IASetInputLayout( mss_for_render.vertexlayout );
 	ID3D11Buffer* bufs[] = {render_mesh->p_vertexbuffer, render_instance_vertexbuffer};
@@ -1523,7 +1539,7 @@ void MeshInstanceds::_render(Graphics* g, RENDERINSTANCEINFOSTRUCT* st, int temp
 		
 		setCBuf3(g, s->MaterialIndex);
 		ID3D11Buffer* NUL = NULL;
-		g->getDeviceContext()->PSSetConstantBuffers(0,1, &cbuf3_buffer);
+		g->getDeviceContext()->PSSetConstantBuffers(1,1, &cbuf3_buffer);
 		//g->getDeviceContext()->PSSetConstantBuffers(1,1, &cbuf3_buffer);
 		g->getDeviceContext()->DrawIndexedInstanced(s->FaceCount*3,temp,s->FaceIndex*3,0, 0);
 	}
