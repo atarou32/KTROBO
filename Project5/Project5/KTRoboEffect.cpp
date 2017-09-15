@@ -2,11 +2,11 @@
 
 using namespace KTROBO;
 
-KTRoboEffect::KTRoboEffect(void)
+Effect::Effect(void)
 {
 }
 
 
-KTRoboEffect::~KTRoboEffect(void)
+Effect::~Effect(void)
 {
 }

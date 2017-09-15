@@ -284,7 +284,13 @@ void Koumoku_Parts_Category::byouga(Graphics* g, GUI* gui, float dsecond, int st
 }
 void Koumoku_Parts_Category::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
 	if (!getEnabled() && !has_clicked) return;
-	int stt = stamp % 130;
+	static float unko=0;
+	unko += dsecond;
+	if (unko >= 1000) {
+		unko =0;
+	}
+
+	int stt = (int) (unko) % 130;
 	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 }
@@ -346,7 +352,14 @@ const D3D11_VIEWPORT* ggg = g->getViewPort();
 
 
 	if (!getEnabled() && !has_clicked) return;
-	int stt = stamp % 130;
+	//int stt = stamp % 130;
+	static float unko2=0;
+	unko2 += dsecond;
+	if (unko2 >= 1000) {
+		unko2 =0;
+	}
+
+	int stt = (int) (unko2) % 130;
 	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 
@@ -2904,7 +2917,14 @@ if (!getEnabled() && !has_clicked) return;
 
 void KoumokuYESEQUIP::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
 if (!getEnabled() && !has_clicked) return;
-	int stt = stamp % 130;
+	static float unko=0;
+	unko += dsecond;
+	if (unko >= 1000) {
+		unko =0;
+	}
+
+	int stt = (int) (unko) % 130;
+	//int stt = stamp % 13;
 	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 
@@ -3049,7 +3069,14 @@ if (!getEnabled() && !has_clicked) return;
 
 void KoumokuNOEQUIP::focusedByouga(Graphics* g, GUI* gui, float dsecond, int stamp, bool has_clicked) {
 if (!getEnabled() && !has_clicked) return;
-	int stt = stamp % 130;
+	//int stt = stamp % 13;
+	static float unko=0;
+	unko += dsecond;
+	if (unko >= 1000) {
+		unko =0;
+	}
+
+	int stt = (int) (unko) % 130;
 	unsigned int color = ((((0xFFFF0000 / 130 * stt) & 0x77770000) + 0x88880000) & 0xFFFF0000) + 0x0000FFFF;
 	t->setRenderTexColor(gui_koumoku_name_bg_id,color);
 }

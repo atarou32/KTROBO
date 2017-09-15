@@ -494,6 +494,14 @@ public:
 		Release();
 	};
 	void render(Graphics* g); // 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+
+	void renderText(Graphics* g);
+	void renderBill(Graphics* g);
+	void renderTex(Graphics* g);
+
+
+
+
 	void sendinfoToVertexTexture(Graphics* g);// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画補助スレッドで呼ぶ
 	void updateIndexBuffer(Graphics* g);//描画補助スレッドで呼ぶ
 	void createIndexBuffer(Graphics* g);// ロードスレッドで呼ぶ 適正な初期値でcreateする

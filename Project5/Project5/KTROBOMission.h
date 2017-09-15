@@ -177,6 +177,7 @@ private:
 
 	Gamen_GARAGE* gg;
 	Gamen_MISSION* gm;
+	Clock butukari_clock;
 public:
 	Game_SCENE(Graphics* g, AtariHantei* hantei, Texture* tex, Texture* tex2, MyTextureLoader* loader);
 	~Game_SCENE(void);

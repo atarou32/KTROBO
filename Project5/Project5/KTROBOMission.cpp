@@ -394,6 +394,71 @@ void Game_SCENE::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Gam
 
 void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
 
+	double millisecond = game->stopWatchForButukari();//stopWatch();
+	game->startWatchForButukari();
+	if (millisecond > RENDERTIME_IGNORETIME) {
+		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
+		//Sleep(1);
+		millisecond = RENDERTIME_SETTIME*2/3;
+		butukari_clock.plus((float)millisecond);
+		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
+	}/* else if ( millisecond < RENDERTIME_SETTIME*2/3 ) {
+		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
+		butukari_clock.plus((float)millisecond);
+		Sleep(DWORD(RENDERTIME_SETTIME*2/3 - millisecond));
+		millisecond = RENDERTIME_SETTIME*2/3;
+		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
+	}*/ else {
+		
+		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
+		butukari_clock.plus((float)millisecond);
+		//Sleep(1);
+		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
+	}
+
+	float frameTime = millisecond;
+	int frame = butukari_clock.getSecond();
+	/*
+	CS::instance()->enter(CS_DEVICECON_CS,"unko");
+	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
+	*/
+	
+	/*
+	hantei->ataristart();
+	hantei->maecalcdayo(g);
+	hantei->calcAuInfo(g,true);
+	hantei->calcKumi(g);
+	hantei->calcObb(g);
+	hantei->clearKekkaOfBuffer(g);
+	hantei->runComputeShader(g);
+
+	hantei->copyKekkaToBufferForCopy(g,true);
+	
+	hantei->calcKumiKuwasiku(g);
+	hantei->runComputeShaderKuwasiku(g);
+	hantei->copyKekkaToBufferForCopy(g,false);
+	*/
+
+//	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	/*
+	if (gm) {
+	if (hantei->canGetAns()) {
+		if (game->robodayo->atarihan) {
+			game->robodayo->atarishori(g, &gm->view, hantei, frameTime, (int)frame);
+		}
+
+		if (game->roboaitedayo->atarihan) {
+			game->roboaitedayo->atarishori(g, &gm->view, hantei, frameTime, (int)frame);
+		}
+
+		
+		//hantei->drawKekka(g,&view,&proj);
+		hantei->setIsCalcKuwasikuGetted();
+	}
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+	CS::instance()->leave(CS_DEVICECON_CS, "unko");
+	*/
 }
 
 void Game_SCENE::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {

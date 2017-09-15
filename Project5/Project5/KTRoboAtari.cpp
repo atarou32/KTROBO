@@ -68,6 +68,8 @@ void UMeshUnit::calcJyusinAndR() {
 	/*if (is_updated == false) {
 		return;
 	}*/
+
+
 	is_updated = false;
 	vector<UMesh*>::iterator it = meshs.begin();
 	int size = meshs.size();
@@ -1417,6 +1419,48 @@ void AtariHantei::releaseBufferAndView() {
 		buffer_autts_view = 0;
 	}
 }
+
+int AtariHantei::getAnsWaza(AtariUnitAnsKWSK* out_ans, int out_ans_num) {
+
+
+	int tmp = 0;
+
+	for (int k = 0; k < atatta_count;k++) {
+		
+		if ((units[ans[k].atari_idx].type == AtariUnit::AtariType::ATARI_WAZA)) {
+				out_ans[tmp].ans = &ans[k];
+				out_ans[tmp].aite = units[ans[k].atari_idx2].umesh_unit;
+			out_ans[tmp].aite_umesh = units[ans[k].atari_idx2].umesh;
+					out_ans[tmp].my_umesh = units[ans[k].atari_idx].umesh;
+			out_ans[tmp].aite_type = units[ans[k].atari_idx2].type;
+			out_ans[tmp].my_umeshunit = units[ans[k].atari_idx].umesh_unit;
+			tmp++;
+			if (tmp >= out_ans_num) {
+				return tmp;
+			}
+			}
+		if ((units[ans[k].atari_idx2].type == AtariUnit::AtariType::ATARI_WAZA)) {// && (units[ans[k].atari_idx].umesh_unit != oya)) {
+			out_ans[tmp].ans = &ans[k];
+				out_ans[tmp].aite = units[ans[k].atari_idx].umesh_unit;
+				out_ans[tmp].aite_umesh = units[ans[k].atari_idx].umesh;
+				out_ans[tmp].aite_type = units[ans[k].atari_idx].type;
+				out_ans[tmp].my_umesh = units[ans[k].atari_idx2].umesh;
+				out_ans[tmp].my_umeshunit = units[ans[k].atari_idx2].umesh_unit;
+			tmp++;
+			if (tmp >= out_ans_num) {
+				return tmp;
+			}
+			}
+		
+	}
+	return tmp;
+}
+
+
+
+
+
+
 
 int AtariHantei::getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya, UMesh* oya2, int out_ans_num) {
 	int tmp = 0;

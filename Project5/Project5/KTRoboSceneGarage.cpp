@@ -24,8 +24,15 @@ SceneGarage::~SceneGarage(void)
 
 
 void SceneGarage::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
-	if (gg) {
+	if (gg && is_focused) {
 		gg->byouga(g, NULL, game->getDMSecond(), game->getTimeStamp());
+		MYVECTOR3 from(22,22,10);
+		MYVECTOR3 at(0,0,0);
+		MYVECTOR3 up(0,0,1);
+		MyMatrixLookAtRH(game->view,from,at,up);
+
+		tex->setViewProj(g,&game->view,g->getProj(),&from,&at);
+		tex2->setViewProj(g,&game->view, g->getProj(),&from,&at);
 	}
 }
 void SceneGarage::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {

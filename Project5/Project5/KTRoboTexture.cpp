@@ -799,6 +799,116 @@ void Texture::_renderBill(Graphics* g, TexturePart* p) {
 }
 
 
+void Texture::renderText(Graphics* g) {
+
+	
+	CS::instance()->enter(CS_DEVICECON_CS, "text_render");
+	CS::instance()->enter(CS_RENDERDATA_CS, "text_render");
+
+	vector<RenderText*>::iterator it = render_texts.begin();
+	while(it != render_texts.end()) {
+		RenderText* te = *it;
+		if (te->is_use) {
+			if (te->is_render) {
+				te->text->render(g, te->color,te->x,te->y,te->tex_h, te->width, te->height);
+			}
+		}
+		it++;
+	}
+
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "text_render");
+	CS::instance()->leave(CS_DEVICECON_CS, "text_render");
+
+}
+
+
+void Texture::renderBill(Graphics* g) {
+	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+	// texごとにレンダーを呼ぶ
+	CS::instance()->enter(CS_RENDERDATA_CS, "texture render");
+	// texture情報を取得してから描画にしようするまでロックは外せないがとりあえず取得する
+	int part_size = parts.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+	CS::instance()->enter(CS_DEVICECON_CS, "texture render");
+	CS::instance()->enter(CS_RENDERDATA_CS, "texture render");
+	for (int i=0;i<part_size;i++) {
+	
+		int psize = parts.size();
+		if (psize != part_size) {
+			// ちょうど変更が入ったタイミング
+			// この場合はどうするか
+			if (psize > part_size) {
+				// 増えただけなので気にしないでまわす
+			} else {
+				// 減ったので狂うのでリターンする　これで描画されないタイミングがでてくるけどしょうがない
+
+				CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+				CS::instance()->leave(CS_DEVICECON_CS, "texture render");
+				return;
+			}
+		}
+		TexturePart* p = parts[i];
+		if (p->getIsUse()) {
+			if (p->getIsIndexLoad()) {
+				// need loadがtruefalseにかかわらず描画する		
+				//_renderTex(g, p);
+				_renderBill(g,p);
+			}
+		}
+	
+
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+	CS::instance()->leave(CS_DEVICECON_CS, "texture render");
+}
+
+
+void Texture::renderTex(Graphics* g) {
+
+	// 内部でRENDERDATA_CS, DEVICECON_CSを細切れにロックすること // 描画スレッドで呼ぶ
+	// texごとにレンダーを呼ぶ
+	CS::instance()->enter(CS_RENDERDATA_CS, "texture render");
+	// texture情報を取得してから描画にしようするまでロックは外せないがとりあえず取得する
+	int part_size = parts.size();
+	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+	CS::instance()->enter(CS_DEVICECON_CS, "texture render");
+	CS::instance()->enter(CS_RENDERDATA_CS, "texture render");
+	for (int i=0;i<part_size;i++) {
+	
+		int psize = parts.size();
+		if (psize != part_size) {
+			// ちょうど変更が入ったタイミング
+			// この場合はどうするか
+			if (psize > part_size) {
+				// 増えただけなので気にしないでまわす
+			} else {
+				// 減ったので狂うのでリターンする　これで描画されないタイミングがでてくるけどしょうがない
+
+				CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+				CS::instance()->leave(CS_DEVICECON_CS, "texture render");
+				return;
+			}
+		}
+		TexturePart* p = parts[i];
+		if (p->getIsUse()) {
+			if (p->getIsIndexLoad()) {
+				// need loadがtruefalseにかかわらず描画する		
+				_renderTex(g, p);
+				//_renderBill(g,p);
+			}
+		}
+	
+
+	}
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "texture render");
+	CS::instance()->leave(CS_DEVICECON_CS, "texture render");
+}
+
+
+
 void Texture::_render(Graphics* g, int part_size, int p_index) {
 
 

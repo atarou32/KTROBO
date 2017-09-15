@@ -1,9 +1,24 @@
 #ifndef KTROBOCLOCK_H
 #define KTROBOCLOCK_H
 
+
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
 
 namespace KTROBO {
+
+class ClockWatch {
+private:
+	LARGE_INTEGER time_start;
+	LARGE_INTEGER time_end;
+	LARGE_INTEGER timeFreq;
+public:
+	ClockWatch(){};
+	~ClockWatch(){};
+	void startWatch();
+	double stopWatch();
+};
 class Clock
 {
 private:

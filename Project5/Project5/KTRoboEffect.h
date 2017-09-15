@@ -8,7 +8,7 @@
 namespace KTROBO {
 
 // billboard
-class KTRoboEffect
+class Effect
 {
 private:
 	MYRECT all_anim_rect;
@@ -25,8 +25,8 @@ private:
 	float tex_height;
 
 public:
-	KTRoboEffect(void);
-	~KTRoboEffect(void);
+	Effect(void);
+	~Effect(void);
 };
 
 

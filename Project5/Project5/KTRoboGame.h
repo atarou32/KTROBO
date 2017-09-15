@@ -107,6 +107,8 @@ private:
 	float dmsecond;
 	float dt;
 	Clock* c;
+	ClockWatch watch_for_butukari;
+
 	Task* task_threads[TASKTHREAD_NUM];
 	Graphics* g_for_task_threads[TASKTHREAD_NUM];
 public:
@@ -149,6 +151,12 @@ public:
 	bool Init(HWND hwnd);
 	void Del();
 	void Run();
+	void startWatchForButukari() {
+		watch_for_butukari.startWatch();
+	}
+	double stopWatchForButukari() {
+		return watch_for_butukari.stopWatch();
+	}
 
 	MySound* getSound() {
 		return sound;

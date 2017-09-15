@@ -13,12 +13,14 @@ void Bullet::Init(Graphics* g, AtariHantei* h) {
 
 	if (!atarihan) {
 		atarihan = new UMeshUnit();
+		UMesh* n = new UMesh();
+		atarihan->setUMesh(n);
 		atarihan->setIsEnabled(h, false);
 		h->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_WAZA);
 	}
 }
 
-void Bullet::setParam(Robo* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo) {
+void Bullet::setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo) {
 
 
 
@@ -89,6 +91,7 @@ void BulletController::Init(Graphics* g, AtariHantei* hantei) {
 		bullets = new Bullet[KTROBO_BULLET_CONTROLLER_BULLET_NUM];
 		for (int i=0;i<KTROBO_BULLET_CONTROLLER_BULLET_NUM; i++) {
 			bullets[i].Init(g,hantei);
+			umesh_id_to_bullet_indexs.insert(std::pair<int,int>(bullets[i].atarihan->meshs[0]->getUMESHID(),i));
 		}
 	}
 }

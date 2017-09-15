@@ -777,6 +777,12 @@ bool Game::Init(HWND hwnd) {
 	texdayo->getInstance(1)->setRenderTexIsRender(j,false);
 	}
 
+	{
+//	MYMATRIX idenmat;
+//	MyMatrixIdentity(idenmat);
+//	int kkk = texdayo->getInstance(0)->getRenderBillBoard(pp,0xFFFFFFFF,&idenmat,10,10,0,0,128,128);
+//	texdayo->getInstance(0)->setRenderBillBoardIsRender(kkk,true);
+	}
 	GUI::Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
 
 /*	ksgene = new KendoSinaiGenerator();
@@ -1566,6 +1572,10 @@ void Game::Run() {
 	ff += 0.01f;
 	MyMatrixRotationX(rotX,0);
 	MyVec3TransformNormal(testr,testr,rotX);
+//	texdayo->getInstance(0)->setRenderBillBoardPos(0,&rotX);
+
+
+
 	static Mesh* mm = mesh;
 	if (ff > 3.0f) {
 		CS::instance()->enter(CS_DEVICECON_CS, "lock");
@@ -1946,14 +1956,27 @@ void Game::Run() {
 		MyMatrixTranslation(iden,0,0,5);
 	//	g->drawOBB(g,0xFF0000FF,&iden,&view,&proj,&umesh_units[0]->meshs[0]->bone_obbs[0]);
 	}
-	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
-	
+
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+
+
 	hantei->maecalcdayo(g);
 	hantei->ataristart();
 	hantei->calc(g);
 	hantei->copyKekkaForBufferCopy(g);
 	hantei->calc(g);
 	hantei->copyKekkaForBufferCopy(g);
+//	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+//	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
+/*	
+	hantei->maecalcdayo(g);
+	hantei->ataristart();
+	hantei->calc(g);
+	hantei->copyKekkaForBufferCopy(g);
+	hantei->calc(g);
+	hantei->copyKekkaForBufferCopy(g);
+*/
 	/*
 	hantei->ataristart();
 	hantei->maecalcdayo(g);
@@ -1969,6 +1992,7 @@ void Game::Run() {
 	hantei->runComputeShaderKuwasiku(g);
 	hantei->copyKekkaToBufferForCopy(g,false);
 	*/
+
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 
 	if (hantei->canGetAns()) {
@@ -1986,13 +2010,29 @@ void Game::Run() {
 	}
 	
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+
+//	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+/*	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+	if (hantei->canGetAns()) {
+		hantei->drawKekka(g,&view,&proj);
+	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+*/	
 	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
-
-	texdayo->render(g,0);
+	
+	texdayo->getInstance(0)->renderBill(g);
 	texdayo->deletedayo();
+	texdayo->getInstance(0)->renderTex(g);
+	
+
+	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
+	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	texdayo->getInstance(0)->renderText(g);
 
 	int siz = scenes.size();
 	if (siz) {
@@ -2005,6 +2045,14 @@ void Game::Run() {
 		}
 		now_scene->mainrender(true);
 	}
+
+	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
+	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	
+
+	
 
 	texdayo->render(g,1);
 

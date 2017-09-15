@@ -43,6 +43,18 @@ public:
 	void setMatrixKakeru(MYMATRIX* mat) {
 		RootBone_matrix_local_kakeru = *mat;
 	}
+	void changeMesh(Mesh* mm) {
+		if (is_use_vertexs_and_indexs) {
+			throw new GameError(FATAL_ERROR, " cant change mesh in umesh");
+			return;
+		}
+		for (int i=0;i <KTROBO_MESH_BONE_MAX;i++) {
+			is_bone_obbs_use[i] = false;
+			bone_obbs_idx[i] = 0;
+		}
+
+		mesh = mm;
+	}
 
 	UMesh() {
 		mesh = 0;
@@ -410,6 +422,7 @@ public:
 public:
 	void drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 	int getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya,UMesh* oya2, int out_ans_num);
+	int getAnsWaza(AtariUnitAnsKWSK* out_ans, int out_ans_num);
 private:
 	static MYSHADERSTRUCT mss;
 	static MYSHADERSTRUCT mss2;

@@ -66,33 +66,45 @@ void Robo::upDownMuki(float mouse_y, float dmouse_y) {
 
 	float dy;
 	dy = (mouse_y - screen_height/2);
-	if (abs(dmouse_y) < 700 && abs(dmouse_y) > 1) {
-			dy = dmouse_y/10;
-			updown_muki += dy/10.0f;
+	if (abs(dmouse_y) < 700 && abs(dmouse_y) > 10) {
+		dy = dmouse_y/10;
+		updown_muki += dy/10.0f;
+		if (updown_muki > 1.57) {
+			updown_muki = 1.57;
+		}
+		if (updown_muki < -1.57) {
+			updown_muki = -1.57;
+		}
+	} else {
+
+		if ((abs(dy) >120) && (abs(dy) < 800) && (abs(dmouse_y) > 5)) {
+			updown_muki += dy/10000.0f;
 			if (updown_muki > 1.57) {
 				updown_muki = 1.57;
 			}
 			if (updown_muki < -1.57) {
 				updown_muki = -1.57;
 			}
-		} else {
-
-	if ((abs(dy) >120) && (abs(dy) < 800) && (abs(mouse_y) > 1)) {
-	updown_muki += dy/10000.0f;
-	if (updown_muki > 1.57) {
-		updown_muki = 1.57;
-	}
-	if (updown_muki < -1.57) {
-		updown_muki = -1.57;
-	}
-	}else {
+		}else {
 		
 
 
 
-		if (abs(dy) < 50) {
-		updown_muki = updown_muki/1.1f;
-		}
+			if (abs(dmouse_y) <= 5) {
+//				dy = dmouse_y/100000;
+				updown_muki += dmouse_y/180.0f;
+				if (updown_muki > 1.57) {
+					updown_muki = 1.57;
+				}
+				if (updown_muki < -1.57) {
+					updown_muki = -1.57;
+				}
+			
+			}
+
+			if(abs(dy) < 20) {
+				updown_muki /= 1.3f;
+			}
 		}
 	}
 
