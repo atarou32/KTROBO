@@ -2017,20 +2017,22 @@ void Game::Run() {
 	*/
 
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
-	
 	if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
+			robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 			robodayo->atariAim(g, &view, frameTime, (int)frame);
 		}
 
 		if (roboaitedayo->atarihan) {
+			roboaitedayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 			roboaitedayo->atariAim(g, &view, frameTime, (int)frame);
 		}
 
 		
 		hantei->drawKekka(g,&view,&proj);
-	//	hantei->setIsCalcKuwasikuGetted();
+		hantei->setIsCalcKuwasikuGetted();
 	}
+
 	
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 

@@ -675,6 +675,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					movestop.enter(this, &movestop, move_state);
 					move_state = &movestop;
 					}*/
+					atari_leg->is_bone_obbs_atatta[atari_leg->mesh->BoneIndexes["rightLegDownBone"]] = true;
 					vdayo = 0;
 					setdayo = true;
 					}
@@ -702,6 +703,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 					move_state = &movestop;
 					}*/
 					setti_state = &setti;
+					atari_leg->is_bone_obbs_atatta[atari_leg->mesh->BoneIndexes["leftLegDownBone"]] = true;
 					vdayo = 0;
 					//atarihan->setV(&MYVECTOR3(0,0,atarihan->v.float3.z));
 					setdayo = true;
@@ -726,7 +728,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 			rec.c = ans[i].ans->kouten_jyusin;
 			MYMATRIX iden;
 			MyMatrixIdentity(iden);
-			g->drawOBB(g,0xFFFF0000,&iden,view,g->getProj(),&rec);
+			//g->drawOBB(g,0xFFFF0000,&iden,view,g->getProj(),&rec);
 			if (ans[i].aite_type == AtariUnit::AtariType::ATARI_TIKEI) {
 				MYVECTOR3 sitadayo(0,0,-1);
 				MYVECTOR3 uedayo(0,0,1);
@@ -802,7 +804,8 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 							OBB obda = *ob2;
 							obda.e = MYVECTOR3(0.5f,0.5f,0.5f);
-							g->drawOBB(g,0xFF00FF00,&iden,view,g->getProj(),&obda);
+						//	g->drawOBB(g,0xFF00FF00,&iden,view,g->getProj(),&obda);
+							temp_atari->is_bone_obbs_atatta[k] = true;
 							atarihan->setXYZD(atarihan->x + ans[i].ans->kouten_housen.float3.x * 1.02f*f2*f2,
 								atarihan->y + ans[i].ans->kouten_housen.float3.y * 1.02f*f2*f2,
 								atarihan->z + ans[i].ans->kouten_housen.float3.z * 1.02f*f2*f2,myspeed);

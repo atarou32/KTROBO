@@ -30,6 +30,7 @@ public:
 	OBB bone_obbs[KTROBO_MESH_BONE_MAX]; // 各位置、姿勢、アニメの計算後のおｂｂ
 	int bone_obbs_idx[KTROBO_MESH_BONE_MAX];
 	bool is_bone_obbs_use[KTROBO_MESH_BONE_MAX];
+	bool is_bone_obbs_atatta[KTROBO_MESH_BONE_MAX];
 public:
 	void setInfo();
 	void setAnimeFrame(float frame) {
@@ -68,6 +69,7 @@ public:
 		anime_frame = 0;
 		for (int i=0;i <KTROBO_MESH_BONE_MAX;i++) {
 			is_bone_obbs_use[i] = false;
+			is_bone_obbs_atatta[i] = false;
 			bone_obbs_idx[i] = 0;
 		}
 		UMESH_ID = id_max;

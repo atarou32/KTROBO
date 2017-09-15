@@ -423,7 +423,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	CS::instance()->enter(CS_DEVICECON_CS,"unko");
 	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
 	
-	Sleep(5000);
+//	Sleep(5000);
 	/*
 	hantei->ataristart();
 	hantei->maecalcdayo(g);
@@ -443,19 +443,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 //	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	
 	if (gm) {
-	if (hantei->canGetAns()) {
-		if (game->robodayo->atarihan) {
-			game->robodayo->atarishori(g, &gm->view, hantei, frameTime, (int)frame);
-		}
-
-		if (game->roboaitedayo->atarihan) {
-			game->roboaitedayo->atarishori(g, &gm->view, hantei, frameTime, (int)frame);
-		}
-
-		
-		//hantei->drawKekka(g,&view,&proj);
-		hantei->setIsCalcKuwasikuGetted();
-	}
+	
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	CS::instance()->leave(CS_DEVICECON_CS, "unko");
