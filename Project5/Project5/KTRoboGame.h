@@ -185,10 +185,14 @@ public:
 		CS::instance()->enter(CS_TASK_CS, "render lock",2);
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
+		CS::instance()->enter(CS_DEVICECON_CS, "device lock");
 		CS::instance()->enter(CS_MESSAGE_CS, "message lock");
+		CS::instance()->enter(CS_RENDERDATA_CS, "render lock");
 		scenes.push_back(scene);
 		scene->enter();
+		CS::instance()->leave(CS_RENDERDATA_CS, "render unlock");
 		CS::instance()->leave(CS_MESSAGE_CS, "message lock");
+		CS::instance()->leave(CS_DEVICECON_CS, "device lock");
 		CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 		CS::instance()->leave(CS_TASK_CS, "anime lock",1);
 		CS::instance()->leave(CS_TASK_CS, "render lock",2);
@@ -201,17 +205,40 @@ public:
 		CS::instance()->enter(CS_TASK_CS, "render lock",2);
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
+			CS::instance()->enter(CS_DEVICECON_CS, "device lock");
 		CS::instance()->enter(CS_MESSAGE_CS, "message lock");
-		if (scenes.size()) {
+		CS::instance()->enter(CS_RENDERDATA_CS, "render lock");
+		
+		while (scenes.size()) {
 		Scene* s = scenes.back();
 		scenes.pop_back();
 		if (s) {
 			s->leave();
+			// タスクをキルしてからキル予定のタスクが終了するまでデリートしない
+			CS::instance()->leave(CS_RENDERDATA_CS, "render unlock");
+			CS::instance()->leave(CS_MESSAGE_CS, "message lock");
+			CS::instance()->leave(CS_DEVICECON_CS, "device lock");
+			CS::instance()->leave(CS_TASK_CS, "atari lock",0);
+			CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+			CS::instance()->leave(CS_TASK_CS, "render lock",2);
+			CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+			CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+			CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
+			CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+			CS::instance()->enter(CS_TASK_CS, "render lock",2);
+			CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
+			CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
+			CS::instance()->enter(CS_DEVICECON_CS, "device lock");
+			CS::instance()->enter(CS_MESSAGE_CS, "message lock");
+			CS::instance()->enter(CS_RENDERDATA_CS, "render lock");
+
 			delete s;
 			s = 0;
 		}
 		}
+		CS::instance()->leave(CS_RENDERDATA_CS, "render unlock");
 		CS::instance()->leave(CS_MESSAGE_CS, "message lock");
+		CS::instance()->leave(CS_DEVICECON_CS, "device lock");
 		CS::instance()->leave(CS_TASK_CS, "atari lock",0);
 		CS::instance()->leave(CS_TASK_CS, "anime lock",1);
 		CS::instance()->leave(CS_TASK_CS, "render lock",2);

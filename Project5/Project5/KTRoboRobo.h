@@ -1757,7 +1757,7 @@ public:
 	void release();
 	void atarishori(Graphics* g , MYMATRIX* view, AtariHantei* hantei, float dt, int stamp);
 	void fireUpdate(Graphics* g, MyTextureLoader* tex_loader, MYMATRIX* view, AtariHantei* hantei, float dt, int stamp, Game* game, Texture* tex);
-
+	void atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp);
 };
 
 }

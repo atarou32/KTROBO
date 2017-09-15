@@ -934,12 +934,7 @@ void Game::Del() {
 
 	
 
-	// シーンは別の場所でデストラクトを呼ぶ　とかいてあったがすべてデストラクトすることにした
-	int sizz = scenes.size();
-	while(sizz) {
-		this->removeScene();
-		sizz--;
-	}
+	
 	/*
 	vector<Scene*>::iterator scene_it = scenes.begin();
 	while (scene_it != scenes.end()) {
@@ -955,8 +950,16 @@ void Game::Del() {
 	*/
 	
 
+	// シーンは別の場所でデストラクトを呼ぶ　とかいてあったがすべてデストラクトすることにした
+	int sizz = scenes.size();
+	while(sizz) {
+		this->removeScene();
+		sizz--;
+	}
 	Scene::Del();
 
+	
+		
 
 	if (task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
 		task_threads[TASKTHREADS_UPDATEMAINRENDER]->deleteTask();
@@ -965,7 +968,7 @@ void Game::Del() {
 	}
 	
 
-
+/*
 	if (task_threads[TASKTHREADS_AIDECISION]) {
 		task_threads[TASKTHREADS_AIDECISION]->deleteTask();
 		delete task_threads[TASKTHREADS_AIDECISION];
@@ -988,7 +991,7 @@ void Game::Del() {
 		delete g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
 		g_for_task_threads[TASKTHREADS_LOADDESTRUCT] = 0;
 	}
-
+*/
 	
 
 	// 順番を変えないこと　cs と　タスクの間に依存関係がある
@@ -1013,6 +1016,18 @@ void Game::Del() {
 		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
 	}
 
+
+	
+
+	// CSでロックする
+	CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
+		CS::instance()->enter(CS_TASK_CS, "load lock", 3);
+		CS::instance()->enter(CS_TASK_CS, "render lock",2);
+		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
+		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
+		CS::instance()->enter(CS_DEVICECON_CS, "device lock");
+		CS::instance()->enter(CS_MESSAGE_CS, "message lock");
+		CS::instance()->enter(CS_RENDERDATA_CS, "render lock");
 
 	if (te) {
 		delete te;
@@ -1211,7 +1226,15 @@ void Game::Del() {
 		gg = 0;
 	}
 	*/
-
+	
+	CS::instance()->leave(CS_RENDERDATA_CS, "render unlock");
+	CS::instance()->leave(CS_MESSAGE_CS, "message lock");
+	CS::instance()->leave(CS_DEVICECON_CS, "device lock");
+	CS::instance()->leave(CS_TASK_CS, "atari lock",0);
+	CS::instance()->leave(CS_TASK_CS, "anime lock",1);
+	CS::instance()->leave(CS_TASK_CS, "render lock",2);
+	CS::instance()->leave(CS_TASK_CS, "load lock", 3);
+	CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
 }
 
 
@@ -1994,19 +2017,19 @@ void Game::Run() {
 	*/
 
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
-
+	
 	if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
-			robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+			robodayo->atariAim(g, &view, frameTime, (int)frame);
 		}
 
 		if (roboaitedayo->atarihan) {
-			roboaitedayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+			roboaitedayo->atariAim(g, &view, frameTime, (int)frame);
 		}
 
 		
 		hantei->drawKekka(g,&view,&proj);
-		hantei->setIsCalcKuwasikuGetted();
+	//	hantei->setIsCalcKuwasikuGetted();
 	}
 	
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");

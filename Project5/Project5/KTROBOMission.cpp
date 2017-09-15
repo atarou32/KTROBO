@@ -399,30 +399,31 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	if (millisecond > RENDERTIME_IGNORETIME) {
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
 		//Sleep(1);
-		millisecond = RENDERTIME_SETTIME*2/3;
+		millisecond = RENDERTIME_SETTIME;
 		butukari_clock.plus((float)millisecond);
 		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
-	}/* else if ( millisecond < RENDERTIME_SETTIME*2/3 ) {
+	} else if ( millisecond < RENDERTIME_SETTIME ) {
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
 		butukari_clock.plus((float)millisecond);
-		Sleep(DWORD(RENDERTIME_SETTIME*2/3 - millisecond));
-		millisecond = RENDERTIME_SETTIME*2/3;
+		//Sleep(DWORD(RENDERTIME_SETTIME - millisecond));
+		millisecond = RENDERTIME_SETTIME;
 		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
-	}*/ else {
+	} else {
 		
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
 		butukari_clock.plus((float)millisecond);
 		//Sleep(1);
+		millisecond = RENDERTIME_SETTIME;
 		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
 	}
 
 	float frameTime = millisecond;
-	int frame = butukari_clock.getSecond();
-	/*
+	int frame = game->getTimeStamp();//butukari_clock.getSecond();
+	
 	CS::instance()->enter(CS_DEVICECON_CS,"unko");
 	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
-	*/
 	
+	Sleep(5000);
 	/*
 	hantei->ataristart();
 	hantei->maecalcdayo(g);
@@ -440,7 +441,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	*/
 
 //	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
-	/*
+	
 	if (gm) {
 	if (hantei->canGetAns()) {
 		if (game->robodayo->atarihan) {
@@ -458,7 +459,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	CS::instance()->leave(CS_DEVICECON_CS, "unko");
-	*/
+	
 }
 
 void Game_SCENE::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {

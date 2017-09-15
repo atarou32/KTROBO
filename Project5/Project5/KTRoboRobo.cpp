@@ -368,6 +368,275 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 
 }
 
+void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
+		static int iunko = 9;
+	static bool bunko = false;
+
+	if (ap) {
+		MYVECTOR3 moku(0,0,0);
+		MYMATRIX trans_world;
+		MyMatrixInverse(trans_world, NULL, atarihan->world);
+		MyVec3TransformCoord(moku,moku,trans_world);
+//	
+//		ap->positionArm2(0,0.5, meshrobo, &D3DXVECTOR3(40*cos(test),-80+40*sin(test),80+40*sin(test)), true);
+//		ap->positionArm2(3.14/600,0.5,meshrobo, &D3DXVECTOR3(40*cos(test),-80+40*sin(test),80+40*sin(test)), false);
+		static float test = 0;
+		test += 0.1f;
+
+		if (this->arm ) {
+			
+			if (this->arm->larm) {
+//			this->arm->larm->animate(0,true);
+//			
+//		if (	ap->positionArm2(0.001,0.5, this, &moku/*
+//											   MYVECTOR3(40*cos(test),-80+40*sin(test),80+40*sin(test)
+//												   */, false)) {
+//			arm->larm->animate(0,false);
+//		}
+//		
+		
+					MYMATRIX temp;
+			MyMatrixMultiply(temp, this->atarihan->world, *view);
+		//	if (ap->positionArm(g,&temp, 0,this, &moku, false)) {
+		//		arm->larm->animate(0,false);
+		//	}
+
+			MYVECTOR3 te = MYVECTOR3(3,3,3);//1*cos(test),-2+4*sin(test)
+												//	 ,3+4*sin(test));
+
+			{
+			MYMATRIX temp;
+			MyMatrixInverse(temp,NULL,atarihan->world);
+			MyVec3TransformCoord(te,te,temp);
+			
+		//	arm->larm->animate(40,true);
+		//	if (ap->positionArm3(g,&temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+						//							 ,80+40*sin(test))*/, false)) {
+		//	arm->larm->animate(40,false);//false);
+			{
+			RAY ra;
+			
+			MeshBone* handbo = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
+			MYVECTOR3 tempd(0,0,0);
+			MYMATRIX tempma;
+			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+			MyVec3TransformCoord(tempd,tempd,tempma);
+			MYVECTOR3 tempdn(1,0,0);
+			MyVec3TransformNormal(tempdn,tempdn, tempma);
+			ra.org = tempd;
+			ra.dir = tempdn * 30;
+			MYMATRIX iden;
+			MyMatrixIdentity(iden);
+
+			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+
+			}
+			}
+			//}
+
+			}
+			if (this->arm->rarm) {
+		//	this->arm->rarm->animate(0,true);
+	//		this->arm->rarm->animate(0,false);
+			MYVECTOR3 te = MYVECTOR3(3,3,3);//1*cos(test),-2+4*sin(test)
+												//	 ,3+4*sin(test));
+			{
+
+			MYMATRIX temp;
+			MyMatrixInverse(temp,NULL,atarihan->world);
+			MyVec3TransformCoord(te,te,temp);
+			MyMatrixMultiply(temp, this->atarihan->world, *view);
+			
+		//	if (ap->positionArm(g,&temp, 0,this,/* &moku*/&te, true)) {
+			//	arm->rarm->animate(0,false);
+		//	}
+			MYMATRIX world;
+			MyMatrixIdentity(world);
+			g->drawTriangle(g,0xFFFF0000,&world,view,g->getProj(), 
+				&MYVECTOR3(3,3,3),//1*cos(test),-2+4*sin(test),3+4*sin(test)+1),
+				&MYVECTOR3(3,4,3),//1*cos(test),-2+4*sin(test)+1,3+4*sin(test)),
+				&MYVECTOR3(3,4,4));//*cos(test)+1,-2+4*sin(test),3+4*sin(test)));
+
+
+			static float unko=0;
+			unko += 0.03f;
+			if (unko > 1) {
+				unko = -1+0.01f;;
+			}
+		
+			int i=0;
+			for (i=0;i<1;i++) {
+				LockOnSystem los;
+				static ArmPoint8Positioner posit;
+				if (iunko > 8) {
+				
+					static int r =0;
+					bool t=false;
+					
+					r = iunko % 800+200;
+				
+					
+					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
+					MyVec3TransformCoord(te,te,atarihan->world);
+					OBB ob;
+					ob.c = te;
+					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
+					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+					if (!bunko) {
+						if (apinfo->isCalcFinished()) {
+							aim(g, view);
+							bunko = false;
+						} else {
+							aphelper->setMoku(&te);
+							
+							bunko = true;
+						}
+				
+					}
+					//ArmPoint app = posit.getPoint(&te);//posit.points[r];
+					//app.is_ok = true;
+					//getPoint(&te);
+					//if (app.is_ok) {
+					//	if (!setdayo || ap->getReseted()) {
+						//ap->setTheta(app.dthetaxa,app.dthetaxb,app.dthetaya, app.dthetayb, app.dthetaza, app.dthetazb);
+					//	setdayo = true;
+					//	}
+				//		//iunko++;
+				//	}
+					
+				
+				
+				
+				
+				
+				} else {
+				te = los.getPosOfStudyPoint(iunko, 10,100,6,10,6,10,300,300,500);
+				MyVec3TransformCoord(te,te,atarihan->world);
+				OBB ob;
+				ob.c = te;
+				te = los.getPosOfStudyPoint(iunko, 10,100,6,10,6,10,300,300,500);
+				g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+
+
+
+
+
+				}
+			
+		for (int t=0;t<50;t++) {
+			if (!aphelper->getIsCalced() && !apinfo->isCalcFinished()) {
+			aphelper->calc(g,&temp);
+			}
+			if (!aphelper_hidari->getIsCalced() && !apinfo->isCalcFinished()) {
+			aphelper_hidari->calc(g,&temp);
+			}
+
+		}
+
+		if (aphelper->getIsCalced()) {
+			iunko++;
+			if (!apinfo->isCalcFinished()) {
+				ArmPoint app = aphelper->getArmPoint();
+				app.is_ok = true;
+				app.pos = apinfo->getIndexPos();
+			apinfo->saveDtheta(&app, apinfo->getNowIndex());
+			apinfo->saveFileWithA();
+			apinfo->setNextIndex();
+				bunko = false;
+			} else {
+				if (bunko) {
+				
+				bunko = false;
+				} else {
+				bunko = true;
+				}
+			}
+
+		
+		}
+
+					
+//		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
+//											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
+												
+												 
+							
+//												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+//													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 
+												 
+//												 arm->rarm->animate(40,false);
+//												 ArmPoint app;
+//												 app.pos = te;
+//												 ap->getTheta(&app);
+											
+												// posit.setPoint(iunko,&app);
+//												 iunko++;
+//												 setdayo = false;
+												 
+	//											 break;
+	//	} else {
+		//	ap->resetTheta();
+		//			 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+			//										 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 
+											 
+	//										 arm->rarm->animate(40,false);
+	//	}
+			}
+			
+		//	if ( i == 15) {
+			//	// arm のアニメはしない
+				// ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
+					//								 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
+			
+												 
+												 
+												 
+						//						 arm->rarm->animate(40,false);
+			//}
+
+
+				{
+			RAY ra;
+			
+			MeshBone* handbo = arm->rarm->Bones[arm->larm->BoneIndexes["handBone"]];
+			MYVECTOR3 tempd(0,0,0);
+			MYMATRIX tempma;
+			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+			MyVec3TransformCoord(tempd,tempd,tempma);
+			MYVECTOR3 tempdn(1,0,0);
+			MyVec3TransformNormal(tempdn,tempdn, tempma);
+			ra.org = tempd;
+			ra.dir = tempdn * 30;
+			MYMATRIX iden;
+			MyMatrixIdentity(iden);
+
+			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+
+			}
+
+
+			
+
+
+
+
+
+
+			}
+			
+			}
+		}
+	
+	}
+}
+
+
 void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float dt, int stamp) {
 
 	AtariUnitAnsKWSK ans[512];
@@ -778,268 +1047,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 	anime_loop_leg.animate(atari_leg, true);
 	
 
-	if (ap) {
-		MYVECTOR3 moku(0,0,0);
-		MYMATRIX trans_world;
-		MyMatrixInverse(trans_world, NULL, atarihan->world);
-		MyVec3TransformCoord(moku,moku,trans_world);
-//	
-//		ap->positionArm2(0,0.5, meshrobo, &D3DXVECTOR3(40*cos(test),-80+40*sin(test),80+40*sin(test)), true);
-//		ap->positionArm2(3.14/600,0.5,meshrobo, &D3DXVECTOR3(40*cos(test),-80+40*sin(test),80+40*sin(test)), false);
-		static float test = 0;
-		test += 0.1f;
-
-		if (this->arm ) {
-			
-			if (this->arm->larm) {
-//			this->arm->larm->animate(0,true);
-//			
-//		if (	ap->positionArm2(0.001,0.5, this, &moku/*
-//											   MYVECTOR3(40*cos(test),-80+40*sin(test),80+40*sin(test)
-//												   */, false)) {
-//			arm->larm->animate(0,false);
-//		}
-//		
-		
-					MYMATRIX temp;
-			MyMatrixMultiply(temp, this->atarihan->world, *view);
-		//	if (ap->positionArm(g,&temp, 0,this, &moku, false)) {
-		//		arm->larm->animate(0,false);
-		//	}
-
-			MYVECTOR3 te = MYVECTOR3(3,3,3);//1*cos(test),-2+4*sin(test)
-												//	 ,3+4*sin(test));
-
-			{
-			MYMATRIX temp;
-			MyMatrixInverse(temp,NULL,atarihan->world);
-			MyVec3TransformCoord(te,te,temp);
-			
-		//	arm->larm->animate(40,true);
-		//	if (ap->positionArm3(g,&temp,this, &te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-						//							 ,80+40*sin(test))*/, false)) {
-		//	arm->larm->animate(40,false);//false);
-			{
-			RAY ra;
-			
-			MeshBone* handbo = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
-			MYVECTOR3 tempd(0,0,0);
-			MYMATRIX tempma;
-			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
-			MyVec3TransformCoord(tempd,tempd,tempma);
-			MYVECTOR3 tempdn(1,0,0);
-			MyVec3TransformNormal(tempdn,tempdn, tempma);
-			ra.org = tempd;
-			ra.dir = tempdn * 30;
-			MYMATRIX iden;
-			MyMatrixIdentity(iden);
-
-			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
-
-			}
-			}
-			//}
-
-			}
-			if (this->arm->rarm) {
-		//	this->arm->rarm->animate(0,true);
-	//		this->arm->rarm->animate(0,false);
-			MYVECTOR3 te = MYVECTOR3(3,3,3);//1*cos(test),-2+4*sin(test)
-												//	 ,3+4*sin(test));
-			{
-
-			MYMATRIX temp;
-			MyMatrixInverse(temp,NULL,atarihan->world);
-			MyVec3TransformCoord(te,te,temp);
-			MyMatrixMultiply(temp, this->atarihan->world, *view);
-			
-		//	if (ap->positionArm(g,&temp, 0,this,/* &moku*/&te, true)) {
-			//	arm->rarm->animate(0,false);
-		//	}
-			MYMATRIX world;
-			MyMatrixIdentity(world);
-			g->drawTriangle(g,0xFFFF0000,&world,view,g->getProj(), 
-				&MYVECTOR3(3,3,3),//1*cos(test),-2+4*sin(test),3+4*sin(test)+1),
-				&MYVECTOR3(3,4,3),//1*cos(test),-2+4*sin(test)+1,3+4*sin(test)),
-				&MYVECTOR3(3,4,4));//*cos(test)+1,-2+4*sin(test),3+4*sin(test)));
-
-
-			static float unko=0;
-			unko += 0.03f;
-			if (unko > 1) {
-				unko = -1+0.01f;;
-			}
-		
-			int i=0;
-			for (i=0;i<1;i++) {
-				LockOnSystem los;
-				static ArmPoint8Positioner posit;
-				if (iunko > 8) {
-				
-					static int r =0;
-					bool t=false;
-					
-					r = iunko % 800+200;
-				
-					
-					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
-					MyVec3TransformCoord(te,te,atarihan->world);
-					OBB ob;
-					ob.c = te;
-					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
-					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
-					if (!bunko) {
-						if (apinfo->isCalcFinished()) {
-							aim(g, view);
-							bunko = false;
-						} else {
-							aphelper->setMoku(&te);
-							
-							bunko = true;
-						}
-				
-					}
-					//ArmPoint app = posit.getPoint(&te);//posit.points[r];
-					//app.is_ok = true;
-					//getPoint(&te);
-					//if (app.is_ok) {
-					//	if (!setdayo || ap->getReseted()) {
-						//ap->setTheta(app.dthetaxa,app.dthetaxb,app.dthetaya, app.dthetayb, app.dthetaza, app.dthetazb);
-					//	setdayo = true;
-					//	}
-				//		//iunko++;
-				//	}
-					
-				
-				
-				
-				
-				
-				} else {
-				te = los.getPosOfStudyPoint(iunko, 10,100,6,10,6,10,300,300,500);
-				MyVec3TransformCoord(te,te,atarihan->world);
-				OBB ob;
-				ob.c = te;
-				te = los.getPosOfStudyPoint(iunko, 10,100,6,10,6,10,300,300,500);
-				g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
-
-
-
-
-
-				}
-			
-		for (int t=0;t<50;t++) {
-			if (!aphelper->getIsCalced() && !apinfo->isCalcFinished()) {
-			aphelper->calc(g,&temp);
-			}
-			if (!aphelper_hidari->getIsCalced() && !apinfo->isCalcFinished()) {
-			aphelper_hidari->calc(g,&temp);
-			}
-
-		}
-
-		if (aphelper->getIsCalced()) {
-			iunko++;
-			if (!apinfo->isCalcFinished()) {
-				ArmPoint app = aphelper->getArmPoint();
-				app.is_ok = true;
-				app.pos = apinfo->getIndexPos();
-			apinfo->saveDtheta(&app, apinfo->getNowIndex());
-			apinfo->saveFileWithA();
-			apinfo->setNextIndex();
-				bunko = false;
-			} else {
-				if (bunko) {
-				
-				bunko = false;
-				} else {
-				bunko = true;
-				}
-			}
-
-		
-		}
-
-					
-//		if (ap->positionArm3(g,&temp,this,&te/*MYVECTOR3(40*cos(test),-80+40*sin(test)
-//											,80+40*sin(test))*/, true) != KTROBO_ARMPOSITION_DAME) {
-												
-												 
-							
-//												 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-//													 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
-			
-												 
-												 
-												 
-//												 arm->rarm->animate(40,false);
-//												 ArmPoint app;
-//												 app.pos = te;
-//												 ap->getTheta(&app);
-											
-												// posit.setPoint(iunko,&app);
-//												 iunko++;
-//												 setdayo = false;
-												 
-	//											 break;
-	//	} else {
-		//	ap->resetTheta();
-		//			 ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-			//										 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
-			
-												 
-												 
-											 
-	//										 arm->rarm->animate(40,false);
-	//	}
-			}
-			
-		//	if ( i == 15) {
-			//	// arm のアニメはしない
-				// ap->setArm3(this,true, arm->rarm->Bones[arm->rarm->BoneIndexes["uparmBone"]],
-					//								 arm->rarm->Bones[arm->rarm->BoneIndexes["downarmBone"]]);
-			
-												 
-												 
-												 
-						//						 arm->rarm->animate(40,false);
-			//}
-
-
-				{
-			RAY ra;
-			
-			MeshBone* handbo = arm->rarm->Bones[arm->larm->BoneIndexes["handBone"]];
-			MYVECTOR3 tempd(0,0,0);
-			MYMATRIX tempma;
-			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
-			MyVec3TransformCoord(tempd,tempd,tempma);
-			MYVECTOR3 tempdn(1,0,0);
-			MyVec3TransformNormal(tempdn,tempdn, tempma);
-			ra.org = tempd;
-			ra.dir = tempdn * 30;
-			MYMATRIX iden;
-			MyMatrixIdentity(iden);
-
-			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
-
-			}
-
-
-			
-
-
-
-
-
-
-			}
-			
-			}
-		}
 	
-	}
 
 
 	if (MyVec3Length(atarihan->v) > 5) {// seigen
