@@ -441,7 +441,7 @@ public:
 	void calcAuInfo(Graphics* g, bool calc_vertex_and_index);
 	void calcObb(Graphics* g);
 	
-	void sendAtariWithOffset(Graphics* g, int offset);
+	void sendAtariWithOffset(ID3D11DeviceContext* context, int offset);
 
 public:
 	void drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj);

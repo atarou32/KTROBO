@@ -108,8 +108,9 @@ private:
 	float dt;
 	Clock* c;
 	ClockWatch watch_for_butukari;
+public:
 	ClockWatches watches_for_keisoku;
-
+private:
 	Task* task_threads[TASKTHREAD_NUM];
 	Graphics* g_for_task_threads[TASKTHREAD_NUM];
 public:

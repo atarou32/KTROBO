@@ -556,6 +556,7 @@ bool TelopTexts::isRenderFinished() {
 void TelopTexts::plusTime(Graphics* g, float dt) {
 	sum_plustime += dt;
 	cbuf1.plustime = sum_plustime;
+	
 	g->getDeviceContext()->UpdateSubresource(cbuf1_buffer,0,NULL,&cbuf1,0,0);
 }
 

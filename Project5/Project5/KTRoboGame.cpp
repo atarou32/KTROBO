@@ -1312,11 +1312,12 @@ void Game::Run() {
 	//demo->Render(g);
 	float clearColor[4] = {
 		0.3f,0.4f,0.8f,1.0f};
+	CS::instance()->enter(CS_DEVICECON_CS, "test");
 	telop_texts->plusTime(g,millisecond);
 	if (telop_texts->isRenderFinished()) {
 		telop_texts->readFile(g,"resrc/sample/KTROBO.txt",30,14,&MYVECTOR4(1,1,1,1),0.1);
 	}
-	
+	CS::instance()->leave(CS_DEVICECON_CS, "test");
 	//demo->Render(g);
 
 	static float frame = 0;
@@ -1413,7 +1414,9 @@ void Game::Run() {
 	WCHAR bbufdayo[512];
 	memset(bbufdayo,0,sizeof(WCHAR)*512);
 	stringconverter scc;
+	CS::instance()->enter(CS_RENDERDATA_CS, "render");
 	scc.charToWCHAR(bbuf,bbufdayo);
+	CS::instance()->leave(CS_RENDERDATA_CS, "render");
 	te->changeText(bbufdayo,wcslen(bbufdayo));
 	CS::instance()->leave(CS_MESSAGE_CS, "render");
 
@@ -1721,7 +1724,7 @@ void Game::Run() {
 	//	g->drawTriangle(g,0xFFFFFFFF,&world,&view,&proj,&t1.x,&t1.y,&t1.z);
 	//	g->drawTriangle(g,0xFFFFFFFF,&world,&view,&proj,&t2.x,&t2.y,&t2.z);
 	}
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "render game");
 	
 	{
 		static float bui = 0;
@@ -1805,10 +1808,11 @@ void Game::Run() {
 //	sn.nigiraseru(g,&view,&proj);
 
 	bool calcom = true;
+	
 	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
-
+	
 	}
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "render game");
 	static float tester = 0;
 	tester += 0.1f;
 	UMeshUnit* umesh_unit = umesh_units[2+30];
@@ -1888,10 +1892,14 @@ void Game::Run() {
 //	mesh_instanceds->calcCombinedMatrixToTexture(g);
 	//mesh_instanceds->loadColorToTexture(g);
 	
-	watches_for_keisoku.startWatch(0);
+	//watches_for_keisoku.startWatch(0);
 	mesh_instanceds->render(g);
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
+
+
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "ee");
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
 	/*
@@ -1940,7 +1948,7 @@ void Game::Run() {
 	if ( h > 100) {
 		 h=  1;
 	}
-
+	CS::instance()->leave(CS_RENDERDATA_CS, "ee");
 	static int coun = 0;
 	coun++;
 	
@@ -1963,7 +1971,7 @@ void Game::Run() {
 	//texdayo->getInstance(0)->setRenderBillBoardIsRender(0,false);
 
 	//texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
-	watches_for_keisoku.stopWatch(0);
+	//watches_for_keisoku.stopWatch(0);
 	
 	{
 		WCHAR buff[512];
@@ -2035,49 +2043,22 @@ void Game::Run() {
 	hantei->calc(g);
 	hantei->copyKekkaForBufferCopy(g);
 */
-	watches_for_keisoku.startWatch(2);
 
-	watches_for_keisoku.startWatch(5);
-	hantei->ataristart();
-	hantei->maecalcdayo(g);
-	watches_for_keisoku.stopWatch(5);
-	watches_for_keisoku.startWatch(6);
-	hantei->calcAuInfo(g,true);
-	hantei->calcKumi(g);
-	hantei->calcObb(g);
-	hantei->clearKekkaOfBuffer(g);
-	watches_for_keisoku.stopWatch(6);
-		watches_for_keisoku.startWatch(7);
-	hantei->runComputeShaderAida(g);
-	watches_for_keisoku.stopWatch(7);
-	
-	//hantei->copyKekkaToBufferForCopy(g,true);
-	
-	//hantei->calcKumiKuwasiku(g);
-	//hantei->runComputeShaderKuwasiku(g);
-
-	watches_for_keisoku.startWatch(8);
-	hantei->copyKekkaToBufferForCopy2(g);
-	watches_for_keisoku.stopWatch(8);
-		watches_for_keisoku.stopWatch(2);
 	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	//if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
-			robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-			robodayo->atariAim(g, &view, frameTime, (int)frame);
-		}
+				//	robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+					robodayo->atariAim(g, &view, frameTime, (int)frame);
+				}
 
-		if (roboaitedayo->atarihan) {
-			roboaitedayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-			roboaitedayo->atariAim(g, &view, frameTime, (int)frame);
-		}
-
+				if (roboaitedayo->atarihan) {
+			//		roboaitedayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+					roboaitedayo->atariAim(g, &view, frameTime, (int)frame);
+				}
+		hantei->drawKekka(g,&this->view,g->getProj());
 		
-		hantei->drawKekka(g,&view,&proj);
-		hantei->setIsCalcKuwasikuGetted();
 	//}
-
 	watches_for_keisoku.stopWatch(3);
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 

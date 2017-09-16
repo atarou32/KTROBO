@@ -179,6 +179,9 @@ public:
 	void setTexLoader(MyTextureLoader* tex) {
 		tex_loader = tex;
 	}
+	bool isCopied() {
+		return is_copied;
+	}
 
 	MyTextureLoader* getTexLoader() {
 		return tex_loader;
