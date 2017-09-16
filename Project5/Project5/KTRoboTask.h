@@ -71,7 +71,8 @@ public:
 	void kill(TCB* killTCB);
 	void change(TCB* thisTCB, void(*exec)(TCB*), void* data);
 	void deleteTask();
-
+	void deleteTaskWithoutLock();
+	void waitForTaskEnd();
 };
 
 

@@ -128,8 +128,7 @@ ktrobo_error:
 		delete input;
 		input = 0;
 	}
-
-
+	
 	if (game) {
 		game->Del();
 		delete game;

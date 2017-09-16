@@ -1529,6 +1529,7 @@ void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_w
 void ShudouArmPositioner::Del() {
 	if (gui) {
 		gui->deleteAll();
+		//gui->Release();
 		delete gui;
 		gui = 0;
 	}

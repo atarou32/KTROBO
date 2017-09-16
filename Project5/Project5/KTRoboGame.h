@@ -217,6 +217,7 @@ public:
 		if (s) {
 			s->leave();
 			// タスクをキルしてからキル予定のタスクが終了するまでデリートしない
+			for (int i=0;i<10;i++) {
 			CS::instance()->leave(CS_RENDERDATA_CS, "render unlock");
 			CS::instance()->leave(CS_MESSAGE_CS, "message lock");
 			CS::instance()->leave(CS_DEVICECON_CS, "device lock");
@@ -233,7 +234,7 @@ public:
 			CS::instance()->enter(CS_DEVICECON_CS, "device lock");
 			CS::instance()->enter(CS_MESSAGE_CS, "message lock");
 			CS::instance()->enter(CS_RENDERDATA_CS, "render lock");
-
+			}
 			delete s;
 			s = 0;
 		}

@@ -336,11 +336,16 @@ bool Game::Init(HWND hwnd) {
 	// 順番をかえないこと cs とタスクの間に依存関係がある
 
 	g = new Graphics();
+
 	if (!g->Init(hwnd)) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "graphics init error");
 	}
+	g_for_task_threads[2] = g;
+	//return true;
 
 	Graphics::InitMSS(g);
+
+//	return true;
 
 	demo = new KTRoboDemoRender();
 	demo->Init(g);
@@ -355,11 +360,12 @@ bool Game::Init(HWND hwnd) {
 			g_for_task_threads[i]->setTexLoader(demo->tex_loader);
 		}
 	}
-
+	
+	
 	Mesh::Init(g);
 	MyTokenAnalyzer::Init();
 
-
+	
 	c = new Clock(0,0,0);
 	Text::Init(g, demo->font);
 
@@ -492,8 +498,9 @@ bool Game::Init(HWND hwnd) {
 	roboaitedayo->init(g,demo->tex_loader,hantei);
 
 
+	
 
-
+	
 	for (int i=0;i<1;i++) {
 	{
 	MYMATRIX idenmat;
@@ -522,7 +529,8 @@ bool Game::Init(HWND hwnd) {
 	UMeshUnit* umesh_unit = new UMeshUnit();
 	uum = umesh_unit;
 
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH"/*"resrc/model/cube/pkcube.MESH"*/, demo->tex_loader,mesh2,false,&idenmat,
+	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH"/*"resrc/model/cube/pkcube.MESH"*/
+	, demo->tex_loader,mesh2,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL,false);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
@@ -535,6 +543,7 @@ bool Game::Init(HWND hwnd) {
 
 	umesh_unit->calcJyusinAndR();
 	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
+
 	/*sinai = new Sinai();
 	sinai->init(g, demo->tex_loader,hantei);
 	ss = new SinaiNigiru(sinai,umesh_unit);
@@ -565,6 +574,8 @@ bool Game::Init(HWND hwnd) {
 //	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
 
 	}
+
+
 	/*
 	{
 	MYMATRIX idenmat;
@@ -582,6 +593,9 @@ bool Game::Init(HWND hwnd) {
 	mesh_instanceds = new MeshInstanceds(g, this->demo->tex_loader);
 	mesh_instanceds->setSkeleton(mesh);
 
+	
+	
+	
 	for(int i=0;i<10;i++) {
 		for(int k=0;k<10;k++) {
 	{
@@ -609,7 +623,7 @@ bool Game::Init(HWND hwnd) {
 	}
 		}
 	}
-
+ //*//
 	
 	/*
 	MyMatrixRotationX(worldforg, -3.14/4*2);
@@ -741,6 +755,7 @@ bool Game::Init(HWND hwnd) {
 	
 	LuaTCBMaker::Init(task_threads, Ls);
 	Texture::Init(g);
+
 	Scene::Init(g_for_task_threads,Ls,this);
 	
 	texdayo = new Textures(demo->tex_loader);
@@ -784,12 +799,13 @@ bool Game::Init(HWND hwnd) {
 //	texdayo->getInstance(0)->setRenderBillBoardIsRender(kkk,true);
 	}
 	GUI::Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
-
+	
 /*	ksgene = new KendoSinaiGenerator();
 	ksgene->Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
 	*/
 	sap = new ShudouArmPositioner(robodayo, robodayo->ap);
 	sap->Init(hwnd, texdayo->getInstance(0), L , g->getScreenWidth(),g->getScreenHeight());
+	
 	/*
 	makers = new SinaiFuruAnimeMakers();
 	MyLuaGlueSingleton::getInstance()->setColSinaiFuruAnimeMakers(makers);
@@ -884,6 +900,9 @@ bool Game::Init(HWND hwnd) {
 	
 	//long work[TASK_WORK_SIZE];
 
+
+	
+
 	unsigned long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
 	work[0] = (unsigned long)g_for_task_threads[TASKTHREADS_UPDATEANIMEFRAMENADO];
@@ -907,12 +926,12 @@ bool Game::Init(HWND hwnd) {
 
 	task_threads[TASKTHREADS_AIDECISION]->make(LOADMESHTCB,Ls[TASKTHREADS_AIDECISION],work,0x0000FFFF);
 
-
+	
 	memset(work,0,sizeof(work));
 	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	//InputMessageDispatcher::registerImpl(&k,NULL,NULL);
-	
+
 	/*
 	ONEMESSAGE* mes = new ONEMESSAGE();
 
@@ -923,7 +942,7 @@ bool Game::Init(HWND hwnd) {
 	
 	//hantei->ataristart();
 
-
+	
 //	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	Game_SCENE* gs = new Game_SCENE(g,hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	this->setScene(gs);
@@ -958,19 +977,32 @@ void Game::Del() {
 	}
 	Scene::Del();
 
-	
-		
 
+
+
+	for (int i=0;i<TASKTHREAD_NUM;i++) {
+		if (task_threads[i]) {
+		task_threads[i]->deleteTaskWithoutLock();
+		}
+	}
+
+	for (int i=0;i<TASKTHREAD_NUM;i++) {
+		if (task_threads[i]) {
+		task_threads[i]->waitForTaskEnd();
+		}
+	}
+	
 	if (task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
-		task_threads[TASKTHREADS_UPDATEMAINRENDER]->deleteTask();
+	//	task_threads[TASKTHREADS_UPDATEMAINRENDER]->deleteTaskWithoutLock();
+	//	Sleep(1000);
 		delete task_threads[TASKTHREADS_UPDATEMAINRENDER];
 		task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
 	}
 	
 
-/*
+	/*
 	if (task_threads[TASKTHREADS_AIDECISION]) {
-		task_threads[TASKTHREADS_AIDECISION]->deleteTask();
+	//	task_threads[TASKTHREADS_AIDECISION]->deleteTask();
 		delete task_threads[TASKTHREADS_AIDECISION];
 		task_threads[TASKTHREADS_AIDECISION] = 0;
 	}
@@ -982,7 +1014,7 @@ void Game::Del() {
 
 
 	if (task_threads[TASKTHREADS_LOADDESTRUCT]) {
-		task_threads[TASKTHREADS_LOADDESTRUCT]->deleteTask();
+	//	task_threads[TASKTHREADS_LOADDESTRUCT]->deleteTask();
 		delete task_threads[TASKTHREADS_LOADDESTRUCT];
 		task_threads[TASKTHREADS_LOADDESTRUCT] = 0;
 	}
@@ -991,14 +1023,19 @@ void Game::Del() {
 		delete g_for_task_threads[TASKTHREADS_LOADDESTRUCT];
 		g_for_task_threads[TASKTHREADS_LOADDESTRUCT] = 0;
 	}
-*/
+	*/
 	
+	
+
+	
+
+
 
 	// 順番を変えないこと　cs と　タスクの間に依存関係がある
 	for (int i = 0 ; i <TASKTHREAD_NUM; i++) {
 		if (i != TASKTHREADS_UPDATEMAINRENDER) {
 		if (task_threads[i]) {
-			task_threads[i]->deleteTask();
+	//		task_threads[i]->deleteTask();
 			delete task_threads[i];
 			task_threads[i] = 0;
 		}
@@ -1010,13 +1047,44 @@ void Game::Del() {
 		}
 	}
 
+	Graphics::Del();
+	Scene::Del();
+
+#if defined(DEBUG) || defined(_DEBUG)
+	ID3D11Debug* m_pD3dDebug;
+	HRESULT hr = S_OK;//g->getDevice()->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&m_pD3dDebug));
+	if( FAILED(hr))
+	{
+		if(g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]->Release();
+		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
+		 g = 0;
+	}
+	    
+	} else {
+
+		if(g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]->Release();
+		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
+		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
+		g = 0;
+		}
+
+		// 詳細表示
+//		hr = m_pD3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+
+	}
+#else 
 	if(g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]) {
 		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER]->Release();
 		delete g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER];
 		g_for_task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
-	}
+		g = 0;
+		}
+#endif		
 
-
+	
 	
 
 	// CSでロックする
@@ -1134,7 +1202,7 @@ void Game::Del() {
 		mesh_instanceds = 0;
 	}
 
-	Graphics::Del();
+// Graphics::del	
 
 	MeshInstanceds::Del();
 
@@ -1235,6 +1303,13 @@ void Game::Del() {
 	CS::instance()->leave(CS_TASK_CS, "render lock",2);
 	CS::instance()->leave(CS_TASK_CS, "load lock", 3);
 	CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+
+	
+
+	
+
+
+
 }
 
 
@@ -1472,7 +1547,14 @@ void Game::Run() {
 		ID3D11CommandList* pd3dCommandList=0;
 
 		if (i == TASKTHREADS_UPDATEMAINRENDER) continue;
-		HRESULT hr = g_for_task_threads[i]->getDeviceContext()->FinishCommandList(FALSE, &pd3dCommandList);
+		CS::instance()->enter(CS_DEVICECON_CS, "un");
+		
+		HRESULT hr = S_OK;
+		if (g_for_task_threads[i] && task_threads[i] && task_threads[i]->getIsExecTask()) {
+			//Sleep(1000);
+			hr = g_for_task_threads[i]->getDeviceContext()->FinishCommandList(FALSE, &pd3dCommandList);
+		}
+		CS::instance()->leave(CS_DEVICECON_CS, "un");
 		if (FAILED(hr)) {
 			throw new GameError(KTROBO::FATAL_ERROR, "failed in finishing list");
 		}

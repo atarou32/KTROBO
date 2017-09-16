@@ -62,7 +62,13 @@ public:
 		Scene::game = mgame; // gs ls game ‚Ì“o˜^‚ÉŽg‚¤
 	}
 
-	static void Del() {};
+	static void Del() {
+		for (int i=0;i<TASKTHREAD_NUM;i++) {
+			gs[i] = 0;
+		}
+	
+	
+	};
 
 	Scene(char* n, int len) {
 		if (len >= 31) {

@@ -443,7 +443,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 
 //	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	
-	if (game && gm) {
+	if (game && gm && task->getIsExecTask()) {
 
 			game->watches_for_keisoku.startWatch(2);
 

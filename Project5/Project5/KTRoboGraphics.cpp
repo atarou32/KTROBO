@@ -1014,14 +1014,22 @@ bool Graphics::createViewPort() {
 void Graphics::Release() {
 	
 
+	
+
+	
+
 	// コンテキストの開放
 	if (p_devicecontext) {
+		CS::instance()->enter(CS_DEVICECON_CS,"un");
 		p_devicecontext->ClearState();
 		p_devicecontext->Release();
 		p_devicecontext = 0;
+		CS::instance()->leave(CS_DEVICECON_CS, "un");
+		
 	}
 
 	if (is_copied) return; // コピーされたものの場合はコピー元でリリースさせる
+
 
 	if (p_backbuffer) {
 		p_backbuffer->Release();
