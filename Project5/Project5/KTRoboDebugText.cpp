@@ -23,7 +23,7 @@ void DebugText::setVertex(Font* f, int screen_width, int screen_height, int line
 	this->vertex_count = text_count * 6;
 
 	this->texts = new KTROBO::SimpleDebugTextVertex[vertex_count];
-	memset(texts, 0, sizeof(SimpleDebugTextVertex) * vertex_count);
+//	memset(texts, 0, sizeof(SimpleDebugTextVertex) * vertex_count);
 
 	// ‚±‚Ì‚È‚©‚Évertex’è‹`‚ð“ü‚ê‚Ä‚¢‚­
 	for (int i = 0; i < text_count; i++) {

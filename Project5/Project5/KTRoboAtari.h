@@ -353,9 +353,24 @@ struct AtariHanteiTempCount {
 	int soreigai_count;
 };
 
+// ansbuf2 に格納されている当たった情報を取得する際のオフセット
+
+#define KTROBO_ATARI_OFFSET 512
+
+struct AtariHanteiTempOffset {
+	int offset_atari;
+	int atari_offset; // KTROBO_ATARI_OFFSET を入れる
+	int nasi;
+	int nasi2;
+};
+
+
 
 #define KTROBO_ATARI_SHADER_COMPUTE "resrc/shader/simple_atari_compute.cso"
 #define KTROBO_ATARI_SHADER_COMPUTE2 "resrc/shader/simple_atari_compute_kuwasiku.cso"
+#define KTROBO_ATARI_SHADER_COMPUTE_AIDA "resrc/shader/simple_atari_compute_aida.cso"
+#define KTROBO_ATARI_SHADER_COMPUTE_AIDA_OFFSET "resrc/shader/simple_atari_compute_aida_offset.cso"
+// AIDA はautts と　autid の計算をコンピュートシェーダで行う
 
 #define KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET 0
 #define KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALC 1
@@ -374,11 +389,15 @@ private:
 	int is_calc_kuwasiku;
 	bool atari_start;
 public:
+	int getAtattaCount() {
+		return atatta_count;
+	}
 
 	AtariUnit units[KTROBO_MAX_ATARI_HANTEI_UNIT_NUM];
 private:
 	AtariHanteiTempCount max_count;
 	AtariHanteiTempCount temp_count;
+	AtariHanteiTempOffset temp_offset;
 	int au_count;
 	int au_tikei_count;
 	int au_object_count;
@@ -421,6 +440,9 @@ public:
 	void calcKumiKuwasiku(Graphics* g);
 	void calcAuInfo(Graphics* g, bool calc_vertex_and_index);
 	void calcObb(Graphics* g);
+	
+	void sendAtariWithOffset(Graphics* g, int offset);
+
 public:
 	void drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 	int getAns(AtariUnitAnsKWSK* out_ans, UMeshUnit* oya,UMesh* oya2, int out_ans_num);
@@ -428,7 +450,10 @@ public:
 private:
 	static MYSHADERSTRUCT mss;
 	static MYSHADERSTRUCT mss2;
+	static MYSHADERSTRUCT mss_aida;
+	static MYSHADERSTRUCT mss_aida_offset;
 	static ID3D11Buffer* buffer_count;
+	static ID3D11Buffer* buffer_offset;
 
 	ID3D11Buffer* buffer_vertexs;
 	ID3D11Buffer* buffer_indexs;
@@ -437,8 +462,10 @@ private:
 	ID3D11Buffer* buffer_kumi;
 	ID3D11Buffer* buffer_ans;
 	ID3D11Buffer* buffer_ans2;
+	ID3D11Buffer* buffer_ans2_aida;
 	ID3D11Buffer* buffer_ans_copy;
 	ID3D11Buffer* buffer_ans2_copy;
+	ID3D11Buffer* buffer_ans2_copy_aida;
 	ID3D11Buffer* buffer_autid;
 	ID3D11Buffer* buffer_autts;
 
@@ -452,6 +479,7 @@ private:
 
 	ID3D11UnorderedAccessView* buffer_ans_view;
 	ID3D11UnorderedAccessView* buffer_ans2_view;
+	ID3D11UnorderedAccessView* buffer_ans2_aida_view;
 	void releaseBufferAndView();
 
 public:
@@ -459,10 +487,18 @@ public:
 	static void del() {
 		mss.Del();
 		mss2.Del();
+		mss_aida.Del();
+		mss_aida_offset.Del();
 		if (buffer_count) {
 			buffer_count->Release();
 			buffer_count = 0;
 		}
+		if (buffer_offset) {
+
+			buffer_offset->Release();
+			buffer_offset = 0;
+		}
+
 	}
 
 	static HRESULT createStructuredBuffer(Graphics* g, UINT element_size, UINT count, void* pInitData, ID3D11Buffer** ppBufferOut);
@@ -471,6 +507,7 @@ public:
 	static HRESULT createBufferForCopy(Graphics* g, ID3D11Buffer* pBuffer, ID3D11Buffer** ppBufOut);
 public:
 	HRESULT copyKekkaToBufferForCopy(Graphics* g,bool isans1);
+	HRESULT copyKekkaToBufferForCopy2(Graphics* g);// for aida
 public:
 	void clearKekkaOfBuffer(Graphics* g);
 
@@ -478,6 +515,7 @@ public:
 
 	void runComputeShader(Graphics* g);
 	void runComputeShaderKuwasiku(Graphics* g);
+	void runComputeShaderAida(Graphics* g);
 public:
 
 	bool setIsCalcKuwasikuGetted() {
@@ -596,7 +634,7 @@ public:
 		max_count.obbs_count = 0;//kakuho_counts[0];
 		max_count.soreigai_count =0;// kakuho_counts[0];
 		max_count.vertexs_count = 0;//kakuho_counts[0];
-
+		
 		temp_count.ans_count = 0;
 		temp_count.auinfo_count = 0;
 		temp_count.igaidousi_count = 0;
@@ -605,6 +643,7 @@ public:
 		temp_count.obbs_count = 0;
 		temp_count.soreigai_count = 0;
 		temp_count.vertexs_count = 0;
+		
 
 		max_tikei_vertexs = new AtariUnitVertexs[kakuho_counts[2]];
 		max_tikei_indexs = new AtariUnitIndexs[kakuho_counts[2]];
@@ -654,10 +693,13 @@ public:
 		buffer_kumi_view = 0;
 		buffer_ans_view = 0;
 		buffer_ans2_view = 0;
+		buffer_ans2_aida_view = 0;
 		buffer_autid_view = 0;
 		buffer_autts_view = 0;
 		buffer_ans_copy = 0;
 		buffer_ans2_copy  =0;
+		buffer_ans2_aida = 0;
+		buffer_ans2_copy_aida = 0;
 		atatta_count = 0;
 	}
 };

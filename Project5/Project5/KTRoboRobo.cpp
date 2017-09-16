@@ -128,7 +128,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 			static int test=0;
 			
 
-			head->head->animate(test,true);
+//			head->head->animate(test,true);
 	//		head->head->drawWithObbs(g,world,view,proj);
 		}
 		if (head->head2) {
@@ -136,7 +136,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 			static int test=0;
 			
 
-			head->head2->animate(test,true);
+//			head->head2->animate(test,true);
 	//		head->head2->drawWithObbs(g,world,view,proj);
 		}
 		if (head->head3) {
@@ -144,7 +144,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 			static int test=0;
 			
 
-			head->head3->animate(test,true);
+//			head->head3->animate(test,true);
 	//		head->head3->drawWithObbs(g,world,view,proj);
 		}
 
@@ -157,7 +157,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 			static int test=0;
 			
 		
-			body->body->animate(test,true);
+//			body->body->animate(test,true);
 		//	body->body->drawWithObbs(g,&world,view,proj);
 		}
 	}
@@ -1522,7 +1522,8 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	
 
 	roboparam.calcParam();
-	
+
+	//atarihan->calcJyusinAndR();
 }
 
 void Robo::release() {

@@ -102,7 +102,7 @@ uint getIndex(uint indexdayo) {
 }
 */
 bool majiwariKumi(AtariUnitInfo k1, AtariUnitInfo k2) {
-  // dS‚Ær ‚ÍŒvZÏ‚İ
+  // é‡å¿ƒã¨r ã¯è¨ˆç®—æ¸ˆã¿
 
   if(k1.atari_idx == k2.atari_idx) return false;
 
@@ -134,7 +134,7 @@ bool majiwariAtariUnitOBB(AtariUnitOBB a, AtariUnitOBB b) {
     float3 t = b.c - a.c;
     t = float3(dot(t, a.u[0]), dot(t, a.u[1]), dot(t, a.u[2]));
         
-    //²L=A0, L=A1, L=A2”»’è
+    //è»¸L=A0, L=A1, L=A2åˆ¤å®š
     float ra, rb;
     [unroll(3)]
     for(int p = 0; p < 3; p++)
@@ -143,7 +143,7 @@ bool majiwariAtariUnitOBB(AtariUnitOBB a, AtariUnitOBB b) {
         rb = b.e[0] * AbsR[p][0] + b.e[1] * AbsR[p][1] + b.e[2] * AbsR[p][2];
         if(abs(t[p]) > ra + rb)return false;
   /*  }
-    //²L=B0, L=B1, L=B2”»’è
+    //è»¸L=B0, L=B1, L=B2åˆ¤å®š
     [unroll(3)]
     for(int t2 = 0; t2 < 3; t2++)
     {*/
@@ -152,47 +152,47 @@ bool majiwariAtariUnitOBB(AtariUnitOBB a, AtariUnitOBB b) {
         if(abs(t[0] * R[0][p] + t[1] * R[1][p] + t[2] * R[2][p]) > ra + rb)return false;
     }
 
-    //²L=A0 X B0”»’è
+    //è»¸L=A0 X B0åˆ¤å®š
     ra = a.e[1] * AbsR[2][0] + a.e[2] * AbsR[1][0];
     rb = b.e[1] * AbsR[0][2] + b.e[2] * AbsR[0][1];
     if(abs(t[2] * R[1][0] - t[1] * R[2][0]) > ra + rb)return false;
 
-    //²L=A0 X B1”»’è
+    //è»¸L=A0 X B1åˆ¤å®š
     ra = a.e[1] * AbsR[2][1] + a.e[2] * AbsR[1][1];
     rb = b.e[0] * AbsR[0][2] + b.e[2] * AbsR[0][0];
     if(abs(t[2] * R[1][1] - t[1] * R[2][1]) > ra + rb)return false;
 
-    //²L=A0 X B2”»’è
+    //è»¸L=A0 X B2åˆ¤å®š
     ra = a.e[1] * AbsR[2][2] + a.e[2] * AbsR[1][2];
     rb = b.e[0] * AbsR[0][1] + b.e[1] * AbsR[0][0];
     if(abs(t[2] * R[1][2] - t[1] * R[2][2]) > ra + rb)return false;
 
-    //²L=A1 X B0”»’è
+    //è»¸L=A1 X B0åˆ¤å®š
     ra = a.e[0] * AbsR[2][0] + a.e[2] * AbsR[0][0];
     rb = b.e[1] * AbsR[1][2] + b.e[2] * AbsR[1][1];
     if(abs(t[0] * R[2][0] - t[2] * R[0][0]) > ra + rb)return false;
 
-    //²L=A1 X B1”»’è
+    //è»¸L=A1 X B1åˆ¤å®š
     ra = a.e[0] * AbsR[2][1] + a.e[2] * AbsR[0][1];
     rb = b.e[0] * AbsR[1][2] + b.e[2] * AbsR[1][0];
     if(abs(t[0] * R[2][1] - t[2] * R[0][1]) > ra + rb)return false;
 
-    //²L=A1 X B2”»’è
+    //è»¸L=A1 X B2åˆ¤å®š
     ra = a.e[0] * AbsR[2][2] + a.e[2] * AbsR[0][2];
     rb = b.e[0] * AbsR[1][1] + b.e[1] * AbsR[1][0];
     if(abs(t[0] * R[2][2] - t[2] * R[0][2]) > ra + rb)return false;
 
-    //²L=A2 X B0”»’è
+    //è»¸L=A2 X B0åˆ¤å®š
     ra = a.e[0] * AbsR[1][0] + a.e[1] * AbsR[0][0];
     rb = b.e[1] * AbsR[2][2] + b.e[2] * AbsR[2][1];
     if(abs(t[1] * R[0][0] - t[0] * R[1][0]) > ra + rb)return false;
 
-    //²L=A2 X B1”»’è
+    //è»¸L=A2 X B1åˆ¤å®š
     ra = a.e[0] * AbsR[1][1] + a.e[1] * AbsR[0][1];
     rb = b.e[0] * AbsR[2][2] + b.e[2] * AbsR[2][0];
     if(abs(t[1] * R[0][1] - t[0] * R[1][1]) > ra + rb)return false;
 
-    //²L=A2 X B2”»’è
+    //è»¸L=A2 X B2åˆ¤å®š
     ra = a.e[0] * AbsR[1][2] + a.e[1] * AbsR[0][2];
     rb = b.e[0] * AbsR[2][1] + b.e[1] * AbsR[2][0];
     if(abs(t[1] * R[0][2] - t[0] * R[1][2]) > ra + rb)return false;
@@ -227,7 +227,7 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLETOHEN(RAY ray1, TRIANGLEDAYO tri2, flo
   ans_ten.pos = float3(0,0,0);
   ans_ten.housen = float3(0,0,0);
 
-	// 1. OŠp–Ê‚ÆŒğ‚í‚é‚©‚Ç‚¤‚©‚Ü‚¸”»’è‚·‚é
+	// 1. ä¸‰è§’é¢ã¨äº¤ã‚ã‚‹ã‹ã©ã†ã‹ã¾ãšåˆ¤å®šã™ã‚‹
 	float3 a = ray1.org;
 	float3 b = ray1.org + ray1.dir;
 
@@ -240,16 +240,16 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLETOHEN(RAY ray1, TRIANGLEDAYO tri2, flo
 	float dot2 = dot(pp,ppp);
 
 	if (dot1 * dot2 <= 0) {
-		// Œğ‚í‚é
+		// äº¤ã‚ã‚‹
 	} else {
                 ans_ten.is_majiwari = false;
 		return ans_ten;
 	}
 
-	//@OŠp–Ê‚Æ‚ÌŒğ“_D‚ğ‹‚ß‚é
+	//ã€€ä¸‰è§’é¢ã¨ã®äº¤ç‚¹Dã‚’æ±‚ã‚ã‚‹
 	float bunbo = dot(a,ppp) - dot(b,ppp);
 	if (abs(bunbo) < 0.000001) {
-		// Œğ‚í‚ç‚È‚¢‚Æ‚µ‚Äˆ—‚ğ‚·‚é
+		// äº¤ã‚ã‚‰ãªã„ã¨ã—ã¦å‡¦ç†ã‚’ã™ã‚‹
                 ans_ten.is_majiwari = false;
 		return ans_ten;
 	}
@@ -304,8 +304,8 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLEDAYO( TRIANGLEDAYO tri1, TRIANGLEDAYO 
   ans_ten.pos = float3(0,0,0);
   ans_ten.housen = float3(0,0,0);
 
-	//@1.ŠOÚ‹…“¯m‚ÅŒğ‚í‚é‚©‚Ç‚¤‚©”»’è‚·‚é
-	// ŠOÚ‹…‚ğ‹‚ß‚é
+	//ã€€1.å¤–æ¥çƒåŒå£«ã§äº¤ã‚ã‚‹ã‹ã©ã†ã‹åˆ¤å®šã™ã‚‹
+	// å¤–æ¥çƒã‚’æ±‚ã‚ã‚‹
 
 	SPHERE sph1;
 	SPHERE sph2;
@@ -317,8 +317,8 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLEDAYO( TRIANGLEDAYO tri1, TRIANGLEDAYO 
 	float3 sa1 = tri1.x - sph1.c;
 	float3 sa2 = tri2.x - sph2.c;
 
-	// ‚Qæ‚Ì‚Ü‚Ü‚ÅŒvZ‚·‚é@iŒvZŠÈˆÕ‚Ì‚½‚ßj
-	// ‚»‚Ì‚½‚ßŒğ‚í‚Á‚Ä‚¢‚È‚­‚Ä‚àŒğ‚í‚Á‚Ä‚é‚Æ”»’è‚³‚ê‚éê‡‚ª‚ ‚é
+	// ï¼’ä¹—ã®ã¾ã¾ã§è¨ˆç®—ã™ã‚‹ã€€ï¼ˆè¨ˆç®—ç°¡æ˜“ã®ãŸã‚ï¼‰
+	// ãã®ãŸã‚äº¤ã‚ã£ã¦ã„ãªãã¦ã‚‚äº¤ã‚ã£ã¦ã‚‹ã¨åˆ¤å®šã•ã‚Œã‚‹å ´åˆãŒã‚ã‚‹
 
 	float x2;
 	float r12;
@@ -329,13 +329,13 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLEDAYO( TRIANGLEDAYO tri1, TRIANGLEDAYO 
 	r22 = sa2.x * sa2.x * sa2.y * sa2.y + sa2.z * sa2.z;
 
 	if (x2 > 2 *r12 + 2 *r22) {
-		// ‰“‚­‚É‚ ‚é‚Ì‚ÅŒğ‚í‚ç‚È‚¢
+		// é ãã«ã‚ã‚‹ã®ã§äº¤ã‚ã‚‰ãªã„
                 ans_ten.is_majiwari = false;
                 return ans_ten;
 		//return YATTEYARU_TRIANGLE_OUT;
 	}
 
-	// 2. OŠpŒ`‚P‚Ì•Ó‚ÉŠÖ‚µ‚Ä OŠpŒ`2‚É‘Î‚·‚éŒğ“_‚ğ‹‚ß‚é
+	// 2. ä¸‰è§’å½¢ï¼‘ã®è¾ºã«é–¢ã—ã¦ ä¸‰è§’å½¢2ã«å¯¾ã™ã‚‹äº¤ç‚¹ã‚’æ±‚ã‚ã‚‹
 	RAY ray1;
 	RAY ray2;
 	RAY ray3;
@@ -372,7 +372,7 @@ ANS_MAJIWARITIKEITOSOREIGAI hanteiTRIANGLEDAYO( TRIANGLEDAYO tri1, TRIANGLEDAYO 
 	}
 
 	if (temp_ans == 0) {
-		// Œğ‚í‚ç‚È‚¢
+		// äº¤ã‚ã‚‰ãªã„
                 ans_ten.is_majiwari = false;
 		return ans_ten;
 		//return YATTEYARU_TRIANGLE_OUT;
@@ -814,45 +814,57 @@ ANS_MAJIWARITIKEITOSOREIGAI majiwariAtariUnitTikeiToSoreigai(MESH_VERTEXKARI ver
   return ans;
 }
 
-// group ‚É‚ÍmaxƒCƒ“ƒXƒ^ƒ“ƒX‚Ì”‚ğw’è‚·‚é
-// numthreads ‚É‚Ímaxbonenum ‚Ì”‚ğw’è‚·‚é
+
+
+// group ã«ã¯maxã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®æ•°ã‚’æŒ‡å®šã™ã‚‹
+// numthreads ã«ã¯maxbonenum ã®æ•°ã‚’æŒ‡å®šã™ã‚‹
 [numthreads(16,8,1)]
 void CalcCS(uint3 gtid: SV_GroupID, uint gid: SV_GroupIndex )
 {
 
-uint struct_idx = (gtid.x + gtid.y * 32*16 + gtid.z*32*16)* 128+ gid;
+uint struct_idx = (gtid.x *32*32+ gtid.y * 32 + gtid.z)* 128+ gid;
 uint k_count = kumi_count;
 uint igai_dousi_k_count = igaidousi_count;
-int soreigai_idx = gtid.x+gtid.y*32*16+gtid.z*32*16;//struct_idx / 128;//KTROBO_MAX_TIKEI_HITOTU_INDEX;
+int soreigai_idx = gtid.x*32*32+gtid.y*32+gtid.z;//struct_idx / 128;//KTROBO_MAX_TIKEI_HITOTU_INDEX;
 int soreigai_index_idx = gid;//(struct_idx - soreigai_idx*128);//KTROBO_MAX_TIKEI_HITOTU_INDEX;
 
-if (igai_dousi_k_count > struct_idx) {
-  AtariUnitTikeiIgaiDousi autid = autidBuf[struct_idx];
-  bool t = majiwariAtariUnitOBB(obbBuf[autid.obb_idx], obbBuf[autid.obb_idx2]);
-  if (t) {
-    uint idxd = ansBuf2.IncrementCounter();
-    ansBuf2[idxd].is_use = 1;
-    ansBuf2[idxd].atari_idx = autid.atari_idx;
-    ansBuf2[idxd].atari_idx2 = autid.atari_idx2;
-    ansBuf2[idxd].obb_idx = autid.obb_idx;
-    ansBuf2[idxd].obb_idx2 = autid.obb_idx2;
-    ansBuf2[idxd].kouten_jyusin = (obbBuf[autid.obb_idx].c + obbBuf[autid.obb_idx2].c)/2;
-    ansBuf2[idxd].kouten_housen = normalize(obbBuf[autid.obb_idx].c - obbBuf[autid.obb_idx2].c);
 
-  } else {
-    ansBuf2[struct_idx].is_use = 0;
-  } 
+
+if (igai_dousi_k_count > struct_idx) {
+	AtariUnitTikeiIgaiDousi autid = autidBuf[struct_idx];
+  bool tt = majiwariKumi(auinfoBuf[autid.atari_idx], auinfoBuf[autid.atari_idx2]);
+  if (tt) {
+  
+  
+  	bool t = majiwariAtariUnitOBB(obbBuf[autid.obb_idx], obbBuf[autid.obb_idx2]);
+  	if (t) {
+  	  uint idxd;
+  	  idxd = ansBuf2.IncrementCounter();
+  	  if (idxd >= ans_count) return;
+  	  ansBuf2[idxd].is_use = 1;
+  	  ansBuf2[idxd].atari_idx = autid.atari_idx;
+  	  ansBuf2[idxd].atari_idx2 = autid.atari_idx2;
+  	  ansBuf2[idxd].obb_idx = autid.obb_idx;
+  	  ansBuf2[idxd].obb_idx2 = autid.obb_idx2;
+  	  ansBuf2[idxd].kouten_jyusin = (obbBuf[autid.obb_idx].c + obbBuf[autid.obb_idx2].c)/2;
+  	  ansBuf2[idxd].kouten_housen = normalize(obbBuf[autid.obb_idx].c - obbBuf[autid.obb_idx2].c);
+  	} 
+  }
 }
 
 if (soreigai_count > soreigai_idx) {
 
   AtariUnitTikeiToSoreigai autts = auttsBuf[soreigai_idx];
   if (autts.atari_idx == autts.atari_idx2) return;
+  
+  
+  
+  
   AtariUnitInfo au1 = auinfoBuf[autts.atari_idx];
   AtariUnitInfo au2 = auinfoBuf[autts.atari_idx2];
-//  bool t = majiwariKumi(auinfoBuf[autts.atari_idx],auinfoBuf[autts.atari_idx2]);
+  bool t = majiwariKumi(auinfoBuf[autts.atari_idx],auinfoBuf[autts.atari_idx2]);
  
- // if (t) {
+  if (t) {
 
 
 
@@ -893,19 +905,18 @@ if (soreigai_count > soreigai_idx) {
     if (at.is_majiwari) {
       uint idxd;
       idxd = ansBuf2.IncrementCounter();
+  	  if (idxd >= ans_count) return;
       ansBuf2[idxd].is_use = 1;
       ansBuf2[idxd].atari_idx = autts.atari_idx;
       ansBuf2[idxd].atari_idx2 = autts.atari_idx2;
       ansBuf2[idxd].obb_idx = autts.obb_idx;
       ansBuf2[idxd].obb_idx2 = 0;
       ansBuf2[idxd].kouten_jyusin = float3(at.pos.x,at.pos.y,at.pos.z);
-      ansBuf2[/*soreigai_idx+igaidousi_count*/idxd].kouten_housen = float3(at.housen.x, at.housen.y, at.housen.z);
+      ansBuf2[idxd].kouten_housen = float3(at.housen.x, at.housen.y, at.housen.z);
      return;
     }  
-//  }
 
-//  ansBuf2[struct_idx+igaidousi_count].is_use = 0;
-
+	}
 
 
 

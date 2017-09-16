@@ -94,7 +94,7 @@ void Graphics::loadShader(Graphics* g, MYSHADERSTRUCT* s, char* shader_filename,
 								D3D11_INPUT_ELEMENT_DESC* layout, int numoflayout, bool blend_enable) {
 HRESULT hr = S_OK;
 	ID3DBlob* pblob = 0;
-	memset(s, 0, sizeof(MYSHADERSTRUCT));
+	//memset(s, 0, sizeof(MYSHADERSTRUCT));
 
 	try {
 		CompileShaderFromFile(shader_filename, vs_func_name, "vs_4_0", &pblob);

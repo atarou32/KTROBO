@@ -14,6 +14,11 @@ namespace KTROBO {
 struct SimpleDebugTextVertex {
 	MYVECTOR3 pos;
 	MYVECTOR3 tex_coord_plus_tex_index;
+	SimpleDebugTextVertex() {
+		pos = MYVECTOR3(0,0,0);
+		tex_coord_plus_tex_index = MYVECTOR3(0,0,0);
+
+	}
 
 	SimpleDebugTextVertex& operator =(const SimpleDebugTextVertex& obj) {
 		this->pos.float3.x = obj.pos.float3.x;

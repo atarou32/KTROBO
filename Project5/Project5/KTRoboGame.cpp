@@ -1572,7 +1572,7 @@ void Game::Run() {
 				memset(buf,0,sizeof(WCHAR)*512);
 				stringconverter sc;
 				sc.charToWCHAR(vv->bone_name,buf);
-				DebugTexts::instance()->setText(g,wcslen(buf),buf);
+				//DebugTexts::instance()->setText(g,wcslen(buf),buf);
 			//	g->drawOBB(g,0xFFFFFFFF,&idenmat,&view,&proj,&henkanobb);
 				is_ma = true;
 			}	else {
@@ -1888,7 +1888,7 @@ void Game::Run() {
 //	mesh_instanceds->calcCombinedMatrixToTexture(g);
 	//mesh_instanceds->loadColorToTexture(g);
 	
-
+	watches_for_keisoku.startWatch(0);
 	mesh_instanceds->render(g);
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
@@ -1963,13 +1963,36 @@ void Game::Run() {
 	//texdayo->getInstance(0)->setRenderBillBoardIsRender(0,false);
 
 	//texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
+	watches_for_keisoku.stopWatch(0);
 	
+	{
+		WCHAR buff[512];
+		char buf[128];
+		char str[128];
+		memset(buf,0,128);
 
+		for (int i=5;i<10;i++) {
+		memset(str,0,128);
+		GamenGARAGE_partsParam::getSuutiChara((int)(watches_for_keisoku.times[i]*100),str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+	//	GamenGARAGE_partsParam::getSuutiChara((int)(sizeof(AtariUnitAns)),str);
+	//	strcat_s(buf,str);
+		}
 
+		GamenGARAGE_partsParam::getSuutiChara((int)hantei->getAtattaCount(), str);
+		strcat_s(buf,str);
+		stringconverter sc;
+		sc.charToWCHAR(buf,buff);
+		
+		DebugTexts::instance()->setText(g,wcslen(buff),buff);
+	}
+	
+	watches_for_keisoku.startWatch(1);
 	texdayo->createIndexBuffer(g);
 	texdayo->updateIndexBuffer(g);
 	texdayo->sendinfoToVertexTexture(g);
-	
+	watches_for_keisoku.stopWatch(1);
 
 	
 
@@ -1982,14 +2005,26 @@ void Game::Run() {
 
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
-
-
+/*	
+	watches_for_keisoku.startWatch(2);
+	watches_for_keisoku.startWatch(5);
 	hantei->maecalcdayo(g);
+	watches_for_keisoku.stopWatch(5);
+	watches_for_keisoku.startWatch(6);
 	hantei->ataristart();
 	hantei->calc(g);
+	watches_for_keisoku.stopWatch(6);
+	watches_for_keisoku.startWatch(7);
 	hantei->copyKekkaForBufferCopy(g);
+	watches_for_keisoku.stopWatch(7);
+	watches_for_keisoku.startWatch(8);
 	hantei->calc(g);
+	watches_for_keisoku.stopWatch(8);
+	watches_for_keisoku.startWatch(9);
 	hantei->copyKekkaForBufferCopy(g);
+	watches_for_keisoku.stopWatch(9);
+	watches_for_keisoku.stopWatch(2);
+*/	
 //	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 //	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
 /*	
@@ -2000,24 +2035,34 @@ void Game::Run() {
 	hantei->calc(g);
 	hantei->copyKekkaForBufferCopy(g);
 */
-	/*
+	watches_for_keisoku.startWatch(2);
+
+	watches_for_keisoku.startWatch(5);
 	hantei->ataristart();
 	hantei->maecalcdayo(g);
+	watches_for_keisoku.stopWatch(5);
+	watches_for_keisoku.startWatch(6);
 	hantei->calcAuInfo(g,true);
 	hantei->calcKumi(g);
 	hantei->calcObb(g);
 	hantei->clearKekkaOfBuffer(g);
-	hantei->runComputeShader(g);
-
-	hantei->copyKekkaToBufferForCopy(g,true);
+	watches_for_keisoku.stopWatch(6);
+		watches_for_keisoku.startWatch(7);
+	hantei->runComputeShaderAida(g);
+	watches_for_keisoku.stopWatch(7);
 	
-	hantei->calcKumiKuwasiku(g);
-	hantei->runComputeShaderKuwasiku(g);
-	hantei->copyKekkaToBufferForCopy(g,false);
-	*/
+	//hantei->copyKekkaToBufferForCopy(g,true);
+	
+	//hantei->calcKumiKuwasiku(g);
+	//hantei->runComputeShaderKuwasiku(g);
 
+	watches_for_keisoku.startWatch(8);
+	hantei->copyKekkaToBufferForCopy2(g);
+	watches_for_keisoku.stopWatch(8);
+		watches_for_keisoku.stopWatch(2);
+	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
-	if (hantei->canGetAns()) {
+	//if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
 			robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 			robodayo->atariAim(g, &view, frameTime, (int)frame);
@@ -2031,9 +2076,9 @@ void Game::Run() {
 		
 		hantei->drawKekka(g,&view,&proj);
 		hantei->setIsCalcKuwasikuGetted();
-	}
+	//}
 
-	
+	watches_for_keisoku.stopWatch(3);
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 
 //	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
@@ -2048,6 +2093,7 @@ void Game::Run() {
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
 	
+	watches_for_keisoku.startWatch(4);
 	texdayo->getInstance(0)->renderBill(g);
 	texdayo->deletedayo();
 	texdayo->getInstance(0)->renderTex(g);
@@ -2080,7 +2126,7 @@ void Game::Run() {
 	
 
 	texdayo->render(g,1);
-
+	watches_for_keisoku.stopWatch(4);
 	/*
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 	gg->byouga(g,NULL,frameTime, (int)frame);

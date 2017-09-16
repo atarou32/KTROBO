@@ -648,16 +648,17 @@ if (k_count > struct_idx) {
     AtariUnitKumi k = kumiBuf[struct_idx];
     bool t = majiwariKumi(auinfoBuf[k.atari_idx],auinfoBuf[k.atari_idx2]);
     if (t) {
-      ansBuf[struct_idx].is_use = 1;
-      ansBuf[struct_idx].atari_idx = k.atari_idx;
-      ansBuf[struct_idx].atari_idx2 = k.atari_idx2;
-      ansBuf[struct_idx].obb_idx = 0;
-      ansBuf[struct_idx].obb_idx2 = 0;
-    } else {
+      uint idxd = ansBuf.IncrementCounter();
+      ansBuf[idxd].is_use = 1;
+      ansBuf[idxd].atari_idx = k.atari_idx;
+      ansBuf[idxd].atari_idx2 = k.atari_idx2;
+      ansBuf[idxd].obb_idx = 0;
+      ansBuf[idxd].obb_idx2 = 0;
+    }/* else {
       ansBuf[struct_idx].is_use = 0;
  //     ansBuf[struct_idx].atari_idx = k.atari_idx;
   //    ansBuf[struct_idx].atari_idx2 = k.atari_idx2;
-    }
+    }*/
 
 }
 

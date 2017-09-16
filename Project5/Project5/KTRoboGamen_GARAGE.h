@@ -49,8 +49,8 @@ public:
 	void setNoUse() {
 		is_use = false;
 	}
-	void getSuutiHikakuChara(int suuti, char* chara);
-	void getSuutiChara(int suuti, char* chara);
+	static void getSuutiHikakuChara(int suuti, char* chara);
+	static void getSuutiChara(int suuti, char* chara);
 
 };
 class Gamen_GARAGE;

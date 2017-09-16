@@ -45,7 +45,7 @@ column_major float4x4 proj;
 float4 lightdir;
 };
 
-cbuffer c1dayo :register(c0){
+cbuffer c1dayo :register(c1){
 uint color_id;
 uint offset1;
 uint offset2;
@@ -342,7 +342,7 @@ float4 local_normal =  mul(combined_matrixs[0],temp_normal)*input.Weight[0] +
 					  mul(combined_matrixs[2],temp_normal)*input.Weight[2] + 
 					  mul(combined_matrixs[3],temp_normal)*(input.Weight[3]) +
                                           mul(combined_matrixs[4], temp_normal)*(input.Weightfive);
-float4 world_normal = mul( input.world, local_normal );
+float4 world_normal = float4(input.Normal.xyz,0);//mul( input.world, temp_normal);//local_normal );
 
 output.Normal = world_normal.xyz;
 output.instance_id = input.instance_id;
@@ -381,16 +381,16 @@ stream.RestartStrip();
 
 
 float4 PSFunc(GSPSInput input ) : SV_Target {
-float3 L = -normalize(float4(1,1,-10,1));//lightdir.xyz);
-float3 N = normalize(input.Normal);
+float3 L = -normalize(float4(lightdir).xyz);
+float3 N = normalize(input.Normal.xyz);
 //float3 E = normalize(viewdir);
 //float3 H = normalize(L+E);
 //float4 cc = float4(1,1,1,1);
-float4 diffuse;
+float3 diffuse;
 float4 color = getColorFromTex(input.instance_id, color_id);
- diffuse = color * max(dot( L, N ), 0.25 );
-diffuse.a = color.a;
-
+ diffuse = color.xyz * max(dot( L, N ), 0.20 );
+//diffuse.a = color.a;
+float4 amb = float4(0.4,0.4,0.4,1);
 float4 test = texDiffuse.Sample( texSmp, float2(input.TexCoord.x , input.TexCoord.y) );
-return test * float4(diffuse);
+return test * float4(diffuse,1);// + amb;
 }

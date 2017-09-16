@@ -19,6 +19,19 @@ public:
 	void startWatch();
 	double stopWatch();
 };
+
+
+class ClockWatches {
+private:
+
+	ClockWatch watches[10];
+public:
+	ClockWatches(){};
+	double times[10];
+	void startWatch(int index);
+	void stopWatch(int index);
+};
+
 class Clock
 {
 private:

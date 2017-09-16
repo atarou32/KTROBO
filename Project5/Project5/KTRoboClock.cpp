@@ -20,3 +20,15 @@ double ClockWatch::stopWatch() {
 
 
 }
+
+void ClockWatches::startWatch(int index) {
+	if (index >=0 && index < 10) {
+		watches[index].startWatch();
+	}
+}
+
+void ClockWatches::stopWatch(int index) {
+	if (index >= 0 && index < 10) {
+		times[index] = watches[index].stopWatch();
+	}
+}
