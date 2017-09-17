@@ -879,6 +879,7 @@ Graphics::Graphics(void)
 	h = 0;
 	p_swapchain = 0;
 	p_device = 0;
+	p_immediatecontext = 0;
 	p_devicecontext = 0;
 	p_backbuffer = 0;
 	p_rendertargetview = 0;
@@ -1028,6 +1029,13 @@ void Graphics::Release() {
 		
 	}
 
+	if (p_immediatecontext) {
+		CS::instance()->enter(CS_DEVICECON_CS,"un");
+		p_immediatecontext->Release();
+		p_immediatecontext = 0;
+		CS::instance()->leave(CS_DEVICECON_CS, "un");
+
+	}
 	if (is_copied) return; // コピーされたものの場合はコピー元でリリースさせる
 
 
@@ -1077,9 +1085,21 @@ Graphics* Graphics::makeGraphicsOfNewDeviceContext() {
 	new_g->proj = this->proj;
 	// デバイスコンテキストを作成する
 	HRESULT hr =  p_device->CreateDeferredContext(0, &new_g->p_devicecontext);
+
 	if (FAILED(hr)) {
+		new_g->Release();
+		delete new_g;
+		new_g = 0;
 		throw new GameError(KTROBO::FATAL_ERROR, "failed in copying graphics");
 	}
+	p_device->GetImmediateContext(&new_g->p_immediatecontext);
+	if (FAILED(hr)) {
+		new_g->Release();
+		delete new_g;
+		new_g = 0;
+		throw new GameError(KTROBO::FATAL_ERROR, "failed in copying graphics");
+	}
+
 
 	return new_g;
 }

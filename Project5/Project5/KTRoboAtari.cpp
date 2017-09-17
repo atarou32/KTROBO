@@ -1302,7 +1302,8 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 		while (is_loop && (i_count+KTROBO_ATARI_OFFSET < temp_count.ans_count) && (cc*KTROBO_ATARI_OFFSET < temp_count.ans_count)) {
 			if (g->isCopied()) {
 				ID3D11DeviceContext* context;
-				g->getDevice()->GetImmediateContext(&context);
+				//g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
 				this->sendAtariWithOffset(context,cc*KTROBO_ATARI_OFFSET);
 			} else {
 
@@ -1310,7 +1311,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 			}
 			if (g->isCopied()) {
 				ID3D11DeviceContext* context;
-				g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
 				context->CopyResource(buffer_ans2_copy_aida, buffer_ans2_aida);
 				HRESULT hr = context->Map(buffer_ans2_copy_aida, 0, D3D11_MAP_READ, 0, &subRes );
 			} else {
@@ -1346,7 +1347,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 
 			if (g->isCopied()) {
 				ID3D11DeviceContext* context;
-				g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
 				context->Unmap(buffer_ans2_copy_aida, 0);
 			} else {
 
@@ -1370,7 +1371,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 
 		if (g->isCopied()) {
 				ID3D11DeviceContext* context;
-				g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
 				context->CopyResource(buffer_ans2_copy, buffer_ans2);
 				context->Map(buffer_ans2_copy,0,D3D11_MAP_READ,0, &subRes);
 		} else {
@@ -1398,7 +1399,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 			}
 		if (g->isCopied()) {
 				ID3D11DeviceContext* context;
-				g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
 				context->Unmap(buffer_ans2_copy,0);
 		} else {
 			g->getDeviceContext()->Unmap(buffer_ans2_copy,0);

@@ -477,6 +477,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 		HRESULT hr;
 		CS::instance()->enter(CS_DEVICECON_CS, "unko");
 		CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+		
 			if ((hr =hantei->copyKekkaToBufferForCopy2(g)) == S_OK) {
 				
 				game->watches_for_keisoku.stopWatch(8);
@@ -503,6 +504,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 			}
 		
 	}
+	
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	CS::instance()->leave(CS_DEVICECON_CS, "unko");
 	//Sleep(5);

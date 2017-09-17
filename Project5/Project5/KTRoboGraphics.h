@@ -143,6 +143,7 @@ private:
 	ID3D11Device* p_device;
 	D3D_FEATURE_LEVEL featurelevel;
 	ID3D11DeviceContext* p_devicecontext;
+	ID3D11DeviceContext* p_immediatecontext; // copied‚Å‚È‚¢‚à‚Ì‚ÍNULL
 	ID3D11Resource* p_backbuffer;
 	ID3D11RenderTargetView* p_rendertargetview;
 	D3D11_VIEWPORT vp;
@@ -192,6 +193,13 @@ public:
 
 	IDXGISwapChain* getSwapChain() {return p_swapchain;}
 	ID3D11DeviceContext* getDeviceContext() {return p_devicecontext;}
+	ID3D11DeviceContext* getImmediateContext() {
+		if (is_copied) {
+		return p_immediatecontext;
+		} else {
+			return p_devicecontext;
+		}
+	}
 	ID3D11RenderTargetView* getRenderTargetView() {return p_rendertargetview;}
 	ID3D11Device* getDevice() {return p_device;}
 	unsigned int getScreenHeight() {return height;}
