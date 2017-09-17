@@ -167,6 +167,10 @@ void KTROBO::Task::kill(TCB* killtcb) {
 	killtcb->next->prev = killtcb->prev;
 	killtcb->flag = 0;
 	CS::instance()->leave(CS_TASK_CS,"", index);
+
+	// 該当のtcbのタスクが終わるまで待たないので外で待つ必要がある
+
+
 }
 
 void KTROBO::Task::change(TCB* thisTCB, void(*exec)(TCB*), void* data) {

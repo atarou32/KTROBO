@@ -116,6 +116,11 @@ private:
 
 	float lookatspeed;
 	float lookfromspeed;
+
+	int screen_tex2;
+
+	BulletController* bullet_c;
+
 public:
 	MYVECTOR3 lookat;
 	MYVECTOR3 lookfrom;
@@ -149,10 +154,21 @@ public:
 		MyMatrixIdentity(view);
 		lookatspeed = 0;
 		lookfromspeed = 0;
+		screen_tex2=0;
+		bullet_c = 0;
+
 	}
 	~Gamen_MISSION() {
 	}
-	void Init();
+	void Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* loader);
+	void Release() {
+		if (bullet_c) {
+			bullet_c->Release();
+			delete bullet_c;
+			bullet_c = 0;
+		}
+	}
+
 	void byouga(Graphics* g, GUI* gui, float dsecond, int stamp);
 	void clickedShori(int id);
 	void clickedShoriWithData(int id, void* data);
@@ -162,6 +178,8 @@ public:
 	void setHoui(float rotz);
 	void setView(MYMATRIX* world, float R, float dsecond);
 
+	void posButukari(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);
+	void renderhojyo(Graphics* g, float dsecond, int stamp);
 
 };
 
@@ -178,6 +196,7 @@ private:
 	Gamen_GARAGE* gg;
 	Gamen_MISSION* gm;
 	Clock butukari_clock;
+	ClockWatches watches;
 public:
 	Game_SCENE(Graphics* g, AtariHantei* hantei, Texture* tex, Texture* tex2, MyTextureLoader* loader);
 	~Game_SCENE(void);

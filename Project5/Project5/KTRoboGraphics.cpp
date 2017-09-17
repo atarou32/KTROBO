@@ -1031,6 +1031,7 @@ void Graphics::Release() {
 
 	if (p_immediatecontext) {
 		CS::instance()->enter(CS_DEVICECON_CS,"un");
+		p_immediatecontext->ClearState();
 		p_immediatecontext->Release();
 		p_immediatecontext = 0;
 		CS::instance()->leave(CS_DEVICECON_CS, "un");

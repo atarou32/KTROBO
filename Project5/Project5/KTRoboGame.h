@@ -226,6 +226,7 @@ public:
 			CS::instance()->leave(CS_TASK_CS, "render lock",2);
 			CS::instance()->leave(CS_TASK_CS, "load lock", 3);
 			CS::instance()->leave(CS_TASK_CS, "ai lock", 4);
+			Sleep(80); // ‘¼‚Ìƒ^ƒXƒN‚ªƒQƒbƒg‚Å‚«‚é‚æ‚¤‚É’ZŽžŠÔ‘Ò‚Â ¦‚W‚O‚Oƒ~ƒŠ•b‚æ‚è‚©‚©‚éƒ^ƒXƒN‚ª‚ ‚é‚Æ‚¤‚Ü‚­‚¢‚©‚È‚¢‚©‚à‚µ‚ê‚È‚¢
 			CS::instance()->enter(CS_TASK_CS, "ai lock", 4);
 			CS::instance()->enter(CS_TASK_CS, "load lock", 3);
 			CS::instance()->enter(CS_TASK_CS, "render lock",2);

@@ -2085,14 +2085,14 @@ void Game::Run() {
 	watches_for_keisoku.stopWatch(1);
 
 	
-
+	/*
 
 	if(TestOBBOBB(&hantei->umesh_units[0]->meshs[0]->bone_obbs[0],&hantei->umesh_units[1]->meshs[0]->bone_obbs[0])) {
 		MYMATRIX iden;
 		MyMatrixTranslation(iden,0,0,5);
 	//	g->drawOBB(g,0xFF0000FF,&iden,&view,&proj,&umesh_units[0]->meshs[0]->bone_obbs[0]);
 	}
-
+	*/
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 /*	

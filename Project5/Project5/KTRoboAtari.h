@@ -210,6 +210,7 @@ public:
 	void setV(MYVECTOR3* v);
 	void calcAnimeFrame(int meshnum, float* frames, bool* calculateoffsetmatrixs);
 	void calcJyusinAndR();
+	virtual void calcJyusinAndRForEmptyMesh() {};
 
 	~UMeshUnit() {
 		vector<UMesh*>::iterator it = meshs.begin();

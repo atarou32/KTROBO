@@ -159,6 +159,15 @@ void Gamen_MISSION::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 		setHoui(robo->atarihan->rotz);
 		setView(&robo->atarihan->world,robo->atarihan->r,dsecond);
 	}
+	if (bullet_c) {
+		bullet_c->byouga(g,&this->view,g->getProj(),dsecond, stamp);
+	}
+
+	//static float unko = 255;
+
+	//unko -= 0.01f;
+
+	//t2->setRenderTexColor(screen_tex2, (int)unko);
 }
 
 void Gamen_MISSION::setTexSuuji(int suuji,int tex_id) {
@@ -196,7 +205,7 @@ void Gamen_MISSION::setTimerTex(int second_sita, int second_ue) {
 	setTexSuuji(second_sita / 10, timer_suuji_tex[2]);
 }	
 
-void Gamen_MISSION::Init() {
+void Gamen_MISSION::Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* loader) {
 	int tex_id = t->getTexture(KTROBO_MISSION_GAMEN_PILOT_PNG);
 	/*
 	int timer_suuji_tex[4];
@@ -249,7 +258,13 @@ void Gamen_MISSION::Init() {
 	t->setRenderTexIsRender(s_tex,true);
 	t->setRenderTexIsRender(w_tex,true);
 	t->setRenderTexIsRender(energy_tex,true);
-
+	//int tex_id2 = t2->getTexture(KTROBO_MISSION_GAMEN_PILOT_PNG);
+	//screen_tex2 = t2->getRenderTex(tex_id2,0x000000FF,0,0,1000,800,0,1,0,1);
+	//t2->setRenderTexIsRender(screen_tex2,true);
+	//if (!bullet_c) {
+		bullet_c = new BulletController();
+		bullet_c->Init(g, hantei, loader);
+	//}
 }
 void Gamen_MISSION::clickedShori(int id) {
 
@@ -274,11 +289,12 @@ Game_SCENE::Game_SCENE(Graphics* g, AtariHantei* hantei, Texture* tex, Texture* 
 	gm = 0;
 	if (!gm) {
 		gm = new Gamen_MISSION(tex,tex2);
-		gm->Init();
+		gm->Init(g,hantei,loader);
 	}
 }
 Game_SCENE::~Game_SCENE(void) {
 	if (gm) {
+		gm->Release();
 		delete gm;
 		gm = 0;
 	}
@@ -384,7 +400,12 @@ void Game_SCENE::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
 }
 
 void Game_SCENE::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
+	if (game && gm && task->getIsExecTask()) {
+		watches.stopWatch(TASKTHREADS_UPDATEANIMEFRAMENADO);
+		watches.startWatch(TASKTHREADS_UPDATEANIMEFRAMENADO);
+		gm->renderhojyo(g, watches.times[TASKTHREADS_UPDATEANIMEFRAMENADO],game->getTimeStamp());
 
+	}
 }
 
 void Game_SCENE::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
@@ -445,7 +466,8 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	
 	if (game && gm && task->getIsExecTask()) {
 
-			game->watches_for_keisoku.startWatch(2);
+	
+	game->watches_for_keisoku.startWatch(2);
 
 	game->watches_for_keisoku.startWatch(5);
 	hantei->ataristart();
@@ -507,6 +529,12 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	CS::instance()->leave(CS_DEVICECON_CS, "unko");
+
+	if (gm && task->getIsExecTask()) {
+		watches.stopWatch(TASKTHREADS_UPDATEPOSBUTUKARI);
+		watches.startWatch(TASKTHREADS_UPDATEPOSBUTUKARI);
+		gm->posButukari(g,hantei, watches.times[TASKTHREADS_UPDATEPOSBUTUKARI],game->getTimeStamp());
+	}
 	//Sleep(5);
 }
 
@@ -535,9 +563,34 @@ void Game_SCENE::leave() {
 	//	gg = 0;
 	//}
 
+
+
 }
 bool Game_SCENE::handleMessage(int msg, void* data, DWORD time) {
 
 
 	return true;
+}
+
+
+
+
+void Gamen_MISSION::posButukari(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) {
+
+	if (bullet_c) {
+		bullet_c->update(g,hantei,dsecond, stamp);
+
+	}
+
+
+}
+
+void Gamen_MISSION::renderhojyo(Graphics* g, float dsecond, int stamp) {
+
+	if (bullet_c) {
+		
+		bullet_c->calcUpdate(g);
+	}
+
+
 }

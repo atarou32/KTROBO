@@ -10,6 +10,10 @@
 #include "KTRoboRobo.h"
 #endif
 
+#ifndef KTROBO_MESH_INSTANCED_H
+#include "KTRoboMeshInstanced.h"
+#endif
+
 namespace KTROBO {
 
 	class Bullet : public AtariBase {
@@ -20,11 +24,13 @@ namespace KTROBO {
 		MYVECTOR3 h_pos; // 発射した地点
 		MYVECTOR3 h_v; // 発射したときの速度
 		float dtime; // 発射してからの時間
-		AtariBase* robo;
-		RoboParts* robo_parts;
+		AtariBase* robo; // deleteしない
+		RoboParts* robo_parts; //deleteしない
+		
+		MeshInstanced* mesh_i; // delete しない　
 
-		AtariBase* atari_robo;
-		AtariBase* atari_tikei;
+		AtariBase* atari_robo; // deleteしない
+		AtariBase* atari_tikei; // deleteしない
 	public:
 		Bullet() {
 			atarihan = 0;
@@ -38,6 +44,7 @@ namespace KTROBO {
 			robo_parts = 0;
 			atari_robo = 0;
 			atari_tikei = 0;
+			mesh_i = 0;
 		}
 
 		~Bullet();
@@ -56,7 +63,7 @@ namespace KTROBO {
 		}
 
 		bool getIsUse() {return is_use;}
-		void Init(Graphics* g, AtariHantei* h);
+		void Init(Graphics* g, AtariHantei* h, MeshInstanced* mi);
 		void setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo);
 		bool fire();
 		void atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp);
@@ -67,26 +74,29 @@ namespace KTROBO {
 
 	};
 
-#define KTROBO_BULLET_CONTROLLER_BULLET_NUM 400
+#define KTROBO_BULLET_CONTROLLER_BULLET_NUM 400 // mesh_instancedsの関係上512以下にすること
+#define KTROBO_BULLET_MESH_DUMMY_FILENAME "resrc/model/cube/pkcube.mesh"
+#define KTROBO_BULLET_MESH_ANIME_DUMMY_FILENAME "resrc/model/cube/pkcube.anime"
 
 class BulletController {
 private:
 	AtariHantei* hantei;
 	Bullet* bullets;
 	map<int,int> umesh_id_to_bullet_indexs;
-
+	MeshInstanceds* mis;
+	Mesh* dummy_mesh;
 public:
 	BulletController();
 	~BulletController();
-	void Init(Graphics* g, AtariHantei* hantei);
-	Bullet* getEmptyBullet();
+	void Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* loader);
+	Bullet* getEmptyBullet(); // 空のものがない場合はNULLが返る
 	void Release(); // AtariHantei がクリアされる
 
 	void atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp);
 	void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float dsecond, int stamp);
 	void update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);
 
-
+	void calcUpdate(Graphics* g); // mis用
 
 
 };

@@ -95,6 +95,15 @@ void UMeshUnit::calcJyusinAndR() {
 	it = meshs.begin();
 	while(it != meshs.end()) {
 		UMesh* em = *it;
+
+		if (!em->mesh) {
+			// ê—p‚ÌcalcJyusinR‚ðŒÄ‚Ô
+			this->calcJyusinAndRForEmptyMesh();
+			it++;
+			continue;
+		}
+
+
 		if (em->mesh->Bones.size() >= KTROBO_MESH_BONE_MAX) {
 			it++;
 			continue;

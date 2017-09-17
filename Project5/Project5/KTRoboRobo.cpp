@@ -1009,16 +1009,18 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view,  AtariHantei* hantei, float d
 
 		if ((move_state == &movestop)) {
 			
-			if (dt < 50) {
-				MYVECTOR3 xyz = atarihan->v * dt;
-				atarihan->setXYZ(atarihan->x+xyz.float3.x , atarihan->y + xyz.float3.y , atarihan->z + xyz.float3.z);
-			}
+		
 			atarihan->setDT(dt);
 			if (booster_state == &boostontaiki) {
 
 				atarihan->setV(&MYVECTOR3(atarihan->v.float3.x, atarihan->v.float3.y,vdayo));
 			} else {
 				atarihan->setV(&MYVECTOR3(0,0,vdayo));
+			}
+
+			if (dt < 50) {
+				MYVECTOR3 xyz = atarihan->v * dt;
+				atarihan->setXYZ(atarihan->x+xyz.float3.x , atarihan->y + xyz.float3.y , atarihan->z + xyz.float3.z);
 			}
 			
 		} else if (move_state->isJump()){
@@ -3070,6 +3072,27 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 				}
 			}
 			}
+
+			if(input->getMOUSESTATE()->mouse_l_button_pressed) {
+				if ((moveturn_state != &moveleftturn)) {
+					moveturn_state->leave(this, &moveleftturn, moveturn_state);
+					moveleftturn.enter(this, &moveleftturn, moveturn_state);
+					moveturn_state = &moveleftturn;
+				}
+			} else if(input->getMOUSESTATE()->mouse_r_button_pressed) {
+				if ((moveturn_state != &moverightturn)) {
+					moveturn_state->leave(this, &moverightturn, moveturn_state);
+					moveleftturn.enter(this, &moverightturn, moveturn_state);
+					moveturn_state = &moverightturn;
+				}
+			} else {
+				if ((moveturn_state != &movestop)) {
+					moveturn_state->leave(this, &movestop, moveturn_state);
+					movestop.enter(this, &movestop, moveturn_state);
+					moveturn_state = &movestop;
+				}
+			}
+
 			//Sleep(1);
 		} else {
 
