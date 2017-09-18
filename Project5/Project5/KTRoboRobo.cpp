@@ -4452,11 +4452,29 @@ void RoboState::enter(Robo* robo, RoboState* now_state, RoboState* before_state)
 
 
 
-void Robo::fireUpdate(Graphics* g, MyTextureLoader* tex_loader, MYMATRIX* view, AtariHantei* hantei, float dt, int stamp, Game* game, KTROBO::Texture* tex) {
+void Robo::fireUpdate(Graphics* g, Game* game, Scene* scene,BulletController* bullet_c, AtariHantei* hantei, float dt, int stamp) {
 
 
 	if (is_fireraweapon) {
-		raweapon->wf_rifle.fire(g,NULL,hantei, game->getSound(),tex,NULL,view, NULL,NULL);
+
+		// bullet_world ‚ÌŽZo
+		MYVECTOR3 bullet_pos(0,0,0);
+		MYVECTOR3 bullet_vec(0,0,1);
+		MYMATRIX bullet_world;
+		MeshBone* bone = raweapon->weapon->Bones[raweapon->weapon->BoneIndexes["fireBone"]];
+		MyMatrixMultiply(bullet_world, bone->matrix_local, bone->combined_matrix);        //umesh_unit->meshs[0]->mesh->Bones[umesh_unit->meshs[0]->mesh->BoneIndexes["hidariteBone"]]->matrix_local,umesh_unit->meshs[0]->mesh->Bones[umesh_unit->meshs[0]->mesh->BoneIndexes["hidariteBone"]]->combined_matrix);
+		MyMatrixMultiply(bullet_world,bullet_world,atarihan->world);
+		MyVec3TransformCoord(bullet_pos,bullet_pos,bullet_world);
+		MyVec3TransformNormal(bullet_vec,bullet_vec,bullet_world);
+		MyVec3Normalize(bullet_vec,bullet_vec);
+		bullet_vec = bullet_vec * 0.01;
+
+		// bullet_vec ‚ÌŽZo
+
+		// bullet_pos ‚ÌŽZo
+
+
+		raweapon->wf_rifle.fire(this, raweapon, g,game,scene, bullet_c, hantei, game->getSound(),&bullet_world,&bullet_vec, &bullet_pos);
 	}
 
 }

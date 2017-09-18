@@ -22,7 +22,9 @@ namespace KTROBO {
 		bool is_fired;
 		float fire_distance; // 発射してから移動した距離
 		MYVECTOR3 h_pos; // 発射した地点
+		MYVECTOR3 dpos; // 発射した地点からの相対位置
 		MYVECTOR3 h_v; // 発射したときの速度
+		MYMATRIX shoki_world;
 		float dtime; // 発射してからの時間
 		AtariBase* robo; // deleteしない
 		RoboParts* robo_parts; //deleteしない
@@ -45,6 +47,7 @@ namespace KTROBO {
 			atari_robo = 0;
 			atari_tikei = 0;
 			mesh_i = 0;
+			MyMatrixIdentity(shoki_world);
 		}
 
 		~Bullet();
@@ -64,8 +67,8 @@ namespace KTROBO {
 
 		bool getIsUse() {return is_use;}
 		void Init(Graphics* g, AtariHantei* h, MeshInstanced* mi);
-		void setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo);
-		bool fire();
+		void setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo, MYMATRIX* shoki_world);
+		bool fire(AtariHantei* hantei);
 		void atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp);
 		void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float dsecond, int stamp);
 		void update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);

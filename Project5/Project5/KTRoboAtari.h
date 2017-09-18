@@ -193,6 +193,7 @@ public:
 		is_enabled = true;
 		dt = 0;
 	}
+	void setWorld(MYMATRIX* nworld);
 	void setXYZ(float x, float y, float z);
 	void setXYZD(float x, float y, float z, float ddmax);
 
@@ -209,7 +210,7 @@ public:
 
 	void setV(MYVECTOR3* v);
 	void calcAnimeFrame(int meshnum, float* frames, bool* calculateoffsetmatrixs);
-	void calcJyusinAndR();
+	void calcJyusinAndR(bool calcWorld=true);
 	virtual void calcJyusinAndRForEmptyMesh() {};
 
 	~UMeshUnit() {
@@ -389,7 +390,11 @@ private:
 	bool is_unit_updated;
 	int is_calc_kuwasiku;
 	bool atari_start;
+
+	bool need_calc_kumi;
+	
 public:
+
 	int getAtattaCount() {
 		return atatta_count;
 	}
@@ -422,6 +427,9 @@ private:
 	AtariUnitTikeiIgaiDousi* autid;
 	AtariUnitTikeiToSoreigai* autts;
 public:
+	void setIsUnitUpdated() {
+		is_unit_updated = true;
+	}
 
 	void setUMeshUnit(UMeshUnit* u, AtariUnit::AtariType type) {
 		umesh_units.push_back(u);
@@ -702,6 +710,10 @@ public:
 		buffer_ans2_aida = 0;
 		buffer_ans2_copy_aida = 0;
 		atatta_count = 0;
+
+	
+		need_calc_kumi = false;
+	
 	}
 };
 

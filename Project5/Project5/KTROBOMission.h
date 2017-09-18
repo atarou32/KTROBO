@@ -178,7 +178,7 @@ public:
 	void setHoui(float rotz);
 	void setView(MYMATRIX* world, float R, float dsecond);
 
-	void posButukari(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);
+	void posButukari(Graphics* g, Scene* scene, Game* game, AtariHantei* hantei, float dsecond, int stamp);
 	void renderhojyo(Graphics* g, float dsecond, int stamp);
 
 };

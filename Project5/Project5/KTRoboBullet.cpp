@@ -15,22 +15,36 @@ void Bullet::Init(Graphics* g, AtariHantei* h, MeshInstanced* mi) {
 		atarihan = new UMeshUnit();
 		UMesh* n = new UMesh();
 		atarihan->setUMesh(n);
-		atarihan->setIsEnabled(h, false);
+		atarihan->setIsEnabled(h, true);
 		h->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_WAZA);
 	//}
 
 	this->mesh_i = mi;
 }
 
-void Bullet::setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo) {
+void Bullet::setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo, MYMATRIX* shoki_world) {
+	this->robo = robo;
+	this->robo_parts =parts;
+	h_pos = *hassyapos;
+	h_v = *vdayo; // 発射方向もかねる
+	this->shoki_world = *shoki_world;
 
 
 
 }
 
 
-bool Bullet::fire() {
+bool Bullet::fire(AtariHantei* hantei) {
 
+	// エフェクトが実装されたらエフェクトも再生するようにする
+	
+	mesh_i->setIsRender(true);
+	this->setIsUse(true);
+	this->is_fired = true;
+	atarihan->setV(&h_v);
+	atarihan->setXYZ(h_pos.float3.x, h_pos.float3.y, h_pos.float3.z);
+	dpos = MYVECTOR3(0,0,0);
+	atarihan->setIsEnabled(hantei,true);
 	return true;
 
 }
@@ -51,20 +65,22 @@ void Bullet::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float dsecond, 
 
 
 void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) {
-	if(mesh_i){
-		static float theta = 0;
-		if (dsecond < 300) {
-			theta += dsecond/10.0f;
-		}
-		MYMATRIX mat;
-		float test = atarihan->y * sin(theta);
-		float test2 = atarihan->z * cos(theta);
-		MyMatrixTranslation(mat,test,test2,0);//atarihan->z);
-		atarihan->setXYZ(rand() %1000/10.0,rand() % 1000/10.0,rand() %10000/10.0);//test,test2,0);
-		atarihan->calcJyusinAndR();
-		mesh_i->setWorld(&mat);
-		mesh_i->setIsRender(true);
+	if(mesh_i && is_fired && is_use){
 		
+		MYMATRIX world = shoki_world;
+		MYMATRIX dpos_wor;
+
+		dpos = dpos + atarihan->v* dsecond;
+		MyMatrixTranslation(dpos_wor, dpos.float3.x,dpos.float3.y,dpos.float3.z);
+		MyMatrixMultiply(world,world,dpos_wor);
+		// rotx roty rotz を計算する必要がある // setworldを作ることで対応 bool calcworldをつけるようにした
+		//atarihan->setXYZ(rand() %1000/10.0,rand() % 1000/10.0,rand() %10000/10.0);//test,test2,0);
+		atarihan->setWorld(&world);
+		atarihan->setDT(dsecond);
+		atarihan->calcJyusinAndR(false);
+		mesh_i->setWorld(&world);
+		//mesh_i->setIsRender(true);
+
 	}
 
 

@@ -441,8 +441,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	float frameTime = millisecond;
 	int frame = game->getTimeStamp();//butukari_clock.getSecond();
 	
-	CS::instance()->enter(CS_DEVICECON_CS,"unko");
-	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+	
 //	CS::instance()->enter(CS_RENDERDATA_CS,"unko");
 	
 //	Sleep(5000);
@@ -467,73 +466,20 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	if (game && gm && task->getIsExecTask()) {
 
 	
-	game->watches_for_keisoku.startWatch(2);
-
-	game->watches_for_keisoku.startWatch(5);
-	hantei->ataristart();
-	hantei->maecalcdayo(g);
-	game->watches_for_keisoku.stopWatch(5);
-	game->watches_for_keisoku.startWatch(6);
-	hantei->calcAuInfo(g,true);
-	hantei->calcKumi(g);
-	hantei->calcObb(g);
-	hantei->clearKekkaOfBuffer(g);
-	game->watches_for_keisoku.stopWatch(6);
-	game->watches_for_keisoku.startWatch(7);
-	hantei->runComputeShaderAida(g);
-	game->watches_for_keisoku.stopWatch(7);
-	//Sleep(10000);
-	//hantei->copyKekkaToBufferForCopy(g,true);
 	
-	//hantei->calcKumiKuwasiku(g);
-	//hantei->runComputeShaderKuwasiku(g);
-
-	
-		game->watches_for_keisoku.stopWatch(2);
-
-
-
-		game->watches_for_keisoku.startWatch(8);
-		CS::instance()->leave(CS_RENDERDATA_CS, "unko");
-		CS::instance()->leave(CS_DEVICECON_CS, "unko");
-		HRESULT hr;
-		CS::instance()->enter(CS_DEVICECON_CS, "unko");
-		CS::instance()->enter(CS_RENDERDATA_CS, "unko");
-		
-			if ((hr =hantei->copyKekkaToBufferForCopy2(g)) == S_OK) {
-				
-				game->watches_for_keisoku.stopWatch(8);
-				game->watches_for_keisoku.stopWatch(0);
-				double test = game->watches_for_keisoku.times[0];
-				game->watches_for_keisoku.startWatch(0);
-				Robo* robodayo = game->robodayo;
-				Robo* roboaitedayo = game->roboaitedayo;
-				if (hantei->canGetAns()) {
-				if (robodayo->atarihan) {
-					robodayo->atarihan->calcJyusinAndR();
-					robodayo->atarishori(g, &game->view, hantei, test, (int)frame);
-				//	robodayo->atariAim(g, &game->view, frameTime, (int)frame);
-				}
-
-				if (roboaitedayo->atarihan) {
-					roboaitedayo->atarihan->calcJyusinAndR();
-					roboaitedayo->atarishori(g, &game->view, hantei, test, (int)frame);
-				//	roboaitedayo->atariAim(g, &game->view, frameTime, (int)frame);
-				}
-				
-				hantei->setIsCalcKuwasikuGetted();
-				}
-			}
 		
 	}
 	
-	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
-	CS::instance()->leave(CS_DEVICECON_CS, "unko");
+	
 
-	if (gm && task->getIsExecTask()) {
+	if (game && gm && task->getIsExecTask()) {
 		watches.stopWatch(TASKTHREADS_UPDATEPOSBUTUKARI);
 		watches.startWatch(TASKTHREADS_UPDATEPOSBUTUKARI);
-		gm->posButukari(g,hantei, watches.times[TASKTHREADS_UPDATEPOSBUTUKARI],game->getTimeStamp());
+		CS::instance()->enter(CS_DEVICECON_CS,"unko");
+		CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+		gm->posButukari(g,this,game, hantei, watches.times[TASKTHREADS_UPDATEPOSBUTUKARI],game->getTimeStamp());
+		CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+		CS::instance()->leave(CS_DEVICECON_CS, "unko");
 	}
 	//Sleep(5);
 }
@@ -575,11 +521,69 @@ bool Game_SCENE::handleMessage(int msg, void* data, DWORD time) {
 
 
 
-void Gamen_MISSION::posButukari(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) {
+void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHantei* hantei, float dsecond, int stamp) {
 
 	if (bullet_c) {
 		bullet_c->update(g,hantei,dsecond, stamp);
+		game->watches_for_keisoku.startWatch(2);
 
+	game->watches_for_keisoku.startWatch(5);
+	hantei->ataristart();
+	hantei->maecalcdayo(g);
+	game->watches_for_keisoku.stopWatch(5);
+	game->watches_for_keisoku.startWatch(6);
+	hantei->calcAuInfo(g,true);
+	hantei->calcKumi(g);
+	hantei->calcObb(g);
+	hantei->clearKekkaOfBuffer(g);
+	game->watches_for_keisoku.stopWatch(6);
+	game->watches_for_keisoku.startWatch(7);
+	hantei->runComputeShaderAida(g);
+	game->watches_for_keisoku.stopWatch(7);
+	//Sleep(10000);
+	//hantei->copyKekkaToBufferForCopy(g,true);
+	
+	//hantei->calcKumiKuwasiku(g);
+	//hantei->runComputeShaderKuwasiku(g);
+
+	
+		game->watches_for_keisoku.stopWatch(2);
+
+
+
+		game->watches_for_keisoku.startWatch(8);
+		//CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+		//CS::instance()->leave(CS_DEVICECON_CS, "unko");
+		HRESULT hr;
+		//CS::instance()->enter(CS_DEVICECON_CS, "unko");
+		//CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+		
+			if ((hr =hantei->copyKekkaToBufferForCopy2(g)) == S_OK) {
+				
+				game->watches_for_keisoku.stopWatch(8);
+				game->watches_for_keisoku.stopWatch(0);
+				double test = game->watches_for_keisoku.times[0];
+				game->watches_for_keisoku.startWatch(0);
+				Robo* robodayo = game->robodayo;
+				Robo* roboaitedayo = game->roboaitedayo;
+				if (hantei->canGetAns()) {
+				if (robodayo->atarihan) {
+					robodayo->atarihan->calcJyusinAndR();
+					robodayo->atarishori(g, &game->view, hantei, test, (int)stamp);
+					robodayo->fireUpdate(g, game, scene, bullet_c, hantei,dsecond, (int)stamp); 
+	
+				//	robodayo->atariAim(g, &game->view, frameTime, (int)frame);
+				}
+
+				if (roboaitedayo->atarihan) {
+					roboaitedayo->atarihan->calcJyusinAndR();
+					roboaitedayo->atarishori(g, &game->view, hantei, test, (int)stamp);
+				//	roboaitedayo->atariAim(g, &game->view, frameTime, (int)frame);
+				}
+				
+				hantei->setIsCalcKuwasikuGetted();
+				}
+			}
 	}
 
 

@@ -8,6 +8,34 @@ void UMeshUnit::setXYZ(float x, float y, float z) {
 	is_updated = true;
 }
 
+void UMeshUnit::setWorld(MYMATRIX* nworld) {
+	if (!nworld) return;
+	
+	/*
+	MYMATRIX temp;
+	MYMATRIX temp2;
+	MYMATRIX temp3;
+	MYMATRIX temp4;
+	MYMATRIX temp5;
+	MyMatrixRotationX(temp,rotx);
+	MyMatrixRotationY(temp2,roty);
+	MyMatrixRotationZ(temp3,rotz);
+	MyMatrixTranslation(temp4,x,y,z);
+	MyMatrixScaling(temp5,scalex,scaley,scalez);
+	MyMatrixMultiply(world,temp5,temp);
+	MyMatrixMultiply(world,world,temp3);
+	MyMatrixMultiply(world,world,temp2);
+	MyMatrixMultiply(world,world,temp4);	
+	*/
+
+
+
+
+
+	world = *nworld;
+
+	is_updated = true;
+}
 void UMeshUnit::setXYZD(float x, float y, float z, float ddmax) {
 	
 	MYVECTOR3 tt = MYVECTOR3(this->x-x,this->y-y, this->z-z);
@@ -63,7 +91,7 @@ void UMeshUnit::calcAnimeFrame(int meshnum, float* frames, bool* calculateoffset
 }
 
 
-void UMeshUnit::calcJyusinAndR() {
+void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 	// UMeshUnitを包括する重心座標とRを求める
 	/*if (is_updated == false) {
 		return;
@@ -80,6 +108,8 @@ void UMeshUnit::calcJyusinAndR() {
 	MYMATRIX temp3;
 	MYMATRIX temp4;
 	MYMATRIX temp5;
+
+	if (calcWorld) {
 	MyMatrixRotationX(temp,rotx);
 	MyMatrixRotationY(temp2,roty);
 	MyMatrixRotationZ(temp3,rotz);
@@ -89,7 +119,7 @@ void UMeshUnit::calcJyusinAndR() {
 	MyMatrixMultiply(world,world,temp3);
 	MyMatrixMultiply(world,world,temp2);
 	MyMatrixMultiply(world,world,temp4);	
-
+	}
 	// 現在のアニメフレームと位置と姿勢のときの各umesh のbone_obbs の計算を行う
 	// combined_matrix はすでにcalcanimeframe で計算されている
 	it = meshs.begin();
@@ -436,6 +466,8 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 				}
 		}
 	}
+
+
 	au_obbs_count = temp_obbs_count;
 	int temp_c5 = this->getKakuhoCountsFromCount(temp_obbs_count);
 	if (temp_c5 > max_count.obbs_count) {
@@ -709,6 +741,10 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 
 	}
 
+
+	
+	need_calc_kumi = true;
+
 	is_unit_updated = false;
 }
 
@@ -716,7 +752,22 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 void AtariHantei::calcKumi(Graphics* g) {
 		// 組の変数に値を入れる
 	if (!atari_start) return;
-
+	if (!need_calc_kumi) {
+		
+	g->getDeviceContext()->UpdateSubresource(buffer_kumi,0,0,kumi,0,0);
+//	g->getDeviceContext()->Map(buffer_kumi,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+//	memcpy(subresource.pData, kumi, sizeof(AtariUnitKumi) * temp);
+//	g->getDeviceContext()->Unmap(buffer_kumi,0);
+	g->getDeviceContext()->UpdateSubresource(buffer_autts,0,0,autts,0,0);
+//	subresource.pData = autts;
+//	g->getDeviceContext()->Map(buffer_autts,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+//	memcpy(subresource.pData, autts, sizeof(AtariUnitTikeiToSoreigai) * temp_tosoreigai);
+//	g->getDeviceContext()->Unmap(buffer_autts,0);
+	g->getDeviceContext()->UpdateSubresource(buffer_autid,0,0,autid,0,0);		
+		
+		
+		return;
+	}
 	int temp = 0;
 	int temp_igaidousi = 0;
 	int temp_tosoreigai = 0;
@@ -821,7 +872,7 @@ void AtariHantei::calcKumi(Graphics* g) {
 //	g->getDeviceContext()->Map(buffer_autid,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 //	memcpy(subresource.pData, autid, sizeof(AtariUnitTikeiIgaiDousi) * temp_igaidousi);
 //	g->getDeviceContext()->Unmap(buffer_autid,0);
-
+	need_calc_kumi = false;
 }
 
 
@@ -921,6 +972,7 @@ void AtariHantei::calcKumiKuwasiku(Graphics* g) {
 
 void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 	if (!atari_start) return;
+	
 	int temp_index_place=0;
 	int temp_vertex_place=0;
 
@@ -1022,11 +1074,13 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 		g->getDeviceContext()->Unmap(buffer_au_info,0);
 */
 	}
+	
 }
 
 
 void AtariHantei::calcObb(Graphics* g) {
 	if (!atari_start) return;
+	
 	for (int i = 0;i<au_count;i++) {
 		AtariUnit* au = &units[i];
 		for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
@@ -1047,6 +1101,8 @@ void AtariHantei::calcObb(Graphics* g) {
 	subresource.RowPitch = 0;
 */
 	g->getDeviceContext()->UpdateSubresource(buffer_obbs,0,0,obbs,0,0);
+
+	
 /*
 	g->getDeviceContext()->Map(buffer_obbs,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 	memcpy(subresource.pData, obbs, sizeof(AtariUnitKumi) * au_obbs_count);
