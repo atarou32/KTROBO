@@ -530,6 +530,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 	game->watches_for_keisoku.startWatch(5);
 	hantei->ataristart();
 	hantei->maecalcdayo(g);
+	hantei->maeCalcDummy(g);
 	game->watches_for_keisoku.stopWatch(5);
 	game->watches_for_keisoku.startWatch(6);
 	hantei->calcAuInfo(g,true);

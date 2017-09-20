@@ -1,5 +1,12 @@
 #include "KTRoboAtari.h"
 #include "KTRoboGameError.h"
+#include <set>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <iterator>
+
+using namespace std;
 
 void UMeshUnit::setXYZ(float x, float y, float z) {
 	this->x = x;
@@ -238,7 +245,8 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 }
 void UMeshUnit::setIsEnabled(AtariHantei* hantei, bool t){ 
 		
-		hantei->resetIsUnitUpdated();
+		//hantei->resetIsUnitUpdated();
+	hantei->setUnitStateChanged(this);
 		is_enabled = t;
 }
 void UMeshUnit::draw(Graphics* g, MYMATRIX* view, MYMATRIX* proj, int meshnum, float* frames, bool* calculateoffsetmatrixs,
@@ -291,6 +299,22 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 // maecalcdayoでは登録されたUMeshUnitからatariunitの計算を行う
 	//if (!atari_start) return;
 	if (!is_unit_updated) return;
+
+	if (!dummy_umeshunit) {
+		dummy_umeshunit = new UMeshUnit();
+		dummy_umesh = new UMesh();
+		dummy_umesh->is_bone_obbs_use[0] = true;
+		dummy_umesh->bone_obbs_idx[0] = KTROBO_ATARI_CALC_OBBS_IDX_DUMMY;
+		dummy_umesh->bone_obbs[0].c = MYVECTOR3(0,0,0);
+		dummy_umesh->bone_obbs[0].e = MYVECTOR3(1,1,1);
+		dummy_umesh->bone_obbs[0].u[0] = MYVECTOR3(1,0,0);
+		dummy_umesh->bone_obbs[0].u[1] = MYVECTOR3(0,1,0);
+		dummy_umesh->bone_obbs[0].u[2] = MYVECTOR3(0,0,1);
+		dummy_umeshunit->setUMesh(dummy_umesh);
+	}
+
+
+
 	int atari_unit_count = 0;
 	int size = umesh_units.size();
 	for (int i=0;i<size;i++) {
@@ -303,7 +327,7 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 			if (atari_unit_count >= KTROBO_MAX_ATARI_HANTEI_UNIT_NUM) {
 				throw new GameError(KTROBO::FATAL_ERROR, "no more atari");
 			}
-			units[atari_unit_count].atariidx = atari_unit_count;
+			units[atari_unit_count].atariidx = atari_unit_count; // このインデックス　とあたりいｄｘの関係を変えないこと
 			units[atari_unit_count].type = type;
 			units[atari_unit_count].umesh = umm;
 			units[atari_unit_count].umesh_unit = um;
@@ -453,22 +477,24 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 
 	// obbs のカウントを出す
 	// obbsをカウントするのは地形以外
-	int temp_obbs_count = 0;
+	int temp_obbs_count = KTROBO_ATARI_CALC_OBBS_IDX_DUMMY+1; //これから始める
 	for (int i=0;i<atari_unit_count;i++) {
-		if ((units[i].type != AtariUnit::AtariType::ATARI_TIKEI)
+		if ((units[i].type != AtariUnit::AtariType::ATARI_TIKEI) // 地形はカウントされないのだがatariunitの計上にはobbs_useがtrueとなったumesh が地形には必要
 			&& units[i].umesh /*&& units[i].umesh->mesh*/) {
 				UMesh* um = units[i].umesh;
 				for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
 					if (um->is_bone_obbs_use[k]) {
 						um->bone_obbs_idx[k] = temp_obbs_count;
 						temp_obbs_count++;
+					} else {
+						um->bone_obbs_idx[k] = 0; // 0でクリアする
 					}
 				}
 		}
 	}
 
 
-	au_obbs_count = temp_obbs_count;
+//	au_obbs_count = temp_obbs_count;
 	int temp_c5 = this->getKakuhoCountsFromCount(temp_obbs_count);
 	if (temp_c5 > max_count.obbs_count) {
 		max_count.obbs_count = temp_c5;
@@ -746,8 +772,46 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 	need_calc_kumi = true;
 
 	is_unit_updated = false;
+
+	// dummy の値がなくなるので関連の情報をクリアする
+	clearDummyInfo(false);
 }
 
+void AtariHantei::clearDummyInfo(bool is_use_in_mae_dummy) {
+
+	state_changed_plus_count.ans_count = 0;
+	state_changed_plus_count.auinfo_count = 0;
+	state_changed_plus_count.igaidousi_count = 0;
+	state_changed_plus_count.indexs_count = 0;
+	state_changed_plus_count.kumi_count = 0;
+	state_changed_plus_count.obbs_count = 0;
+	state_changed_plus_count.soreigai_count = 0;
+	state_changed_plus_count.vertexs_count = 0;
+
+	if (false == is_use_in_mae_dummy) {
+		// 全てクリアする
+		state_changed_umeshunit.clear();
+		auinfo_dummy_index.clear();
+		
+		autts_dummy_index.clear();
+	
+		autid_dummy_index.clear();
+		
+		kumi_dummy_index.clear();
+		
+		obbs_dummy_index.clear();
+		au_dummy_index.clear();
+
+	}
+
+	auinfo_dummy_index_used.clear();
+	autts_dummy_index_used.clear();
+	autid_dummy_index_used.clear();
+	kumi_dummy_index_used.clear();
+	obbs_dummy_index_used.clear();
+	au_dummy_index_used.clear();
+
+}
 
 void AtariHantei::calcKumi(Graphics* g) {
 		// 組の変数に値を入れる
@@ -1084,7 +1148,7 @@ void AtariHantei::calcObb(Graphics* g) {
 	for (int i = 0;i<au_count;i++) {
 		AtariUnit* au = &units[i];
 		for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
-			if (au->umesh && au->umesh->is_bone_obbs_use[k] && (au->type != AtariUnit::AtariType::ATARI_TIKEI)) {
+			if (au->umesh_unit && au->umesh_unit->getIsEnabled() && au->umesh && au->umesh->is_bone_obbs_use[k] && (au->type != AtariUnit::AtariType::ATARI_TIKEI)) {
 				obbs[au->umesh->bone_obbs_idx[k]].c = au->umesh->bone_obbs[k].c;
 				obbs[au->umesh->bone_obbs_idx[k]].e = au->umesh->bone_obbs[k].e;
 				obbs[au->umesh->bone_obbs_idx[k]].u[0] =au->umesh->bone_obbs[k].u[0];
@@ -1093,6 +1157,22 @@ void AtariHantei::calcObb(Graphics* g) {
 			}
 		}
 	}
+
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].c = MYVECTOR3(0,0,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].e = MYVECTOR3(1,1,1);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[0] = MYVECTOR3(1,0,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[0] = MYVECTOR3(0,1,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[0] = MYVECTOR3(0,0,1);
+
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].c = MYVECTOR3(0,0,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].e = MYVECTOR3(1,1,1);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[0] = MYVECTOR3(1,0,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[0] = MYVECTOR3(0,1,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[0] = MYVECTOR3(0,0,1);
+
+
+
+
 
 	// buffer に値を入れる
 /*	D3D11_MAPPED_SUBRESOURCE subresource;
@@ -2155,5 +2235,505 @@ void AtariHantei::clearKekkaOfBuffer(Graphics* g) {
 //	g->getDeviceContext()->UpdateSubresource(buffer_ans,0,0,ans,0,0);
 	g->getDeviceContext()->UpdateSubresource(buffer_ans2,0,0,ans,0,0);
 	g->getDeviceContext()->UpdateSubresource(buffer_ans2_aida, 0, 0, ans,0,0);
+
+}
+
+
+bool AtariHantei::isNeedMaeCalcWhenMaeCalcDummy() {
+	// maxcount を超えてしまう場合全ての再計算が必要になる
+	// 増分は多く計算する分には問題がない
+
+	// obbs_count の増分を出す
+	int obbs_zoubun=0;
+	set<UMeshUnit*>::iterator it = state_changed_umeshunit.begin();
+	while(it != state_changed_umeshunit.end()) {
+
+		UMeshUnit* umm = *it;
+		if (umm->getIsEnabled()) {
+			int si = umm->meshs.size();
+			for (int f = 0 ; f < si;f++) {
+				UMesh* um = umm->meshs[f];
+				for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
+					if (um->is_bone_obbs_use[k]) {
+						obbs_zoubun++;
+					}
+				}
+			}
+		}
+				
+
+		it++;
+	}
+
+
+
+
+	// vertexsの増分を出す
+	int vertex_c=0;
+	// indexsの増分を出す
+	int indexs_c=0;
+
+
+
+	// au の増分を出す
+	int au_zoubun = state_changed_umeshunit.size();
+
+	// auinfoの増分を出す
+	int auinfo_zoubun = au_zoubun;
+
+	// kumi の増分を出す
+	int kumi_zoubun = (temp_count.auinfo_count + au_zoubun)* (temp_count.auinfo_count +au_zoubun-1)/2 - temp_count.kumi_count;
+
+	int tikei_c = 0;
+	int siz = umesh_unit_types.size();
+
+	// vertexs indexsの再計算を行う
+	// enabledされてない地形でも計算する　多く計算する分には問題ないので umesh_unitsにはstate_changed_umesh_unit が含まれている
+	for (int i=0;i<siz;i++) {
+		if (AtariUnit::AtariType::ATARI_TIKEI == umesh_unit_types[i]) {
+			
+			int si = umesh_units[i]->meshs.size();
+			for (int k=0;k<si;k++) {
+				if (umesh_units[i]->meshs[k]->vertexs && umesh_units[i]->meshs[k]->mesh) {
+					vertex_c += umesh_units[i]->meshs[k]->mesh->VertexCount;
+					tikei_c++;// atariunit は　umeshunit 単位ではなくて　umesh単位であるのでこのように計上する
+				}
+				if (umesh_units[i]->meshs[k]->indexs && umesh_units[i]->meshs[k]->mesh) {
+					indexs_c += umesh_units[i]->meshs[k]->mesh->FaceCount*3;
+				}
+			}
+		}
+	}
+
+	
+
+
+
+	// autid の増分を出す
+	int autid_zoubun = (temp_count.obbs_count + obbs_zoubun) * (temp_count.obbs_count + obbs_zoubun -1) - temp_count.igaidousi_count ;
+
+	// autts の増分を出す
+	int autts_zoubun = (temp_count.obbs_count + obbs_zoubun) * tikei_c - temp_count.soreigai_count;
+	// ansの増分を出す
+
+	int ans_zoubun = autid_zoubun + autts_zoubun;
+
+	
+
+	// zoubun は出したので　一つずつmax_count を超えるかどうかを計算していく
+
+	if (max_count.vertexs_count <= vertex_c) {
+		return true;
+	}
+
+	if (max_count.indexs_count <= indexs_c) {
+		return true;
+	}
+
+	if (max_count.ans_count <= temp_count.ans_count + ans_zoubun) {
+		return true;
+	}
+
+	if (max_count.auinfo_count <= temp_count.auinfo_count + auinfo_zoubun - auinfo_dummy_index.size()) {
+		return true;
+	}
+
+	if (max_count.igaidousi_count <= temp_count.igaidousi_count + autid_zoubun - autid_dummy_index.size()) {
+		return true;
+	}
+
+	if (max_count.obbs_count <= temp_count.obbs_count + obbs_zoubun - obbs_dummy_index.size()) {
+		return true;
+	}
+	if (max_count.soreigai_count <= temp_count.soreigai_count + autts_zoubun - autts_dummy_index.size()) {
+		return true;
+	}
+
+	if (KTROBO_MAX_ATARI_HANTEI_UNIT_NUM <= au_count + au_zoubun -au_dummy_index.size()) {
+		return true;
+	}
+	if (max_count.kumi_count <= temp_count.kumi_count + kumi_zoubun - kumi_dummy_index.size()) {
+		return true;
+	}
+
+	return false;
+
+}
+
+void AtariHantei::setStateChangedUMeshUnitToDummy() {
+
+	//atariunit
+	for (int i=0;i<au_count;i++) {
+		if (!units[i].umesh_unit) continue;
+
+		if (state_changed_umeshunit.find(units[i].umesh_unit) != state_changed_umeshunit.end()) {
+			// dummyを入れる
+
+			units[i].umesh_unit = dummy_umeshunit;
+			units[i].umesh = dummy_umesh;
+			au_dummy_index.insert(i);
+		}
+	}
+
+
+
+
+	// auinfo
+
+	for (int i=0;i<au_count;i++) {
+		if (units[au_info[i].atari_idx].umesh_unit == dummy_umeshunit) {
+			auinfo_dummy_index.insert(i);
+		}
+	}
+
+
+
+
+	//obbs
+	set<UMeshUnit*>::iterator it = state_changed_umeshunit.begin();
+	while(it != state_changed_umeshunit.end()) {
+		UMeshUnit* um = *it;
+		int sie = um->meshs.size();
+		for (int i=0;i<sie;i++) {
+			UMesh* umm = um->meshs[i];
+			for (int k=0;k<KTROBO_MESH_BONE_MAX;k++) {
+				if ((umm->bone_obbs_idx[k] != KTROBO_ATARI_CALC_OBBS_IDX_DUMMY) && 
+					(umm->bone_obbs_idx[k] != KTROBO_ATARI_CALC_OBBS_IDX_TIKEI)) {
+						// 使われているのでクリアする
+						obbs_dummy_index.insert(umm->bone_obbs_idx[k]);
+						umm->bone_obbs_idx[k] = KTROBO_ATARI_CALC_OBBS_IDX_DUMMY;
+				}
+			}
+		}
+	
+
+
+
+		it++;
+	}
+
+	// kumi
+	for (int i=0;i< temp_count.kumi_count;i++) {
+		if (au_dummy_index.find(kumi[i].atari_idx) != au_dummy_index.end()) {
+			kumi_dummy_index.insert(i);
+		}
+
+		if (au_dummy_index.find(kumi[i].atari_idx2) != au_dummy_index.end()) {
+			kumi_dummy_index.insert(i);
+		}
+	}
+
+
+
+
+	// autts
+	for (int i=0;i<temp_count.soreigai_count;i++) {
+		if (au_dummy_index.find(autts[i].atariidx) != au_dummy_index.end()) {
+			autts_dummy_index.insert(i);
+		}
+
+		if (au_dummy_index.find(autts[i].atariidx2) != au_dummy_index.end()) {
+			autts_dummy_index.insert(i);
+		}
+	}
+	
+	// autid
+	for (int i=0;i<temp_count.igaidousi_count;i++) {
+		if (au_dummy_index.find(autid[i].atariidx) != au_dummy_index.end()) {
+			autid_dummy_index.insert(i);
+		}
+
+		if (au_dummy_index.find(autid[i].atariidx2) != au_dummy_index.end()) {
+			autid_dummy_index.insert(i);
+		}
+	}
+
+}
+
+void AtariHantei::setInfoOfStateChangedUMeshUnit() {
+	// atariunit
+	set<int>::iterator it_for_dummy_au = au_dummy_index.begin();
+
+	set<UMeshUnit*>::iterator it_for_meshs = state_changed_umeshunit.begin();
+	int au_count_offset = 0;
+	while ( it_for_meshs != state_changed_umeshunit.end() ) {
+
+		UMeshUnit* umm = *it_for_meshs;
+		if (umm->getIsEnabled()) {
+			// atariunit の情報を入れ込む
+			int siz = umm->meshs.size();
+			for (int i=0;i<siz;i++) {
+				UMesh* um = umm->meshs[i];
+				if (it_for_dummy_au != au_dummy_index.end()) {
+					int inde = *it_for_dummy_au;
+					units[inde].umesh_unit = umm;
+					units[inde].umesh = um;
+					units[inde].type = umm->getType();
+					auinfo_dummy_index_used.insert(inde);
+					it_for_dummy_au++;
+				} else {
+					units[au_count+au_count_offset].umesh_unit = umm;
+					units[au_count+au_count_offset].umesh = um;
+					units[au_count+au_count_offset].type = umm->getType();
+					au_count_offset++;
+					auinfo_dummy_index_used.insert(au_count+au_count_offset);
+				}
+			}
+		}
+		it_for_meshs++;
+
+	}
+
+
+	// auinfo
+	// auinfoはcalcauinfoで再計算されるので大丈夫
+
+
+	// obbs
+	// obbsは再計算される
+	// 大事なのはau_count を更新すること
+
+
+
+	set<int>::iterator it_for_dummy_autts = autts_dummy_index.begin();
+	set<int>::iterator it_for_dummy_autid = autid_dummy_index.begin();
+	set<int>::iterator it_for_dummy_kumi = kumi_dummy_index.begin();
+	// 下記の三つは再計算されないのでここで計算させておく必要がある
+	int temp_offset = 0;
+	int temp_igaidousi_offset = 0;
+	int temp_tosoreigai_offset = 0;
+
+	it_for_dummy_au = au_dummy_index_used.begin();
+	// au_count 同士のループだと重いので工夫する
+
+	while (it_for_dummy_au != au_dummy_index_used.end()) {
+		AtariUnit* auu = &units[*it_for_dummy_au];
+		*it_for_dummy_au++;
+
+	//for (int i = 0;i<au_count+au_count_offset;i++) {
+		for (int k=0;k<au_count+au_count_offset;k++) {
+			if ((au_dummy_index_used.find(k) != au_dummy_index_used.end()) && (auu->atariidx >= k)) continue;
+			//if ((au_dummy_index_used.find(i) == au_dummy_index_used.end()) && (au_dummy_index_used.find(k) == au_dummy_index_used.end())) continue;
+
+			AtariUnit* aui = auu;// &units[i];
+			AtariUnit* auk = &units[k];
+
+			if ((aui->type == AtariUnit::AtariType::ATARI_TIKEI)
+				&& (auk->type == AtariUnit::AtariType::ATARI_TIKEI)) {
+					continue;
+			}
+
+			if ((aui->type != AtariUnit::AtariType::ATARI_TIKEI)
+				&& auk->type != AtariUnit::AtariType::ATARI_TIKEI) {
+					// igaidousi
+					
+					for (int t=0;t<KTROBO_MESH_BONE_MAX;t++) {
+						for (int h=0;h<KTROBO_MESH_BONE_MAX;h++) {
+							if (aui->umesh->is_bone_obbs_use[t] && auk->umesh->is_bone_obbs_use[h]) {
+			
+								int empty_index;
+								if (it_for_dummy_autid != autid_dummy_index.end()) {
+									empty_index = *it_for_dummy_autid;
+									it_for_dummy_autid++;
+									autid_dummy_index_used.insert(empty_index);
+								} else {
+									empty_index = temp_count.igaidousi_count + temp_igaidousi_offset;
+									temp_igaidousi_offset++;
+								}
+
+
+								autid[empty_index].atariidx = aui->atariidx;
+								autid[empty_index].atariidx2 = auk->atariidx;
+								autid[empty_index].obbidx = aui->umesh->bone_obbs_idx[t];
+								autid[empty_index].obbidx2 = auk->umesh->bone_obbs_idx[h];
+								
+
+								
+
+								if (temp_count.igaidousi_count + temp_igaidousi_offset >= max_count.igaidousi_count) {
+									throw new GameError(KTROBO::FATAL_ERROR, "igaidousicount over no nono ");
+								}
+							}
+						}
+					}
+			}
+			if ((aui->type == AtariUnit::AtariType::ATARI_TIKEI)
+				&& auk->type != AtariUnit::AtariType::ATARI_TIKEI) {
+					// tosoreigai
+
+			
+				
+					for (int h=0;h<KTROBO_MESH_BONE_MAX;h++) {
+						if (auk->umesh->is_bone_obbs_use[h]) {
+							int empty_index;
+							if (it_for_dummy_autts != autts_dummy_index.end()) {
+								empty_index = *it_for_dummy_autts;
+								it_for_dummy_autts++;
+								autts_dummy_index_used.insert(empty_index);
+							} else {
+								empty_index = temp_count.soreigai_count + temp_tosoreigai_offset;
+								temp_tosoreigai_offset++;
+							}
+
+							autts[empty_index].atariidx = auk->atariidx;
+							autts[empty_index].atariidx2 = aui->atariidx;
+							autts[empty_index].obbidx = auk->umesh->bone_obbs_idx[h];
+							
+							if (temp_count.soreigai_count + temp_tosoreigai_offset >= max_count.soreigai_count) {
+								throw new GameError(KTROBO::FATAL_ERROR, "tosoreigai count over no nono");
+							}
+						}
+					}
+			}
+			if ((aui->type != AtariUnit::AtariType::ATARI_TIKEI)
+				&& auk->type == AtariUnit::AtariType::ATARI_TIKEI) {
+					// tosoreigai
+
+			
+			
+					for (int t=0;t<KTROBO_MESH_BONE_MAX;t++) {
+						if (aui->umesh->is_bone_obbs_use[t]) {
+							int empty_index;
+							if (it_for_dummy_autts != autts_dummy_index.end()) {
+								empty_index = *it_for_dummy_autts;
+								it_for_dummy_autts++;
+								autts_dummy_index_used.insert(empty_index);
+							} else {
+								empty_index = temp_count.soreigai_count + temp_tosoreigai_offset;
+								temp_tosoreigai_offset++;
+							}
+
+							autts[empty_index].atariidx = aui->atariidx;
+							autts[empty_index].atariidx2 = auk->atariidx;
+							autts[empty_index].obbidx = aui->umesh->bone_obbs_idx[t];
+							
+
+							if (temp_count.soreigai_count + temp_tosoreigai_offset >= max_count.soreigai_count) {
+								throw new GameError(KTROBO::FATAL_ERROR, " no no no ");
+							}
+						}
+					}
+			}
+
+			int empty_index;
+			if (it_for_dummy_kumi != kumi_dummy_index.end()) {
+				empty_index = *it_for_dummy_kumi;
+				it_for_dummy_kumi++;
+				kumi_dummy_index_used.insert(empty_index);
+			} else {
+				empty_index = temp_count.kumi_count + temp_offset;
+				temp_offset++;
+			}
+			kumi[empty_index].atari_idx = aui->atariidx;
+			kumi[empty_index].atari_idx2 = auk->atariidx;
+			//temp++;
+			if (temp_count.kumi_count + temp_offset >= max_count.kumi_count) {
+				throw new GameError(KTROBO::FATAL_ERROR, " no noooo");
+			}
+		}
+	}
+
+	temp_count.kumi_count += temp_offset;
+	temp_count.igaidousi_count += temp_igaidousi_offset;
+	temp_count.soreigai_count += temp_tosoreigai_offset;
+	// kumi
+	
+	au_count += au_count_offset;
+/*
+multiset<int> au_dummy_index;
+multiset<int> auinfo_dummy_index; // ダミーが入っているインデックスを保存する
+multiset<int> kumi_dummy_index;
+multiset<int> obbs_dummy_index;
+multiset<int> autid_dummy_index;
+multiset<int> autts_dummy_index;
+
+	// 下の関数の計算の際に必要となる
+multiset<int> au_dummy_index_used;
+multiset<int> auinfo_dummy_index_used;
+multiset<int> kumi_dummy_index_used;
+multiset<int> obbs_dummy_index_used;
+multiset<int> autid_dummy_index_used;
+multiset<int> autts_dummy_index_used;
+
+	// autid
+
+	// autts
+*/
+
+	auinfo_dummy_index.clear();
+	auinfo_dummy_index_used.clear();
+	obbs_dummy_index.clear();
+	obbs_dummy_index_used.clear();
+
+	// 計算する
+	set<int> au_dummy_index2;
+	set<int> kumi_dummy_index2;
+	set<int> autid_dummy_index2;
+	set<int> autts_dummy_index2;
+	set<int>::iterator it1 = au_dummy_index.begin();
+	set<int>::iterator it2 = au_dummy_index_used.begin();
+	std::set_difference(it1, au_dummy_index.end(),
+		it2, au_dummy_index_used.end(), std::inserter<set<int> >(au_dummy_index2, au_dummy_index2.end()));
+
+	au_dummy_index.clear();
+	au_dummy_index_used.clear();
+
+
+	it1 = au_dummy_index2.begin();
+	it2 = au_dummy_index.begin();
+	std::copy(it1,au_dummy_index2.end(), std::inserter<set<int> >(au_dummy_index, au_dummy_index.end()));
+
+	
+	std::set_difference(kumi_dummy_index.begin(), kumi_dummy_index.end(),
+		kumi_dummy_index_used.begin(), kumi_dummy_index_used.end(),  std::inserter<set<int> >(kumi_dummy_index2, kumi_dummy_index2.end()));
+
+	kumi_dummy_index.clear();
+	kumi_dummy_index_used.clear();
+	std::copy(kumi_dummy_index2.begin(),kumi_dummy_index2.end(),std::inserter<set<int> >(kumi_dummy_index, kumi_dummy_index.end()));
+
+
+	std::set_difference(autts_dummy_index.begin(), autts_dummy_index.end(),
+		autts_dummy_index_used.begin(), autts_dummy_index_used.end(),  std::inserter<set<int> >(autts_dummy_index2, autts_dummy_index2.end()));
+
+	autts_dummy_index.clear();
+	autts_dummy_index_used.clear();
+	std::copy(autts_dummy_index2.begin(),autts_dummy_index2.end(), std::inserter<set<int> >(autts_dummy_index, autts_dummy_index.end()));
+
+
+	std::set_difference(autid_dummy_index.begin(), autid_dummy_index.end(),
+		autid_dummy_index_used.begin(), autid_dummy_index_used.end(),  std::inserter<set<int> >(autid_dummy_index2, autid_dummy_index2.end()));
+
+	autid_dummy_index.clear();
+	autid_dummy_index_used.clear();
+	std::copy(autid_dummy_index2.begin(),autid_dummy_index2.end(),std::inserter<set<int> >(autid_dummy_index2, autid_dummy_index2.end()));
+	
+	
+
+}
+
+void AtariHantei::maeCalcDummy(Graphics* g) {
+	// maecalcdayoの後に呼ぶ
+
+	if (state_changed_umeshunit.size() == 0) return;
+	
+
+	clearDummyInfo(true); // plus_count と　dummy_index_usedをクリアする
+
+	setStateChangedUMeshUnitToDummy();
+
+	if (isNeedMaeCalcWhenMaeCalcDummy()) {
+		// plus_count の計算を行って max_count を超える場合はmaecalcさせる
+		// dummyの計算は行わない
+		resetIsUnitUpdated();
+		return;
+	}
+
+	// isneedmaecalcwhenmaecalcdummy の計算によって求められたpluscount の情報と　statechangedumeshunitを使って
+	// 
+
+	setInfoOfStateChangedUMeshUnit();
+
+	clearDummyInfo(true);
+	state_changed_umeshunit.clear(); // すべて適用したのでクリアする
 
 }

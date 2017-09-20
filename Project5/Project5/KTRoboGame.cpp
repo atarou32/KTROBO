@@ -603,7 +603,7 @@ bool Game::Init(HWND hwnd) {
 	MyMatrixIdentity(idenmat);
 	UMeshUnit* umesh_unit = new UMeshUnit();
 	UMesh* um = new UMesh(g,"resrc/model/cube/pkcube.MESH", demo->tex_loader,mesh,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL, true);
+		0,KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
 
 	mesh_is[i+10*k] = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&idenmat);
 	umesh_unit->setUMesh(um);

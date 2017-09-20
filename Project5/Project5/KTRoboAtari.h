@@ -5,7 +5,7 @@
 #include "KTRoboMesh.h"
 #include "MyDefine.h"
 #include "KTRoboMeshInstanced.h"
-
+#include <set>
 
 namespace KTROBO {
 #define KTROBO_MAX_TIKEI_HITOTU_INDEX 2048 // ひとつの地形のfaceの最大数 ここをかきかえるときはシェーダも書き換えること
@@ -51,7 +51,7 @@ public:
 		}
 		for (int i=0;i <KTROBO_MESH_BONE_MAX;i++) {
 			is_bone_obbs_use[i] = false;
-			bone_obbs_idx[i] = 0;
+			//bone_obbs_idx[i] = 0; // 変えない
 		}
 
 		mesh = mm;
@@ -113,6 +113,35 @@ public:
 };
 
 class AtariHantei;
+class UMeshUnit;
+
+class AtariUnit {
+public:
+	enum AtariType {
+		ATARI_TIKEI=0, // 地形はすべての面と当たり判定を行う
+		ATARI_OBJECT=1, // オブジェクトは包括直方体(ボーンごと)と当たり判定を行う
+		ATARI_CHARA=2, // キャラクターは包括直方体(ボーンごと）と当たり判定を行う
+		ATARI_WAZA=3 // キャラクターの攻撃の技の判定
+	};
+
+	AtariType type;
+	// 当たり判定の仕組み
+	// 地形として登録されたメッシュ同士は当たり判定を行わない
+	// 地形とオブジェクト　オブジェクト同士　地形とキャラクター　オブジェクトとキャラクター　キャラクター同士
+	// 技とキャラクター　技とオブジェクト　技と地形（弾の場合消失判定を行う) 
+	// は行う
+
+	int atariidx; // シェーダに渡すidx
+	UMeshUnit* umesh_unit; // メッシュが属するユニット
+	UMesh* umesh; // メッシュ
+	AtariUnit() {
+		type = ATARI_TIKEI;
+		atariidx = 0;
+		umesh_unit = 0;
+		umesh = 0;
+	}
+};
+
 
 class UMeshUnit {
 private:
@@ -121,7 +150,7 @@ private:
 	// 姿勢と位置の情報
 
 	bool is_enabled;
-
+	AtariUnit::AtariType type; // atarihantei以外が変えないこと
 public:
 	float x;
 	float y;
@@ -134,7 +163,14 @@ public:
 	float scalez;
 	
 	
+	// atarihantei以外が呼ばないように
+	void setType(AtariUnit::AtariType t) {
+		type = t;
+	}
 
+	AtariUnit::AtariType getType() {
+		return type;
+	}
 	
 public:
 	MYVECTOR3 v;
@@ -238,34 +274,6 @@ public:
 	AtariBase(){};
 	virtual ~AtariBase(){};// Atarihanの処理は子のクラスでやる
 
-};
-
-
-class AtariUnit {
-public:
-	enum AtariType {
-		ATARI_TIKEI=0, // 地形はすべての面と当たり判定を行う
-		ATARI_OBJECT=1, // オブジェクトは包括直方体(ボーンごと)と当たり判定を行う
-		ATARI_CHARA=2, // キャラクターは包括直方体(ボーンごと）と当たり判定を行う
-		ATARI_WAZA=3 // キャラクターの攻撃の技の判定
-	};
-
-	AtariType type;
-	// 当たり判定の仕組み
-	// 地形として登録されたメッシュ同士は当たり判定を行わない
-	// 地形とオブジェクト　オブジェクト同士　地形とキャラクター　オブジェクトとキャラクター　キャラクター同士
-	// 技とキャラクター　技とオブジェクト　技と地形（弾の場合消失判定を行う) 
-	// は行う
-
-	int atariidx; // シェーダに渡すidx
-	UMeshUnit* umesh_unit; // メッシュが属するユニット
-	UMesh* umesh; // メッシュ
-	AtariUnit() {
-		type = ATARI_TIKEI;
-		atariidx = 0;
-		umesh_unit = 0;
-		umesh = 0;
-	}
 };
 
 
@@ -374,6 +382,9 @@ struct AtariHanteiTempOffset {
 #define KTROBO_ATARI_SHADER_COMPUTE_AIDA_OFFSET "resrc/shader/simple_atari_compute_aida_offset.cso"
 // AIDA はautts と　autid の計算をコンピュートシェーダで行う
 
+#define KTROBO_ATARI_CALC_OBBS_IDX_TIKEI 0
+#define KTROBO_ATARI_CALC_OBBS_IDX_DUMMY 1
+
 #define KTROBO_ATARI_CALC_KUWASIKU_NONCALCYET 0
 #define KTROBO_ATARI_CALC_KUWASIKU_WAITFORCOPYKEKKACALC 1
 #define KTROBO_ATARI_CALC_KUWASIKU_NONCALCKUWASIKUYET 2
@@ -409,9 +420,41 @@ private:
 	int au_object_count;
 	int au_chara_count;
 	int au_waza_count;
-	int au_obbs_count;
+	//int au_obbs_count;
 	int atatta_count;
+
+
+
+
+	set<UMeshUnit*> state_changed_umeshunit; // 再計算が必要なumeshunit
+	AtariHanteiTempCount state_changed_plus_count; // 再計算によって変動するカウントの値 ダミーの値の増減は考慮無しの値
+	UMeshUnit* dummy_umeshunit; // ダミー用のumeshunit 使われないインフォ構造体のなかに入れられる
+	UMesh* dummy_umesh;
+	set<int> au_dummy_index;
+	set<int> auinfo_dummy_index; // ダミーが入っているインデックスを保存する
+	set<int> kumi_dummy_index;
+	set<int> obbs_dummy_index;
+	set<int> autid_dummy_index;
+	set<int> autts_dummy_index;
+
+	// 下の関数の計算の際に必要となる
+	set<int> au_dummy_index_used;
+	set<int> auinfo_dummy_index_used;
+	set<int> kumi_dummy_index_used;
+	set<int> obbs_dummy_index_used;
+	set<int> autid_dummy_index_used;
+	set<int> autts_dummy_index_used;
+
+	void clearDummyInfo(bool is_use_in_maedummy);
+	bool isNeedMaeCalcWhenMaeCalcDummy(); // maxcount を超えてしまう場合全ての再計算が必要になる
+	void setStateChangedUMeshUnitToDummy();
+	void setInfoOfStateChangedUMeshUnit();
+
 public:
+	void setUnitStateChanged(UMeshUnit* umesh) {// typeは変えないこと umeshの構成やisenabledが変わったりした場合に呼ぶ
+		state_changed_umeshunit.insert(umesh);
+	}
+
 	bool getIsUpdated() {return is_updated;}
 	void resetIsUnitUpdated() {is_unit_updated = true;}
 	vector<UMeshUnit*> umesh_units;
@@ -434,12 +477,15 @@ public:
 	void setUMeshUnit(UMeshUnit* u, AtariUnit::AtariType type) {
 		umesh_units.push_back(u);
 		umesh_unit_types.push_back(type);
+		u->setType(type);
 		is_unit_updated = true;
 	}
 	void ataristart() {atari_start =true;}
+	void maeCalcDummy(Graphics* g); // maecalcdayoの後に呼ぶ
 	void maecalcdayo(Graphics* g);
 	void clearUMeshUnits() {
 		umesh_units.clear();
+		umesh_unit_types.clear();
 		is_unit_updated = true;
 		atari_start = false;
 	}
@@ -631,6 +677,12 @@ public:
 			delete[] autts;
 			autts = 0;
 		}
+
+		if (dummy_umeshunit) {
+			delete dummy_umeshunit;
+			dummy_umeshunit = 0;
+		}
+
 		releaseBufferAndView();
 	}
 
@@ -652,6 +704,15 @@ public:
 		temp_count.obbs_count = 0;
 		temp_count.soreigai_count = 0;
 		temp_count.vertexs_count = 0;
+
+		state_changed_plus_count.ans_count = 0;
+		state_changed_plus_count.auinfo_count = 0;
+		state_changed_plus_count.igaidousi_count = 0;
+		state_changed_plus_count.indexs_count = 0;
+		state_changed_plus_count.kumi_count = 0;
+		state_changed_plus_count.obbs_count = 0;
+		state_changed_plus_count.soreigai_count = 0;
+		state_changed_plus_count.vertexs_count = 0;
 		
 
 		max_tikei_vertexs = new AtariUnitVertexs[kakuho_counts[2]];
@@ -667,7 +728,7 @@ public:
 		au_chara_count = 0;
 		au_waza_count = 0;
 		au_object_count = 0;
-		au_obbs_count=0;
+//		au_obbs_count=0;
 		atari_start = false;
 		is_updated = false;
 		is_unit_updated = false;
@@ -713,6 +774,9 @@ public:
 
 	
 		need_calc_kumi = false;
+
+		dummy_umeshunit = 0; // キャラクタとして扱う
+		dummy_umesh = 0;
 	
 	}
 };

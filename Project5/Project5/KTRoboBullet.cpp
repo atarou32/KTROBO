@@ -44,7 +44,9 @@ bool Bullet::fire(AtariHantei* hantei) {
 	atarihan->setV(&h_v);
 	atarihan->setXYZ(h_pos.float3.x, h_pos.float3.y, h_pos.float3.z);
 	dpos = MYVECTOR3(0,0,0);
+	CS::instance()->enter(CS_RENDERDATA_CS, "un");
 	atarihan->setIsEnabled(hantei,true);
+	CS::instance()->leave(CS_RENDERDATA_CS, "un");
 	return true;
 
 }
