@@ -90,6 +90,7 @@ Game::Game(void)
 	//ss = 0;
 	sap = 0;
 	//gg = 0;
+	renderTCB = 0;
 }
 
 
@@ -928,7 +929,7 @@ bool Game::Init(HWND hwnd) {
 
 	
 	memset(work,0,sizeof(work));
-	task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
+	renderTCB = task_threads[TASKTHREADS_UPDATEMAINRENDER]->make(RENDERTCB,this,work,0x0000FFFF);
 	task_threads[TASKTHREADS_AIDECISION]->make(MessageDispatcherTCB, NULL, work, 0x0000FFFF);
 	//InputMessageDispatcher::registerImpl(&k,NULL,NULL);
 
@@ -968,7 +969,10 @@ void Game::Del() {
 	scenes.clear();
 	*/
 	
-
+	if (renderTCB) {
+		task_threads[TASKTHREADS_UPDATEMAINRENDER]->kill(renderTCB);
+		Sleep(100);
+	}
 	// シーンは別の場所でデストラクトを呼ぶ　とかいてあったがすべてデストラクトすることにした
 	int sizz = scenes.size();
 	while(sizz) {
@@ -1988,34 +1992,7 @@ void Game::Run() {
 	sinai->draw(g,&view,&proj);
 	*/
 	MyMatrixTranslation(world,3,0,1);
-	robodayo->byouga(g,&view,&proj);
-	if (robodayo->atarihan) {
-	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
-		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-	//	robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
-		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
-		robodayo->atarihan->calcJyusinAndR();
-		
-		if (sap && sap->update()) {
-			robodayo->aphelper->setNoCalcYet(false);
-		}
-		//sap->update();
-	}
-
-	roboaitedayo->byouga(g,&view,&proj);
-	if (roboaitedayo->atarihan) {
-	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
-		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
-		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
-		roboaitedayo->atarihan->calcJyusinAndR();
-	/*	
-		if (sap->update()) {
-			robodayo->aphelper->setNoCalcYet(false);
-		}
-		*/
-		//sap->update();
-	}
+	
 
 
 
@@ -2054,14 +2031,16 @@ void Game::Run() {
 
 	//texdayo->getInstance(0)->setRenderBillBoardPos(0, &world);
 	//watches_for_keisoku.stopWatch(0);
+	bool is_sleep =false;
 	
+
 	{
 		WCHAR buff[512];
 		char buf[128];
 		char str[128];
 		memset(buf,0,128);
 
-		for (int i=5;i<10;i++) {
+		for (int i=0;i<10;i++) {
 		memset(str,0,128);
 		GamenGARAGE_partsParam::getSuutiChara((int)(watches_for_keisoku.times[i]*100),str);
 		strcat_s(buf,str);
@@ -2069,13 +2048,27 @@ void Game::Run() {
 	//	GamenGARAGE_partsParam::getSuutiChara((int)(sizeof(AtariUnitAns)),str);
 	//	strcat_s(buf,str);
 		}
-
+		strcat_s(buf,"ac:");
 		GamenGARAGE_partsParam::getSuutiChara((int)hantei->getAtattaCount(), str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+		GamenGARAGE_partsParam::getSuutiChara((int)robodayo->atarihan->x, str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+
+		GamenGARAGE_partsParam::getSuutiChara((int)robodayo->atarihan->y, str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+		GamenGARAGE_partsParam::getSuutiChara((int)robodayo->atarihan->z, str);
 		strcat_s(buf,str);
 		stringconverter sc;
 		sc.charToWCHAR(buf,buff);
 		
 		DebugTexts::instance()->setText(g,wcslen(buff),buff);
+		if (watches_for_keisoku.times[5] > 10) {
+			mylog::writelog(KTROBO::INFO, buf);
+			mylog::writelog(KTROBO::INFO, "\n\n");
+		}
 	}
 	
 	watches_for_keisoku.startWatch(1);
@@ -2180,6 +2173,36 @@ void Game::Run() {
 		now_scene->mainrender(true);
 	}
 
+	robodayo->byouga(g,&view,&proj);
+	if (robodayo->atarihan) {
+	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
+		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+	//	robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
+		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
+		robodayo->atarihan->calcJyusinAndR();
+		
+		if (sap && sap->update()) {
+			robodayo->aphelper->setNoCalcYet(false);
+		}
+		//sap->update();
+	}
+
+	roboaitedayo->byouga(g,&view,&proj);
+	if (roboaitedayo->atarihan) {
+	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
+		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
+		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
+		roboaitedayo->atarihan->calcJyusinAndR();
+	/*	
+		if (sap->update()) {
+			robodayo->aphelper->setNoCalcYet(false);
+		}
+		*/
+		//sap->update();
+	}
+
+
 	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
@@ -2203,6 +2226,8 @@ void Game::Run() {
 	if (c->getSecond() != s) {
 	}
 	CS::instance()->leave(CS_DEVICECON_CS, "render game");
-	
+	/*if (is_sleep) {
+		Sleep(3000);
+	}*/
 
 }

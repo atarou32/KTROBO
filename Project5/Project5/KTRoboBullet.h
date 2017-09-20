@@ -28,9 +28,9 @@ namespace KTROBO {
 		float dtime; // ”­Ë‚µ‚Ä‚©‚ç‚ÌŠÔ
 		AtariBase* robo; // delete‚µ‚È‚¢
 		RoboParts* robo_parts; //delete‚µ‚È‚¢
-		
+	public:
 		MeshInstanced* mesh_i; // delete ‚µ‚È‚¢@
-
+	private:
 		AtariBase* atari_robo; // delete‚µ‚È‚¢
 		AtariBase* atari_tikei; // delete‚µ‚È‚¢
 	public:
@@ -87,6 +87,7 @@ private:
 	Bullet* bullets;
 	map<int,int> umesh_id_to_bullet_indexs;
 	MeshInstanceds* mis;
+public:
 	Mesh* dummy_mesh;
 public:
 	BulletController();

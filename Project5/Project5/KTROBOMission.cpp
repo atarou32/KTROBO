@@ -534,13 +534,19 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 	game->watches_for_keisoku.stopWatch(5);
 	game->watches_for_keisoku.startWatch(6);
 	hantei->calcAuInfo(g,true);
-	hantei->calcKumi(g);
-	hantei->calcObb(g);
-	hantei->clearKekkaOfBuffer(g);
 	game->watches_for_keisoku.stopWatch(6);
 	game->watches_for_keisoku.startWatch(7);
-	hantei->runComputeShaderAida(g);
+	hantei->calcKumi(g);
 	game->watches_for_keisoku.stopWatch(7);
+	game->watches_for_keisoku.startWatch(8);
+	hantei->calcObb(g);
+	game->watches_for_keisoku.stopWatch(8);
+	game->watches_for_keisoku.startWatch(9);
+	hantei->clearKekkaOfBuffer(g);
+	game->watches_for_keisoku.stopWatch(9);
+	game->watches_for_keisoku.startWatch(3);
+	hantei->runComputeShaderAida(g);
+	game->watches_for_keisoku.stopWatch(3);
 	//Sleep(10000);
 	//hantei->copyKekkaToBufferForCopy(g,true);
 	
@@ -552,7 +558,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 
 
 
-		game->watches_for_keisoku.startWatch(8);
+		game->watches_for_keisoku.startWatch(1);
 		//CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 		//CS::instance()->leave(CS_DEVICECON_CS, "unko");
 		HRESULT hr;
@@ -561,7 +567,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 		
 			if ((hr =hantei->copyKekkaToBufferForCopy2(g)) == S_OK) {
 				
-				game->watches_for_keisoku.stopWatch(8);
+				game->watches_for_keisoku.stopWatch(1);
 				game->watches_for_keisoku.stopWatch(0);
 				double test = game->watches_for_keisoku.times[0];
 				game->watches_for_keisoku.startWatch(0);
@@ -581,7 +587,8 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					roboaitedayo->atarishori(g, &game->view, hantei, test, (int)stamp);
 				//	roboaitedayo->atariAim(g, &game->view, frameTime, (int)frame);
 				}
-				
+				bullet_c->atariShori(hantei, &game->view,test,(int)stamp);
+
 				hantei->setIsCalcKuwasikuGetted();
 				}
 			}

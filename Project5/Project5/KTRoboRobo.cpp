@@ -4467,7 +4467,7 @@ void Robo::fireUpdate(Graphics* g, Game* game, Scene* scene,BulletController* bu
 		MyVec3TransformCoord(bullet_pos,bullet_pos,bullet_world);
 		MyVec3TransformNormal(bullet_vec,bullet_vec,bullet_world);
 		MyVec3Normalize(bullet_vec,bullet_vec);
-		bullet_vec = bullet_vec * 0.01;
+		bullet_vec = bullet_vec * 0.007;
 
 		// bullet_vec ÇÃéZèo
 

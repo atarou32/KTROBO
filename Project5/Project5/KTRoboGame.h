@@ -113,6 +113,7 @@ public:
 private:
 	Task* task_threads[TASKTHREAD_NUM];
 	Graphics* g_for_task_threads[TASKTHREAD_NUM];
+	TCB* renderTCB;
 public:
 	MYMATRIX view;
 private:

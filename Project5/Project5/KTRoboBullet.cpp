@@ -14,9 +14,28 @@ void Bullet::Init(Graphics* g, AtariHantei* h, MeshInstanced* mi) {
 	//if (!atarihan) {
 		atarihan = new UMeshUnit();
 		UMesh* n = new UMesh();
+		n->is_bone_obbs_use[0] =true;
+		n->bone_obbs[0].c = MYVECTOR3(0,0,0);//atarihan->x,atarihan->y,atarihan->z);
+		n->bone_obbs[0].e = MYVECTOR3(1,1,1);
+		n->bone_obbs[0].u[0] = MYVECTOR3(1,0,0);
+		n->bone_obbs[0].u[1] = MYVECTOR3(0,1,0);
+		n->bone_obbs[0].u[2] = MYVECTOR3(0,0,1);
 		atarihan->setUMesh(n);
-		atarihan->setIsEnabled(h, true);
+	
+		//atarihan->calcJyusinAndR(true);
+
+
+
+
 		h->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_WAZA);
+		atarihan->setIsEnabled(h, true);
+
+		/*CS::instance()->enter(CS_RENDERDATA_CS, "un");
+		atarihan->setIsEnabled(h,false);
+		CS::instance()->leave(CS_RENDERDATA_CS, "un");
+		*/
+
+
 	//}
 
 	this->mesh_i = mi;
@@ -28,7 +47,7 @@ void Bullet::setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, M
 	h_pos = *hassyapos;
 	h_v = *vdayo; // ”­ŽË•ûŒü‚à‚©‚Ë‚é
 	this->shoki_world = *shoki_world;
-
+	
 
 
 }
@@ -45,7 +64,8 @@ bool Bullet::fire(AtariHantei* hantei) {
 	atarihan->setXYZ(h_pos.float3.x, h_pos.float3.y, h_pos.float3.z);
 	dpos = MYVECTOR3(0,0,0);
 	CS::instance()->enter(CS_RENDERDATA_CS, "un");
-	atarihan->setIsEnabled(hantei,true);
+	//atarihan->setIsEnabled(hantei,true);
+	// ‚à‚Æ‚à‚Ætrue‚É‚È‚Á‚Ä‚¢‚é‚Ì‚Å–â‘è‚È‚¢
 	CS::instance()->leave(CS_RENDERDATA_CS, "un");
 	return true;
 
@@ -81,10 +101,11 @@ void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) 
 		atarihan->setDT(dsecond);
 		atarihan->calcJyusinAndR(false);
 		mesh_i->setWorld(&world);
-		//mesh_i->setIsRender(true);
+		mesh_i->setIsRender(true);
 
+	} else if(mesh_i) {
+	
 	}
-
 
 }
 
@@ -92,8 +113,23 @@ void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) 
 
 
 void BulletController::atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp) {
+	AtariUnitAnsKWSK kuwasiku[2048];
+	
+	int temp = hantei->getAnsWaza(kuwasiku,2048);
+	for (int i=0;i<temp;i++) {
+		if (kuwasiku[i].aite_umesh && kuwasiku[i].my_umesh) {
+			bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+		}
 
 
+
+		//if (this->umesh_id_to_bullet_indexs.find(kuwasiku[i].my_umesh->getUMESHID()) != umesh_id_to_bullet_indexs.end()) {
+		//	bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+		//}
+		//if (this->umesh_id_to_bullet_indexs.find(kuwasiku[i].aite_umesh->getUMESHID()) != umesh_id_to_bullet_indexs.end()) {
+		//	bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+		//}
+	}
 
 }
 
@@ -148,8 +184,23 @@ void BulletController::Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* l
 			// mesh_instanceds ‚ð“ü‚ê‚é
 			
 			MeshInstanced* mi = mis->makeInstanced(dummy_mesh,dummy_mesh,NULL,KTROBO_MESH_BONE_NULL,false,&idenmat);
+			//‚±‚ÌŽž“_‚Åhantei‚É’Ç‰Á‚³‚ê‚é
 			bullets[i].Init(g,hantei, mi);
-			bullets[i].atarihan->setXYZ(i,i,i);
+			//bullets[i].atarihan->setXYZ(i,i,i);
+
+			bullets[i].atarihan->setXYZ(0, + 10, rand()%1000000/100-50);
+			bullets[i].atarihan->calcJyusinAndR(true);
+			// calcjyusinr‚Å‚Í¡‚Ì‚Æ‚±‚ëŒvŽZ‚³‚ê‚È‚¢‚Ì‚Å
+			bullets[i].atarihan->meshs[0]->bone_obbs[0].c = MYVECTOR3(bullets[i].atarihan->x, bullets[i].atarihan->y, bullets[i].atarihan->z);
+			bullets[i].atarihan->jyusin = bullets[i].atarihan->meshs[0]->bone_obbs[0].c;
+			bullets[i].atarihan->r = 1;
+			MYMATRIX world;
+			float x = bullets[i].atarihan->x;
+			float y = bullets[i].atarihan->y;
+			float z = bullets[i].atarihan->z;
+			MyMatrixTranslation(world,x,y,z);
+			mi->setWorld(&world);
+			mi->setIsRender(true);
 			umesh_id_to_bullet_indexs.insert(std::pair<int,int>(bullets[i].atarihan->meshs[0]->getUMESHID(),i));
 		}
 	}

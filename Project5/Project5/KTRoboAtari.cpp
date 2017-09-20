@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <vector>
 #include <iterator>
+#include "KTRoboLog.h"
+#include "KTRoboClock.h"
+#include "KTRoboGamen_GARAGE.h"
 
 using namespace std;
 
@@ -243,10 +246,12 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 	r = ans_r + MyVec3Length(v) * dt; // ｖの長さの分だけ半径を大きくする
 	jyusin = ans_jyusin;
 }
+
+
 void UMeshUnit::setIsEnabled(AtariHantei* hantei, bool t){ 
 		
 		//hantei->resetIsUnitUpdated();
-	hantei->setUnitStateChanged(this);
+		hantei->setUnitStateChanged(this);
 		is_enabled = t;
 }
 void UMeshUnit::draw(Graphics* g, MYMATRIX* view, MYMATRIX* proj, int meshnum, float* frames, bool* calculateoffsetmatrixs,
@@ -554,7 +559,7 @@ void AtariHantei::maecalcdayo(Graphics* g) {
 		}
 	}
 
-	int autid_count = temp_obbs_count*(temp_obbs_count-1);
+	int autid_count = temp_obbs_count*(temp_obbs_count-1)/2;
 	int temp_c6 = this->getKakuhoCountsFromCount(autid_count);
 	if (temp_c6 > max_count.igaidousi_count) {
 		max_count.igaidousi_count = temp_c6;
@@ -838,9 +843,12 @@ void AtariHantei::calcKumi(Graphics* g) {
 	for (int i = 0;i<au_count;i++) {
 		for (int k=0;k<au_count;k++) {
 			if (i >= k) continue;
-
+			
 			AtariUnit* aui = &units[i];
 			AtariUnit* auk = &units[k];
+
+			if (aui->umesh_unit == auk->umesh_unit) continue;
+
 
 			if ((aui->type == AtariUnit::AtariType::ATARI_TIKEI)
 				&& (auk->type == AtariUnit::AtariType::ATARI_TIKEI)) {
@@ -1161,14 +1169,14 @@ void AtariHantei::calcObb(Graphics* g) {
 	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].c = MYVECTOR3(0,0,0);
 	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].e = MYVECTOR3(1,1,1);
 	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[0] = MYVECTOR3(1,0,0);
-	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[0] = MYVECTOR3(0,1,0);
-	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[0] = MYVECTOR3(0,0,1);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[1] = MYVECTOR3(0,1,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_TIKEI].u[2] = MYVECTOR3(0,0,1);
 
 	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].c = MYVECTOR3(0,0,0);
 	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].e = MYVECTOR3(1,1,1);
 	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[0] = MYVECTOR3(1,0,0);
-	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[0] = MYVECTOR3(0,1,0);
-	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[0] = MYVECTOR3(0,0,1);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[1] = MYVECTOR3(0,1,0);
+	obbs[KTROBO_ATARI_CALC_OBBS_IDX_DUMMY].u[2] = MYVECTOR3(0,0,1);
 
 
 
@@ -2310,7 +2318,7 @@ bool AtariHantei::isNeedMaeCalcWhenMaeCalcDummy() {
 
 
 	// autid の増分を出す
-	int autid_zoubun = (temp_count.obbs_count + obbs_zoubun) * (temp_count.obbs_count + obbs_zoubun -1) - temp_count.igaidousi_count ;
+	int autid_zoubun = (temp_count.obbs_count + obbs_zoubun) * (temp_count.obbs_count + obbs_zoubun -1)/2 - temp_count.igaidousi_count ;
 
 	// autts の増分を出す
 	int autts_zoubun = (temp_count.obbs_count + obbs_zoubun) * tikei_c - temp_count.soreigai_count;
@@ -2361,8 +2369,11 @@ bool AtariHantei::isNeedMaeCalcWhenMaeCalcDummy() {
 }
 
 void AtariHantei::setStateChangedUMeshUnitToDummy() {
-
+	ClockWatches watches;
 	//atariunit
+
+
+	watches.startWatch(0);
 	for (int i=0;i<au_count;i++) {
 		if (!units[i].umesh_unit) continue;
 
@@ -2374,22 +2385,23 @@ void AtariHantei::setStateChangedUMeshUnitToDummy() {
 			au_dummy_index.insert(i);
 		}
 	}
-
+	watches.stopWatch(0);
 
 
 
 	// auinfo
-
+	watches.startWatch(1);
 	for (int i=0;i<au_count;i++) {
 		if (units[au_info[i].atari_idx].umesh_unit == dummy_umeshunit) {
 			auinfo_dummy_index.insert(i);
 		}
 	}
-
+	watches.stopWatch(1);
 
 
 
 	//obbs
+	watches.startWatch(2);
 	set<UMeshUnit*>::iterator it = state_changed_umeshunit.begin();
 	while(it != state_changed_umeshunit.end()) {
 		UMeshUnit* um = *it;
@@ -2411,8 +2423,12 @@ void AtariHantei::setStateChangedUMeshUnitToDummy() {
 
 		it++;
 	}
+	watches.stopWatch(2);
 
 	// kumi
+	watches.startWatch(3);
+
+	/*
 	for (int i=0;i< temp_count.kumi_count;i++) {
 		if (au_dummy_index.find(kumi[i].atari_idx) != au_dummy_index.end()) {
 			kumi_dummy_index.insert(i);
@@ -2422,11 +2438,16 @@ void AtariHantei::setStateChangedUMeshUnitToDummy() {
 			kumi_dummy_index.insert(i);
 		}
 	}
+	*/
 
+	// calc構造体は使われていいないので
+	// 基のままにしておく
+	watches.stopWatch(3);
 
 
 
 	// autts
+	watches.startWatch(4);
 	for (int i=0;i<temp_count.soreigai_count;i++) {
 		if (au_dummy_index.find(autts[i].atariidx) != au_dummy_index.end()) {
 			autts_dummy_index.insert(i);
@@ -2436,8 +2457,10 @@ void AtariHantei::setStateChangedUMeshUnitToDummy() {
 			autts_dummy_index.insert(i);
 		}
 	}
+	watches.stopWatch(4);
 	
 	// autid
+	watches.startWatch(5);
 	for (int i=0;i<temp_count.igaidousi_count;i++) {
 		if (au_dummy_index.find(autid[i].atariidx) != au_dummy_index.end()) {
 			autid_dummy_index.insert(i);
@@ -2447,6 +2470,43 @@ void AtariHantei::setStateChangedUMeshUnitToDummy() {
 			autid_dummy_index.insert(i);
 		}
 	}
+	watches.stopWatch(5);
+
+
+
+
+
+
+
+
+
+
+	
+{
+		WCHAR buff[512];
+		char buf[128];
+		char str[128];
+		memset(buf,0,128);
+
+		for (int i=0;i<6;i++) {
+		memset(str,0,128);
+		GamenGARAGE_partsParam::getSuutiChara((int)(watches.times[i]*100),str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+	//	GamenGARAGE_partsParam::getSuutiChara((int)(sizeof(AtariUnitAns)),str);
+	//	strcat_s(buf,str);
+		}
+	
+		//DebugTexts::instance()->setText(g,wcslen(buff),buff);
+	//	if (watches.times[5] > 10) {
+			mylog::writelog(KTROBO::INFO, "setdummydayo::");
+			mylog::writelog(KTROBO::INFO, buf);
+			mylog::writelog(KTROBO::INFO, "\n");
+	//	}
+	}
+
+
+
 
 }
 
@@ -2456,6 +2516,11 @@ void AtariHantei::setInfoOfStateChangedUMeshUnit() {
 
 	set<UMeshUnit*>::iterator it_for_meshs = state_changed_umeshunit.begin();
 	int au_count_offset = 0;
+
+	ClockWatches watches;
+
+
+	watches.startWatch(0);
 	while ( it_for_meshs != state_changed_umeshunit.end() ) {
 
 		UMeshUnit* umm = *it_for_meshs;
@@ -2483,7 +2548,7 @@ void AtariHantei::setInfoOfStateChangedUMeshUnit() {
 		it_for_meshs++;
 
 	}
-
+	watches.stopWatch(0);
 
 	// auinfo
 	// auinfoはcalcauinfoで再計算されるので大丈夫
@@ -2505,7 +2570,7 @@ void AtariHantei::setInfoOfStateChangedUMeshUnit() {
 
 	it_for_dummy_au = au_dummy_index_used.begin();
 	// au_count 同士のループだと重いので工夫する
-
+	watches.startWatch(1);
 	while (it_for_dummy_au != au_dummy_index_used.end()) {
 		AtariUnit* auu = &units[*it_for_dummy_au];
 		*it_for_dummy_au++;
@@ -2517,7 +2582,8 @@ void AtariHantei::setInfoOfStateChangedUMeshUnit() {
 
 			AtariUnit* aui = auu;// &units[i];
 			AtariUnit* auk = &units[k];
-
+			if (aui->umesh_unit == auk->umesh_unit) continue;
+			
 			if ((aui->type == AtariUnit::AtariType::ATARI_TIKEI)
 				&& (auk->type == AtariUnit::AtariType::ATARI_TIKEI)) {
 					continue;
@@ -2614,6 +2680,10 @@ void AtariHantei::setInfoOfStateChangedUMeshUnit() {
 						}
 					}
 			}
+			
+			// kumiをこれ以上増やさないためにそのままにしておく
+			// また減らしもしない
+			continue;
 
 			int empty_index;
 			if (it_for_dummy_kumi != kumi_dummy_index.end()) {
@@ -2632,7 +2702,7 @@ void AtariHantei::setInfoOfStateChangedUMeshUnit() {
 			}
 		}
 	}
-
+	watches.stopWatch(1);
 	temp_count.kumi_count += temp_offset;
 	temp_count.igaidousi_count += temp_igaidousi_offset;
 	temp_count.soreigai_count += temp_tosoreigai_offset;
@@ -2660,6 +2730,7 @@ multiset<int> autts_dummy_index_used;
 	// autts
 */
 
+	watches.startWatch(2);
 	auinfo_dummy_index.clear();
 	auinfo_dummy_index_used.clear();
 	obbs_dummy_index.clear();
@@ -2672,68 +2743,164 @@ multiset<int> autts_dummy_index_used;
 	set<int> autts_dummy_index2;
 	set<int>::iterator it1 = au_dummy_index.begin();
 	set<int>::iterator it2 = au_dummy_index_used.begin();
+
+	watches.startWatch(3);
 	std::set_difference(it1, au_dummy_index.end(),
 		it2, au_dummy_index_used.end(), std::inserter<set<int> >(au_dummy_index2, au_dummy_index2.end()));
+	watches.stopWatch(3);
 
+	watches.startWatch(4);
 	au_dummy_index.clear();
 	au_dummy_index_used.clear();
-
+	watches.stopWatch(4);
 
 	it1 = au_dummy_index2.begin();
 	it2 = au_dummy_index.begin();
+	watches.startWatch(5);
 	std::copy(it1,au_dummy_index2.end(), std::inserter<set<int> >(au_dummy_index, au_dummy_index.end()));
-
-	
+	watches.stopWatch(5);
+	watches.startWatch(6);
 	std::set_difference(kumi_dummy_index.begin(), kumi_dummy_index.end(),
 		kumi_dummy_index_used.begin(), kumi_dummy_index_used.end(),  std::inserter<set<int> >(kumi_dummy_index2, kumi_dummy_index2.end()));
 
+	watches.stopWatch(6);
 	kumi_dummy_index.clear();
 	kumi_dummy_index_used.clear();
+	watches.startWatch(7);
 	std::copy(kumi_dummy_index2.begin(),kumi_dummy_index2.end(),std::inserter<set<int> >(kumi_dummy_index, kumi_dummy_index.end()));
+	watches.stopWatch(7);
 
-
+	watches.startWatch(8);
 	std::set_difference(autts_dummy_index.begin(), autts_dummy_index.end(),
 		autts_dummy_index_used.begin(), autts_dummy_index_used.end(),  std::inserter<set<int> >(autts_dummy_index2, autts_dummy_index2.end()));
 
 	autts_dummy_index.clear();
 	autts_dummy_index_used.clear();
 	std::copy(autts_dummy_index2.begin(),autts_dummy_index2.end(), std::inserter<set<int> >(autts_dummy_index, autts_dummy_index.end()));
+	watches.stopWatch(8);
 
-
+	watches.startWatch(9);
 	std::set_difference(autid_dummy_index.begin(), autid_dummy_index.end(),
 		autid_dummy_index_used.begin(), autid_dummy_index_used.end(),  std::inserter<set<int> >(autid_dummy_index2, autid_dummy_index2.end()));
 
 	autid_dummy_index.clear();
 	autid_dummy_index_used.clear();
 	std::copy(autid_dummy_index2.begin(),autid_dummy_index2.end(),std::inserter<set<int> >(autid_dummy_index2, autid_dummy_index2.end()));
+	watches.stopWatch(9);
+
+	watches.stopWatch(2);
+		
+
+{
+		WCHAR buff[512];
+		char buf[128];
+		char str[128];
+		memset(buf,0,128);
+
+		for (int i=0;i<10;i++) {
+		memset(str,0,128);
+		GamenGARAGE_partsParam::getSuutiChara((int)(watches.times[i]*100),str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+	//	GamenGARAGE_partsParam::getSuutiChara((int)(sizeof(AtariUnitAns)),str);
+	//	strcat_s(buf,str);
+		}
 	
-	
+		//DebugTexts::instance()->setText(g,wcslen(buff),buff);
+	//	if (watches.times[5] > 10) {
+			mylog::writelog(KTROBO::INFO, "setdayo::");
+			mylog::writelog(KTROBO::INFO, buf);
+		mylog::writelog(KTROBO::INFO, "\n");
+	//	}
+	}
+
 
 }
 
 void AtariHantei::maeCalcDummy(Graphics* g) {
 	// maecalcdayoの後に呼ぶ
+	
 
 	if (state_changed_umeshunit.size() == 0) return;
 	
-
+	
 	clearDummyInfo(true); // plus_count と　dummy_index_usedをクリアする
+	ClockWatches watches;
 
+	watches.startWatch(0);
 	setStateChangedUMeshUnitToDummy();
-
+	watches.stopWatch(0);
+	
+	
+	watches.startWatch(1);
 	if (isNeedMaeCalcWhenMaeCalcDummy()) {
 		// plus_count の計算を行って max_count を超える場合はmaecalcさせる
 		// dummyの計算は行わない
+		watches.stopWatch(1);
 		resetIsUnitUpdated();
 		return;
 	}
-
+	watches.stopWatch(1);
 	// isneedmaecalcwhenmaecalcdummy の計算によって求められたpluscount の情報と　statechangedumeshunitを使って
 	// 
-
+	watches.startWatch(2);
 	setInfoOfStateChangedUMeshUnit();
+	watches.stopWatch(2);
+
+	
+
+
 
 	clearDummyInfo(true);
 	state_changed_umeshunit.clear(); // すべて適用したのでクリアする
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+{
+		WCHAR buff[512];
+		char buf[128];
+		char str[128];
+		memset(buf,0,128);
+
+		for (int i=0;i<3;i++) {
+		memset(str,0,128);
+		GamenGARAGE_partsParam::getSuutiChara((int)(watches.times[i]*100),str);
+		strcat_s(buf,str);
+		strcat_s(buf,",");
+	//	GamenGARAGE_partsParam::getSuutiChara((int)(sizeof(AtariUnitAns)),str);
+	//	strcat_s(buf,str);
+		}
+	
+		//DebugTexts::instance()->setText(g,wcslen(buff),buff);
+	//	if (watches.times[5] > 10) {
+			mylog::writelog(KTROBO::INFO, "testdayo::");
+			mylog::writelog(KTROBO::INFO, buf);
+		mylog::writelog(KTROBO::INFO, "\n");
+	//	}
+//	}
+
+
+
+}
+
+
+
 
 }

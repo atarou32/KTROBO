@@ -203,7 +203,7 @@ public:
 public:
 	bool getIsEnabled() {return is_enabled;}
 	void setIsEnabled(AtariHantei* hantei, bool t);
-	
+//	void setIsEnabledWithoutChangeOBBNado(
 	
 
 
@@ -247,7 +247,8 @@ public:
 	void setV(MYVECTOR3* v);
 	void calcAnimeFrame(int meshnum, float* frames, bool* calculateoffsetmatrixs);
 	void calcJyusinAndR(bool calcWorld=true);
-	virtual void calcJyusinAndRForEmptyMesh() {};
+	virtual void calcJyusinAndRForEmptyMesh() {
+	};
 
 	~UMeshUnit() {
 		vector<UMesh*>::iterator it = meshs.begin();

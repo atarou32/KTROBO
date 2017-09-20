@@ -53,18 +53,24 @@ void WeaponFireRifle::fire(Robo* robo, RoboParts* parts, Graphics* g, Game* game
 
 	
 	if (is_canfire) {
+
+	
 		Bullet* c = controller->getEmptyBullet();
 
 		if (c) {
 		} else {
 			return;
 		}
-
+		
 		c->setParam(robo,parts,pos,vec,robo_world);
+		c->atarihan->meshs[0]->changeMesh(controller->dummy_mesh); // changemesh‚·‚éÛ‚Í@Œ³‚Ìobb_idx‚Æ‚©obb_use‚ª•Ï‚í‚ç‚È‚¢‚æ‚¤‚É‚µ‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
 
 		sound->playCue("se_maoudamashii_battle_gun01");
 		
 		WeaponFire::fire(robo, parts, g, game,scene, controller, hantei, sound, robo_world, vec,pos);
 		c->fire(hantei);
+		
+
+		
 	}
 }
