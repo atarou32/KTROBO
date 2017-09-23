@@ -1304,6 +1304,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 		g->getDeviceContext()->CopyResource(buffer_ans_copy , buffer_ans);
 		// マップ.
 		int i_count=0;
+		
 		g->getDeviceContext()->Map(buffer_ans_copy, 0, D3D11_MAP_READ, 0, &subRes );
 		anspo = (AtariUnitAns*)subRes.pData;
 		if (anspo) {
@@ -1449,6 +1450,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 		
 		// マップ.
 		int i_count=0;
+		int max_count = icounter.counter;
 		int cc = 0;
 		bool is_loop = true;
 
@@ -1490,6 +1492,10 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 						ans[i_count].obbidx2 = anspo[i].obbidx2;
 						ans[i_count].is_use = 1;
 						i_count++;
+						if (max_count <= i_count) {
+							is_loop = false;
+							break;
+						}
 					} else {
 						is_loop = false;
 						//break;
@@ -1519,7 +1525,7 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 		// マップ.
 		int i_count=0;
 		int cc = 0;
-
+			int max_count = icounter.counter;
 		//this->sendAtariWithOffset(g,KTROBO_ATARI_OFFSET*cc);
 
 		if (g->isCopied()) {
@@ -1545,6 +1551,9 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy2(Graphics* g) {
 				ans[i_count].is_use = 1;
 
 				i_count++;
+				if (i_count >= max_count) {
+					break;
+				}
 				} else {
 					break;
 				}
@@ -1967,6 +1976,20 @@ void AtariHantei::compileShader(Graphics* g) {
 		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
 	}
 
+	//D3D11_BUFFER_DESC des;
+	des.ByteWidth = sizeof(AtariUnitIncrementCounter);
+	des.Usage =  D3D11_USAGE_STAGING;
+	des.BindFlags = 0;
+	des.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	des.MiscFlags = 0;
+	des.StructureByteStride = sizeof(AtariUnitIncrementCounter);
+
+	hr = g->getDevice()->CreateBuffer(&des, 0, &buffer_counter);
+	if (FAILED(hr)) {
+		del();
+		throw new KTROBO::GameError(KTROBO::FATAL_ERROR, "cbuf make error");
+	}
+
 }
 
 
@@ -1977,6 +2000,7 @@ MYSHADERSTRUCT AtariHantei::mss_aida_offset;
 
 ID3D11Buffer* AtariHantei::buffer_count = 0;
 ID3D11Buffer* AtariHantei::buffer_offset = 0;
+ID3D11Buffer* AtariHantei::buffer_counter = 0;
 
 void AtariHantei::releaseBufferAndView() {
 
@@ -2235,14 +2259,42 @@ void AtariHantei::drawKekka(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	}
 }
 
-void AtariHantei::clearKekkaOfBuffer(Graphics* g) {
-
+void AtariHantei::copyCounterOfKekkaBuffer(Graphics* g) {
+/*
 	for (int i=0;i<max_count.ans_count;i++) {
 		ans[i].is_use = 0;
 	}
 //	g->getDeviceContext()->UpdateSubresource(buffer_ans,0,0,ans,0,0);
 	g->getDeviceContext()->UpdateSubresource(buffer_ans2,0,0,ans,0,0);
 	g->getDeviceContext()->UpdateSubresource(buffer_ans2_aida, 0, 0, ans,0,0);
+*/
+	D3D11_MAPPED_SUBRESOURCE subresource;
+	subresource.pData = 0;
+	subresource.DepthPitch = 0;
+	subresource.RowPitch = 0;
+
+
+	if (g->isCopied()) {
+		ID3D11DeviceContext* context;
+		context = g->getImmediateContext();
+		context->CopyStructureCount(buffer_counter, 0,buffer_ans2_view);
+		HRESULT hr = context->Map(buffer_counter, 0, D3D11_MAP_READ, 0, &subresource );
+		if (!FAILED(hr)) {
+			AtariUnitIncrementCounter* pp = (AtariUnitIncrementCounter*)subresource.pData;
+			icounter.counter = pp->counter;
+		}
+		context->Unmap(buffer_counter,0);
+	} else {
+		g->getDeviceContext()->CopyStructureCount(buffer_counter, 0,buffer_ans2_view);
+		HRESULT hr = g->getDeviceContext()->Map(buffer_counter, 0, D3D11_MAP_READ, 0, &subresource );
+		if (!FAILED(hr)) {
+			AtariUnitIncrementCounter* pp = (AtariUnitIncrementCounter*)subresource.pData;
+			icounter.counter = pp->counter;
+		}
+		g->getDeviceContext()->Unmap(buffer_counter,0);
+	}
+
+
 
 }
 

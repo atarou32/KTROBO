@@ -542,7 +542,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 	hantei->calcObb(g);
 	game->watches_for_keisoku.stopWatch(8);
 	game->watches_for_keisoku.startWatch(9);
-	hantei->clearKekkaOfBuffer(g);
+	hantei->copyCounterOfKekkaBuffer(g);
 	game->watches_for_keisoku.stopWatch(9);
 	game->watches_for_keisoku.startWatch(3);
 	hantei->runComputeShaderAida(g);

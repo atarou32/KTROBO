@@ -2052,7 +2052,7 @@ void Game::Run() {
 		GamenGARAGE_partsParam::getSuutiChara((int)hantei->getAtattaCount(), str);
 		strcat_s(buf,str);
 		strcat_s(buf,",");
-		GamenGARAGE_partsParam::getSuutiChara((int)robodayo->atarihan->x, str);
+		GamenGARAGE_partsParam::getSuutiChara((int)hantei->icounter.counter, str);
 		strcat_s(buf,str);
 		strcat_s(buf,",");
 

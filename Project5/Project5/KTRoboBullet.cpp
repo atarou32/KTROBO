@@ -188,7 +188,7 @@ void BulletController::Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* l
 			bullets[i].Init(g,hantei, mi);
 			//bullets[i].atarihan->setXYZ(i,i,i);
 
-			bullets[i].atarihan->setXYZ(0, + 10, rand()%1000000/100-50);
+			bullets[i].atarihan->setXYZ(i/20 * 10, i%20 * 10, rand()%1000000/100-50);
 			bullets[i].atarihan->calcJyusinAndR(true);
 			// calcjyusinr‚Å‚Í¡‚Ì‚Æ‚±‚ëŒvŽZ‚³‚ê‚È‚¢‚Ì‚Å
 			bullets[i].atarihan->meshs[0]->bone_obbs[0].c = MYVECTOR3(bullets[i].atarihan->x, bullets[i].atarihan->y, bullets[i].atarihan->z);

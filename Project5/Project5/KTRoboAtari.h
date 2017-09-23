@@ -304,6 +304,10 @@ struct AtariUnitIndexs {
 	unsigned int index;
 };
 
+struct AtariUnitIncrementCounter {
+	unsigned int counter;
+};
+
 struct AtariUnitKumi {
 	int atari_idx;
 	int atari_idx2;
@@ -423,9 +427,9 @@ private:
 	int au_waza_count;
 	//int au_obbs_count;
 	int atatta_count;
-
-
-
+public:
+	AtariUnitIncrementCounter icounter;
+private:
 
 	set<UMeshUnit*> state_changed_umeshunit; // 再計算が必要なumeshunit
 	AtariHanteiTempCount state_changed_plus_count; // 再計算によって変動するカウントの値 ダミーの値の増減は考慮無しの値
@@ -510,6 +514,7 @@ private:
 	static MYSHADERSTRUCT mss_aida_offset;
 	static ID3D11Buffer* buffer_count;
 	static ID3D11Buffer* buffer_offset;
+	static ID3D11Buffer* buffer_counter;
 
 	ID3D11Buffer* buffer_vertexs;
 	ID3D11Buffer* buffer_indexs;
@@ -555,6 +560,11 @@ public:
 			buffer_offset = 0;
 		}
 
+		if (buffer_counter) {
+			buffer_counter->Release();
+			buffer_counter = 0;
+		}
+
 	}
 
 	static HRESULT createStructuredBuffer(Graphics* g, UINT element_size, UINT count, void* pInitData, ID3D11Buffer** ppBufferOut);
@@ -565,7 +575,7 @@ public:
 	HRESULT copyKekkaToBufferForCopy(Graphics* g,bool isans1);
 	HRESULT copyKekkaToBufferForCopy2(Graphics* g);// for aida
 public:
-	void clearKekkaOfBuffer(Graphics* g);
+	void copyCounterOfKekkaBuffer(Graphics* g);
 
 	// 計算するのはいっせいに行う
 
@@ -614,7 +624,7 @@ public:
 			calcAuInfo(g,true);
 			calcKumi(g);
 			calcObb(g);
-			clearKekkaOfBuffer(g);
+			copyCounterOfKekkaBuffer(g);
 			runComputeShader(g);
 			
 			
@@ -778,7 +788,7 @@ public:
 
 		dummy_umeshunit = 0; // キャラクタとして扱う
 		dummy_umesh = 0;
-	
+		icounter.counter = 0;
 	}
 };
 
