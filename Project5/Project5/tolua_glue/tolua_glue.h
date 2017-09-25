@@ -12,7 +12,7 @@
 #include "../KTRoboLuaCMesh.h"
 #include "../KTRoboTexture.h"
 #include "../KTRoboMessage.h"
-#include "../KTRoboKendoSinaiGenerator.h"
+#include "../KTRoboEffect.h"
 using namespace std;
 namespace KTROBO {
 /////  please write this functions!///////
@@ -92,14 +92,22 @@ int Messages_makeMessageGlue(lua_State* L);
 int Messages_getMessageIndexsFromMsgIdGlue(lua_State* L);
 int Messages_getMessageIndexsFromReceiverIdGlue(lua_State* L);
 int Messages_getMsgBodyGlue(lua_State* L);
-int SinaiFuruAnimeMakers_makeInstGlue(lua_State* L);
-int SinaiFuruAnimeMakers_togglePlayAnimeGlue(lua_State* L);
-int SinaiFuruAnimeMakers_nigiruhitoSetAnimeGlue(lua_State* L);
-int SinaiFuruAnimeMakers_nigiruhitoEraseAnimeGlue(lua_State* L);
-int SinaiFuruAnimeMakers_sinaiEraseAnimeGlue(lua_State* L);
-int SinaiFuruAnimeMakers_sinaiSetAnimeGlue(lua_State* L);
-int SinaiFuruAnimeMakers_undoGlue(lua_State* L);
-int SinaiFuruAnimeMakers_sinaiNigiruhitoUpdateGlue(lua_State* L);
+int EffectManagers_makeInstGlue(lua_State* L);
+int EffectManagers_getEffectGlue(lua_State* L);
+int EffectManagers_makeEffectPartGlue(lua_State* L);
+int EffectManagers_setEffectPartPosGlue(lua_State* L);
+int EffectManagers_setEffectPartTexPosGlue(lua_State* L);
+int EffectManagers_setEffectPartWHGlue(lua_State* L);
+int EffectManagers_setEffectPartRotGlue(lua_State* L);
+int EffectManagers_setEffectPartColorGlue(lua_State* L);
+int EffectManagers_deleteEffectGlue(lua_State* L);
+int EffectManagers_getEffectImplGlue(lua_State* L);
+int EffectManagers_setEffectImplWorldGlue(lua_State* L);
+int EffectManagers_setEffectImplTimeGlue(lua_State* L);
+int EffectManagers_setEffectImplIsRenderGlue(lua_State* L);
+int EffectManagers_setEffectImplIsStartGlue(lua_State* L);
+int EffectManagers_lightdeleteEffectImplGlue(lua_State* L);
+int EffectManagers_deleteEffectImplGlue(lua_State* L);
 class MyLuaGlueSingleton{
  private:
   MyLuaGlueSingleton() {};
@@ -116,7 +124,7 @@ class MyLuaGlueSingleton{
   vector<CMeshs*> m_CMeshs;
   vector<Textures*> m_Textures;
   vector<Messages*> m_Messages;
-  vector<SinaiFuruAnimeMakers*> m_SinaiFuruAnimeMakers;
+  vector<EffectManagers*> m_EffectManagers;
  public:
 MeshInstanceds* getColMeshInstanceds ( int index) {
   int size = m_MeshInstanceds.size();
@@ -173,16 +181,16 @@ Messages* getColMessages ( int index) {
 void setColMessages ( Messages* m) {
   m_Messages.push_back(m);
 }
-SinaiFuruAnimeMakers* getColSinaiFuruAnimeMakers ( int index) {
-  int size = m_SinaiFuruAnimeMakers.size();
+EffectManagers* getColEffectManagers ( int index) {
+  int size = m_EffectManagers.size();
   if (size > index && index >=0) {
-    return m_SinaiFuruAnimeMakers[index];
+    return m_EffectManagers[index];
   } else {
-    throw new GameError(KTROBO::WARNING, " try to access outside vector SinaiFuruAnimeMakers");
+    throw new GameError(KTROBO::WARNING, " try to access outside vector EffectManagers");
   }
 }
-void setColSinaiFuruAnimeMakers ( SinaiFuruAnimeMakers* m) {
-  m_SinaiFuruAnimeMakers.push_back(m);
+void setColEffectManagers ( EffectManagers* m) {
+  m_EffectManagers.push_back(m);
 }
 void registerdayo(lua_State* L) {
   lua_register(L, "MeshInstanceds_setBoneIndexInfo", KTROBO::MeshInstanceds_setBoneIndexInfoGlue);
@@ -249,14 +257,22 @@ void registerdayo(lua_State* L) {
   lua_register(L, "Messages_getMessageIndexsFromReceiverId", KTROBO::Messages_getMessageIndexsFromReceiverIdGlue);
   lua_register(L, "Messages_getMsgBody", KTROBO::Messages_getMsgBodyGlue);
   lua_register(L, "Messages_makeInst", KTROBO::Messages_makeInstGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_togglePlayAnime", KTROBO::SinaiFuruAnimeMakers_togglePlayAnimeGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_nigiruhitoSetAnime", KTROBO::SinaiFuruAnimeMakers_nigiruhitoSetAnimeGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_nigiruhitoEraseAnime", KTROBO::SinaiFuruAnimeMakers_nigiruhitoEraseAnimeGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_sinaiEraseAnime", KTROBO::SinaiFuruAnimeMakers_sinaiEraseAnimeGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_sinaiSetAnime", KTROBO::SinaiFuruAnimeMakers_sinaiSetAnimeGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_undo", KTROBO::SinaiFuruAnimeMakers_undoGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_sinaiNigiruhitoUpdate", KTROBO::SinaiFuruAnimeMakers_sinaiNigiruhitoUpdateGlue);
-  lua_register(L, "SinaiFuruAnimeMakers_makeInst", KTROBO::SinaiFuruAnimeMakers_makeInstGlue);
+  lua_register(L, "EffectManagers_getEffect", KTROBO::EffectManagers_getEffectGlue);
+  lua_register(L, "EffectManagers_makeEffectPart", KTROBO::EffectManagers_makeEffectPartGlue);
+  lua_register(L, "EffectManagers_setEffectPartPos", KTROBO::EffectManagers_setEffectPartPosGlue);
+  lua_register(L, "EffectManagers_setEffectPartTexPos", KTROBO::EffectManagers_setEffectPartTexPosGlue);
+  lua_register(L, "EffectManagers_setEffectPartWH", KTROBO::EffectManagers_setEffectPartWHGlue);
+  lua_register(L, "EffectManagers_setEffectPartRot", KTROBO::EffectManagers_setEffectPartRotGlue);
+  lua_register(L, "EffectManagers_setEffectPartColor", KTROBO::EffectManagers_setEffectPartColorGlue);
+  lua_register(L, "EffectManagers_deleteEffect", KTROBO::EffectManagers_deleteEffectGlue);
+  lua_register(L, "EffectManagers_getEffectImpl", KTROBO::EffectManagers_getEffectImplGlue);
+  lua_register(L, "EffectManagers_setEffectImplWorld", KTROBO::EffectManagers_setEffectImplWorldGlue);
+  lua_register(L, "EffectManagers_setEffectImplTime", KTROBO::EffectManagers_setEffectImplTimeGlue);
+  lua_register(L, "EffectManagers_setEffectImplIsRender", KTROBO::EffectManagers_setEffectImplIsRenderGlue);
+  lua_register(L, "EffectManagers_setEffectImplIsStart", KTROBO::EffectManagers_setEffectImplIsStartGlue);
+  lua_register(L, "EffectManagers_lightdeleteEffectImpl", KTROBO::EffectManagers_lightdeleteEffectImplGlue);
+  lua_register(L, "EffectManagers_deleteEffectImpl", KTROBO::EffectManagers_deleteEffectImplGlue);
+  lua_register(L, "EffectManagers_makeInst", KTROBO::EffectManagers_makeInstGlue);
 }};
 }
 #endif

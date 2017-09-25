@@ -417,15 +417,15 @@ return 4;
 int KTROBO::CMeshs_getMeshWithAnimeGlue(lua_State* L) {
 luaL_checktype(L,3, LUA_TSTRING);
 luaL_checktype(L,4, LUA_TSTRING);
-char path_without_dot[1024];
-memset(path_without_dot,0, sizeof(char)* 1024);
-mystrcpy(path_without_dot,1024,0,lua_tostring(L,3));
+char path_to_mesh[1024];
+memset(path_to_mesh,0, sizeof(char)* 1024);
+mystrcpy(path_to_mesh,1024,0,lua_tostring(L,3));
 char path_to_anime[1024];
 memset(path_to_anime,0, sizeof(char)* 1024);
 mystrcpy(path_to_anime,1024,0,lua_tostring(L,4));
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColCMeshs(ci)->getInterface(cci)->getMeshWithAnime(path_without_dot , path_to_anime );
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColCMeshs(ci)->getInterface(cci)->getMeshWithAnime(path_to_mesh , path_to_anime );
 lua_pushnumber(L, kaeriti);
 lua_insert(L,1);
 return 5;
@@ -1270,10 +1270,10 @@ for (int i=0;i<temp && i < 32;i++) {
 }
 return 9;
 }
-int KTROBO::SinaiFuruAnimeMakers_makeInstGlue(lua_State* L) {
+int KTROBO::EffectManagers_makeInstGlue(lua_State* L) {
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->makeInst();
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->makeInst();
 {
 int ci = lua_tonumber(L, 1);
 int cci = kaeriti;
@@ -1281,7 +1281,7 @@ lua_newtable(L);
 lua_pushnumber(L, 1);
 lua_newtable(L);
 int top = lua_gettop(L);
-lua_pushstring(L, "SinaiFuruAnimeMaker");
+lua_pushstring(L, "EffectManager");
 lua_setfield(L, top, "collected_class_name");
 {
 char tempp[1024];memset(tempp,0,1024);
@@ -1289,9 +1289,9 @@ sprintf_s(tempp, 1024, "%d", cci);
 lua_pushstring(L, tempp);
 lua_setfield(L, top, "collected_index");
 }
-lua_pushstring(L, "ISinaiFuruAnimeMaker");
+lua_pushstring(L, "IEffectManager");
 lua_setfield(L, top, "collected_interface_name");
-lua_pushstring(L, "SinaiFuruAnimeMakers");
+lua_pushstring(L, "EffectManagers");
 lua_setfield(L, top, "collection_class_name");
 {
 char tempp[1024];memset(tempp,0,1024);
@@ -1304,45 +1304,321 @@ lua_insert(L,1);
 }
 return 3;
 }
-int KTROBO::SinaiFuruAnimeMakers_togglePlayAnimeGlue(lua_State* L) {
+int KTROBO::EffectManagers_getEffectGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TSTRING);
+luaL_checktype(L,4, LUA_TSTRING);
+luaL_checktype(L,5, LUA_TSTRING);
+char effect_name[1024];
+memset(effect_name,0, sizeof(char)* 1024);
+mystrcpy(effect_name,1024,0,lua_tostring(L,3));
+char texture_name[1024];
+memset(texture_name,0, sizeof(char)* 1024);
+mystrcpy(texture_name,1024,0,lua_tostring(L,4));
+char lua_file_name[1024];
+memset(lua_file_name,0, sizeof(char)* 1024);
+mystrcpy(lua_file_name,1024,0,lua_tostring(L,5));
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->togglePlayAnime();
-return 2;
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->getEffect(effect_name , texture_name , lua_file_name );
+lua_pushnumber(L, kaeriti);
+lua_insert(L,1);
+return 6;
 }
-int KTROBO::SinaiFuruAnimeMakers_nigiruhitoSetAnimeGlue(lua_State* L) {
+int KTROBO::EffectManagers_makeEffectPartGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TNUMBER);
+luaL_checktype(L,5, LUA_TSTRING);
+luaL_checktype(L,6, LUA_TBOOLEAN);
+luaL_checktype(L,7, LUA_TSTRING);
+luaL_checktype(L,8, LUA_TSTRING);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int index;
+index = lua_tonumber(L,4);
+float endtime;
+const char* endtime_temp = lua_tostring(L,5);
+endtime = atof(endtime_temp);
+bool is_loop;
+is_loop = (bool)lua_toboolean(L,6);
+float time_when_loop;
+const char* time_when_loop_temp = lua_tostring(L,7);
+time_when_loop = atof(time_when_loop_temp);
+float plustime_loop;
+const char* plustime_loop_temp = lua_tostring(L,8);
+plustime_loop = atof(plustime_loop_temp);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->nigiruhitoSetAnime();
-return 2;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->makeEffectPart(effect_id , index , endtime , is_loop , time_when_loop , plustime_loop );
+return 8;
 }
-int KTROBO::SinaiFuruAnimeMakers_nigiruhitoEraseAnimeGlue(lua_State* L) {
+int KTROBO::EffectManagers_setEffectPartPosGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TNUMBER);
+luaL_checktype(L,5, LUA_TSTRING);
+luaL_checktype(L,6, LUA_TSTRING);
+luaL_checktype(L,7, LUA_TSTRING);
+luaL_checktype(L,8, LUA_TSTRING);
+luaL_checktype(L,9, LUA_TSTRING);
+luaL_checktype(L,10, LUA_TSTRING);
+luaL_checktype(L,11, LUA_TSTRING);
+luaL_checktype(L,12, LUA_TSTRING);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int index;
+index = lua_tonumber(L,4);
+float dtime_start;
+const char* dtime_start_temp = lua_tostring(L,5);
+dtime_start = atof(dtime_start_temp);
+float dtime_end;
+const char* dtime_end_temp = lua_tostring(L,6);
+dtime_end = atof(dtime_end_temp);
+float start_x;
+const char* start_x_temp = lua_tostring(L,7);
+start_x = atof(start_x_temp);
+float start_y;
+const char* start_y_temp = lua_tostring(L,8);
+start_y = atof(start_y_temp);
+float start_z;
+const char* start_z_temp = lua_tostring(L,9);
+start_z = atof(start_z_temp);
+float end_x;
+const char* end_x_temp = lua_tostring(L,10);
+end_x = atof(end_x_temp);
+float end_y;
+const char* end_y_temp = lua_tostring(L,11);
+end_y = atof(end_y_temp);
+float end_z;
+const char* end_z_temp = lua_tostring(L,12);
+end_z = atof(end_z_temp);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->nigiruhitoEraseAnime();
-return 2;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectPartPos(effect_id , index , dtime_start , dtime_end , start_x , start_y , start_z , end_x , end_y , end_z );
+return 12;
 }
-int KTROBO::SinaiFuruAnimeMakers_sinaiEraseAnimeGlue(lua_State* L) {
+int KTROBO::EffectManagers_setEffectPartTexPosGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TNUMBER);
+luaL_checktype(L,5, LUA_TSTRING);
+luaL_checktype(L,6, LUA_TSTRING);
+luaL_checktype(L,7, LUA_TNUMBER);
+luaL_checktype(L,8, LUA_TNUMBER);
+luaL_checktype(L,9, LUA_TNUMBER);
+luaL_checktype(L,10, LUA_TNUMBER);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int index;
+index = lua_tonumber(L,4);
+float dtime_start;
+const char* dtime_start_temp = lua_tostring(L,5);
+dtime_start = atof(dtime_start_temp);
+float dtime_end;
+const char* dtime_end_temp = lua_tostring(L,6);
+dtime_end = atof(dtime_end_temp);
+int tex_x;
+tex_x = lua_tonumber(L,7);
+int tex_y;
+tex_y = lua_tonumber(L,8);
+int tex_width;
+tex_width = lua_tonumber(L,9);
+int tex_height;
+tex_height = lua_tonumber(L,10);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->sinaiEraseAnime();
-return 2;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectPartTexPos(effect_id , index , dtime_start , dtime_end , tex_x , tex_y , tex_width , tex_height );
+return 10;
 }
-int KTROBO::SinaiFuruAnimeMakers_sinaiSetAnimeGlue(lua_State* L) {
+int KTROBO::EffectManagers_setEffectPartWHGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TNUMBER);
+luaL_checktype(L,5, LUA_TSTRING);
+luaL_checktype(L,6, LUA_TSTRING);
+luaL_checktype(L,7, LUA_TSTRING);
+luaL_checktype(L,8, LUA_TSTRING);
+luaL_checktype(L,9, LUA_TSTRING);
+luaL_checktype(L,10, LUA_TSTRING);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int index;
+index = lua_tonumber(L,4);
+float dtime_start;
+const char* dtime_start_temp = lua_tostring(L,5);
+dtime_start = atof(dtime_start_temp);
+float dtime_end;
+const char* dtime_end_temp = lua_tostring(L,6);
+dtime_end = atof(dtime_end_temp);
+float start_width;
+const char* start_width_temp = lua_tostring(L,7);
+start_width = atof(start_width_temp);
+float start_height;
+const char* start_height_temp = lua_tostring(L,8);
+start_height = atof(start_height_temp);
+float end_width;
+const char* end_width_temp = lua_tostring(L,9);
+end_width = atof(end_width_temp);
+float height;
+const char* height_temp = lua_tostring(L,10);
+height = atof(height_temp);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->sinaiSetAnime();
-return 2;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectPartWH(effect_id , index , dtime_start , dtime_end , start_width , start_height , end_width , height );
+return 10;
 }
-int KTROBO::SinaiFuruAnimeMakers_undoGlue(lua_State* L) {
+int KTROBO::EffectManagers_setEffectPartRotGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TNUMBER);
+luaL_checktype(L,5, LUA_TSTRING);
+luaL_checktype(L,6, LUA_TSTRING);
+luaL_checktype(L,7, LUA_TSTRING);
+luaL_checktype(L,8, LUA_TSTRING);
+luaL_checktype(L,9, LUA_TSTRING);
+luaL_checktype(L,10, LUA_TSTRING);
+luaL_checktype(L,11, LUA_TSTRING);
+luaL_checktype(L,12, LUA_TSTRING);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int index;
+index = lua_tonumber(L,4);
+float dtime_start;
+const char* dtime_start_temp = lua_tostring(L,5);
+dtime_start = atof(dtime_start_temp);
+float dtime_end;
+const char* dtime_end_temp = lua_tostring(L,6);
+dtime_end = atof(dtime_end_temp);
+float start_rotx;
+const char* start_rotx_temp = lua_tostring(L,7);
+start_rotx = atof(start_rotx_temp);
+float start_roty;
+const char* start_roty_temp = lua_tostring(L,8);
+start_roty = atof(start_roty_temp);
+float start_rotz;
+const char* start_rotz_temp = lua_tostring(L,9);
+start_rotz = atof(start_rotz_temp);
+float end_rotx;
+const char* end_rotx_temp = lua_tostring(L,10);
+end_rotx = atof(end_rotx_temp);
+float end_roty;
+const char* end_roty_temp = lua_tostring(L,11);
+end_roty = atof(end_roty_temp);
+float end_rotz;
+const char* end_rotz_temp = lua_tostring(L,12);
+end_rotz = atof(end_rotz_temp);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->undo();
-return 2;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectPartRot(effect_id , index , dtime_start , dtime_end , start_rotx , start_roty , start_rotz , end_rotx , end_roty , end_rotz );
+return 12;
 }
-int KTROBO::SinaiFuruAnimeMakers_sinaiNigiruhitoUpdateGlue(lua_State* L) {
+int KTROBO::EffectManagers_setEffectPartColorGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TNUMBER);
+luaL_checktype(L,5, LUA_TSTRING);
+luaL_checktype(L,6, LUA_TSTRING);
+luaL_checktype(L,7, LUA_TNUMBER);
+luaL_checktype(L,8, LUA_TNUMBER);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int index;
+index = lua_tonumber(L,4);
+float dtime_start;
+const char* dtime_start_temp = lua_tostring(L,5);
+dtime_start = atof(dtime_start_temp);
+float dtime_end;
+const char* dtime_end_temp = lua_tostring(L,6);
+dtime_end = atof(dtime_end_temp);
+unsigned int start_color;
+start_color = (unsigned int)lua_tonumber(L,7);
+unsigned int end_color;
+end_color = (unsigned int)lua_tonumber(L,8);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-KTROBO::MyLuaGlueSingleton::getInstance()->getColSinaiFuruAnimeMakers(ci)->getInterface(cci)->sinaiNigiruhitoUpdate();
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectPartColor(effect_id , index , dtime_start , dtime_end , start_color , end_color );
+return 8;
+}
+int KTROBO::EffectManagers_deleteEffectGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->deleteEffect(effect_id );
+return 3;
+}
+int KTROBO::EffectManagers_getEffectImplGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+int effect_id;
+effect_id = lua_tonumber(L,3);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->getEffectImpl(effect_id );
+lua_pushnumber(L, kaeriti);
+lua_insert(L,1);
+return 4;
+}
+int KTROBO::EffectManagers_setEffectImplWorldGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TTABLE);
+int effect_impl_id;
+effect_impl_id = lua_tonumber(L,3);
+MYMATRIX world_m;
+MYMATRIX* world=&world_m;
+YARITORI_getMYMATRIX(L, world, 1);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplWorld(effect_impl_id , world );
+lua_pushnumber(L, kaeriti);
+lua_insert(L,1);
+return 5;
+}
+int KTROBO::EffectManagers_setEffectImplTimeGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TSTRING);
+int effect_impl_id;
+effect_impl_id = lua_tonumber(L,3);
+float time;
+const char* time_temp = lua_tostring(L,4);
+time = atof(time_temp);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplTime(effect_impl_id , time );
+lua_pushnumber(L, kaeriti);
+lua_insert(L,1);
+return 5;
+}
+int KTROBO::EffectManagers_setEffectImplIsRenderGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TBOOLEAN);
+int effect_impl_id;
+effect_impl_id = lua_tonumber(L,3);
+bool t;
+t = (bool)lua_toboolean(L,4);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplIsRender(effect_impl_id , t );
+return 4;
+}
+int KTROBO::EffectManagers_setEffectImplIsStartGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+luaL_checktype(L,4, LUA_TBOOLEAN);
+int effect_impl_id;
+effect_impl_id = lua_tonumber(L,3);
+bool t;
+t = (bool)lua_toboolean(L,4);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplIsStart(effect_impl_id , t );
+return 4;
+}
+int KTROBO::EffectManagers_lightdeleteEffectImplGlue(lua_State* L) {
+luaL_checktype(L,3, LUA_TNUMBER);
+int effect_impl_id;
+effect_impl_id = lua_tonumber(L,3);
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->lightdeleteEffectImpl(effect_impl_id );
+return 3;
+}
+int KTROBO::EffectManagers_deleteEffectImplGlue(lua_State* L) {
+int ci = lua_tonumber(L, 1);
+int cci = lua_tonumber(L, 2);
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->deleteEffectImpl();
 return 2;
 }

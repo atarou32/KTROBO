@@ -265,11 +265,14 @@ void Texture::setRenderTexTexPos(int render_tex_index, int tex_x, int tex_y, int
 	CS::instance()->enter(CS_RENDERDATA_CS, "setrendertextpos");
 	if (render_tex_indexs.find(render_tex_index) != render_tex_indexs.end()) {
 		RenderTex* e = render_texs[render_tex_indexs[render_tex_index]];
-		e->tex_x = tex_x;
-		e->tex_y = tex_y;
-		e->tex_width = tex_width;
-		e->tex_height = tex_height;
-		e->is_need_load = true;
+
+		if ((e->tex_x != tex_x) || (e->tex_y != tex_y) || (e->tex_width != tex_width) || (e->tex_height != tex_height)) {
+			e->tex_x = tex_x;
+			e->tex_y = tex_y;
+			e->tex_width = tex_width;
+			e->tex_height = tex_height;
+			e->is_need_load = true;
+		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "setrendertextpos");
 }
@@ -280,11 +283,13 @@ void Texture::setRenderBillBoardTexPos(int bill_index, int tex_x, int tex_y, int
 	CS::instance()->enter(CS_RENDERDATA_CS, "setbillboardtpos");
 	if (bill_board_indexs.find(bill_index) != bill_board_indexs.end()) {
 		RenderBillBoard* e = bill_boards[bill_board_indexs[bill_index]];
-		e->tex_x = tex_x;
-		e->tex_y = tex_y;
-		e->tex_width = tex_width;
-		e->tex_height = tex_height;
-		e->is_need_load = true;	
+		if ((e->tex_x != tex_x) || (e->tex_y != tex_y) || (e->tex_width != tex_width) || (e->tex_height != tex_height)) {
+			e->tex_x = tex_x;
+			e->tex_y = tex_y;
+			e->tex_width = tex_width;
+			e->tex_height = tex_height;
+			e->is_need_load = true;	
+		}
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "setbillboardtpos");
 

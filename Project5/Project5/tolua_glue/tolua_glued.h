@@ -12,7 +12,7 @@
 #include "../KTRoboLuaCMesh.h"
 #include "../KTRoboTexture.h"
 #include "../KTRoboMessage.h"
-#include "../KTRoboKendoSinaiGenerator.h"
+#include "../KTRoboEffect.h"
 using namespace std;
 namespace KTROBO {
 /////  please write this functions!///////
