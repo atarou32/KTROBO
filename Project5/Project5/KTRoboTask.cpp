@@ -116,7 +116,11 @@ void KTROBO::Task::donow(void(*exec)(TCB*), void* data,  unsigned long* work,uns
 	}
 
 	newTCB->flag = 0;
+	try {
 	exec(newTCB);
+	} catch (GameError* err) {
+	}
+
 	CS::instance()->leave(CS_TASK_CS,"",index);
 	return;
 

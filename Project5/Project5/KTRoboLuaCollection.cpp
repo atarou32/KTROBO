@@ -123,7 +123,7 @@ void LuaTCBMaker::doTCBnow(int task_index, bool is_lock_sita, char* lua_filename
 				structs[i].task_index = task_index;
 				strcpy_s(structs[i].lua_filename,256,lua_filename);
 				structs[i].lua_filename[strlen(lua_filename)] = '\0';
-				CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
+			//	CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
 
 				unsigned long Work[TASK_WORK_SIZE];
 				memset(Work, 0, sizeof(unsigned long)*TASK_WORK_SIZE);
@@ -133,7 +133,7 @@ void LuaTCBMaker::doTCBnow(int task_index, bool is_lock_sita, char* lua_filename
 				Work[3] = (unsigned long)structs[i].is_lock_sita;
 				int task_index = structs[i].task_index;
 				structs[i].is_send = true;
-				CS::instance()->leave(CS_MESSAGE_CS, "maketcbexec");
+				CS::instance()->leave(CS_MESSAGE_CS, "maketcb");
 				ts[task_index]->donow(TCB_luaExec, ts[task_index], Work, 0x0000FFFF);
 				//CS::instance()->enter(CS_MESSAGE_CS, "maketcbexec");
 

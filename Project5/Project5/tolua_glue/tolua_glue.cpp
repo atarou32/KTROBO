@@ -1563,10 +1563,8 @@ MYMATRIX* world=&world_m;
 YARITORI_getMYMATRIX(L, world, 1);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplWorld(effect_impl_id , world );
-lua_pushnumber(L, kaeriti);
-lua_insert(L,1);
-return 5;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplWorld(effect_impl_id , world );
+return 4;
 }
 int KTROBO::EffectManagers_setEffectImplTimeGlue(lua_State* L) {
 luaL_checktype(L,3, LUA_TNUMBER);
@@ -1578,10 +1576,8 @@ const char* time_temp = lua_tostring(L,4);
 time = atof(time_temp);
 int ci = lua_tonumber(L, 1);
 int cci = lua_tonumber(L, 2);
-int kaeriti = KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplTime(effect_impl_id , time );
-lua_pushnumber(L, kaeriti);
-lua_insert(L,1);
-return 5;
+KTROBO::MyLuaGlueSingleton::getInstance()->getColEffectManagers(ci)->getInterface(cci)->setEffectImplTime(effect_impl_id , time );
+return 4;
 }
 int KTROBO::EffectManagers_setEffectImplIsRenderGlue(lua_State* L) {
 luaL_checktype(L,3, LUA_TNUMBER);

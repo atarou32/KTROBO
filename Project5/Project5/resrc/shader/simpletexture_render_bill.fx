@@ -292,24 +292,27 @@ column_major float4x4 tview = view;
 column_major float4x4 tproj = proj;
 
 float4 localPos = float4(0,0,0,1);
-float4 mymPos = float4(mul(mat, localPos).xyzw);
-float4 worldPos = float4(mul(mym,mymPos ));
-float4 viewPos  = float4(mul(  tview,worldPos ).xyzw);
+
+float4 worldPos = float4(mul(mym,localPos ));
+float4 mymPos = float4(mul(mat, worldPos).xyzw);
+float4 viewPos  = float4(mul(  tview,mymPos ).xyzw);
 float4 projPos  = float4(mul(  tproj,viewPos ).xyzw);
 
 
 float4 localPos2 = float4(w/2,0,h/2,1);
 
-float4 mymPos2 = float4(mul(mat, localPos2).xyz,1);
-float4 worldPos2 = float4(mul(mym,mymPos2 ));
-float4 viewPos2 = float4(mul( tview, worldPos2 ).xyzw);
+
+float4 worldPos2 = float4(mul(mym,localPos2 ));
+float4 mymPos2 = float4(mul(mat, worldPos2).xyz,1);
+float4 viewPos2 = float4(mul( tview, mymPos2 ).xyzw);
 float4 projPos2  = float4(mul( tproj, viewPos2 ).xyzw);
 
 
 float4 localPos3 = float4(w/2,0,-h/2,1);
-float4 mymPos3 = float4(mul(mat, localPos3).xyzw);
-float4 worldPos3 = float4(mul(mym,mymPos3 ));
-float4 viewPos3 = float4(mul( tview, worldPos3 ).xyzw);
+
+float4 worldPos3 = float4(mul(mym,localPos3 ));
+float4 mymPos3 = float4(mul(mat, worldPos3).xyzw);
+float4 viewPos3 = float4(mul( tview, mymPos3 ).xyzw);
 float4 projPos3  = float4(mul( tproj, viewPos3 ).xyzw);
 
 output.Position = float4(projPos.x,projPos.y,projPos.z,projPos.w);

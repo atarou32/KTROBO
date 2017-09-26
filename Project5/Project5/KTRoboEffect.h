@@ -4,6 +4,8 @@
 #pragma once
 #include "KTRoboTexture.h"
 #include "MyButukari.h"
+#include "MyDefine.h"
+#include "tolua_glue/MyLuaGlueMakeCommon.h"
 
 namespace KTROBO {
 
@@ -23,19 +25,21 @@ public:
 	TO_LUA virtual void makeEffectPart(int effect_id,int index, float endtime, bool is_loop, float time_when_loop, float plustime_loop)=0;
 	TO_LUA virtual void setEffectPartPos(int effect_id, int index, float dtime_start, float dtime_end, float start_x, float start_y, float start_z, float end_x, float end_y, float end_z)=0;
 	TO_LUA virtual void setEffectPartTexPos(int effect_id, int index, float dtime_start, float dtime_end, int tex_x,int tex_y, int tex_width, int tex_height)=0;
-	TO_LUA virtual void setEffectPartWH(int effect_id, int index, float dtime_start, float dtime_end,float start_width, float start_height, float end_width, float height)=0;
+	TO_LUA virtual void setEffectPartWH(int effect_id, int index, float dtime_start, float dtime_end,float start_width, float start_height, float end_width, float end_height)=0;
 	TO_LUA virtual void setEffectPartRot(int effect_id, int index, float dtime_start, float dtime_end, float start_rotx, float start_roty, float start_rotz, float end_rotx, float end_roty, float end_rotz)=0;
 	TO_LUA virtual void setEffectPartColor(int effect_id, int index, float dtime_start, float dtime_end, unsigned int start_color, unsigned int end_color)=0;
 
 	TO_LUA virtual void deleteEffect(int effect_id)=0;
 	TO_LUA virtual int getEffectImpl(int effect_id)=0;
-	TO_LUA virtual int setEffectImplWorld(int effect_impl_id, YARITORI MYMATRIX* world)=0;
-	TO_LUA virtual int setEffectImplTime(int effect_impl_id, float time)=0;
+	TO_LUA virtual void setEffectImplWorld(int effect_impl_id, YARITORI MYMATRIX* world)=0;
+	TO_LUA virtual void setEffectImplTime(int effect_impl_id, float time)=0;
 	TO_LUA virtual void setEffectImplIsRender(int effect_impl_id, bool t)=0;
 	TO_LUA virtual void setEffectImplIsStart(int effect_impl_id, bool t)=0;
 	TO_LUA virtual void lightdeleteEffectImpl(int effect_impl_id)=0;
 	TO_LUA virtual void deleteEffectImpl()=0;
 };
+
+class Effect;
 
 class EffectImpl {
 private:
@@ -338,7 +342,7 @@ public:
 	EffectManager(Texture* tex);
 
 	int getEffect(char* effect_name, char* texture_name, char* lua_file_name); // 同じnameを指定した場合は同じIDが返る　ない場合は作られる
-	//int getEffectFromFileName(char* file_name); // effect_nameはファイル中の設定の値が入る　基本的に１エフェクト１ファイル ない場合は0が返る
+	//int getEffectFromFileName(char* file_name); // effect_nameはファイル中の設定の値が入る　基本的に１エフェクト１ファイル ない場合は0が返る posに関してはループしない
 	void makeEffectPart(int effect_id,int index, float endtime, bool is_loop, float time_when_loop, float plustime_loop); // indexは　0 1 2 3 4 5 の順にゲットすること　急に１０とかゲットしようとしてもindexは増えない すでに作られていたindexの場合は作られない
 	void setEffectPartPos(int effect_id, int index, float dtime_start, float dtime_end, float start_x, float start_y, float start_z, float end_x, float end_y, float end_z);
 	void setEffectPartTexPos(int effect_id, int index, float dtime_start, float dtime_end, int tex_x,int tex_y, int tex_width, int tex_height);
@@ -351,8 +355,8 @@ public:
 	void release(); // すべてを開放する dummyも消す
 
 	int getEffectImpl(int effect_id); // effectの実体を作る
-	int setEffectImplWorld(int effect_impl_id, MYMATRIX* world);
-	int setEffectImplTime(int effect_impl_id, float time);
+	void setEffectImplWorld(int effect_impl_id, MYMATRIX* world);
+	void setEffectImplTime(int effect_impl_id, float time);
 	void setEffectImplIsRender(int effect_impl_id, bool t);
 	void setEffectImplIsStart(int effect_impl_id, bool t);
 	void lightdeleteEffectImpl(int effect_impl_id); // effect_impl を未使用にする 消しはしない（再利用する）

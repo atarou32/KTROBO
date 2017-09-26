@@ -91,6 +91,7 @@ Game::Game(void)
 	sap = 0;
 	//gg = 0;
 	renderTCB = 0;
+	effect_managers = 0;
 }
 
 
@@ -784,14 +785,22 @@ bool Game::Init(HWND hwnd) {
 
 	int j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	int kk = texdayo->getInstance(0)->getRenderText("ganbaru",0,0,10,100,100);
+	int ppl = texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF,&mat,1,1,0,0,1,1);
 	texdayo->getInstance(0)->setRenderTextIsRender(kk,false);
 	texdayo->getInstance(0)->setRenderTexIsRender(j,false);
+	texdayo->getInstance(0)->setRenderBillBoardIsRender(ppl,false);
 	{
 	int j = texdayo->getInstance(1)->getRenderTex(pp,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	int kk = texdayo->getInstance(1)->getRenderText("ganbaru",0,0,10,100,100);
+	int ppl = texdayo->getInstance(1)->getRenderBillBoard(pp,0xFFFFFFFF,&mat,1,1,0,0,1,1);
 	texdayo->getInstance(1)->setRenderTextIsRender(kk,false);
 	texdayo->getInstance(1)->setRenderTexIsRender(j,false);
+	texdayo->getInstance(1)->setRenderBillBoardIsRender(ppl,false);
 	}
+
+	effect_managers = new EffectManagers(texdayo->getInstance(0));// Å‰‚Ì•û
+
+	MyLuaGlueSingleton::getInstance()->setColEffectManagers(effect_managers);
 
 	{
 //	MYMATRIX idenmat;
@@ -857,7 +866,7 @@ bool Game::Init(HWND hwnd) {
 //	texdayo->setRenderTexIsRender(j,true);
 	MYMATRIX world;
 	MYMATRIX view;
-	MYMATRIX proj;
+	MYMATRIX proj = *g->getProj();;
 //	MYVECTOR3 from(0,-1,0);
 	MYVECTOR3 from(25,25,12);
 	MYVECTOR3 at(0,0,0);
@@ -868,7 +877,7 @@ bool Game::Init(HWND hwnd) {
 	
 //	MyMatrixRotationZ(world, 0.5f);
 	MyMatrixLookAtRH(view,from,at,up);
-	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
+//	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
 	
 	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
 	
@@ -943,7 +952,7 @@ bool Game::Init(HWND hwnd) {
 	
 	//hantei->ataristart();
 
-	
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua.txt");
 //	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	Game_SCENE* gs = new Game_SCENE(g,hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	this->setScene(gs);
@@ -1166,6 +1175,11 @@ void Game::Del() {
 		 sap->Del();
 		 delete sap;
 		 sap = 0;
+	 }
+
+	 if (effect_managers) {
+		 delete effect_managers;
+		 effect_managers = 0;
 	 }
 
 	 if (texdayo) {
@@ -1444,14 +1458,14 @@ void Game::Run() {
 
 	MYMATRIX world;
 //	MYMATRIX view;
-	MYMATRIX proj;
+	MYMATRIX proj = *g->getProj();
 	MyMatrixIdentity(world);
 	MYVECTOR3 a(25,25,12);
 //	MYVECTOR3 a(0,10,40);
 	MYVECTOR3 b(0,0,0);
 	MYVECTOR3 up(0,0,1);
 //	MyMatrixLookAtRH(view, a, b, up);
-	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
+//	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
 	
 	
 	MYMATRIX worldforg;
@@ -2118,6 +2132,8 @@ void Game::Run() {
 	hantei->calc(g);
 	hantei->copyKekkaForBufferCopy(g);
 */
+
+	effect_managers->update(frameTime,(int)frame);
 
 	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());

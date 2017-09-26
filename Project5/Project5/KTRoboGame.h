@@ -33,6 +33,7 @@
 #include "KTRoboRobo.h"
 #include "KTRoboArmPositioner.h"
 #include "KTRoboGamen_GARAGE.h"
+#include "KTRoboEffect.h"
 
 namespace KTROBO {
 
@@ -135,6 +136,7 @@ private:
 	Messages* messages;
 	MySound* sound;
 	TempInputShori* temp_input_shori;
+	EffectManagers* effect_managers;
 //	Sinai* sinai;
 //	SinaiNigiru* ss;
 //	SinaiFuru* sfuru;
@@ -159,6 +161,9 @@ public:
 	}
 	double stopWatchForButukari() {
 		return watch_for_butukari.stopWatch();
+	}
+	EffectManager* getEffectManager() {
+		return effect_managers->getInstance(0);
 	}
 
 	MySound* getSound() {

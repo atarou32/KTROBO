@@ -185,9 +185,16 @@ void EffectPart::update(EffectImpl* effect_impl, Texture* texture, float loop_ti
 	// 該当するエフェクトパートの状態を更新する
 
 	float tt = effect_impl->getTime();// time だがループするかどうかによって変わってくる
+	float moto_tt = tt;
 	tt = tt - loop_time;
-	if (tt >= end_time) return; // 何もしないでリターンする
+	if (tt >= end_time) {
 
+
+		// is_render をfalseにしてリターン
+		texture->setRenderBillBoardIsRender(billboard_id,false);
+
+		return; // 何もしないでリターンする
+	}
 	float dx = 0;
 	float dy = 0;
 	float dz = 0;
@@ -214,7 +221,7 @@ void EffectPart::update(EffectImpl* effect_impl, Texture* texture, float loop_ti
 	while(it_pos != poss.end()) {
 		EffectPartPos* posp = *it_pos;
 
-		if (posp->isInTime(tt)) {
+		if (posp->isInTime(moto_tt)) {
 			dx = posp->getXOfT(tt);
 			dy = posp->getYOfT(tt);
 			dz = posp->getZOfT(tt);
@@ -338,12 +345,13 @@ void Effect::update(EffectImpl* effect_impl, Texture* texture, float dtime, int 
 		float time = effect_impl->getTime();
 		for (int i=0;i<siz;i++) {
 			float tt = parts[i]->getTimeWhenLoop();
-			if (time >= tt) {
+			if (time - effect_impl->looptime_effectpart[i] >= tt) {
 				if (parts[i]->isLoop()) {
 					effect_impl->looptime_effectpart[i] += parts[i]->getPlusTimeLoop();
 				}
 			}
 		}
+
 		for (int i=0;i<siz;i++) {
 			int billboard_id = effect_impl->effectpart_billboard_ids[i];
 			int loop_time = effect_impl->looptime_effectpart[i];
@@ -479,7 +487,7 @@ void EffectManager::setEffectPartTexPos(int effect_id, int index,  float dtime_s
 
 }
 
-void EffectManager::setEffectPartWH(int effect_id, int index, float dtime_start, float dtime_end,float start_width, float start_height, float end_width, float height) {
+void EffectManager::setEffectPartWH(int effect_id, int index, float dtime_start, float dtime_end,float start_width, float start_height, float end_width, float end_height) {
 	if (effect_id == KTROBO_EFFECT_NONE) return;
 	CS::instance()->enter(CS_RENDERDATA_CS, "seteffectpart wh");
 
@@ -678,7 +686,7 @@ int EffectManager::getEffectImpl(int effect_id) {
 	
 	// effectの実体を作る
 	// まずエフェクトがない場合はnoneを返す
-	if (effect_id == KTROBO_EFFECT_NONE) return;
+	if (effect_id == KTROBO_EFFECT_NONE) return KTROBO_EFFECT_NONE;
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "geteffectimpl");
 	if (effect_id_indexs.find(effect_id) != effect_id_indexs.end()) {
@@ -691,6 +699,23 @@ int EffectManager::getEffectImpl(int effect_id) {
 			int impl_index = effect_impls.size();
 			impl_id = impl_index;
 			impl = new EffectImpl(impl_id, effect_id);
+			int psiz = impl->effectpart_billboard_ids.size();
+			int psii = efe->getPartsSize();
+			int sii = psii - psiz;
+			int tex_index = efe->getTextureID();
+			MYMATRIX mat;
+			MyMatrixIdentity(mat);
+			for (int i=0;i<sii;i++) {
+				int bid = tex->getRenderBillBoard(tex_index, 0xFFFFFFFF, &mat,1,1,0,0,1,1);
+				impl->effectpart_billboard_ids.push_back(bid);
+			}
+
+			impl->looptime_effectpart.clear();
+			for (int i=0;i<psii;i++) {
+				impl->looptime_effectpart.push_back(0);
+			}
+
+
 			effect_impls.push_back(impl);
 			effect_impl_id_indexs.insert(std::pair<int,int>(impl_id,impl_index));
 		} else {
@@ -702,7 +727,7 @@ int EffectManager::getEffectImpl(int effect_id) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "geteffectimpl");
 	return KTROBO_EFFECT_NONE;
 }
-int EffectManager::setEffectImplWorld(int effect_impl_id, MYMATRIX* world) {
+void EffectManager::setEffectImplWorld(int effect_impl_id, MYMATRIX* world) {
 	if (effect_impl_id == KTROBO_EFFECT_NONE) return;
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "seteffectimpl world");
@@ -716,7 +741,7 @@ int EffectManager::setEffectImplWorld(int effect_impl_id, MYMATRIX* world) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "seteffectimpl world");
 }
 
-int EffectManager::setEffectImplTime(int effect_impl_id, float time) {
+void EffectManager::setEffectImplTime(int effect_impl_id, float time) {
 if (effect_impl_id == KTROBO_EFFECT_NONE) return;
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "seteffectimpl time");
@@ -808,6 +833,10 @@ void EffectManager::deleteEffectImpl() {
 }
 
 void EffectManager::update(float dtime, int stamp) {
+
+
+	if (dtime > 200) return;
+
 	// 管理しているエフェクトの実体の状態を更新する
 	CS::instance()->enter(CS_RENDERDATA_CS, "update effect impl");
 	// effectimpl の更新
