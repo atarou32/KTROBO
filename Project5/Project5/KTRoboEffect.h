@@ -340,6 +340,7 @@ private:
 public:
 	void loadFileFromLua(int task_index, char* filename); // どのスレッドから呼んでいるか指定する
 	EffectManager(Texture* tex);
+	int getEffectFromName(char* effect_name);
 
 	int getEffect(char* effect_name, char* texture_name, char* lua_file_name); // 同じnameを指定した場合は同じIDが返る　ない場合は作られる
 	//int getEffectFromFileName(char* file_name); // effect_nameはファイル中の設定の値が入る　基本的に１エフェクト１ファイル ない場合は0が返る posに関してはループしない

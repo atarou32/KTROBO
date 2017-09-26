@@ -68,7 +68,7 @@ void WeaponFireRifle::fire(Robo* robo, RoboParts* parts, Graphics* g, Game* game
 		sound->playCue("se_maoudamashii_battle_gun01");
 		
 		WeaponFire::fire(robo, parts, g, game,scene, controller, hantei, sound, robo_world, vec,pos);
-		c->fire(hantei);
+		c->fire(game, hantei);
 		
 
 		

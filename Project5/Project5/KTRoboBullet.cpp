@@ -1,5 +1,8 @@
 #include "KTRoboBullet.h"
 
+#ifndef KTROBO_GAME_H
+#include "KTRoboGame.h"
+#endif
 
 using namespace KTROBO;
 Bullet::~Bullet() {
@@ -53,7 +56,7 @@ void Bullet::setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, M
 }
 
 
-bool Bullet::fire(AtariHantei* hantei) {
+bool Bullet::fire(Game* game, AtariHantei* hantei) {
 
 	// エフェクトが実装されたらエフェクトも再生するようにする
 	
@@ -66,6 +69,13 @@ bool Bullet::fire(AtariHantei* hantei) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "un");
 	//atarihan->setIsEnabled(hantei,true);
 	// もともとtrueになっているので問題ない
+
+	MYVECTOR3 pp(0,0,0);
+//	MyVec3TransformCoord(pp,pp,atarihan->world);
+
+	game->effect_suuji->render(1234567890, &game->lookfromtoat,&pp);
+
+
 	CS::instance()->leave(CS_RENDERDATA_CS, "un");
 	return true;
 
@@ -112,12 +122,14 @@ void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) 
 
 
 
-void BulletController::atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp) {
+void BulletController::atariShori(Game* game, AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp) {
 	AtariUnitAnsKWSK kuwasiku[2048];
 	
 	int temp = hantei->getAnsWaza(kuwasiku,2048);
 	for (int i=0;i<temp;i++) {
 		if (kuwasiku[i].aite_umesh && kuwasiku[i].my_umesh) {
+
+		
 			bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
 		}
 

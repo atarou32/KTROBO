@@ -192,7 +192,7 @@ void EffectPart::update(EffectImpl* effect_impl, Texture* texture, float loop_ti
 
 		// is_render をfalseにしてリターン
 		texture->setRenderBillBoardIsRender(billboard_id,false);
-
+		effect_impl->setIsActivated(false);
 		return; // 何もしないでリターンする
 	}
 	float dx = 0;
@@ -409,6 +409,23 @@ int EffectManager::getEffect(char* effect_name, char* texture_name, char* lua_fi
 
 
 	}
+	CS::instance()->leave(CS_RENDERDATA_CS, "geteffect");
+	return KTROBO_EFFECT_NONE;
+}	
+
+
+
+int EffectManager::getEffectFromName(char* effect_name) {
+	// 同じnameを指定した場合は同じIDが返る
+
+	CS::instance()->enter(CS_RENDERDATA_CS, "geteffect");
+	if (this->effect_name_indexs.find(effect_name) != effect_name_indexs.end()) {
+		
+		int index =  effect_name_indexs[effect_name];
+		CS::instance()->leave(CS_RENDERDATA_CS, "geteffect");
+		return index;
+	}
+
 	CS::instance()->leave(CS_RENDERDATA_CS, "geteffect");
 	return KTROBO_EFFECT_NONE;
 }	

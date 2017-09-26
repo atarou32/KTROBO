@@ -68,7 +68,7 @@ namespace KTROBO {
 		bool getIsUse() {return is_use;}
 		void Init(Graphics* g, AtariHantei* h, MeshInstanced* mi);
 		void setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, MYVECTOR3* vdayo, MYMATRIX* shoki_world);
-		bool fire(AtariHantei* hantei);
+		bool fire(Game* game, AtariHantei* hantei);
 		void atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp);
 		void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float dsecond, int stamp);
 		void update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);
@@ -96,7 +96,7 @@ public:
 	Bullet* getEmptyBullet(); // ãÛÇÃÇ‡ÇÃÇ™Ç»Ç¢èÍçáÇÕNULLÇ™ï‘ÇÈ
 	void Release(); // AtariHantei Ç™ÉNÉäÉAÇ≥ÇÍÇÈ
 
-	void atariShori(AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp);
+	void atariShori(Game* game, AtariHantei* hantei, MYMATRIX* view, float dsecond, int stamp);
 	void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float dsecond, int stamp);
 	void update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);
 

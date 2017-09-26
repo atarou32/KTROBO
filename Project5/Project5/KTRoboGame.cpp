@@ -92,6 +92,7 @@ Game::Game(void)
 	//gg = 0;
 	renderTCB = 0;
 	effect_managers = 0;
+	effect_suuji = 0;
 }
 
 
@@ -952,7 +953,8 @@ bool Game::Init(HWND hwnd) {
 	
 	//hantei->ataristart();
 
-	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua.txt");
+	//effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua.txt");
+	effect_suuji = new EffectSuuji(TASKTHREADS_UPDATEMAINRENDER,effect_managers->getInstance(0));
 //	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	Game_SCENE* gs = new Game_SCENE(g,hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	this->setScene(gs);
@@ -1175,6 +1177,10 @@ void Game::Del() {
 		 sap->Del();
 		 delete sap;
 		 sap = 0;
+	 }
+	 if (effect_suuji) {
+		 delete effect_suuji;
+		 effect_suuji = 0;
 	 }
 
 	 if (effect_managers) {

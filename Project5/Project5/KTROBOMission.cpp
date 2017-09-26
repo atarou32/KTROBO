@@ -394,6 +394,7 @@ void Game_SCENE::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
 		gm->robo = game->robodayo;
 		gm->byouga(g,NULL,game->getDMSecond(), game->getTimeStamp());
 		game->view = gm->view;
+		game->lookfromtoat = gm->lookat - gm->lookfrom;
 		tex->setViewProj(g,&gm->view,g->getProj(),&gm->lookfrom,&gm->lookat);
 		tex2->setViewProj(g,&gm->view, g->getProj(),&gm->lookfrom,&gm->lookat);
 	}
@@ -587,7 +588,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					roboaitedayo->atarishori(g, &game->view, hantei, test, (int)stamp);
 				//	roboaitedayo->atariAim(g, &game->view, frameTime, (int)frame);
 				}
-				bullet_c->atariShori(hantei, &game->view,test,(int)stamp);
+				bullet_c->atariShori(game, hantei, &game->view,test,(int)stamp);
 
 				hantei->setIsCalcKuwasikuGetted();
 				}

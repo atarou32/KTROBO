@@ -34,6 +34,7 @@
 #include "KTRoboArmPositioner.h"
 #include "KTRoboGamen_GARAGE.h"
 #include "KTRoboEffect.h"
+#include "KTRoboEffectSuuji.h"
 
 namespace KTROBO {
 
@@ -56,6 +57,7 @@ public:
 	MYMATRIX matd;
 	MYMATRIX proj;
 	MYMATRIX view;
+	
 	Graphics* g;
 	RAY ray;
 	int x;
@@ -117,6 +119,7 @@ private:
 	TCB* renderTCB;
 public:
 	MYMATRIX view;
+	MYVECTOR3 lookfromtoat;
 private:
 	Mesh* mesh;
 	Mesh* mesh2;
@@ -137,6 +140,8 @@ private:
 	MySound* sound;
 	TempInputShori* temp_input_shori;
 	EffectManagers* effect_managers;
+public:
+	EffectSuuji* effect_suuji;
 //	Sinai* sinai;
 //	SinaiNigiru* ss;
 //	SinaiFuru* sfuru;
