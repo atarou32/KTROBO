@@ -880,7 +880,6 @@ bool Game::Init(HWND hwnd) {
 	MyMatrixLookAtRH(view,from,at,up);
 //	MyMatrixPerspectiveFovRH(proj, 1, g->getScreenWidth() / (float)g->getScreenHeight(), 1, 1000);
 	
-	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
 	
 //	j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,0,0,200,200,0,0,512,512);//,0.021,0.021,0,0,500,500);
 //	texdayo->getInstance(0)->setRenderTexIsRender(j,true);
@@ -911,8 +910,9 @@ bool Game::Init(HWND hwnd) {
 	
 	//long work[TASK_WORK_SIZE];
 
-
-	
+	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua.txt");
+	effect_suuji = new EffectSuuji(TASKTHREADS_UPDATEMAINRENDER,effect_managers->getInstance(0));
 
 	unsigned long work[TASK_WORK_SIZE];
 	memset(work,0, sizeof(work));
@@ -953,9 +953,12 @@ bool Game::Init(HWND hwnd) {
 	
 	//hantei->ataristart();
 
-	//effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua.txt");
-	effect_suuji = new EffectSuuji(TASKTHREADS_UPDATEMAINRENDER,effect_managers->getInstance(0));
+	
+	
 //	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
+
+	
+
 	Game_SCENE* gs = new Game_SCENE(g,hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 	this->setScene(gs);
 
@@ -1519,7 +1522,7 @@ void Game::Run() {
 	te->changeText(bbufdayo,wcslen(bbufdayo));
 	CS::instance()->leave(CS_MESSAGE_CS, "render");
 
-	
+	CS::instance()->leave(CS_DEVICECON_CS, "render game");
 
 	memset(animf,0,sizeof(animf));
 	memset(animl,0,sizeof(animl));
@@ -1540,6 +1543,10 @@ void Game::Run() {
 		//animw[i] = 1;//1- animw[i];
 	//}
 
+
+
+
+	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 //	mesh_i->setBoneIndexInfo(animf, animl, animw);
 //	mesh_i2->setBoneIndexInfo(animf,animl,animw);
 	for (int i=0;i<100;i++) {
@@ -1565,12 +1572,13 @@ void Game::Run() {
 	if (te) {
 		te->render(g,0xFFFF00FF,10,0,30,450,40);
 	}
-	
+	CS::instance()->leave(CS_DEVICECON_CS, "render game");
 
 	for (int i = 0 ; i < TASKTHREAD_NUM; i++) {
 		ID3D11CommandList* pd3dCommandList=0;
 
 		if (i == TASKTHREADS_UPDATEMAINRENDER) continue;
+		//CS::instance()->leave(CS_DEVICECON_CS, "render game");
 		CS::instance()->enter(CS_DEVICECON_CS, "un");
 		
 		HRESULT hr = S_OK;
@@ -1579,16 +1587,20 @@ void Game::Run() {
 			hr = g_for_task_threads[i]->getDeviceContext()->FinishCommandList(FALSE, &pd3dCommandList);
 		}
 		CS::instance()->leave(CS_DEVICECON_CS, "un");
+		//CS::instance()->enter(CS_DEVICECON_CS, "render game");
 		if (FAILED(hr)) {
 			throw new GameError(KTROBO::FATAL_ERROR, "failed in finishing list");
 		}
+
+		CS::instance()->enter(CS_DEVICECON_CS, "enter executelist");
 		if (pd3dCommandList) {
 			g->getDeviceContext()->ExecuteCommandList(pd3dCommandList,false);
 			pd3dCommandList->Release();
 			pd3dCommandList = 0;
 		}
+		CS::instance()->leave(CS_DEVICECON_CS, "leave executelist");
 	}
-
+	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 	v = g->getRenderTargetView();
 	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
@@ -1706,7 +1718,7 @@ void Game::Run() {
 	MyVec3TransformNormal(testr,testr,rotX);
 //	texdayo->getInstance(0)->setRenderBillBoardPos(0,&rotX);
 
-
+	CS::instance()->leave(CS_DEVICECON_CS, "render game");
 
 	static Mesh* mm = mesh;
 	if (ff > 3.0f) {
@@ -1723,6 +1735,8 @@ void Game::Run() {
 		}
 
 	}
+
+	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 
 	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(testr.float3.x,testr.float3.y,testr.float3.z,1));
 	OBB testobb = mesh2->houkatuobb;
@@ -2139,8 +2153,10 @@ void Game::Run() {
 	hantei->copyKekkaForBufferCopy(g);
 */
 
+	effect_suuji->update(&lookfromtoat);
+	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	effect_managers->update(frameTime,(int)frame);
-
+	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	//if (hantei->canGetAns()) {

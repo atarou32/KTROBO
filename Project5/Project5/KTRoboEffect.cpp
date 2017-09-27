@@ -6,6 +6,14 @@ using namespace KTROBO;
 Effect::Effect(int effect_id)
 {
 	this->effect_id = effect_id;
+	texture_id = 0;
+	for (int i=0;i<64;i++) {
+		effect_name[i] = 0;
+	}
+	for (int i=0;i<256;i++) {
+		texture_name[i] = 0;
+		file_name[i] = 0;
+	}
 }
 
 void Effect::Release() {
@@ -790,6 +798,20 @@ void EffectManager::setEffectImplIsRender(int effect_impl_id, bool t) {
 	CS::instance()->leave(CS_RENDERDATA_CS, "seteffectimpl isrender");
 
 }
+bool EffectManager::getEffectImplIsActivated(int effect_impl_id) {
+	if (effect_impl_id == KTROBO_EFFECT_NONE) return false;
+
+//	CS::instance()->enter(CS_RENDERDATA_CS, "seteffectimpl isstart");
+	if (effect_impl_id_indexs.find(effect_impl_id) != effect_impl_id_indexs.end()) {
+		// ‚ ‚é‚Ì‚Å
+		EffectImpl* imp = effect_impls[effect_impl_id_indexs[effect_impl_id]];
+		bool t = imp->getIsActivated();
+	//	CS::instance()->leave(CS_RENDERDATA_CS, "seteffectimpl isstart");
+		return t;
+	}
+//	CS::instance()->leave(CS_RENDERDATA_CS, "seteffectimpl isstart");
+	return false;
+}
 
 void EffectManager::setEffectImplIsStart(int effect_impl_id, bool t) {
 	if (effect_impl_id == KTROBO_EFFECT_NONE) return;
@@ -813,6 +835,13 @@ void EffectManager::lightdeleteEffectImpl(int effect_impl_id) {
 	CS::instance()->enter(CS_RENDERDATA_CS, "seteffectimpl isstart");
 	if (effect_impl_id_indexs.find(effect_impl_id) != effect_impl_id_indexs.end()) {
 		// ‚ ‚é‚Ì‚Å
+		// ‚Ü‚¸billboard‚ð”ñ•\Ž¦‚É‚·‚é
+		EffectImpl* impl = effect_impls[effect_impl_id_indexs[effect_impl_id]];
+
+		int siz = impl->effectpart_billboard_ids.size();
+		for (int i=0;i<siz;i++) {
+			tex->setRenderBillBoardIsRender(impl->effectpart_billboard_ids[i],false);
+		}
 		unuse_effect_impl_indexs.insert(effect_impl_id_indexs[effect_impl_id]);
 		CS::instance()->leave(CS_RENDERDATA_CS, "seteffectimpl isstart");
 		return;
@@ -834,6 +863,7 @@ void EffectManager::deleteEffectImpl() {
 	dummy_effect_impl = 0;
 	while(it != effect_impls.end()) {
 		EffectImpl* ii = *it;
+		ii->release(tex);
 		delete ii;
 		ii = 0;
 		it++;

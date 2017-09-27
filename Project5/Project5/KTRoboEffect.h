@@ -70,6 +70,13 @@ public:
 		this->effect_id = effect_id;
 		MyMatrixIdentity(this->world);
 	}
+	void release(Texture* t) {
+		int siz = effectpart_billboard_ids.size();
+		for (int i=0;i<siz;i++) {
+			t->setRenderBillBoardIsRender(effectpart_billboard_ids[i],false);
+			t->lightdeleteRenderBillBoard(effectpart_billboard_ids[i]);
+		}
+	}
 
 	float getTime() {return time;}
 	void setTime(float t) {time = t;}
@@ -362,6 +369,7 @@ public:
 	void setEffectImplIsStart(int effect_impl_id, bool t);
 	void lightdeleteEffectImpl(int effect_impl_id); // effect_impl を未使用にする 消しはしない（再利用する）
 	void deleteEffectImpl(); // effect_implを消去する
+	bool getEffectImplIsActivated(int effect_impl_id); // CS_RENDERDATA_CS をロックしてから呼ぶこと
 
 	void update(float dtime, int stamp); // 管理しているエフェクトの実体の状態を更新する
 	
