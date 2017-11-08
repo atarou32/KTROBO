@@ -26,6 +26,7 @@ namespace KTROBO {
 		MYVECTOR3 h_v; // ”­ŽË‚µ‚½‚Æ‚«‚Ì‘¬“x
 		MYMATRIX shoki_world;
 		float dtime; // ”­ŽË‚µ‚Ä‚©‚ç‚ÌŽžŠÔ
+	public:
 		AtariBase* robo; // delete‚µ‚È‚¢
 		RoboParts* robo_parts; //delete‚µ‚È‚¢
 	public:

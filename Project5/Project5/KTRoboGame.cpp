@@ -1724,7 +1724,7 @@ void Game::Run() {
 	if (ff > 3.0f) {
 		CS::instance()->enter(CS_DEVICECON_CS, "lock");
 		for (int i=0;i<100;i++) {
-		mesh_instanceds->changeInstanceMeshSkeleton(mesh_is[i]->getInstanceIndex(), mm,mm);
+	//	mesh_instanceds->changeInstanceMeshSkeleton(mesh_is[i]->getInstanceIndex(), mm,mm);
 		}
 		CS::instance()->leave(CS_DEVICECON_CS, "unlock");
 		ff = 0;
@@ -1937,8 +1937,10 @@ void Game::Run() {
 	tester += 0.1f;
 	UMeshUnit* umesh_unit = umesh_units[2+30];
 	umesh_unit->setXYZ(0,0,5);
-	umesh_unit->setROTXYZ(1.57,0,0);
+	umesh_unit->setROTXYZ(1.57+tester/1000.0f,tester/100.00f,0);
+	
 	umesh_unit->calcJyusinAndR();
+	mesh_is[2+30]->setWorld(&umesh_unit->world);
 	for(int i=0;i<100;i++) {
 	{
 		UMeshUnit* umesh_unit = umesh_units[2+i];
@@ -2098,7 +2100,7 @@ void Game::Run() {
 		stringconverter sc;
 		sc.charToWCHAR(buf,buff);
 		
-		DebugTexts::instance()->setText(g,wcslen(buff),buff);
+	//	DebugTexts::instance()->setText(g,wcslen(buff),buff);
 		if (watches_for_keisoku.times[5] > 10) {
 			mylog::writelog(KTROBO::INFO, buf);
 			mylog::writelog(KTROBO::INFO, "\n\n");

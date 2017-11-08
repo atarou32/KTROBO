@@ -111,7 +111,7 @@ void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) 
 		atarihan->setDT(dsecond);
 		atarihan->calcJyusinAndR(false);
 		mesh_i->setWorld(&world);
-		mesh_i->setIsRender(true);
+		//mesh_i->setIsRender(true);
 
 	} else if(mesh_i) {
 	
@@ -128,9 +128,11 @@ void BulletController::atariShori(Game* game, AtariHantei* hantei, MYMATRIX* vie
 	int temp = hantei->getAnsWaza(kuwasiku,2048);
 	for (int i=0;i<temp;i++) {
 		if (kuwasiku[i].aite_umesh && kuwasiku[i].my_umesh) {
-
-		
-			bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+			MeshInstanced * mm = bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i;
+			Bullet* b = &bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]];
+			if (b->robo && (b->robo->atarihan != kuwasiku[i].aite)) {
+				bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+			}
 		}
 
 

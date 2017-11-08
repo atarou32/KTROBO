@@ -1452,6 +1452,7 @@ private:
 	float last;
 	float now;
 	bool is_loop;
+	bool is_lock;
 public:
 
 	RoboAnimeLoop() {
@@ -1462,6 +1463,7 @@ public:
 		now = 0;
 		is_loop = 0;
 		nowsecond = 0;
+		is_lock = false;
 	};
 
 	~RoboAnimeLoop() {};
@@ -1471,7 +1473,13 @@ public:
 			return true;
 		}
 	}
+	void setLock(bool t) {
+		is_lock = t;
+	}
+
 	void setAnime(float first, float last, bool is_loop) {
+		if (is_lock) return;
+
 		this->first = first;
 		this->last = last;
 		this->is_loop = is_loop;
@@ -1637,7 +1645,7 @@ public:
 
 	void resetSetKabe() {
 		setkabe_count = 0;
-		setkabe_state = &kuutyuu;
+		//setkabe_state = &kuutyuu;
 	}
 
 	void incSetKabe() {

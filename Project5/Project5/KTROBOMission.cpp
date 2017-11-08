@@ -578,8 +578,31 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 				if (robodayo->atarihan) {
 					robodayo->atarihan->calcJyusinAndR();
 					robodayo->atarishori(g, &game->view, hantei, test, (int)stamp);
-					robodayo->fireUpdate(g, game, scene, bullet_c, hantei,dsecond, (int)stamp); 
-	
+					robodayo->fireUpdate(g, game, scene, bullet_c, hantei,dsecond, (int)stamp);
+					if (robodayo->move_state->isJump()) {
+							DebugTexts::instance()->setText(g,4,L"jump");
+					}
+					if (robodayo->move_state->isJumpKABE()) {
+							DebugTexts::instance()->setText(g,4,L"jumk");
+					}
+
+					char buf[512];
+					WCHAR buf2[512];
+					memset(buf,0,512);
+					itoa(robodayo->setkabe_count,buf,10);
+					stringconverter sc;
+					sc.charToWCHAR(buf,buf2);
+					DebugTexts::instance()->setText(g,wcslen(buf2),buf2);
+
+					if (robodayo->setti_state == &robodayo->setti) {
+						DebugTexts::instance()->setText(g,5,L"setti");
+					} else {
+						DebugTexts::instance()->setText(g,5,L"setno");
+					}
+					if (robodayo->setkabe_state == &robodayo->setkabe) {
+						DebugTexts::instance()->setText(g,5,L"setka");
+					}
+
 				//	robodayo->atariAim(g, &game->view, frameTime, (int)frame);
 				}
 
