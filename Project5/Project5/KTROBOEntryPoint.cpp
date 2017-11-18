@@ -96,6 +96,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 		goto ktrobo_error;
 	} catch (...) {
+		KTROBO::mylog::writelog(KTROBO::FATAL_ERROR, "unknown error init failure");
 		goto ktrobo_error;
 	}
 
@@ -130,9 +131,12 @@ ktrobo_error:
 	}
 	
 	if (game) {
+
+		KTROBO::mylog::writelog(KTROBO::INFO, "start game del");
 		game->Del();
 		delete game;
 		game = 0;
+		KTROBO::mylog::writelog(KTROBO::INFO, "end game del");
 	}
 	KTROBO::CS::instance()->Del();
 

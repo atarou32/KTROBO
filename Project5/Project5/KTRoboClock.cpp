@@ -1,5 +1,5 @@
 #include "KTRoboClock.h"
-
+#include <WinSock2.h>
 
 using namespace KTROBO;
 void ClockWatch::startWatch() {
@@ -19,6 +19,16 @@ double ClockWatch::stopWatch() {
 
 
 
+}
+
+
+
+void ClockWatch::wait(unsigned int microsecond) {
+	
+	timeval tt;
+	tt.tv_sec = 0;
+	tt.tv_usec = microsecond*1000;
+	select(0,NULL,NULL,NULL,&tt);
 }
 
 void ClockWatches::startWatch(int index) {

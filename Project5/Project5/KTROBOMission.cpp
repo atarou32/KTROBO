@@ -39,18 +39,19 @@ int Mission::get_now_state() {
 
 
 void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
+
 	MYVECTOR3 up(0,0,1);
 	MYVECTOR3 pos(0,0,0);
 	MYVECTOR3 vec(0,-1,0);
 	MyVec3TransformCoord(pos,pos,*world);
 	MyVec3TransformNormal(vec,vec,*world);
 	MYVECTOR3 temp_lookfrom = up * R *3+ pos - vec * R*5;
-	if (vec.float3.z > 0.5) {
+	if (vec.float3.z > 0.8) {//0.5
 		temp_lookfrom = temp_lookfrom + up * R*2 + vec * R * 7;
 	}
 	float offset = 1;
 	float maxspeed = 1.57 / 2.0f*3; // Å‘å‘¬“x
-	if (vec.float3.z > 0.5f) {
+	if (vec.float3.z > 0.8f) {//0.5
 		maxspeed *= 1000.0f;
 		lookfromspeed = maxspeed;
 		offset = 6;
@@ -94,7 +95,7 @@ void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
 
 
 	maxspeed = 1.57/1.0f*100.0f;
-	if (vec.float3.z > 0.5f) {
+	if (vec.float3.z > 0.8f) {//0.5
 		maxspeed *= 100.0f;
 		lookatspeed = maxspeed;
 	}
@@ -134,6 +135,12 @@ void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
 	} else {
 		lookatspeed /= 1.1f;
 	}
+
+	/*
+	lookfrom = MYVECTOR3(50,50,0);
+	lookat = MYVECTOR3(0,0,0);
+	up = MYVECTOR3(0,0,1);
+	*/
 	MyMatrixLookAtRH(view,lookfrom,lookat,up);
 
 
@@ -142,6 +149,8 @@ void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
 void Gamen_MISSION::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 
 	static int stam =0;
+
+	//DebugTexts::instance()->setText(g, 11,L"startbyouga");
 	if (stam) {
 		if (stam != stamp) {
 
@@ -156,8 +165,11 @@ void Gamen_MISSION::byouga(Graphics* g, GUI* gui, float dsecond, int stamp) {
 	}
 	
 	if (robo) {
+
+		//DebugTexts::instance()->setText(g, 9,L"startbyou");
 		setHoui(robo->atarihan->rotz);
 		setView(&robo->atarihan->world,robo->atarihan->r,dsecond);
+		//DebugTexts::instance()->setText(g, 9,L"startbyou");
 	}
 	if (bullet_c) {
 		bullet_c->byouga(g,&this->view,g->getProj(),dsecond, stamp);
@@ -390,14 +402,20 @@ void Gamen_MISSION::setHoui(float rotz) {
 
 }
 void Game_SCENE::mainrenderIMPL(bool is_focused, Graphics* g, Game* game) {
+
+//	DebugTexts::instance()->setText(g,10,L"mainrender");
+
 	if (gm) {
+//		DebugTexts::instance()->setText(g,8,L"rendergm");
 		gm->robo = game->robodayo;
 		gm->byouga(g,NULL,game->getDMSecond(), game->getTimeStamp());
 		game->view = gm->view;
 		game->lookfromtoat = gm->lookat - gm->lookfrom;
 		tex->setViewProj(g,&gm->view,g->getProj(),&gm->lookfrom,&gm->lookat);
 		tex2->setViewProj(g,&gm->view, g->getProj(),&gm->lookfrom,&gm->lookat);
+//		DebugTexts::instance()->setText(g,9,L"renderend");
 	}
+
 }
 
 void Game_SCENE::renderhojyoIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
@@ -416,26 +434,49 @@ void Game_SCENE::aiIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Gam
 
 void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
 
+	//DebugTexts::instance()->setText(g,12,L"startposimpl");
 	double millisecond = game->stopWatchForButukari();//stopWatch();
 	game->startWatchForButukari();
 	if (millisecond > RENDERTIME_IGNORETIME) {
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
+		//DebugTexts::instance()->setText(g,9,L"leavetask");
 		//Sleep(1);
-		millisecond = RENDERTIME_SETTIME;
+		millisecond = POSBUTUKARITIME_SETTIME;
 		butukari_clock.plus((float)millisecond);
 		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
-	} else if ( millisecond < RENDERTIME_SETTIME ) {
+		//DebugTexts::instance()->setText(g,9,L"entertask");
+	} else if ((millisecond < POSBUTUKARITIME_SETTIME) && (millisecond > 0)) {
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
 		butukari_clock.plus((float)millisecond);
-		Sleep(DWORD(RENDERTIME_SETTIME - millisecond));
-		millisecond = RENDERTIME_SETTIME;
+		Sleep(DWORD(POSBUTUKARITIME_SETTIME - millisecond));
+	//	ClockWatch::wait(POSBUTUKARITIME_SETTIME - millisecond);
+
+/*		char buf[512];
+		WCHAR wbuf[512];
+
+		_itoa(POSBUTUKARITIME_SETTIME - millisecond,buf,10);
+		stringconverter sc;
+		sc.charToWCHAR(buf,wbuf);
+		DebugTexts::instance()->setText(g,wcslen(wbuf),wbuf);
+		//Sleep(1);
+		*/
+		millisecond = POSBUTUKARITIME_SETTIME;
 		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
 	} else {
 		
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
 		butukari_clock.plus((float)millisecond);
-		//Sleep(1);
-		millisecond = RENDERTIME_SETTIME;
+/*
+		char buf[512];
+		WCHAR wbuf[512];
+
+		_itoa(POSBUTUKARITIME_SETTIME - millisecond,buf,10);
+		stringconverter sc;
+		sc.charToWCHAR(buf,wbuf);
+		DebugTexts::instance()->setText(g,wcslen(wbuf),wbuf);
+*/
+		Sleep(1);
+	//	millisecond = POSBUTUKARITIME_SETTIME;
 		CS::instance()->enter(CS_TASK_CS, "enter main", TASKTHREADS_UPDATEPOSBUTUKARI);
 	}
 
@@ -478,11 +519,23 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 		watches.startWatch(TASKTHREADS_UPDATEPOSBUTUKARI);
 		CS::instance()->enter(CS_DEVICECON_CS,"unko");
 		CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+		
+		char buf[512];
+		WCHAR wbuf[512];
+
+		_itoa(watches.times[TASKTHREADS_UPDATEPOSBUTUKARI],buf,10);
+		stringconverter sc;
+		sc.charToWCHAR(buf,wbuf);
+		DebugTexts::instance()->setText(g,wcslen(wbuf),wbuf);
+		//DebugTexts::instance()->setText(g,8,L"startpos");
 		gm->posButukari(g,this,game, hantei, watches.times[TASKTHREADS_UPDATEPOSBUTUKARI],game->getTimeStamp());
+		//DebugTexts::instance()->setText(g,6,L"endpos");
 		CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 		CS::instance()->leave(CS_DEVICECON_CS, "unko");
 	}
 	//Sleep(5);
+
+	//DebugTexts::instance()->setText(g,10,L"endposimpl");
 }
 
 void Game_SCENE::loaddestructIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_State* l, Game* game) {
@@ -523,8 +576,9 @@ bool Game_SCENE::handleMessage(int msg, void* data, DWORD time) {
 
 
 void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHantei* hantei, float dsecond, int stamp) {
-
+//	DebugTexts::instance()->setText(g,18,L"posbutukari thread");
 	if (bullet_c) {
+	//	DebugTexts::instance()->setText(g,8,L"bullet c");
 		bullet_c->update(g,hantei,dsecond, stamp);
 		game->watches_for_keisoku.startWatch(2);
 
@@ -585,7 +639,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					if (robodayo->move_state->isJumpKABE()) {
 							DebugTexts::instance()->setText(g,4,L"jumk");
 					}
-
+/*
 					char buf[512];
 					WCHAR buf2[512];
 					memset(buf,0,512);
@@ -593,7 +647,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					stringconverter sc;
 					sc.charToWCHAR(buf,buf2);
 					DebugTexts::instance()->setText(g,wcslen(buf2),buf2);
-
+*/
 					if (robodayo->setti_state == &robodayo->setti) {
 						DebugTexts::instance()->setText(g,5,L"setti");
 					} else {

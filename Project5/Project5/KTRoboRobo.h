@@ -1618,6 +1618,8 @@ public:
 	int pressed_space_count;
 	int setti_count;
 	int setkabe_count;
+	int setti_jizoku_count;
+	int setno_jizoku_count;
 	MYVECTOR3 kabe_housen;
 
 	float jump_f_z;
@@ -1760,6 +1762,7 @@ public:
 	Robo(void);
 	~Robo(void);
 
+	void boosterEffect(Game* game, Graphics* g, float dt, int stamp);
 	void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
 	void init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei);
 	void release();

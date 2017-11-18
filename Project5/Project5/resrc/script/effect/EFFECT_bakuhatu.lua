@@ -1,0 +1,35 @@
+dofile("tolua_glue/tolua.lua")
+
+manager = EffectManager:getIS(0,0)
+
+bakuhatu_id = manager:getEffect("bakuhatu", "resrc/img/effect/bakuhatu.png","resrc/script/effect/EFFECT_bakuhatu.lua")
+manager:deleteEffect(bakuhatu_id)
+manager:deleteEffectImpl()
+manager:makeEffectPart(bakuhatu_id, 0, "1000000", true,"1000","1000")
+manager:setEffectPartPos(bakuhatu_id,0,"0","1000000","0","0","0","0","0","0")
+manager:setEffectPartTexPos(bakuhatu_id,0,"0","160",0,0,32,32)
+manager:setEffectPartTexPos(bakuhatu_id,0,"161","320",33,0,32,32)
+manager:setEffectPartTexPos(bakuhatu_id,0,"321","480",0,33,32,32)
+manager:setEffectPartTexPos(bakuhatu_id,0,"481","640",33,33,32,32)
+manager:setEffectPartTexPos(bakuhatu_id,0,"641","820",0,65,32,32)
+manager:setEffectPartTexPos(bakuhatu_id,0,"821","1000",33,65,32,32)
+manager:setEffectPartWH(bakuhatu_id,0,"0","1000","1","1","1","1")
+manager:setEffectPartRot(bakuhatu_id,0,"0","1000","0","0","0","0","0","0")
+manager:setEffectPartColor(bakuhatu_id,0,"0","1000",0xFFFFFFFF,0xFFFFFF44)
+
+--impl_id = manager:getEffectImpl(bakuhatu_id)
+--manager:setEffectImplIsRender(impl_id,true)
+--manager:setEffectImplIsStart(impl_id,true)
+
+--impl_id2 = manager:getEffectImpl(bakuhatu_id)
+--manager:setEffectImplWorld(impl_id2,{1,0,0,0,0,1,0,0,0,0,1,0,10,0,10,1})
+--manager:setEffectImplTime(impl_id2,"200")
+--manager:setEffectImplIsRender(impl_id2,true)
+--manager:setEffectImplIsStart(impl_id2,true)
+
+--impl_id3 = manager:getEffectImpl(bakuhatu_id)
+--manager:setEffectImplWorld(impl_id3,{1,0,0,0,0,1,0,0,0,0,1,0,10,10,10,1})
+--manager:setEffectImplTime(impl_id3,"300")
+--manager:setEffectImplIsRender(impl_id3,true)
+
+--manager:setEffectImplIsStart(impl_id3,true)

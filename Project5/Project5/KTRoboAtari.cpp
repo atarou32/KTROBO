@@ -178,9 +178,9 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 				pp.e[2] += abs(MyVec3Dot(&pp.u[2], &v)) * dt;
 				*/
 				henkanobb.c = henkanobb.c - v * dt/2;
-				henkanobb.e.float3.x += abs(MyVec3Dot(henkanobb.u[0], v)) * dt;
-				henkanobb.e.float3.y += abs(MyVec3Dot(henkanobb.u[1], v)) * dt;
-				henkanobb.e.float3.z += abs(MyVec3Dot(henkanobb.u[2], v)) * dt;
+				henkanobb.e.float3.x += henkanobb.e[0] * abs(MyVec3Dot(henkanobb.u[0], v)) * dt;
+				henkanobb.e.float3.y += henkanobb.e[1] * abs(MyVec3Dot(henkanobb.u[1], v)) * dt;
+				henkanobb.e.float3.z += henkanobb.e[2] * abs(MyVec3Dot(henkanobb.u[2], v)) * dt;
 
 
 				if ((MyVec3Length(henkanobb.e) < 0.00001f) || (MyVec3Length(henkanobb.u[0]) < 0.000001) ||

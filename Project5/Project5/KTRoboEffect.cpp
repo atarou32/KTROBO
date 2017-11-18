@@ -195,6 +195,19 @@ void EffectPart::update(EffectImpl* effect_impl, Texture* texture, float loop_ti
 	float tt = effect_impl->getTime();// time ‚¾‚ªƒ‹[ƒv‚·‚é‚©‚Ç‚¤‚©‚É‚æ‚Á‚Ä•Ï‚í‚Á‚Ä‚­‚é
 	float moto_tt = tt;
 	tt = tt - loop_time;
+
+	if (effect_impl->getIsActivated()) {
+	if (effect_impl->isActivateJyunbiOK()) {
+		
+	} else {
+		texture->setRenderBillBoardIsRender(billboard_id,false);
+		effect_impl->incActivateJyunbi();
+		if (effect_impl->isActivateJyunbiOK()) {
+			texture->setRenderBillBoardIsRender(billboard_id,true);
+		}
+	}
+	}
+
 	if (tt >= end_time) {
 
 

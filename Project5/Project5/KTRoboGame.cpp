@@ -92,6 +92,7 @@ Game::Game(void)
 	//gg = 0;
 	renderTCB = 0;
 	effect_managers = 0;
+	weapon_effect_manager = 0;
 	effect_suuji = 0;
 }
 
@@ -800,7 +801,7 @@ bool Game::Init(HWND hwnd) {
 	}
 
 	effect_managers = new EffectManagers(texdayo->getInstance(0));// 最初の方
-
+	weapon_effect_manager = new WeaponEffectManager(effect_managers->getInstance(0));
 	MyLuaGlueSingleton::getInstance()->setColEffectManagers(effect_managers);
 
 	{
@@ -911,7 +912,9 @@ bool Game::Init(HWND hwnd) {
 	//long work[TASK_WORK_SIZE];
 
 	texdayo->getInstance(0)->setViewProj(g,&view,&proj,&from,&at);
-	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua.txt");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_boosterhi.lua");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_boostertaiki.lua");
 	effect_suuji = new EffectSuuji(TASKTHREADS_UPDATEMAINRENDER,effect_managers->getInstance(0));
 
 	unsigned long work[TASK_WORK_SIZE];
@@ -984,17 +987,23 @@ void Game::Del() {
 	*/
 	
 	if (renderTCB) {
+		KTROBO::mylog::writelog(KTROBO::INFO, "start del rendertcb");
 		task_threads[TASKTHREADS_UPDATEMAINRENDER]->kill(renderTCB);
 		Sleep(100);
+		KTROBO::mylog::writelog(KTROBO::INFO, "end del rendertcb");
 	}
 	// シーンは別の場所でデストラクトを呼ぶ　とかいてあったがすべてデストラクトすることにした
 	int sizz = scenes.size();
+
+	KTROBO::mylog::writelog(KTROBO::INFO, "\nscene del %d size\n", sizz);
+
 	while(sizz) {
 		this->removeScene();
 		sizz--;
 	}
 	Scene::Del();
 
+	KTROBO::mylog::writelog(KTROBO::INFO, "scene deleted");
 
 
 
@@ -1006,7 +1015,9 @@ void Game::Del() {
 
 	for (int i=0;i<TASKTHREAD_NUM;i++) {
 		if (task_threads[i]) {
+			KTROBO::mylog::writelog(KTROBO::INFO, "wait for %d",i);
 		task_threads[i]->waitForTaskEnd();
+		KTROBO::mylog::writelog(KTROBO::INFO,"wait end %d",i);
 		}
 	}
 	
@@ -1016,7 +1027,7 @@ void Game::Del() {
 		delete task_threads[TASKTHREADS_UPDATEMAINRENDER];
 		task_threads[TASKTHREADS_UPDATEMAINRENDER] = 0;
 	}
-	
+	KTROBO::mylog::writelog(KTROBO::INFO, "deleted task threads");
 
 	/*
 	if (task_threads[TASKTHREADS_AIDECISION]) {
@@ -1189,6 +1200,10 @@ void Game::Del() {
 	 if (effect_managers) {
 		 delete effect_managers;
 		 effect_managers = 0;
+	 }
+	 if (weapon_effect_manager) {
+		 delete weapon_effect_manager;
+		 weapon_effect_manager = 0 ;
 	 }
 
 	 if (texdayo) {
@@ -2158,6 +2173,10 @@ void Game::Run() {
 	effect_suuji->update(&lookfromtoat);
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 	effect_managers->update(frameTime,(int)frame);
+	weapon_effect_manager->update(frameTime);
+	OBB rec;
+	rec.c = MYVECTOR3(0,0,0);
+	g->drawOBBFill(g,0xFFFF0000,&idenmat,&view,g->getProj(),&rec);
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
@@ -2212,6 +2231,8 @@ void Game::Run() {
 		}
 		now_scene->mainrender(true);
 	}
+	static int robodayo_boostereffect_count = 0;
+	robodayo_boostereffect_count++;
 
 	robodayo->byouga(g,&view,&proj);
 	if (robodayo->atarihan) {
@@ -2221,6 +2242,10 @@ void Game::Run() {
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		robodayo->atarihan->calcJyusinAndR();
 		
+		if (robodayo_boostereffect_count % 2==0) {
+			robodayo->boosterEffect(this,g,frameTime,timestamp);
+		}
+
 		if (sap && sap->update()) {
 			robodayo->aphelper->setNoCalcYet(false);
 		}
@@ -2234,6 +2259,12 @@ void Game::Run() {
 		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
 		roboaitedayo->atarihan->calcJyusinAndR();
+		
+		if (robodayo_boostereffect_count % 2==0) {
+			roboaitedayo->boosterEffect(this,g,frameTime,timestamp);
+		}
+
+
 	/*	
 		if (sap->update()) {
 			robodayo->aphelper->setNoCalcYet(false);

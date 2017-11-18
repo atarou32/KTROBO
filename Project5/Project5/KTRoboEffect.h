@@ -44,6 +44,7 @@ class Effect;
 class EffectImpl {
 private:
 	bool is_activated; // update‚ÌÛ‚É‘ÎÛ‚Æ‚·‚é‚©‚Ç‚¤‚©
+	int activate_jyunbi_count;
 	int effect_id;
 	MYMATRIX world; // ‰ŠúˆÊ’uŽp¨
 	float time; // ”­¶‚µ‚Ä‚©‚ç‚Ì‚ÌÄ¶ŽžŠÔ
@@ -67,6 +68,7 @@ public:
 		time = 0;
 		this->effect_impl_id = effect_impl_id;
 		is_activated = false;
+		activate_jyunbi_count = 0;
 		this->effect_id = effect_id;
 		MyMatrixIdentity(this->world);
 	}
@@ -85,8 +87,40 @@ public:
 		this->world = *world;
 	}
 
-	bool getIsActivated() {return is_activated;}
-	void setIsActivated(bool t) {is_activated = t;}
+	bool getIsActivated() {
+		
+		
+		return is_activated;
+	
+	}
+
+	bool isActivateJyunbiOK() {
+		if (activate_jyunbi_count > 2) {
+			return true;
+		}
+		return false;
+	}
+
+	void incActivateJyunbi() {
+		if (activate_jyunbi_count <= 2) {
+			activate_jyunbi_count ++;
+		}
+	}
+
+	void setIsActivated(bool t) {
+		if (t) {
+			activate_jyunbi_count = 0;
+			
+		}
+
+		is_activated = t;
+	
+	
+	
+	}
+
+	
+
 	void changeEffectID(Texture* texture, Effect* mae_effect, Effect* new_effect);
 };
 

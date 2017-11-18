@@ -35,6 +35,7 @@
 #include "KTRoboGamen_GARAGE.h"
 #include "KTRoboEffect.h"
 #include "KTRoboEffectSuuji.h"
+#include "KTRoboWeapon.h"
 
 namespace KTROBO {
 
@@ -139,7 +140,9 @@ private:
 	Messages* messages;
 	MySound* sound;
 	TempInputShori* temp_input_shori;
+public:
 	EffectManagers* effect_managers;
+	WeaponEffectManager* weapon_effect_manager;
 public:
 	EffectSuuji* effect_suuji;
 //	Sinai* sinai;
@@ -218,7 +221,7 @@ public:
 		CS::instance()->enter(CS_TASK_CS, "render lock",2);
 		CS::instance()->enter(CS_TASK_CS, "anime lock", 1);
 		CS::instance()->enter(CS_TASK_CS, "atari lock", 0);
-			CS::instance()->enter(CS_DEVICECON_CS, "device lock");
+		CS::instance()->enter(CS_DEVICECON_CS, "device lock");
 		CS::instance()->enter(CS_MESSAGE_CS, "message lock");
 		CS::instance()->enter(CS_RENDERDATA_CS, "render lock");
 		
@@ -228,7 +231,7 @@ public:
 		if (s) {
 			s->leave();
 			// タスクをキルしてからキル予定のタスクが終了するまでデリートしない
-			for (int i=0;i<10;i++) {
+			for (int i=0;i<30;i++) {
 			CS::instance()->leave(CS_RENDERDATA_CS, "render unlock");
 			CS::instance()->leave(CS_MESSAGE_CS, "message lock");
 			CS::instance()->leave(CS_DEVICECON_CS, "device lock");

@@ -58,22 +58,37 @@ void Bullet::setParam(AtariBase* robo, RoboParts* parts, MYVECTOR3* hassyapos, M
 
 bool Bullet::fire(Game* game, AtariHantei* hantei) {
 
-	// エフェクトが実装されたらエフェクトも再生するようにする
+	// 前回の場所で当たり判定が行われるのを防ぐ
+	setAtariJyunbi(false);
+	MYMATRIX world = shoki_world;
+	MYMATRIX dpos_wor;
+	dpos = MYVECTOR3(0,0,0);
+	atarihan->setV(&h_v);
+	atarihan->setXYZ(h_pos.float3.x, h_pos.float3.y, h_pos.float3.z);
 	
+	dpos = dpos + atarihan->v* 0;
+	MyMatrixTranslation(dpos_wor, dpos.float3.x,dpos.float3.y,dpos.float3.z);
+	MyMatrixMultiply(world,world,dpos_wor);
+	// rotx roty rotz を計算する必要がある // setworldを作ることで対応 bool calcworldをつけるようにした
+	//atarihan->setXYZ(rand() %1000/10.0,rand() % 1000/10.0,rand() %10000/10.0);//test,test2,0);
+	atarihan->setWorld(&world);
+	atarihan->setDT(0);
+	atarihan->calcJyusinAndR(false);
+	mesh_i->setWorld(&world);
+
 	mesh_i->setIsRender(true);
 	this->setIsUse(true);
 	this->is_fired = true;
-	atarihan->setV(&h_v);
-	atarihan->setXYZ(h_pos.float3.x, h_pos.float3.y, h_pos.float3.z);
-	dpos = MYVECTOR3(0,0,0);
+	
 	CS::instance()->enter(CS_RENDERDATA_CS, "un");
+	
 	//atarihan->setIsEnabled(hantei,true);
 	// もともとtrueになっているので問題ない
 
 	MYVECTOR3 pp(0,0,0);
 //	MyVec3TransformCoord(pp,pp,atarihan->world);
 
-	game->effect_suuji->render(1234567890, &game->lookfromtoat,&pp);
+	game->effect_suuji->render(1, &game->lookfromtoat,&pp);
 
 
 	CS::instance()->leave(CS_RENDERDATA_CS, "un");
@@ -99,6 +114,7 @@ void Bullet::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float dsecond, 
 void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) {
 	if(mesh_i && is_fired && is_use){
 		
+		setAtariJyunbi(true);
 		MYMATRIX world = shoki_world;
 		MYMATRIX dpos_wor;
 
@@ -130,8 +146,15 @@ void BulletController::atariShori(Game* game, AtariHantei* hantei, MYMATRIX* vie
 		if (kuwasiku[i].aite_umesh && kuwasiku[i].my_umesh) {
 			MeshInstanced * mm = bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i;
 			Bullet* b = &bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]];
-			if (b->robo && (b->robo->atarihan != kuwasiku[i].aite)) {
+			if (b->getIsUse() && b->getAtariJyunbi() && b->robo && (b->robo->atarihan != kuwasiku[i].aite)) {
 				bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+				MYMATRIX worldd;
+				MYVECTOR3 pos(0,0,0);
+				MyVec3TransformCoord(pos,pos,b->atarihan->world);
+				MyMatrixTranslation(worldd,pos[0],pos[1],pos[2]);
+				game->weapon_effect_manager->makeWeaponEffect("bakuhatu", 1500,false,&worldd,NULL,NULL);
+				b->setIsUse(false);
+
 			}
 		}
 
@@ -214,7 +237,7 @@ void BulletController::Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* l
 			float z = bullets[i].atarihan->z;
 			MyMatrixTranslation(world,x,y,z);
 			mi->setWorld(&world);
-			mi->setIsRender(true);
+			mi->setIsRender(false);//true);
 			umesh_id_to_bullet_indexs.insert(std::pair<int,int>(bullets[i].atarihan->meshs[0]->getUMESHID(),i));
 		}
 	}

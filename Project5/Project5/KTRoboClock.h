@@ -18,6 +18,8 @@ public:
 	~ClockWatch(){};
 	void startWatch();
 	double stopWatch();
+	static void wait(unsigned int microsecond);
+
 };
 
 

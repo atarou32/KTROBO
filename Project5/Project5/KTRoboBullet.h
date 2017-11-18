@@ -15,9 +15,12 @@
 #endif
 
 namespace KTROBO {
+#define BULLET_ATARI_JYUNBI_COUNT_MAX 2
 
 	class Bullet : public AtariBase {
 	private:
+		bool is_atari_jyunbi;
+		int atari_jyunbi_count;
 		bool is_use;
 		bool is_fired;
 		float fire_distance; // ”­ŽË‚µ‚Ä‚©‚çˆÚ“®‚µ‚½‹——£
@@ -49,9 +52,30 @@ namespace KTROBO {
 			atari_tikei = 0;
 			mesh_i = 0;
 			MyMatrixIdentity(shoki_world);
+			is_atari_jyunbi = false;
+			atari_jyunbi_count = 0;
 		}
 
 		~Bullet();
+
+		void setAtariJyunbi(bool t) {
+			if (!t) {
+				atari_jyunbi_count = 0;
+				is_atari_jyunbi = false;
+			} else {
+				if (atari_jyunbi_count < BULLET_ATARI_JYUNBI_COUNT_MAX) {
+					atari_jyunbi_count++;
+				} else {
+					is_atari_jyunbi = true;
+				}
+			}
+		}
+
+		bool getAtariJyunbi() {
+			return is_atari_jyunbi;
+		}
+
+
 
 		void setIsUse(bool t) {
 			is_use = t;
