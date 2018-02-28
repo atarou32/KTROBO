@@ -114,7 +114,7 @@ void Robo::upDownMuki(float mouse_y, float dmouse_y) {
 	// legÇ≈ë≈Çøè¡Ç∑
 	MYMATRIX mat;
 	MyMatrixRotationX(mat,updown_muki);
-	MyMatrixScaling(leg->leg->rootbone_matrix_local_kakeru,0.65,0.65,0.65);
+	MyMatrixScaling(leg->leg->rootbone_matrix_local_kakeru,0.45,0.45,0.45);
 	MyMatrixMultiply(mat,leg->leg->rootbone_matrix_local_kakeru,mat);
 	atari_leg->setMatrixKakeru(&mat);
 	atari_leg->setInfo();
@@ -181,7 +181,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 	
 	if (arm) {
 		if (arm->larm) {
-			MyMatrixScaling(arm->larm->rootbone_matrix_local_kakeru,0.91,0.91,0.91);
+			MyMatrixScaling(arm->larm->rootbone_matrix_local_kakeru,0.41,0.41,0.41);//0.91
 			static int test=0;
 			test++;
 				
@@ -191,7 +191,7 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 		//	arm->larm->drawWithObbs(g,&world,view,proj);
 		}
 		if (arm->rarm) {
-			MyMatrixScaling(arm->rarm->rootbone_matrix_local_kakeru,0.91,0.91,0.91);
+			MyMatrixScaling(arm->rarm->rootbone_matrix_local_kakeru,0.41,0.41,0.41);//0.91
 			static int test=0;
 			test++;
 
@@ -221,8 +221,10 @@ void Robo::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj) {
 
 	atarihan->draw(g,view,proj,0,NULL,NULL,true,false,true,true);
 	LockOnSystem sys;
-
-	sys.byougaStudyPoint(g, &this->atarihan->world, view, 10,100,6,10,6,10,300,300,500);
+ //	MYMATRIX invworld;
+ //	MyMatrixInverse(invworld,NULL,atarihan->world);
+	sys.byougaRAY(g,&atarihan->world,view,apinfo->dmin,apinfo->dmax,apinfo->mintate,apinfo->maxtate,apinfo->minyoko,apinfo->maxyoko,apinfo->dtate,apinfo->dyoko,apinfo->dd);
+ //	sys.byougaStudyPoint(g, &this->atarihan->world, view,apinfo->dmin,apinfo->dmax,apinfo->mintate,apinfo->maxtate,apinfo->minyoko,apinfo->maxyoko,apinfo->dtate,apinfo->dyoko,apinfo->dd);// 70,120,20,40,20,40,5,5,15);//fcs3 10,100,6,10,6,10,300,300,500);
 	//sys.byougaBigStudyPoint(120,g, &this->atarihan->world, view, 10,100,10,20,10,20,300,300,500);
 	aphelper->byougaAP8(g,view);
 	if (raweapon) {
@@ -375,8 +377,71 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 		static int iunko = 9;
 	static bool bunko = false;
-
+	bunko = false;
 	if (ap) {
+
+		if (!apinfo->isCalcFinished() && !apinfo->isCalced() && ap->getIsSet()) {
+			ap->hanneiSetTheta(this,true);
+			aphelper->setNoCalcYet(false);
+				{
+			RAY ra;
+			
+			MeshBone* handbo = arm->rarm->Bones[arm->rarm->BoneIndexes["handBone"]];
+			MYVECTOR3 tempd(0,0,0);
+			MYMATRIX tempma;
+			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+			MyVec3TransformCoord(tempd,tempd,tempma);
+			MYVECTOR3 tempdn(1,0,0);
+			MyVec3TransformNormal(tempdn,tempdn, tempma);
+			ra.org = tempd;
+			ra.dir = tempdn * 30;
+			MYMATRIX iden;
+			MyMatrixIdentity(iden);
+
+			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+			
+			}
+			//return;
+			bunko = true;
+		}
+
+		if (!apinfo->isCalcFinished() && !apinfo->isCalced() && ap_hidari->getIsSet()) {
+			ap_hidari->hanneiSetTheta(this,false);
+			aphelper->setNoCalcYet(false);
+		
+			{
+			RAY ra;
+			
+			MeshBone* handbo = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
+			MYVECTOR3 tempd(0,0,0);
+			MYMATRIX tempma;
+			MyMatrixMultiply( tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+			MyVec3TransformCoord(tempd,tempd,tempma);
+			MYVECTOR3 tempdn(1,0,0);
+			MyVec3TransformNormal(tempdn,tempdn, tempma);
+			ra.org = tempd;
+			ra.dir = tempdn * 30;
+			MYMATRIX iden;
+			MyMatrixIdentity(iden);
+
+			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+			
+			}
+
+			bunko = true;
+	
+		}
+
+		if (apinfo->isCalcFinished() && apinfo->isCalced()) {
+			bunko = true;
+		}
+
+		if (bunko) {
+			return;
+		}
+
+//	return;
+
 		MYVECTOR3 moku(0,0,0);
 		MYMATRIX trans_world;
 		MyMatrixInverse(trans_world, NULL, atarihan->world);
@@ -486,13 +551,17 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 					ob.c = te;
 					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
 					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+					MYVECTOR3 tet;
+					
+				
+
 					if (!bunko) {
 						if (apinfo->isCalcFinished()) {
 							aim(g, view);
 							bunko = false;
 						} else {
 							aphelper->setMoku(&te);
-							
+							//aim(g,view);// new
 							bunko = true;
 						}
 				
@@ -621,7 +690,66 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 			MyMatrixIdentity(iden);
 
 			g->drawRAY(g,0xFFFF0000, &atarihan->world,view,g->getProj(), 30,&ra);
+			WCHAR wbuf[512];
+			char buf[512];
+			char tempbuf[512];
+			memset(buf,0,512);
+			memset(tempbuf,0,512);
+			stringconverter sc;
+			LockOnSystem los;
+			MYVECTOR3 tet;
+				tet = los.getPosOfStudyPoint(434, 70,120,20,40,20,40,5,5,15);
+					//MyVec3TransformCoord(tet,tet,atarihan->world);
+					{
+					MYVECTOR3 ss;
+					ss = tet - ra.org;
+					MYVECTOR3 dirr;
+					MyVec3Normalize(dirr,ra.dir);
+					MYVECTOR3 dis;
+					dis = ss - dirr * MyVec3Dot(ss,dirr);
+					float tes = MyVec3Length(dis);
+					int tess = (int)(tes * 10000);
+					_itoa_s(tess,tempbuf,10);
+					strcat_s(buf,tempbuf);
+					}
 
+					tet = los.getPosOfStudyPoint(435, 70,120,20,40,20,40,5,5,15);
+					//MyVec3TransformCoord(tet,tet,atarihan->world);
+					{
+					MYVECTOR3 ss;
+					ss = tet - ra.org;
+					MYVECTOR3 dirr;
+					MyVec3Normalize(dirr,ra.dir);
+					MYVECTOR3 dis;
+					dis = ss - dirr * MyVec3Dot(ss,dirr);
+					float tes = MyVec3Length(dis);
+					int tess = (int)(tes * 10000);
+					_itoa_s(tess,tempbuf,10);
+					strcat_s(buf,",,,");
+					strcat_s(buf,tempbuf);
+					}
+					
+					tet = los.getPosOfStudyPoint(436, 70,120,20,40,20,40,5,5,15);
+					//MyVec3TransformCoord(tet,tet,atarihan->world);
+					{
+					MYVECTOR3 ss;
+					ss = tet - ra.org;
+					MYVECTOR3 dirr;
+					MyVec3Normalize(dirr,ra.dir);
+					MYVECTOR3 dis;
+					dis = ss - dirr * MyVec3Dot(ss,dirr);
+					float tes = MyVec3Length(dis);
+					int tess = (int)(tes * 10000);
+					_itoa_s(tess,tempbuf,10);
+						strcat_s(buf,",,,");
+					strcat_s(buf,tempbuf);
+					}
+
+
+
+
+			sc.charToWCHAR(buf,wbuf);
+			DebugTexts::instance()->setText(g,wcslen(wbuf),wbuf);
 			}
 
 
@@ -650,7 +778,7 @@ void Robo::boosterEffect(Game* game, Graphics* g, float dt, int stamp) {
 			MyMatrixMultiply(worl, bone->matrix_local, bone->combined_matrix);        //umesh_unit->meshs[0]->mesh->Bones[umesh_unit->meshs[0]->mesh->BoneIndexes["hidariteBone"]]->matrix_local,umesh_unit->meshs[0]->mesh->Bones[umesh_unit->meshs[0]->mesh->BoneIndexes["hidariteBone"]]->combined_matrix);
 			MyMatrixMultiply(worl,worl,atarihan->world);
 
-			game->weapon_effect_manager->makeWeaponEffect("booster_hi",1000,false,&worl,NULL,NULL);
+			game->weapon_effect_manager->makeWeaponEffect("booster_hi",2000,false,&worl,NULL,NULL);
 
 
 
@@ -664,7 +792,7 @@ void Robo::boosterEffect(Game* game, Graphics* g, float dt, int stamp) {
 			MyMatrixMultiply(worl, bone->matrix_local, bone->combined_matrix);        //umesh_unit->meshs[0]->mesh->Bones[umesh_unit->meshs[0]->mesh->BoneIndexes["hidariteBone"]]->matrix_local,umesh_unit->meshs[0]->mesh->Bones[umesh_unit->meshs[0]->mesh->BoneIndexes["hidariteBone"]]->combined_matrix);
 			MyMatrixMultiply(worl,worl,atarihan->world);
 
-			game->weapon_effect_manager->makeWeaponEffect("booster_taiki",600,false,&worl,NULL,NULL);
+			game->weapon_effect_manager->makeWeaponEffect("booster_taiki",1600,false,&worl,NULL,NULL);
 
 
 
@@ -1309,16 +1437,74 @@ void Robo::aim(Graphics* g, MYMATRIX* view) {
 	MYMATRIX mat;
 	MyMatrixInverse(mat,NULL,atarihan->world);
 	MYVECTOR3 tempmo;
+	MYVECTOR3 temptempmo;
 	MyVec3TransformCoord(tempmo,target, mat);
+	temptempmo = tempmo;
 //	tempmo = target;
 	ArmPoint* podayo8[8];
 	LockOnSystem los;
 	if (!los.isIn(&tempmo,apinfo->dmin,apinfo->dmax, apinfo->mintate, apinfo->maxtate, apinfo->minyoko, apinfo->maxyoko,apinfo->dtate, apinfo->dyoko, apinfo->dd)) return;
 
+
+/*
+	tempmo.float3.x = apinfo->minyoko-1;
+	tempmo.float3.z = apinfo->mintate-1;
+	tempmo.float3.y = -apinfo->dmin-1;
+	//MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_MMU] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_MMU, &tempmo);
+
+	tempmo.float3.x = -apinfo->minyoko+1;
+	tempmo.float3.z = apinfo->mintate-1;
+	tempmo.float3.y = -apinfo->dmin-1;
+	//MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_MHU] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_MHU, &tempmo);
+
+	tempmo.float3.x = apinfo->minyoko-1;
+	tempmo.float3.z = -apinfo->mintate+1;
+	tempmo.float3.y = -apinfo->dmin-1;
+//	MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_MMS] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_MMS, &tempmo);
+
+	tempmo.float3.x = -apinfo->minyoko+1;
+	tempmo.float3.z = -apinfo->mintate+1;
+	tempmo.float3.y = -apinfo->dmin-1;
+//	MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_MHS] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_MHS, &tempmo);
+
+	tempmo.float3.x = apinfo->maxyoko-1;
+	tempmo.float3.z = apinfo->maxtate-1;
+	tempmo.float3.y = -apinfo->dmax+1;
+//	MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_UMU] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_UMU, &tempmo);
+
+	tempmo.float3.x = -apinfo->maxyoko+1;
+	tempmo.float3.z = apinfo->maxtate-1;
+	tempmo.float3.y = -apinfo->dmax+1;
+//	MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_UHU] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_UHU, &tempmo);
+
+	tempmo.float3.x = apinfo->maxyoko-1;
+	tempmo.float3.z = -apinfo->maxtate+1;
+	tempmo.float3.y = -apinfo->dmax+1;
+	//MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_UMS] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_UMS, &tempmo);
+
+	tempmo.float3.x = -apinfo->maxyoko+1;
+	tempmo.float3.z = -apinfo->maxtate+1;
+	tempmo.float3.y = -apinfo->dmax+1;
+	//MyVec3TransformCoord(tempmo, tempmo, mat);
+	podayo8[KTROBO_ARMPOINT8_UHS] = apinfo->getArmPointFromPointindex(KTROBO_ARMPOINT8_UHS, &tempmo);
+
+*/
+
+
+
+	
+
     for (int i=0;i<8;i++) {
     		podayo8[i] = apinfo->getArmPointFromPointindex(i, &tempmo);
 	}
-
+	
 	
 	if (podayo8[0] && podayo8[1] && podayo8[2] && podayo8[3] &&
 		podayo8[4] && podayo8[5] && podayo8[6] && podayo8[7]) {
@@ -1326,10 +1512,10 @@ void Robo::aim(Graphics* g, MYMATRIX* view) {
    			aphelper->setArmPoint8(i,podayo8[i]);
 		//	aphelper_hidari->setArmPoint8(i,podayo8[i]);
 		}
-		aphelper->setMoku(&tempmo);
+		aphelper->setTarget(&temptempmo);
 		aphelper->setNoCalcYet(true);
 		aphelper->calc(g, view);
-
+		ap->hanneiSetTheta(this, true);
 		// weapon Ç…îΩâf
 		if (raweapon) {
 			raweapon->weapon->animate(0,false);
@@ -1337,9 +1523,9 @@ void Robo::aim(Graphics* g, MYMATRIX* view) {
 
 	}
 
-	tempmo.float3.x *= -1;
+	temptempmo.float3.x *= -1;
 	 for (int i=0;i<8;i++) {
-    		podayo8[i] = apinfo->getArmPointFromPointindex(i, &tempmo);
+    		podayo8[i] = apinfo->getArmPointFromPointindex(i, &temptempmo);
 	}
 
 	
@@ -1351,9 +1537,10 @@ void Robo::aim(Graphics* g, MYMATRIX* view) {
 		}
 
 
-             		aphelper_hidari->setMoku(&tempmo);
+        aphelper_hidari->setTarget(&temptempmo);
 		aphelper_hidari->setNoCalcYet(true);
 		aphelper_hidari->calc(g,view);
+		ap_hidari->hanneiSetTheta(this, false);
 		// weapon Ç…îΩâf
 		if (laweapon) {
 			laweapon->weapon->animate(0,false);
@@ -1538,6 +1725,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	body = new RoboBody();
 	try {
 	body->init(&ma,body_md,g,tex_loader);
+	//body->init(&ma,body_md,g,tex_loader);//fix
 	} catch (GameError* err) {
 		ma.deletedayo();
 	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
@@ -1742,7 +1930,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	ap_hidari->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
 	aphelper_hidari = new ArmPositionerHelper(this,ap_hidari,false);
 
-	apinfo = new ArmPointIndexInfo("ktrobofcs2.txt", 10,100,6,10,6,10,2,2,10);
+	apinfo = new ArmPointIndexInfo("ktrobofcs5.txt",70,150,10,10,30,30,3,3,20);//70,150,10,10,30,30,2,2,5);// 70,120,20,40,20,40,5,5,15);
 	if (apinfo->hasFile()) {
 		apinfo->loadFile();
 	} else {
@@ -3254,6 +3442,7 @@ void RoboAnimeLoop::animate(UMesh* umesh, bool calculateoffsetmatrix) {
 
 
 bool Robo::handleMessage(int msg, void* data, DWORD time) {
+	
 /*	if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*) data;
 		if (input->getKEYSTATE()[VK_DOWN] & KTROBO_INPUT_BUTTON_DOWN) {
@@ -4773,7 +4962,7 @@ void Robo::fireUpdate(Graphics* g, Game* game, Scene* scene,BulletController* bu
 		MyVec3TransformCoord(bullet_pos,bullet_pos,bullet_world);
 		MyVec3TransformNormal(bullet_vec,bullet_vec,bullet_world);
 		MyVec3Normalize(bullet_vec,bullet_vec);
-		bullet_vec = bullet_vec * 0.07;
+		bullet_vec = bullet_vec * 0.11;//0.07
 
 		// bullet_vec ÇÃéZèo
 

@@ -158,6 +158,7 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 				MYMATRIX henkanmat;
 				OBB henkanobb = em->mesh->Bones[i]->houkatuobb;
 				MyMatrixMultiply(henkanmat,cm,world);
+				//MyMatrixMultiply(henkanmat,henkanmat
 				MyVec3TransformCoord(henkanobb.c,henkanobb.c,henkanmat);
 				MyVec3TransformNormal(henkanobb.u[0],henkanobb.u[0],henkanmat);
 				henkanobb.e.float3.x = henkanobb.e.float3.x * MyVec3Length(henkanobb.u[0]);
@@ -177,10 +178,10 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 				pp.e[1] += abs(MyVec3Dot(&pp.u[1], &v)) * dt;
 				pp.e[2] += abs(MyVec3Dot(&pp.u[2], &v)) * dt;
 				*/
-				henkanobb.c = henkanobb.c - v * dt/2;
-				henkanobb.e.float3.x += henkanobb.e[0] * abs(MyVec3Dot(henkanobb.u[0], v)) * dt;
-				henkanobb.e.float3.y += henkanobb.e[1] * abs(MyVec3Dot(henkanobb.u[1], v)) * dt;
-				henkanobb.e.float3.z += henkanobb.e[2] * abs(MyVec3Dot(henkanobb.u[2], v)) * dt;
+//				henkanobb.c = henkanobb.c - v * dt/2;
+//				henkanobb.e.float3.x += henkanobb.e[0] * abs(MyVec3Dot(henkanobb.u[0], v)) * dt;
+//				henkanobb.e.float3.y += henkanobb.e[1] * abs(MyVec3Dot(henkanobb.u[1], v)) * dt;
+//				henkanobb.e.float3.z += henkanobb.e[2] * abs(MyVec3Dot(henkanobb.u[2], v)) * dt;
 
 
 				if ((MyVec3Length(henkanobb.e) < 0.00001f) || (MyVec3Length(henkanobb.u[0]) < 0.000001) ||
@@ -243,15 +244,16 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 
 
 
-	r = ans_r + MyVec3Length(v) * dt; // ‚–‚Ì’·‚³‚Ì•ª‚¾‚¯”¼Œa‚ð‘å‚«‚­‚·‚é
+	r = ans_r;//+ MyVec3Length(v) * dt; // ‚–‚Ì’·‚³‚Ì•ª‚¾‚¯”¼Œa‚ð‘å‚«‚­‚·‚é
 	jyusin = ans_jyusin;
 }
 
 
 void UMeshUnit::setIsEnabled(AtariHantei* hantei, bool t){ 
 		
-		//hantei->resetIsUnitUpdated();
-		hantei->setUnitStateChanged(this);
+		hantei->resetIsUnitUpdated();
+
+		//hantei->setUnitStateChanged(this);
 		is_enabled = t;
 }
 void UMeshUnit::draw(Graphics* g, MYMATRIX* view, MYMATRIX* proj, int meshnum, float* frames, bool* calculateoffsetmatrixs,
@@ -2551,9 +2553,9 @@ void AtariHantei::setStateChangedUMeshUnitToDummy() {
 	
 		//DebugTexts::instance()->setText(g,wcslen(buff),buff);
 	//	if (watches.times[5] > 10) {
-			mylog::writelog(KTROBO::INFO, "setdummydayo::");
-			mylog::writelog(KTROBO::INFO, buf);
-			mylog::writelog(KTROBO::INFO, "\n");
+//			mylog::writelog(KTROBO::INFO, "setdummydayo::");
+//			mylog::writelog(KTROBO::INFO, buf);
+//			mylog::writelog(KTROBO::INFO, "\n");
 	//	}
 	}
 
@@ -2860,9 +2862,9 @@ multiset<int> autts_dummy_index_used;
 	
 		//DebugTexts::instance()->setText(g,wcslen(buff),buff);
 	//	if (watches.times[5] > 10) {
-			mylog::writelog(KTROBO::INFO, "setdayo::");
-			mylog::writelog(KTROBO::INFO, buf);
-		mylog::writelog(KTROBO::INFO, "\n");
+//			mylog::writelog(KTROBO::INFO, "setdayo::");
+//			mylog::writelog(KTROBO::INFO, buf);
+//		mylog::writelog(KTROBO::INFO, "\n");
 	//	}
 	}
 
@@ -2942,9 +2944,9 @@ void AtariHantei::maeCalcDummy(Graphics* g) {
 	
 		//DebugTexts::instance()->setText(g,wcslen(buff),buff);
 	//	if (watches.times[5] > 10) {
-			mylog::writelog(KTROBO::INFO, "testdayo::");
-			mylog::writelog(KTROBO::INFO, buf);
-		mylog::writelog(KTROBO::INFO, "\n");
+//			mylog::writelog(KTROBO::INFO, "testdayo::");
+//			mylog::writelog(KTROBO::INFO, buf);
+//		mylog::writelog(KTROBO::INFO, "\n");
 	//	}
 //	}
 

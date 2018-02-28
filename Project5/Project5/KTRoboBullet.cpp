@@ -77,7 +77,6 @@ bool Bullet::fire(Game* game, AtariHantei* hantei) {
 	mesh_i->setWorld(&world);
 
 	mesh_i->setIsRender(true);
-	this->setIsUse(true);
 	this->is_fired = true;
 	
 	CS::instance()->enter(CS_RENDERDATA_CS, "un");
@@ -126,6 +125,7 @@ void Bullet::update(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) 
 		atarihan->setWorld(&world);
 		atarihan->setDT(dsecond);
 		atarihan->calcJyusinAndR(false);
+
 		mesh_i->setWorld(&world);
 		//mesh_i->setIsRender(true);
 
@@ -147,14 +147,30 @@ void BulletController::atariShori(Game* game, AtariHantei* hantei, MYMATRIX* vie
 			MeshInstanced * mm = bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i;
 			Bullet* b = &bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]];
 			if (b->getIsUse() && b->getAtariJyunbi() && b->robo && (b->robo->atarihan != kuwasiku[i].aite)) {
-				bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
+				//bullets[umesh_id_to_bullet_indexs[kuwasiku[i].my_umesh->getUMESHID()]].mesh_i->setIsRender(false);
 				MYMATRIX worldd;
+				MYVECTOR4 color;
+				color.w = 1;
+				color.x = 1;
+				color.y = 0;
+				color.z = 1;
 				MYVECTOR3 pos(0,0,0);
 				MyVec3TransformCoord(pos,pos,b->atarihan->world);
 				MyMatrixTranslation(worldd,pos[0],pos[1],pos[2]);
-				game->weapon_effect_manager->makeWeaponEffect("bakuhatu", 1500,false,&worldd,NULL,NULL);
+				game->weapon_effect_manager->makeWeaponEffect("bakuhatu_weaponpulsegun", 1500,false,&worldd,NULL,NULL);
+				// “–‚½‚è”»’è‚ª‚¨‚«‚é‚Ì‚ð‚Ó‚¹‚®‚½‚ß‚Éƒ‰ƒ“ƒ_ƒ€‚ÉˆÚ“®‚³‚¹‚é
+				b->atarihan->setXYZ((rand() % 256)/256 * 100,(rand() % 256)/256 * 100, (rand() % 256)/256*100);
+				b->atarihan->calcJyusinAndR(true);
 				b->setIsUse(false);
-
+				mm->setColor(&color);
+				game->getSound()->playCue("se_maoudamashii_explosion03");
+				/*
+				Bullet* bb = this->getEmptyBullet();
+				bb->atarihan->setWorld(&kuwasiku[i].aite->world);
+				bb->atarihan->meshs[0]->bone_obbs[0] = kuwasiku[i].aite->meshs[0]->bone_obbs[0];
+				bb->atarihan->meshs[0]->is_bone_obbs_use[0] = true;
+				*/
+				//bb->fire(game,hantei);	
 			}
 		}
 
@@ -174,8 +190,23 @@ void BulletController::byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj, float
 
 	if (mis) {
 		mis->render(g);
-	}
+		if (bullets) {
+			for(int i=0;i<KTROBO_BULLET_CONTROLLER_BULLET_NUM;i++) {
+				if (bullets[i].getIsUse()) {
+					if (bullets[i].atarihan->meshs[0] && bullets[i].atarihan->meshs[0]->mesh) {
+						for(int k=0;k< KTROBO_MESH_BONE_MAX;k++) {
+							if (bullets[i].atarihan->meshs[0]->is_bone_obbs_use[k]) {
+								MYMATRIX idenmat;
+								MyMatrixIdentity(idenmat);
+							//	g->drawOBBFill(g,0xFFFFFFFF,&idenmat,view,proj,&bullets[i].atarihan->meshs[0]->bone_obbs[k]);
+							}
 
+						}
+					}
+				}
+			}
+		}
+	}
 
 }
 
@@ -207,7 +238,30 @@ void BulletController::Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* l
 		dummy_mesh->readMesh(g, KTROBO_BULLET_MESH_DUMMY_FILENAME,loader);
 		dummy_mesh->readAnime(KTROBO_BULLET_MESH_ANIME_DUMMY_FILENAME);
 		dummy_mesh->animate(0,true);
+
+		// bullet_mesh‚Ì“Ç‚Ýž‚Ý
+		Mesh* m = new Mesh();
+		m->readMesh(g,KTROBO_BULLET_MESH_RIFLE_FILENAME,loader);
+		m->readAnime(KTROBO_BULLET_MESH_ANIME_RIFLE_FILENAME);
+		
+		bullet_meshs.push_back(m);
+		MyMatrixScaling(m->rootbone_matrix_local_kakeru,1.2f,1.2f,1.2f);
+		m->animate(0,true);
+		bullet_mesh_index.insert(std::pair<string,int>(string(KTROBO_BULLET_MESH_RIFLE_INDEXNAME),0));
+
+		Mesh* mm = new Mesh();
+		mm->readMesh(g, KTROBO_BULLET_MESH_LASERRIFLE_FILENAME, loader);
+		mm->readAnime(KTROBO_BULLET_MESH_ANIME_LASERRIFLE_FILENAME);
+		bullet_meshs.push_back(mm);
+		MyMatrixScaling(mm->rootbone_matrix_local_kakeru,1.2f,1.2f,1.2f);
+		mm->animate(0,true);
+		bullet_mesh_index.insert(std::pair<string,int>(string(KTROBO_BULLET_MESH_LASERRIFLE_INDEXNAME),1));
+
+
+
+
 	}
+	hantei->setIsUnitUpdated();
 
 	if (!mis) {
 		mis = new MeshInstanceds(g, loader);
@@ -254,6 +308,7 @@ Bullet* BulletController::getEmptyBullet() {
 
 	for (int i=0;i<KTROBO_BULLET_CONTROLLER_BULLET_NUM;i++) {
 		if (!bullets[i].getIsUse()) {
+			bullets[i].setIsUse(true);
 			return &bullets[i];
 		}
 	}
@@ -282,6 +337,17 @@ void BulletController::Release() {
 		delete dummy_mesh;
 		dummy_mesh = 0;
 	}
+
+	vector<Mesh*>::iterator it = bullet_meshs.begin();
+	while(it != bullet_meshs.end()) {
+		Mesh* m = *it;
+		delete m;
+		m = 0;
+		it++;
+	}
+	bullet_meshs.clear();
+	bullet_mesh_index.clear();
+
 }
 
 

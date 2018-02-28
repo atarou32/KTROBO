@@ -8,7 +8,7 @@ using namespace KTROBO;
 WeaponFire::WeaponFire(void)
 {
 	this->is_canfire = true;
-	this->reloadtime = 3300;
+	this->reloadtime = 330;
 	this->dtime = -1;
 	
 }
@@ -64,10 +64,22 @@ void WeaponFireRifle::fire(Robo* robo, RoboParts* parts, Graphics* g, Game* game
 			return;
 		}
 		
-		c->setParam(robo,parts,pos,vec,robo_world);
-		c->atarihan->meshs[0]->changeMesh(controller->dummy_mesh); // changemeshする際は　元のobb_idxとかobb_useが変わらないようにしなければならない
-//		c->atarihan->calcJyusinAndR(false);
-		sound->playCue("se_maoudamashii_battle_gun01");
+		// vec(0,-1,0) と変換後のworldを見て　変化させる
+		MYMATRIX sworld = *robo_world;
+		MYMATRIX worldd;
+		MyMatrixRotationX(worldd,1.57f*3/4);
+		MyMatrixMultiply(sworld,worldd,sworld);
+
+
+		c->setParam(robo,parts,pos,vec,&sworld);
+		Mesh* cmesh = controller->bullet_meshs[controller->bullet_mesh_index[KTROBO_BULLET_MESH_LASERRIFLE_INDEXNAME]]; // changemeshする際は　元のobb_idxとかobb_useが変わらないようにしなければならない
+		c->atarihan->meshs[0]->changeMesh(cmesh);
+	//	c->atarihan->setWorld(&sworld);
+	//	c->atarihan->calcJyusinAndR(false);
+		controller->getMeshInstanceds()->changeInstanceMeshSkeleton(c->mesh_i->getInstanceIndex(), cmesh,cmesh); // 上部でdeviceconをロックしてあるので大丈夫
+
+		//		c->atarihan->calcJyusinAndR(false);
+		sound->playCue("se_maoudamashii_battle08");
 		game->weapon_effect_manager->makeWeaponEffect("bakuhatu", 800,true, robo_world, robo,fire_bone);
 		WeaponFire::fire(robo, parts, g, game,scene, controller, hantei, sound, robo_world, vec,pos,fire_bone);
 		c->fire(game, hantei);

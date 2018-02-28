@@ -17,7 +17,7 @@
 namespace KTROBO {
 #define BULLET_ATARI_JYUNBI_COUNT_MAX 2
 
-	class Bullet : public AtariBase {
+class Bullet : public AtariBase {
 	private:
 		bool is_atari_jyunbi;
 		int atari_jyunbi_count;
@@ -106,6 +106,19 @@ namespace KTROBO {
 #define KTROBO_BULLET_MESH_DUMMY_FILENAME "resrc/model/cube/pkcube.mesh"
 #define KTROBO_BULLET_MESH_ANIME_DUMMY_FILENAME "resrc/model/cube/pkcube.anime"
 
+#define KTROBO_BULLET_MESH_RIFLE_FILENAME "resrc/model/bullet/weaponbullet_rifle.mesh"
+#define KTROBO_BULLET_MESH_ANIME_RIFLE_FILENAME "resrc/model/bullet/weaponbullet_rifle.anime"
+#define KTROBO_BULLET_MESH_RIFLE_INDEXNAME "weapon_rifle"
+
+#define KTROBO_BULLET_MESH_LASERRIFLE_FILENAME "resrc/model/bullet/weaponbullet_laserrifle.mesh"
+#define KTROBO_BULLET_MESH_ANIME_LASERRIFLE_FILENAME "resrc/model/bullet/weaponbullet_laserrifle.anime"
+#define KTROBO_BULLET_MESH_LASERRIFLE_INDEXNAME "weapon_laserrifle"
+
+
+
+
+
+
 class BulletController {
 private:
 	AtariHantei* hantei;
@@ -114,9 +127,16 @@ private:
 	MeshInstanceds* mis;
 public:
 	Mesh* dummy_mesh;
+	vector<Mesh*> bullet_meshs;
+	map<string, int> bullet_mesh_index;
+
 public:
 	BulletController();
 	~BulletController();
+		MeshInstanceds* getMeshInstanceds() {
+		return mis;
+	}
+
 	void Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* loader);
 	Bullet* getEmptyBullet(); // ãÛÇÃÇ‡ÇÃÇ™Ç»Ç¢èÍçáÇÕNULLÇ™ï‘ÇÈ
 	void Release(); // AtariHantei Ç™ÉNÉäÉAÇ≥ÇÍÇÈ

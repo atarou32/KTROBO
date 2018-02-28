@@ -569,7 +569,7 @@ void Game_SCENE::leave() {
 bool Game_SCENE::handleMessage(int msg, void* data, DWORD time) {
 
 
-	return true;
+	return false;
 }
 
 
@@ -628,6 +628,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 				game->watches_for_keisoku.startWatch(0);
 				Robo* robodayo = game->robodayo;
 				Robo* roboaitedayo = game->roboaitedayo;
+
 				if (hantei->canGetAns()) {
 				if (robodayo->atarihan) {
 					robodayo->atarihan->calcJyusinAndR();
@@ -639,15 +640,15 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					if (robodayo->move_state->isJumpKABE()) {
 							DebugTexts::instance()->setText(g,4,L"jumk");
 					}
-/*
+
 					char buf[512];
 					WCHAR buf2[512];
 					memset(buf,0,512);
-					itoa(robodayo->setkabe_count,buf,10);
+					itoa(robodayo->atarihan->z,buf,10);
 					stringconverter sc;
 					sc.charToWCHAR(buf,buf2);
 					DebugTexts::instance()->setText(g,wcslen(buf2),buf2);
-*/
+
 					if (robodayo->setti_state == &robodayo->setti) {
 						DebugTexts::instance()->setText(g,5,L"setti");
 					} else {
@@ -656,7 +657,8 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					if (robodayo->setkabe_state == &robodayo->setkabe) {
 						DebugTexts::instance()->setText(g,5,L"setka");
 					}
-
+				//	robodayo->setTarget(&MYVECTOR3(roboaitedayo->atarihan->x,roboaitedayo->atarihan->y,roboaitedayo->atarihan->z));
+					robodayo->aim(g, &game->view);
 				//	robodayo->atariAim(g, &game->view, frameTime, (int)frame);
 				}
 
@@ -670,6 +672,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 				hantei->setIsCalcKuwasikuGetted();
 				}
 			}
+		
 	}
 
 

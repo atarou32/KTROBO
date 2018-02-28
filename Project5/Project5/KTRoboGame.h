@@ -69,11 +69,15 @@ public:
 	float testy;
 	float roty;
 	void getPos(MYVECTOR3* p) {
+		/*
 			CS::instance()->enter(CS_MESSAGE_CS, "enter");
+			*/
 		p->float3.x = testx;
 		p->float3.y = testy;
 		p->float3.z = testz;
+		/*
 			CS::instance()->leave(CS_MESSAGE_CS, "leave");
+			*/
 	}
 
 	void setMAT(MYMATRIX* mat,MYMATRIX* view, MYMATRIX* proj) {
@@ -173,6 +177,8 @@ public:
 	EffectManager* getEffectManager() {
 		return effect_managers->getInstance(0);
 	}
+
+
 
 	MySound* getSound() {
 		return sound;

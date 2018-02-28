@@ -164,7 +164,7 @@ class ShudouArmPositioner
 	int slider_dyb;
 	int slider_dza;
 	int slider_dzb;
-
+	int toggle_button;
 public:
 	ShudouArmPositioner(Robo* robo,ArmPositioner* ap){
 	this->ap = ap;
@@ -182,6 +182,7 @@ public:
 	slider_dyb=0;
 	slider_dza=0;
 	slider_dzb=0;
+	toggle_button = 0;
 	};
 	~ShudouArmPositioner(){};
 
@@ -209,6 +210,7 @@ class ArmPositioner
 	float dthetazb;
 
 	bool reseted;
+	bool is_set;
 	MYVECTOR3 dmoku;
 public:
 	ArmPositioner(float theta, float theta2, float nobabairitu) {
@@ -226,6 +228,7 @@ public:
 		dthetaza=0;
 		dthetazb=0;
 		reseted = false;
+		is_set = false;
 		dmoku = MYVECTOR3(0,0,0);
 	}
 
@@ -233,13 +236,16 @@ public:
 
 	bool positionArm(Graphics* g , MYMATRIX* view, float framecnt, Robo* robo, MYVECTOR3* mokuhyou, bool is_migi);
 	bool positionArm2(float epsiron, float e, Robo* robo, MYVECTOR3* mokuhyou, bool is_migi);
-
+	bool getIsSet() {return is_set;}
 	bool getReseted() {return reseted;}
 	MYVECTOR3 getDMOKU() {return dmoku;}
-
+	void setIsSet(bool t) {is_set = t;}
 	int positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	bool positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	int positionArm34(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
+	
+	void hanneiSetTheta(Robo* robo, bool is_migi);
+
 	void setArm3(Robo* robo, bool is_migi, MeshBone* uparm1, MeshBone* downarm2);
 	void getTheta(ArmPoint* app) {
 		app->dthetaxa = dthetaxa;
@@ -351,6 +357,10 @@ public:
 		nocalcyet = t;
 		unko_count = 10000;
 	}
+	void setTarget(MYVECTOR3* target) {
+		this->moku = *target;
+	}
+
 	void setMoku(MYVECTOR3* moku) {
 		this->moku = *moku;
 		tempmoku = *moku;

@@ -243,6 +243,11 @@ public:
 class GUI_BUTTON : public GUI_PART
 {
 private:
+
+	bool is_call_lua;
+	bool is_lua_tried_to_send; // 変更タイミング
+
+
 	int box_tex_id;
 	char l_str[128]; // pressされたときによばれるLuaファイル
 	int button_text;
@@ -250,6 +255,19 @@ static lua_State* L; // handlemessageが呼ばれるのは AIスレッドなのでAIスレッドの
 static Texture* texture;
 
 public:
+
+	void setIsCallLua(bool t) {
+		is_call_lua = t;
+	}
+	bool getIsLuaTriedToSend() {
+		if (is_lua_tried_to_send) {
+			is_lua_tried_to_send = false;
+			return true;
+		}
+		return false;//is_lua_tried_to_send;
+	}
+
+
 	static void Init(lua_State* Ld, Texture* tex) {
 		L = Ld;
 		texture = tex;
@@ -826,7 +844,9 @@ public:
 	float getMaxFromSlider(int gui_id);
 	float getMinFromSlider(int gui_id);
 	bool getTriedToSendFromSlider(int gui_id);
+	bool getTriedToSendFromButton(int gui_id);
 	void setCallLuaToSlider(int gui_id, bool t);
+	void setCallLuaToButton(int gui_id, bool t);
 
 	void setNOWMAXMINToSlider(int gui_id, float max, float min, float now);
 	void setTabIndex(int tab_gui_id, int index);

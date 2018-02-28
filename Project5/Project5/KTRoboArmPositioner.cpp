@@ -1524,6 +1524,12 @@ void ShudouArmPositioner::Init(HWND hw, Texture* tex, lua_State* l, int screen_w
 	gui->setPartToWindow(screen_window_id, slider_dzb);
 	gui->setRootWindowToInputMessageDispatcher(screen_window_id);
 	
+	toggle_button = gui->makeButton(100,300,50,50,"test2.lua", 9, "test");
+	gui->setEffect(toggle_button,true);
+	gui->setEnable(toggle_button,true);
+	gui->setRender(toggle_button,true);
+	gui->setCallLuaToButton(toggle_button,false);
+	gui->setPartToWindow(screen_window_id,toggle_button);
 }
 
 void ShudouArmPositioner::Del() {
@@ -1537,7 +1543,7 @@ void ShudouArmPositioner::Del() {
 
 bool ShudouArmPositioner::update() {
 	bool t=false;
-
+	bool t2=false;
 	if (gui->getTriedToSendFromSlider(slider_dxa)) {
 		t = true;
 	}
@@ -1561,6 +1567,11 @@ bool ShudouArmPositioner::update() {
 	if (gui->getTriedToSendFromSlider(slider_dzb)) {
 		t = true;
 	}
+
+	if (gui->getTriedToSendFromButton(toggle_button)) {
+		t2 = true;
+	}
+
 	if (t) {
 		dthetaxa = gui->getNowFromSlider(slider_dxa);
 		dthetaxb = gui->getNowFromSlider(slider_dxb);
@@ -1568,12 +1579,52 @@ bool ShudouArmPositioner::update() {
 		dthetayb = gui->getNowFromSlider(slider_dyb);
 		dthetaza = gui->getNowFromSlider(slider_dza);
 		dthetazb = gui->getNowFromSlider(slider_dzb);
+		//ap->resetTheta();
+		ap->setIsSet(true);
 		ap->setTheta(dthetaxa, dthetaxb, dthetaya, dthetayb, dthetaza, dthetazb);
+		
 	}
+
+	if (t2) {
+		if (ap->getIsSet()) {
+			ap->setIsSet(false);
+		} else {
+			ap->setIsSet(true);
+		}
+	}
+
 	return t;
 }
 
+void ArmPositioner::hanneiSetTheta(Robo* robo, bool is_migi) {
 
+
+	MeshBone* arm1;
+	MeshBone* arm2;
+	MeshBone* handjoint;
+
+	if (is_migi) {
+		arm1 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["handBone"]];
+	} else {
+		arm1 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["handBone"]];
+	}
+
+
+	setArm3(robo,is_migi,arm1,arm2);
+	if (is_migi) {
+		robo->arm->rarm->animate(40,false);
+	} else {
+		robo->arm->larm->animate(40,false);
+	}
+
+	//is_set = false;
+
+
+}
 
 void ArmPoint8Positioner::setPoint(int index, ArmPoint* ap) {
 if (index >= 8) return;
@@ -1611,32 +1662,32 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 
 	MYVECTOR3 kitentomoku = *moku - kitenpoint->pos;
 	
-	float A11 = n_vec1.float3.x;
-	float A12 = n_vec1.float3.y;
-	float A13 = n_vec1.float3.z;
+	double A11 = n_vec1.float3.x;
+	double A12 = n_vec1.float3.y;
+	double A13 = n_vec1.float3.z;
 
-	float A21 = n_vec2.float3.x;
-	float A22 = n_vec2.float3.y;
-	float A23 = n_vec2.float3.z;
+	double A21 = n_vec2.float3.x;
+	double A22 = n_vec2.float3.y;
+	double A23 = n_vec2.float3.z;
 	
-	float A31 = n_vec3.float3.x;
-	float A32 = n_vec3.float3.y;
-	float A33 = n_vec3.float3.z;
-	float detA;
+	double A31 = n_vec3.float3.x;
+	double A32 = n_vec3.float3.y;
+	double A33 = n_vec3.float3.z;
+	double detA;
 	detA = A11*A22*A33 + A12*A23*A31 + A13*A21*A32 - A13*A22*A31 - A11*A23*A32- A12*A21*A33;
 
 	if (abs(detA) <0.000001f) {
               		detA = 1;
 	}
 
-	float x1a = ((A22*A33- A32*A23)* kitentomoku.float3.x - (A21* A33 - A31 * A23)* kitentomoku.float3.y + (A21 * A32 - A31*A22)*kitentomoku.float3.z) /detA;
-	float x2a = (-(A12 * A33 - A32*A13)*kitentomoku.float3.x + (A11*A33 - A31* A13)*kitentomoku.float3.y - (A11 * A32 - A31*A12)*kitentomoku.float3.z)/detA;
-	float x3a = ((A12 * A23 - A22*A13)*kitentomoku.float3.x - (A11*A23 - A21* A13)*kitentomoku.float3.y + (A11*A22 - A21*A12)*kitentomoku.float3.z)/detA;
+	double x1a = ((A22*A33- A32*A23)* kitentomoku.float3.x - (A21* A33 - A31 * A23)* kitentomoku.float3.y + (A21 * A32 - A31*A22)*kitentomoku.float3.z) /detA;
+	double x2a = (-(A12 * A33 - A32*A13)*kitentomoku.float3.x + (A11*A33 - A31* A13)*kitentomoku.float3.y - (A11 * A32 - A31*A12)*kitentomoku.float3.z)/detA;
+	double x3a = ((A12 * A23 - A22*A13)*kitentomoku.float3.x - (A11*A23 - A21* A13)*kitentomoku.float3.y + (A11*A22 - A21*A12)*kitentomoku.float3.z)/detA;
 
 	// これで　moku = kiten + x1a * n_vec1 + x2a * n_vec2 + x3a * n_vec3 と表せる
-	float hi1 = x1a / MyVec3Length(vec1);
-	float hi2 = x2a / MyVec3Length(vec2);
-	float hi3 = x3a / MyVec3Length(vec3);
+	double hi1 = x1a / MyVec3Length(vec1);
+	double hi2 = x2a / MyVec3Length(vec2);
+	double hi3 = x3a / MyVec3Length(vec3);
 
 /*	if ((hi1 <0) || (hi2 < 0) ||(hi3 <0)) {
 		return ans;
@@ -1646,34 +1697,36 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 		return ans;
 	}
 */
+
+	double sumhi = hi1 + hi2+hi3;
 	// dtheta の計算を行う
-	float dthetaxa1 = kitenpoint->dthetaxa * ( 1-hi1) + point1->dthetaxa * hi1;
-	float dthetaxb1 = kitenpoint->dthetaxb * ( 1-hi1) + point1->dthetaxb * hi1;
-	float dthetaya1 = kitenpoint->dthetaya * ( 1-hi1) + point1->dthetaya * hi1;
-	float dthetayb1 = kitenpoint->dthetayb * ( 1-hi1) + point1->dthetayb * hi1;
-	float dthetaza1 = kitenpoint->dthetaza * ( 1-hi1) + point1->dthetaza * hi1;
-	float dthetazb1 = kitenpoint->dthetazb * ( 1-hi1) + point1->dthetazb * hi1;
+	double dthetaxa1 = kitenpoint->dthetaxa * ( 1-hi1) + point1->dthetaxa * hi1;
+	double dthetaxb1 = kitenpoint->dthetaxb * ( 1-hi1) + point1->dthetaxb * hi1;
+	double dthetaya1 = kitenpoint->dthetaya * ( 1-hi1) + point1->dthetaya * hi1;
+	double dthetayb1 = kitenpoint->dthetayb * ( 1-hi1) + point1->dthetayb * hi1;
+	double dthetaza1 = kitenpoint->dthetaza * ( 1-hi1) + point1->dthetaza * hi1;
+	double dthetazb1 = kitenpoint->dthetazb * (1 - hi1) + point1->dthetazb * hi1;
 
-	float dthetaxa2 = kitenpoint->dthetaxa * ( 1-hi2) + point2->dthetaxa * hi2;
-	float dthetaxb2 = kitenpoint->dthetaxb * ( 1-hi2) + point2->dthetaxb * hi2;
-	float dthetaya2 = kitenpoint->dthetaya * ( 1-hi2) + point2->dthetaya * hi2;
-	float dthetayb2 = kitenpoint->dthetayb * ( 1-hi2) + point2->dthetayb * hi2;
-	float dthetaza2 = kitenpoint->dthetaza * ( 1-hi2) + point2->dthetaza * hi2;
-	float dthetazb2 = kitenpoint->dthetazb * ( 1-hi2) + point2->dthetazb * hi2;
+	double dthetaxa2 = kitenpoint->dthetaxa * ( 1-hi2) + point2->dthetaxa * hi2;
+	double dthetaxb2 = kitenpoint->dthetaxb * ( 1-hi2) + point2->dthetaxb * hi2;
+	double dthetaya2 = kitenpoint->dthetaya * ( 1-hi2) + point2->dthetaya * hi2;
+	double dthetayb2 = kitenpoint->dthetayb * ( 1-hi2) + point2->dthetayb * hi2;
+	double dthetaza2 = kitenpoint->dthetaza * ( 1-hi2) + point2->dthetaza * hi2;
+	double dthetazb2 = kitenpoint->dthetazb * ( 1-hi2) + point2->dthetazb * hi2;
+	
+	double dthetaxa3 = kitenpoint->dthetaxa * ( 1-hi3) + point3->dthetaxa * hi3;
+	double dthetaxb3 = kitenpoint->dthetaxb * ( 1-hi3) + point3->dthetaxb * hi3;
+	double dthetaya3 = kitenpoint->dthetaya * ( 1-hi3) + point3->dthetaya * hi3;
+	double dthetayb3 = kitenpoint->dthetayb * ( 1-hi3) + point3->dthetayb * hi3;
+	double dthetaza3 = kitenpoint->dthetaza * ( 1-hi3) + point3->dthetaza * hi3;
+	double dthetazb3 = kitenpoint->dthetazb * ( 1-hi3) + point3->dthetazb * hi3;
 
-	float dthetaxa3 = kitenpoint->dthetaxa * ( 1-hi3) + point3->dthetaxa * hi3;
-	float dthetaxb3 = kitenpoint->dthetaxb * ( 1-hi3) + point3->dthetaxb * hi3;
-	float dthetaya3 = kitenpoint->dthetaya * ( 1-hi3) + point3->dthetaya * hi3;
-	float dthetayb3 = kitenpoint->dthetayb * ( 1-hi3) + point3->dthetayb * hi3;
-	float dthetaza3 = kitenpoint->dthetaza * ( 1-hi3) + point3->dthetaza * hi3;
-	float dthetazb3 = kitenpoint->dthetazb * ( 1-hi3) + point3->dthetazb * hi3;
-
-	ans.dthetaxa = (dthetaxa1 + dthetaxa2 + dthetaxa3)/3;//- 2*kitenpoint->dthetaxa;
-	ans.dthetaxb = (dthetaxb1 + dthetaxb2 + dthetaxb3)/3;//- 2*kitenpoint->dthetaxb;
-	ans.dthetaya = (dthetaya1 + dthetaya2 + dthetaya3)/3;//- 2*kitenpoint->dthetaya;
-	ans.dthetayb = (dthetayb1 + dthetayb2 + dthetayb3)/3;//- 2*kitenpoint->dthetayb;
-	ans.dthetaza = (dthetaza1 + dthetaza2 + dthetaza3)/3;//- 2*kitenpoint->dthetaza;
-	ans.dthetazb = (dthetazb1 + dthetazb2 + dthetazb3)/3;//- 2*kitenpoint->dthetazb;
+	ans.dthetaxa = (float)(dthetaxa1 * hi1/sumhi + dthetaxa2 * hi2/sumhi + dthetaxa3 * hi3/sumhi);//- 2*kitenpoint->dthetaxa;
+	ans.dthetaxb =(float)(dthetaxb1 * hi1/sumhi + dthetaxb2 * hi2/sumhi + dthetaxb3 * hi3/sumhi);//- 2*kitenpoint->dthetaxb;
+	ans.dthetaya =(float)(dthetaya1 * hi1/sumhi + dthetaya2 * hi2/sumhi + dthetaya3 * hi3/sumhi);//- 2*kitenpoint->dthetaya;
+	ans.dthetayb =(float)(dthetayb1 * hi1/sumhi + dthetayb2 * hi2/sumhi + dthetayb3 * hi3/sumhi);//- 2*kitenpoint->dthetayb;
+	ans.dthetaza =(float)(dthetaza1 * hi1/sumhi + dthetaza2 * hi2/sumhi + dthetaza3 * hi3/sumhi);//- 2*kitenpoint->dthetaza;
+	ans.dthetazb =(float)(dthetazb1 * hi1/sumhi + dthetazb2 * hi2/sumhi + dthetazb3 * hi3/sumhi);//- 2*kitenpoint->dthetazb;
 	ans.pos = kitenpoint->pos + n_vec1 * x1a+ n_vec2*x2a+ n_vec3*x3a;
 
 	ans.is_ok = true;
@@ -1907,7 +1960,9 @@ void ArmPositionerHelper::setArmPoint8(int index, ArmPoint* po) {
 
 void ArmPositionerHelper::byougaAP8(Graphics* g, MYMATRIX* view) {
 	OBB ob;
-	ob.e.float3.y = 5;
+	ob.e.float3.x = 0.5;
+	ob.e.float3.y = 1;
+	ob.e.float3.z = 0.5;
 	for (int i=0;i<8;i++) {
 	ob.c = ap8.points[i].pos;
 	g->drawOBB(g,0xFFFFFFFF, &robo->atarihan->world,view,g->getProj(), &ob);
@@ -1915,9 +1970,8 @@ void ArmPositionerHelper::byougaAP8(Graphics* g, MYMATRIX* view) {
 }
 void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		
-	if (is_calced) {
-		return;
-	}
+	
+	
 
 	if (nocalcyet) {
 		ddmoku = MYVECTOR3(0,0,0);
@@ -1932,8 +1986,17 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 			ap->setTheta(anp.dthetaxa,anp.dthetaxb,anp.dthetaya,anp.dthetayb,anp.dthetaza,anp.dthetazb);
 		}
 	
+		if (is_calced) {
+			return;
+		}
 
 	} else {
+		
+		if (is_calced) {
+			return;
+		}
+		
+
 		// dmokuをしようする
 	
 		// tempmokuを計算する
@@ -2007,7 +2070,7 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		MyMatrixIdentity(wo);
 		OBB ob;
 
-		//if (ap8.isInPoint(&tempmoku)) {
+	//	if (ap8.isInPoint(&tempmoku)) {
 
 		ob.c = tempmoku;
 		g->drawOBBFill(g,0xFFFFFF00,&wo,view,g->getProj(),&ob);
@@ -2019,7 +2082,7 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 			
 		}
 		}
-		//}
+//		}
 
 	}
 
@@ -2359,7 +2422,7 @@ bool ArmPointIndexInfo::isCalcFinished() {
 	LockOnSystem los;
 	int pointnum = los.getStudyPointNum(dmin,dmax,mintate,maxtate,minyoko,maxyoko,dtate,dyoko,dd);
 
-	if (pointnum != points.size()) {
+	if (pointnum >= points.size()) {
 		return false;
 	}
 	return true;

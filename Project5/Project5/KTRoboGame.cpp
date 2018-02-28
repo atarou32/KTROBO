@@ -613,7 +613,7 @@ bool Game::Init(HWND hwnd) {
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
 	umesh_unit->setSCALEXYZ(10,10,2);
-	umesh_unit->setXYZ((i-5)*25,(k-5)*25,-3);
+	umesh_unit->setXYZ((i-5)*25,(k-5)*25,-4);
 	umesh_unit->calcJyusinAndR();
 	mesh_is[i+10*k]->setWorld(&umesh_unit->world);
 	mesh_is[i+10*k]->setIsRender(true);
@@ -915,6 +915,11 @@ bool Game::Init(HWND hwnd) {
 	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_bakuhatu.lua");
 	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_boosterhi.lua");
 	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER,"resrc/script/effect/EFFECT_boostertaiki.lua");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER, "resrc/script/effect/EFFECT_bakuhatu_weaponrifle.lua");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER, "resrc/script/effect/EFFECT_bakuhatu_weaponbazooka.lua");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER, "resrc/script/effect/EFFECT_bakuhatu_weaponlaserrifle.lua");
+	effect_managers->getInstance(0)->loadFileFromLua(TASKTHREADS_UPDATEMAINRENDER, "resrc/script/effect/EFFECT_bakuhatu_weaponpulsegun.lua");
+
 	effect_suuji = new EffectSuuji(TASKTHREADS_UPDATEMAINRENDER,effect_managers->getInstance(0));
 
 	unsigned long work[TASK_WORK_SIZE];
@@ -1952,7 +1957,7 @@ void Game::Run() {
 	tester += 0.1f;
 	UMeshUnit* umesh_unit = umesh_units[2+30];
 	umesh_unit->setXYZ(0,0,5);
-	umesh_unit->setROTXYZ(1.57+tester/1000.0f,tester/100.00f,0);
+	umesh_unit->setROTXYZ(0,0,0);//1.57+tester/1000.0f,tester/100.00f,0);
 	
 	umesh_unit->calcJyusinAndR();
 	mesh_is[2+30]->setWorld(&umesh_unit->world);
@@ -2188,7 +2193,7 @@ void Game::Run() {
 
 				if (roboaitedayo->atarihan) {
 			//		roboaitedayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-					roboaitedayo->atariAim(g, &view, frameTime, (int)frame);
+		//			roboaitedayo->atariAim(g, &view, frameTime, (int)frame);
 				}
 		hantei->drawKekka(g,&this->view,g->getProj());
 		
@@ -2233,7 +2238,7 @@ void Game::Run() {
 	}
 	static int robodayo_boostereffect_count = 0;
 	robodayo_boostereffect_count++;
-
+	g->getDeviceContext()->RSSetViewports(1,g->getViewPort());
 	robodayo->byouga(g,&view,&proj);
 	if (robodayo->atarihan) {
 	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);

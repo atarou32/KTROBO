@@ -338,6 +338,23 @@ float GUI::getMaxFromSlider(int gui_id) {
 	return 0;
 
 }
+
+
+
+void GUI::setCallLuaToButton(int gui_id, bool t) {
+	CS::instance()->enter(CS_MESSAGE_CS, "setcalllua");
+	if (p_buttons_index.find(gui_id) != p_buttons_index.end()) {
+
+		GUI_BUTTON* s = buttons[p_buttons_index[gui_id]];
+		s->setIsCallLua(t);
+		CS::instance()->leave(CS_MESSAGE_CS, "setcalllua");
+		return;
+	}
+
+	CS::instance()->leave(CS_MESSAGE_CS, "setcalllua");
+	return;
+}
+
 void GUI::setCallLuaToSlider(int gui_id, bool t) {
 	CS::instance()->enter(CS_MESSAGE_CS, "setcalllua");
 	if (p_sliderhs_index.find(gui_id) != p_sliderhs_index.end()) {
@@ -377,6 +394,25 @@ bool GUI::getTriedToSendFromSlider(int gui_id) {
 		return ans;
 	}
 
+
+	CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+	return false;
+
+
+
+}
+
+
+
+bool GUI::getTriedToSendFromButton(int gui_id) {
+		CS::instance()->enter(CS_MESSAGE_CS, "getmin");
+	if (p_buttons_index.find(gui_id) != p_buttons_index.end()) {
+
+		GUI_BUTTON* s = buttons[p_buttons_index[gui_id]];
+		bool ans = s->getIsLuaTriedToSend();
+		CS::instance()->leave(CS_MESSAGE_CS, "getmin");
+		return ans;
+	}
 
 	CS::instance()->leave(CS_MESSAGE_CS, "getmin");
 	return false;
@@ -531,7 +567,11 @@ bool GUI_BUTTON::handleMessage(int msg, void* data, DWORD time){
 				
 				// ボタンが実行可能になっているので実行する
 				// lua ファイル実行
+				if (is_call_lua) {
 				LuaTCBMaker::makeTCB(TASKTHREADS_AIDECISION, true, this->l_str);
+				} else {
+					is_lua_tried_to_send = true;
+				}
 
 				setIsEffect(false);
 
