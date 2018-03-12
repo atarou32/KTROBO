@@ -8,7 +8,7 @@
 #include <set>
 
 namespace KTROBO {
-#define KTROBO_MAX_TIKEI_HITOTU_INDEX 2048 // ひとつの地形のfaceの最大数 ここをかきかえるときはシェーダも書き換えること
+#define KTROBO_MAX_TIKEI_HITOTU_INDEX 1024 // ひとつの地形のfaceの最大数 ここをかきかえるときはシェーダも書き換えること
 class UMesh {
 public:
 	Mesh* mesh;
@@ -121,7 +121,7 @@ public:
 		ATARI_TIKEI=0, // 地形はすべての面と当たり判定を行う
 		ATARI_OBJECT=1, // オブジェクトは包括直方体(ボーンごと)と当たり判定を行う
 		ATARI_CHARA=2, // キャラクターは包括直方体(ボーンごと）と当たり判定を行う
-		ATARI_WAZA=3 // キャラクターの攻撃の技の判定
+		ATARI_WAZA=3 // キャラクターの攻撃の技の判定 // ここをかきかえるときはshaderも書き換える
 	};
 
 	AtariType type;
@@ -289,6 +289,7 @@ struct AtariUnitInfo{
 	int indexs_place;
 	int vertex_count;
 	int index_count;
+	int unit_type;
 	MYMATRIX world;
 	MYVECTOR3 jyusin;
 	MYVECTOR3 v;

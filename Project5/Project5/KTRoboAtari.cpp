@@ -231,7 +231,7 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 				MYVECTOR3 tmp;
 				float tempp=0;
 				tmp = em->bone_obbs[i].c - ans_jyusin;
-				tempp = MyVec3Length(tmp) + sqrt(MyVec3Dot(em->bone_obbs[i].e,em->bone_obbs[i].e));
+				tempp = MyVec3Length(tmp) + 2* MyVec3Dot(em->bone_obbs[i].e,em->bone_obbs[i].e);
 				if (tempp > ans_r) {
 					ans_r = tempp;
 				}
@@ -244,7 +244,7 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 
 
 
-	r = ans_r;//+ MyVec3Length(v) * dt; // ‚–‚Ì’·‚³‚Ì•ª‚¾‚¯”¼Œa‚ğ‘å‚«‚­‚·‚é
+	r = ans_r;// +MyVec3Length(v) * dt; // ‚–‚Ì’·‚³‚Ì•ª‚¾‚¯”¼Œa‚ğ‘å‚«‚­‚·‚é
 	jyusin = ans_jyusin;
 }
 
@@ -1055,6 +1055,7 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 		if( au->umesh && au->umesh_unit) {
 			au_info[au->atariidx].world = au->umesh_unit->world;
 			au_info[au->atariidx].r = au->umesh_unit->r;
+			au_info[au->atariidx].unit_type = au->umesh_unit->getType();
 			au_info[au->atariidx].jyusin = au->umesh_unit->jyusin;
 			au_info[au->atariidx].v = au->umesh_unit->v;
 			au_info[au->atariidx].atari_idx = au->atariidx;

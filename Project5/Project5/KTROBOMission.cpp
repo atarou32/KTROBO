@@ -448,7 +448,7 @@ void Game_SCENE::posbutukariIMPL(Task* task, TCB* thisTCB, Graphics* g, lua_Stat
 	} else if ((millisecond < POSBUTUKARITIME_SETTIME) && (millisecond > 0)) {
 		CS::instance()->leave(CS_TASK_CS, "leave main", TASKTHREADS_UPDATEPOSBUTUKARI);
 		butukari_clock.plus((float)millisecond);
-		Sleep(DWORD(POSBUTUKARITIME_SETTIME - millisecond));
+		Sleep((DWORD(POSBUTUKARITIME_SETTIME - millisecond))/2);
 	//	ClockWatch::wait(POSBUTUKARITIME_SETTIME - millisecond);
 
 /*		char buf[512];

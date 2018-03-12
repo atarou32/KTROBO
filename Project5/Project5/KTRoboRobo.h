@@ -1764,6 +1764,8 @@ public:
 
 	void boosterEffect(Game* game, Graphics* g, float dt, int stamp);
 	void byouga(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+	void byougaRay(Graphics* g, MYMATRIX* view, MYMATRIX* proj);
+
 	void init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei);
 	void release();
 	void atarishori(Graphics* g , MYMATRIX* view, AtariHantei* hantei, float dt, int stamp);

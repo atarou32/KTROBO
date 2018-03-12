@@ -384,15 +384,15 @@ bool Game::Init(HWND hwnd) {
 	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
 	
 	mesh = new Mesh();
-	mesh->readMesh(g, "resrc/model/cube/pkcube.MESH", demo->tex_loader);
-	mesh->readAnime("resrc/model/cube/pkcube.ANIME");
+	mesh->readMesh(g, "resrc/model/tikei/tikei_douro.MESH", demo->tex_loader);
+	mesh->readAnime("resrc/model/tikei/tikei_douro.ANIME");
 
 	mesh2 = new Mesh();
-	mesh2->readMesh(g, "resrc/model/ponko2-4/pk2sailor.MESH", demo->tex_loader);
-	mesh2->readAnime("resrc/model/ponko2-4/pk2sailor.ANIME");
+	mesh2->readMesh(g, "resrc/model/tikei/tikei_densin.MESH", demo->tex_loader);
+	mesh2->readAnime("resrc/model/tikei/tikei_densin.ANIME");
 	mesh3[0] = new Mesh();
-	mesh3[0]->readMesh(g, "resrc/model/ponko2-3/pk2face.MESH", demo->tex_loader);
-	mesh3[0]->readAnime("resrc/model/ponko2-3/pk2face.ANIME");
+	mesh3[0]->readMesh(g, "resrc/model/tikei/tikei_house.MESH", demo->tex_loader);
+	mesh3[0]->readAnime("resrc/model/tikei/tikei_house.ANIME");
 
 	mesh3[1] = new Mesh();
 	//mesh3[1]->readMesh(g, "resrc/model/ponko2-3/pk2hidarime.MESH", demo->tex_loader);
@@ -600,23 +600,23 @@ bool Game::Init(HWND hwnd) {
 	
 	
 	
-	for(int i=0;i<10;i++) {
-		for(int k=0;k<10;k++) {
+	for(int i=0;i<5;i++) {
+		for(int k=0;k<5;k++) {
 	{
 	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
 	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/cube/pkcube.MESH", demo->tex_loader,mesh,false,&idenmat,
+	UMesh* um = new UMesh(g,"resrc/model/tikei/tikei_douro.MESH", demo->tex_loader,mesh,false,&idenmat,
 		0,KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
 
-	mesh_is[i+10*k] = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&idenmat);
+	mesh_is[i+5*k] = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&idenmat);
 	umesh_unit->setUMesh(um);
 	umesh_units.push_back(umesh_unit);
-	umesh_unit->setSCALEXYZ(10,10,2);
-	umesh_unit->setXYZ((i-5)*25,(k-5)*25,-4);
+	umesh_unit->setSCALEXYZ(100,100,130);
+	umesh_unit->setXYZ((i-2)*200,(k-2)*200,-4);
 	umesh_unit->calcJyusinAndR();
-	mesh_is[i+10*k]->setWorld(&umesh_unit->world);
-	mesh_is[i+10*k]->setIsRender(true);
+	mesh_is[i+5*k]->setWorld(&umesh_unit->world);
+	mesh_is[i+5*k]->setIsRender(true);
 
 	bool tyo_unko=true;
 	float frame_anime = 0;
@@ -627,6 +627,65 @@ bool Game::Init(HWND hwnd) {
 	}
 		}
 	}
+
+	for (int i = 0; i<5; i++) {
+		for (int k = 0; k<5; k++) {
+			{
+				MYMATRIX idenmat;
+				MyMatrixIdentity(idenmat);
+				UMeshUnit* umesh_unit = new UMeshUnit();
+				UMesh* um = new UMesh(g, "resrc/model/tikei/tikei_densin.MESH", demo->tex_loader, mesh2, false, &idenmat,
+					0, KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
+
+				mesh_is[i + 5 * k+25] = mesh_instanceds->makeInstanced(mesh2, mesh2, NULL, NULL, false, &idenmat);
+				umesh_unit->setUMesh(um);
+				umesh_units.push_back(umesh_unit);
+				umesh_unit->setSCALEXYZ(100, 100, 130);
+				umesh_unit->setXYZ((i - 2) * 200, (k - 2) * 200, 0);
+				umesh_unit->calcJyusinAndR();
+				mesh_is[i + 5 * k+25]->setWorld(&umesh_unit->world);
+				mesh_is[i + 5 * k+25]->setIsRender(true);
+
+				bool tyo_unko = true;
+				float frame_anime = 0;
+
+				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+				//umesh_unit->calcJyusinAndR();
+				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
+			}
+		}
+	}
+
+	for (int i = 0; i<5; i++) {
+		for (int k = 0; k<5; k++) {
+			{
+				MYMATRIX idenmat;
+				MyMatrixIdentity(idenmat);
+				UMeshUnit* umesh_unit = new UMeshUnit();
+				UMesh* um = new UMesh(g, "resrc/model/tikei/tikei_house.MESH", demo->tex_loader, mesh3[0], false, &idenmat,
+					0, KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
+
+				mesh_is[i + 5 * k + 50] = mesh_instanceds->makeInstanced(mesh3[0], mesh3[0], NULL, NULL, false, &idenmat);
+				umesh_unit->setUMesh(um);
+				umesh_units.push_back(umesh_unit);
+				umesh_unit->setSCALEXYZ(50, 50, 50);
+				umesh_unit->setXYZ((i - 2) * 200-100, (k - 2) * 200-100, 0);
+				umesh_unit->calcJyusinAndR();
+				mesh_is[i + 5 * k + 50]->setWorld(&umesh_unit->world);
+				mesh_is[i + 5 * k + 50]->setIsRender(true);
+
+				bool tyo_unko = true;
+				float frame_anime = 0;
+
+				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+				//umesh_unit->calcJyusinAndR();
+				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
+			}
+		}
+	}
+
+
+
  //*//
 	
 	/*
@@ -1569,7 +1628,7 @@ void Game::Run() {
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 //	mesh_i->setBoneIndexInfo(animf, animl, animw);
 //	mesh_i2->setBoneIndexInfo(animf,animl,animw);
-	for (int i=0;i<100;i++) {
+	for (int i=0;i<50;i++) {
 		if (mesh_is[i]) {
 		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
 		}
@@ -1956,14 +2015,14 @@ void Game::Run() {
 	static float tester = 0;
 	tester += 0.1f;
 	UMeshUnit* umesh_unit = umesh_units[2+30];
-	umesh_unit->setXYZ(0,0,5);
-	umesh_unit->setROTXYZ(0,0,0);//1.57+tester/1000.0f,tester/100.00f,0);
+	//umesh_unit->setXYZ(0,0,205);
+	//umesh_unit->setROTXYZ(0,0,0);//1.57+tester/1000.0f,tester/100.00f,0);
 	
-	umesh_unit->calcJyusinAndR();
-	mesh_is[2+30]->setWorld(&umesh_unit->world);
-	for(int i=0;i<100;i++) {
+	//umesh_unit->calcJyusinAndR();
+	//mesh_is[2+30]->setWorld(&umesh_unit->world);
+	for(int i=0;i<75;i++) {
 	{
-		UMeshUnit* umesh_unit = umesh_units[2+i];
+		UMeshUnit* umesh_unit = umesh_units[i];
 //	umesh_unit->setROTXYZ(0,0,0);//testcc/3.00f);
 //	umesh_unit->setSCALEXYZ(2,2,1);
 //	umesh_unit->setXYZ(0,0,0);
@@ -2035,13 +2094,19 @@ void Game::Run() {
 	//mesh_instanceds->loadColorToTexture(g);
 	
 	//watches_for_keisoku.startWatch(0);
+////	mesh_instanceds->render(g);
 	mesh_instanceds->render(g);
+
+	
+
 	//g->getDeviceContext()->ClearRenderTargetView(mesh_instanceds->anime_matrix_basis_texture->target_view, cc);
 	//demo->Render(g, mesh_instanceds->combined_matrix_texture);
 
 
 
 	CS::instance()->enter(CS_RENDERDATA_CS, "ee");
+	
+
 	demo->Render(g, mesh_instanceds->anime_matrix_basis_texture);
 //	demo->Render(g, mesh_instanceds->matrix_local_texture);
 	/*
@@ -2185,6 +2250,63 @@ void Game::Run() {
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+
+
+	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+
+	mesh_instanceds->render(g);
+	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+	
+	robodayo->byouga(g, &view, &proj);
+	roboaitedayo->byouga(g, &view, &proj);
+	
+	static int robodayo_boostereffect_count = 0;
+	robodayo_boostereffect_count++;
+	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
+
+
+	if (robodayo->atarihan) {
+		//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
+		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+		//	robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
+		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
+		robodayo->atarihan->calcJyusinAndR();
+
+		if (robodayo_boostereffect_count % 2 == 0) {
+			robodayo->boosterEffect(this, g, frameTime, timestamp);
+		}
+
+		if (sap) {
+			CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+			bool t = sap->update();
+			CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+			robodayo->aphelper->setNoCalcYet(false);
+		}
+		//sap->update();
+	}
+
+
+	if (roboaitedayo->atarihan) {
+		//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
+		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
+		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
+		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
+		roboaitedayo->atarihan->calcJyusinAndR();
+
+		if (robodayo_boostereffect_count % 2 == 0) {
+			roboaitedayo->boosterEffect(this, g, frameTime, timestamp);
+		}
+
+
+		/*
+		if (sap->update()) {
+		robodayo->aphelper->setNoCalcYet(false);
+		}
+		*/
+		//sap->update();
+	}
+
+
 	//if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
 				//	robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
@@ -2212,7 +2334,11 @@ void Game::Run() {
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
-	
+	//CS::instance()->leave(CS_RENDERDATA_CS, "unko");
+
+	robodayo->byougaRay(g, &view, &proj);
+	//CS::instance()->enter(CS_RENDERDATA_CS, "unko");
+
 	watches_for_keisoku.startWatch(4);
 	texdayo->getInstance(0)->renderBill(g);
 	texdayo->deletedayo();
@@ -2223,6 +2349,7 @@ void Game::Run() {
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
 	//g->getDeviceContext()->ClearRenderTargetView(g->getRenderTargetView(),clearColor);
 	g->getDeviceContext()->ClearDepthStencilView(Mesh::pDepthStencilView,  D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0 );
+	
 	texdayo->getInstance(0)->renderText(g);
 
 	int siz = scenes.size();
@@ -2236,47 +2363,7 @@ void Game::Run() {
 		}
 		now_scene->mainrender(true);
 	}
-	static int robodayo_boostereffect_count = 0;
-	robodayo_boostereffect_count++;
-	g->getDeviceContext()->RSSetViewports(1,g->getViewPort());
-	robodayo->byouga(g,&view,&proj);
-	if (robodayo->atarihan) {
-	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
-		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-	//	robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
-		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
-		robodayo->atarihan->calcJyusinAndR();
-		
-		if (robodayo_boostereffect_count % 2==0) {
-			robodayo->boosterEffect(this,g,frameTime,timestamp);
-		}
-
-		if (sap && sap->update()) {
-			robodayo->aphelper->setNoCalcYet(false);
-		}
-		//sap->update();
-	}
-
-	roboaitedayo->byouga(g,&view,&proj);
-	if (roboaitedayo->atarihan) {
-	//	robodayo->atarihan->setXYZ(robodayo->atarihan->x + temp_input_shori->testdayo, robodayo->atarihan->y, robodayo->atarihan->z);
-		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
-		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
-		roboaitedayo->atarihan->calcJyusinAndR();
-		
-		if (robodayo_boostereffect_count % 2==0) {
-			roboaitedayo->boosterEffect(this,g,frameTime,timestamp);
-		}
-
-
-	/*	
-		if (sap->update()) {
-			robodayo->aphelper->setNoCalcYet(false);
-		}
-		*/
-		//sap->update();
-	}
+	
 
 
 	g->getDeviceContext()->OMSetRenderTargets(1, &v, Mesh::pDepthStencilView);
