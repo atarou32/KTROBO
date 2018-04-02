@@ -1,0 +1,14 @@
+{
+id=12601;
+name="KTINSUB001-ASAGAO";
+WEIGHT=750;
+EDRAIN=500;
+CPUPOWERI=200;
+BAIRITU=3;
+PRICE=85000;
+COMMENT="頭部計算能力増幅装置です。";
+mesh="resrc/inside/subcomputer/insidesubcomputera.mesh";
+anime="resrc/inside/subcomputer/insidesubcomputera.anime";
+
+};
+

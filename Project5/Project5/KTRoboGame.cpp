@@ -2247,6 +2247,13 @@ void Game::Run() {
 	OBB rec;
 	rec.c = MYVECTOR3(0,0,0);
 	g->drawOBBFill(g,0xFFFF0000,&idenmat,&view,g->getProj(),&rec);
+
+	OBB re;
+	re.c = MYVECTOR3(10,10,10);
+
+	g->drawOBBFill(g, 0xFFFFFF00, &idenmat, &view, g->getProj(), &re);
+
+
 	CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 	watches_for_keisoku.startWatch(3);
 	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());
@@ -2310,7 +2317,8 @@ void Game::Run() {
 	//if (hantei->canGetAns()) {
 		if (robodayo->atarihan) {
 				//	robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
-					robodayo->atariAim(g, &view, frameTime, (int)frame);
+//					robodayo->calcAim(g, &view, frameTime, (int)frame);
+					robodayo->aim(g, &view);
 				}
 
 				if (roboaitedayo->atarihan) {

@@ -384,12 +384,13 @@ void Robo::remakeUMesh(Graphics* g, MyTextureLoader* tex_loader) {
 void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 		static int iunko = 9;
 	static bool bunko = false;
-	bunko = false;
+//	bunko = false;
+	
 	if (ap) {
-
+		/*
 		if (!apinfo->isCalcFinished() && !apinfo->isCalced() && ap->getIsSet()) {
 			ap->hanneiSetTheta(this,true);
-			aphelper->setNoCalcYet(false);
+			//aphelper->setNoCalcYet(false);
 				{
 			RAY ra;
 			
@@ -414,7 +415,7 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 
 		if (!apinfo->isCalcFinished() && !apinfo->isCalced() && ap_hidari->getIsSet()) {
 			ap_hidari->hanneiSetTheta(this,false);
-			aphelper->setNoCalcYet(false);
+			//aphelper->setNoCalcYet(false);
 		
 			{
 			RAY ra;
@@ -438,15 +439,17 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 			bunko = true;
 	
 		}
+		
+		
 
 		if (apinfo->isCalcFinished() && apinfo->isCalced()) {
 			bunko = true;
 		}
 
 		if (bunko) {
-			return;
+			//return;
 		}
-
+		*/
 //	return;
 
 		MYVECTOR3 moku(0,0,0);
@@ -557,7 +560,7 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 					OBB ob;
 					ob.c = te;
 					te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
-					//g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
+					g->drawOBBFill(g,0xFFFF0000,&world,view,g->getProj(),&ob);
 					MYVECTOR3 tet;
 					
 				
@@ -568,7 +571,7 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 							bunko = false;
 						} else {
 							aphelper->setMoku(&te);
-							//aim(g,view);// new
+							aim(g,view);// new
 							bunko = true;
 						}
 				
@@ -605,7 +608,7 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 			
 		for (int t=0;t<50;t++) {
 			if (!aphelper->getIsCalced() && !apinfo->isCalcFinished()) {
-			aphelper->calc(g,&temp);
+			aphelper->new_calc(g,&temp);
 			}
 			if (!aphelper_hidari->getIsCalced() && !apinfo->isCalcFinished()) {
 			aphelper_hidari->calc(g,&temp);
@@ -775,6 +778,204 @@ void Robo::atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
 	}
 }
 
+
+
+void Robo::calcAim(Graphics* g, MYMATRIX* view, float dt, int stamp) {
+	MYMATRIX temp;
+	MYVECTOR3 te(0,0,0);
+	static bool bunko = false;
+	static int iunko = 9;
+	MyMatrixInverse(temp, NULL, atarihan->world);
+		{
+			{
+						{
+						RAY ra;
+
+						MeshBone* handbo = arm->larm->Bones[arm->larm->BoneIndexes["handBone"]];
+						MYVECTOR3 tempd(0, 0, 0);
+						MYMATRIX tempma;
+						MyMatrixMultiply(tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+						MyVec3TransformCoord(tempd, tempd, tempma);
+						MYVECTOR3 tempdn(1, 0, 0);
+						MyVec3TransformNormal(tempdn, tempdn, tempma);
+						ra.org = tempd;
+						ra.dir = tempdn * 30;
+						MYMATRIX iden;
+						MyMatrixIdentity(iden);
+
+						g->drawRAY(g, 0xFFFF0000, &atarihan->world, view, g->getProj(), 30, &ra);
+
+						}
+				}
+				
+
+			
+			if (this->arm->rarm) {
+				{
+
+					MYMATRIX world;
+					MyMatrixIdentity(world);
+					g->drawTriangle(g, 0xFFFF0000, &world, view, g->getProj(),
+						&MYVECTOR3(3, 3, 3),//1*cos(test),-2+4*sin(test),3+4*sin(test)+1),
+						&MYVECTOR3(3, 4, 3),//1*cos(test),-2+4*sin(test)+1,3+4*sin(test)),
+						&MYVECTOR3(3, 4, 4));//*cos(test)+1,-2+4*sin(test),3+4*sin(test)));
+
+
+					static float unko = 0;
+					unko += 0.03f;
+					if (unko > 1) {
+						unko = -1 + 0.01f;;
+					}
+
+					int i = 0;
+					for (i = 0; i < 1; i++) {
+						LockOnSystem los;
+						static ArmPoint8Positioner posit;
+						if (iunko > 8) {
+
+							static int r = 0;
+							bool t = false;
+
+							r = iunko % 800 + 200;
+
+
+							te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
+							MyVec3TransformCoord(te, te, atarihan->world);
+							OBB ob;
+							ob.c = te;
+
+
+
+						
+							g->drawOBBFill(g, 0xFFFF0000, &world, view, g->getProj(), &ob);
+							te = MYVECTOR3(38, -140, -50);
+							MyVec3TransformCoord(te, te, atarihan->world);
+
+							ob.c = te;
+							ob.e = MYVECTOR3(1.2, 1.2, 1.2);
+							g->drawOBBFill(g, 0xFFFF00FF, &world, view, g->getProj(), &ob);
+
+						
+							te = los.getPosOfStudyPoint(2050, 80, 140, 50, 50, 50, 50, 4, 4, 20);
+							te = apinfo->getIndexPos();//los.getPosOfStudyPoint(r, 10,100,6,10,6,10,1,1,3);
+							MYVECTOR3 tet;
+
+
+
+							if (!bunko) {
+								if (apinfo->isCalcFinished()) {
+									aim(g, view);
+									bunko = false;
+								}
+								else {
+									aphelper->setMoku(&te);
+									aim(g, view);// new
+									bunko = true;
+								}
+
+							}
+
+						}
+						else {
+							te = los.getPosOfStudyPoint(iunko, 10, 100, 6, 10, 6, 10, 300, 300, 500);
+							MyVec3TransformCoord(te, te, atarihan->world);
+							OBB ob;
+							ob.c = te;
+							te = los.getPosOfStudyPoint(iunko, 10, 100, 6, 10, 6, 10, 300, 300, 500);
+							g->drawOBBFill(g, 0xFFFF0000, &world, view, g->getProj(), &ob);
+
+							te = MYVECTOR3(38, -140, -50);
+							MyVec3TransformCoord(te, te, atarihan->world);
+						
+							ob.c = te;
+							ob.e = MYVECTOR3(1.2, 1.2, 1.2);
+							g->drawOBBFill(g, 0xFFFF00FF, &world, view, g->getProj(), &ob);
+
+
+
+						}
+
+						for (int t = 0; t < 50; t++) {
+							if (!aphelper->getIsCalced() && !apinfo->isCalcFinished()) {
+								aphelper->new_calc(g, &temp);
+							}
+							/*
+							if (!aphelper_hidari->getIsCalced() && !apinfo->isCalcFinished()) {
+								aphelper_hidari->calc(g, &temp);
+							}
+							*/
+						}
+
+						if (aphelper->getIsCalced()) {
+							iunko++;
+							if (!apinfo->isCalcFinished()) {
+								ArmPoint app = aphelper->getArmPoint();
+								app.is_ok = true;
+								app.pos = apinfo->getIndexPos();
+								apinfo->saveDtheta(&app, apinfo->getNowIndex());
+								apinfo->saveFileWithA();
+								apinfo->setNextIndex();
+								bunko = false;
+							}
+							else {
+								if (bunko) {
+
+									bunko = false;
+								}
+								else {
+									bunko = true;
+								}
+							}
+
+
+						}
+
+
+					}
+
+
+					{
+						RAY ra;
+
+						MeshBone* handbo = arm->rarm->Bones[arm->larm->BoneIndexes["handBone"]];
+						MYVECTOR3 tempd(0, 0, 0);
+						MYMATRIX tempma;
+						MyMatrixMultiply(tempma, handbo->matrix_local, handbo->parent_bone->combined_matrix);
+						MyVec3TransformCoord(tempd, tempd, tempma);
+						MYVECTOR3 tempdn(1, 0, 0);
+						MyVec3TransformNormal(tempdn, tempdn, tempma);
+						ra.org = tempd;
+						ra.dir = tempdn * 30;
+						MYMATRIX iden;
+						MyMatrixIdentity(iden);
+
+						g->drawRAY(g, 0xFFFF0000, &atarihan->world, view, g->getProj(), 30, &ra);
+						
+					
+					
+
+					
+
+
+
+					
+					}
+
+
+
+
+
+
+
+
+
+				}
+
+			}
+		}
+
+	
+}
 
 void Robo::boosterEffect(Game* game, Graphics* g, float dt, int stamp) {
 
@@ -1056,7 +1257,7 @@ void Robo::atarishori(Graphics* g, MYMATRIX* view, AtariHantei* hantei, float dt
 							OBB obda = *ob2;
 							OBB obda2 = *ob2;
 							obda.e = obda.e *1.2f;// MYVECTOR3(0.5f,0.5f,0.5f);
-						//	g->drawOBB(g,0xFF00FF00,&iden,view,g->getProj(),&obda);
+							g->drawOBB(g,0xFF00FF00,&iden,view,g->getProj(),&obda);
 							temp_atari->is_bone_obbs_atatta[k] = true;
 							setkabe_state = &setkabe;
 							setkabedayo = true;
@@ -1671,16 +1872,16 @@ void Robo::settyakuBoosterWithLeg() {
 
 
 void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
-/*	Mesh* head;
-	Mesh* body;
-	Mesh* leg;
-	Mesh* rarm;
-	Mesh* larm;
-	RArmWeapon* raweapon;
-	LArmWeapon* laweapon;
-	RShoulderWeapon* rsweapon;
-	LShoulderWeapon* lsweapon;
-*/
+	/*	Mesh* head;
+		Mesh* body;
+		Mesh* leg;
+		Mesh* rarm;
+		Mesh* larm;
+		RArmWeapon* raweapon;
+		LArmWeapon* laweapon;
+		RShoulderWeapon* rsweapon;
+		LShoulderWeapon* lsweapon;
+	*/
 	screen_height = g->getScreenHeight();
 	head = 0;
 	body = 0;
@@ -1699,262 +1900,323 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 	//MyMatrixIdentity(world);
 	MyTokenAnalyzer ma;
 	{
-	ma.load("resrc/ktrobo/info/metadata/ktroboheadpartsmetadata.txt");
-	RoboDataMetaData* head_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		ma.load("resrc/ktrobo/info/metadata/ktroboheadpartsmetadata.txt");
+		RoboDataMetaData* head_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		head_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			head_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-	
-	ma.load("resrc/ktrobo/info/ktroboheadparts.txt");
-
-	head = new RoboHead();
-	try {
-	head->init(&ma,head_md,g,tex_loader);
-		} catch (GameError* err) {
-		
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
-		delete head_md;
 		ma.deletedayo();
-		throw err;
-	}
-	delete head_md;
 
-	ma.deletedayo();
+		ma.load("resrc/ktrobo/info/ktroboheadparts.txt");
+
+		head = new RoboHead();
+		try {
+			head->init(&ma, head_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete head_md;
+			ma.deletedayo();
+			throw err;
+		}
+		delete head_md;
+
+		ma.deletedayo();
 	}
-	
+
 	// ŽŸ‚Íbody
 	{
-	ma.load("resrc/ktrobo/info/metadata/ktrobocorepartsmetadata.txt");
-	RoboDataMetaData* body_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		ma.load("resrc/ktrobo/info/metadata/ktrobocorepartsmetadata.txt");
+		RoboDataMetaData* body_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		body_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			body_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-	ma.load("resrc/ktrobo/info/ktrobocoreparts.txt");
-
-
-	body = new RoboBody();
-	try {
-	body->init(&ma,body_md,g,tex_loader);
-	//body->init(&ma,body_md,g,tex_loader);//fix
-	} catch (GameError* err) {
 		ma.deletedayo();
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		ma.load("resrc/ktrobo/info/ktrobocoreparts.txt");
+
+
+		body = new RoboBody();
+		try {
+			body->init(&ma, body_md, g, tex_loader);
+			//body->init(&ma,body_md,g,tex_loader);//fix
+		}
+		catch (GameError* err) {
+			ma.deletedayo();
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete body_md;
+			throw err;
+		}
+
 		delete body_md;
-		throw err;
-	}
 
-	delete body_md;
-
-	ma.deletedayo();
+		ma.deletedayo();
 	}
 
 	// ŽŸ‚Íarm
 	{
-	ma.load("resrc/ktrobo/info/metadata/ktroboarmpartsmetadata.txt");
-	RoboDataMetaData* arm_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		ma.load("resrc/ktrobo/info/metadata/ktroboarmpartsmetadata.txt");
+		RoboDataMetaData* arm_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		arm_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			arm_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-	ma.load("resrc/ktrobo/info/ktroboarmparts.txt");
-
-
-	arm = new RoboArm();
-	try {
-	arm->init(&ma,arm_md,g,tex_loader);
-		} catch (GameError* err) {
-		
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
-		delete arm_md;
 		ma.deletedayo();
-		throw err;
-	}
-	delete arm_md;
+		ma.load("resrc/ktrobo/info/ktroboarmparts.txt");
 
-	ma.deletedayo();
+
+		arm = new RoboArm();
+		try {
+			arm->init(&ma, arm_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete arm_md;
+			ma.deletedayo();
+			throw err;
+		}
+		delete arm_md;
+
+		ma.deletedayo();
 	}
 
 
 
 	// ŽŸ‚Íleg
 	{
-	ma.load("resrc/ktrobo/info/metadata/ktrobolegpartsmetadata.txt");
-	RoboDataMetaData* leg_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		ma.load("resrc/ktrobo/info/metadata/ktrobolegpartsmetadata.txt");
+		RoboDataMetaData* leg_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		leg_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			leg_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-
-	ma.load("resrc/ktrobo/info/leg/ktrobolegt2.txt");
-
-	leg = new RoboLeg();
-	try { 
-	leg->init(&ma,leg_md,g,tex_loader);
-		} catch (GameError* err) {
-		
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
-		delete leg_md;
 		ma.deletedayo();
-		throw err;
-	}
-	delete leg_md;
 
-	ma.deletedayo();
+		ma.load("resrc/ktrobo/info/leg/ktrobolegt2.txt");
+
+		leg = new RoboLeg();
+		try {
+			leg->init(&ma, leg_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete leg_md;
+			ma.deletedayo();
+			throw err;
+		}
+		delete leg_md;
+
+		ma.deletedayo();
 	}
 
 
 
 	{
-	// RWEAPON
-	ma.load("resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt");
-	RoboDataMetaData* rweapon_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		// RWEAPON
+		ma.load("resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt");
+		RoboDataMetaData* rweapon_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		rweapon_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			rweapon_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-	ma.load("resrc/ktrobo/info/rweapon/ktroborarmweaponrifle.txt");
-	
-	raweapon = new RArmWeapon();
-	try {
-	raweapon->init(&ma,rweapon_md,g,tex_loader);
-		} catch (GameError* err) {
-		
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		ma.deletedayo();
+		ma.load("resrc/ktrobo/info/rweapon/ktroborarmweaponrifle.txt");
+
+		raweapon = new RArmWeapon();
+		try {
+			raweapon->init(&ma, rweapon_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete rweapon_md;
+			ma.deletedayo();
+			throw err;
+		}
 		delete rweapon_md;
 		ma.deletedayo();
-		throw err;
-	}
-	delete rweapon_md;
-	ma.deletedayo();
 
-	
-	settyakuRArmWeaponWithArm();
+
+		settyakuRArmWeaponWithArm();
 	}
 
 	{
-	// LWEAPON
-	ma.load("resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt");
-	RoboDataMetaData* lweapon_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		// LWEAPON
+		ma.load("resrc/ktrobo/info/metadata/weapon/ktrobopartsweaponmetadata.txt");
+		RoboDataMetaData* lweapon_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		lweapon_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			lweapon_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-	ma.load("resrc/ktrobo/info/lweapon/ktrobolarmweaponrifle.txt");
-	
-	laweapon = new LArmWeapon();
-	try {
-	laweapon->init(&ma,lweapon_md,g,tex_loader);
-		} catch (GameError* err) {
-		
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		ma.deletedayo();
+		ma.load("resrc/ktrobo/info/lweapon/ktrobolarmweaponrifle.txt");
+
+		laweapon = new LArmWeapon();
+		try {
+			laweapon->init(&ma, lweapon_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete lweapon_md;
+			ma.deletedayo();
+			throw err;
+		}
 		delete lweapon_md;
 		ma.deletedayo();
-		throw err;
-	}
-	delete lweapon_md;
-	ma.deletedayo();
 
-	settyakuLArmWeaponWithArm();
+		settyakuLArmWeaponWithArm();
 
 	}
 
 
 
 	{
-	// BOOSTER
-	ma.load("resrc/ktrobo/info/metadata/ktroboboosterpartsmetadata.txt");
-	RoboDataMetaData* booster_md = new RoboDataMetaData();
-	RoboMetaDataPart rmdp;
-	rmdp.clear();
-	int dnum = ma.GetIntToken();
-	for (int i=0;i<dnum;i++) {
+		// BOOSTER
+		ma.load("resrc/ktrobo/info/metadata/ktroboboosterpartsmetadata.txt");
+		RoboDataMetaData* booster_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
 		rmdp.clear();
-		rmdp.readline(&ma);
-		booster_md->setData(rmdp.data_name,rmdp.data_name2,rmdp.data_type,rmdp.data_sentence,rmdp.data_compare);
-	}
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			booster_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
 
-	ma.deletedayo();
-	ma.load("resrc/ktrobo/info/ktroboboosterparts.txt");
-	
-	booster = new RoboBooster();
-	try {
-	booster->init(&ma,booster_md,g,tex_loader);
-		} catch (GameError* err) {
-		
-	//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+		ma.deletedayo();
+		ma.load("resrc/ktrobo/info/ktroboboosterparts.txt");
+
+		booster = new RoboBooster();
+		try {
+			booster->init(&ma, booster_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete booster_md;
+			ma.deletedayo();
+			throw err;
+		}
 		delete booster_md;
 		ma.deletedayo();
-		throw err;
-	}
-	delete booster_md;
-	ma.deletedayo();
 
-	settyakuBoosterWithLeg();
+		settyakuBoosterWithLeg();
 
-	// booster ‚ÌŒvŽZ@
-	roboparam.boostercalc.Init(this, booster);
+		// booster ‚ÌŒvŽZ@
+		roboparam.boostercalc.Init(this, booster);
 
 	}
 
 
 
-	this->remakeUMesh(g,tex_loader);
-	
+	this->remakeUMesh(g, tex_loader);
+
 	if (hantei) {
-		hantei->setUMeshUnit(atarihan,AtariUnit::AtariType::ATARI_CHARA);
+		hantei->setUMeshUnit(atarihan, AtariUnit::AtariType::ATARI_CHARA);
 	}
-	
 
-	anime_loop_leg.setAnime(10,30,true);
-	anime_loop_leg.setTimeAndSpeed(0.01,0);
-//	world = atarihan->world;
-	ap = new ArmPositioner(3.14/60000,3.14/3,0.62);
-	ap->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
-	aphelper = new ArmPositionerHelper(this,ap,true);
 
-	ap_hidari = new ArmPositioner(3.14/60000,3.14/3,0.62);
-	ap_hidari->setTheta(0.96429, -0.92417,0.1193,0,0.20,0.19);
-	aphelper_hidari = new ArmPositionerHelper(this,ap_hidari,false);
+	anime_loop_leg.setAnime(10, 30, true);
+	anime_loop_leg.setTimeAndSpeed(0.01, 0);
+	//	world = atarihan->world;
+	ap = new ArmPositioner(3.14 / 60000, 3.14 / 3, 0.62);
+	ap->setTheta(0.96429, -0.92417, 0.1193, 0, 0.20, 0.19);
+	aphelper = new ArmPositionerHelper(this, ap, true);
 
-	apinfo = new ArmPointIndexInfo("ktrobofcs5.txt",70,150,10,10,30,30,3,3,20);//70,150,10,10,30,30,2,2,5);// 70,120,20,40,20,40,5,5,15);
+	ap_hidari = new ArmPositioner(3.14 / 60000, 3.14 / 3, 0.62);
+	ap_hidari->setTheta(0.96429, -0.92417, 0.1193, 0, 0.20, 0.19);
+	aphelper_hidari = new ArmPositionerHelper(this, ap_hidari, false);
+
+
+
+
+
+	{
+		// FCS
+		ma.load("resrc/ktrobo/info/metadata/ktrobofcspartsmetadata.txt");
+		RoboDataMetaData* fcs_md = new RoboDataMetaData();
+		RoboMetaDataPart rmdp;
+		rmdp.clear();
+		int dnum = ma.GetIntToken();
+		for (int i = 0; i < dnum; i++) {
+			rmdp.clear();
+			rmdp.readline(&ma);
+			fcs_md->setData(rmdp.data_name, rmdp.data_name2, rmdp.data_type, rmdp.data_sentence, rmdp.data_compare);
+		}
+
+		ma.deletedayo();
+		ma.load("resrc/ktrobo/info/ktrobofcsparts.txt");
+
+		fcs = new RoboFCS();
+		try {
+			fcs->init(&ma, fcs_md, g, tex_loader);
+		}
+		catch (GameError* err) {
+
+			//	MessageBoxA(g->getHWND(), err->getMessage(), err->getErrorCodeString(err->getErrorCode()), MB_OK);
+			delete fcs_md;
+			ma.deletedayo();
+			throw err;
+		}
+		delete fcs_md;
+		ma.deletedayo();
+
+	}
+
+
+
+
+	if (fcs) {
+		apinfo = new ArmPointIndexInfo(fcs->data->getData("LOCKFILE")->string_data,
+			(float)fcs->data->getData("LOCKMIND")->int_data,
+			(float)fcs->data->getData("LOCKMAXD")->int_data,
+			(float)fcs->data->getData("LOCKMINV")->int_data,
+			(float)fcs->data->getData("LOCKMAXV")->int_data,
+			(float)fcs->data->getData("LOCKMINH")->int_data,
+			(float)fcs->data->getData("LOCKMAXH")->int_data,
+			(float)fcs->data->getData("LOCKDV")->int_data,
+			(float)fcs->data->getData("LOCKDH")->int_data,
+			(float)fcs->data->getData("LOCKDD")->int_data);
+
+
+	} else {
+		apinfo = new ArmPointIndexInfo("ktrobofcs6.txt", 150, 300, 30, 30, 30, 30, 6, 6, 40);//70,150,10,10,30,30,2,2,5);// 70,120,20,40,20,40,5,5,15);
+	}	
 	if (apinfo->hasFile()) {
 		apinfo->loadFile();
 	} else {
@@ -3481,7 +3743,7 @@ bool Robo::handleMessage(int msg, void* data, DWORD time) {
 
 	}
 */
-
+	
 
 	//if (msg == KTROBO_INPUT_MESSAGE_ID_KEYDOWN) {
 		MYINPUTMESSAGESTRUCT* input = (MYINPUTMESSAGESTRUCT*) data;

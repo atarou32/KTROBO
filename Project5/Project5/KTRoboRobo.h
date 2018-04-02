@@ -1771,6 +1771,7 @@ public:
 	void atarishori(Graphics* g , MYMATRIX* view, AtariHantei* hantei, float dt, int stamp);
 	void fireUpdate(Graphics* g, Game* game, Scene* scene,BulletController* bullet_c, AtariHantei* hantei, float dt, int stamp);
 	void atariAim(Graphics* g, MYMATRIX* view, float dt, int stamp);
+	void calcAim(Graphics* g, MYMATRIX* view, float dt, int stamp);
 };
 
 }

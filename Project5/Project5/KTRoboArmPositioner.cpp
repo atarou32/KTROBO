@@ -10,7 +10,7 @@
 #include "KTRoboLog.h"
 #include <string>
 #include "MyTokenAnalyzer.h"
-
+#include "KTRoboDebugText.h"
 
 using namespace KTROBO;
 
@@ -823,7 +823,7 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 
 		}
 		mada_count++;
-		if (mada_count > 760) {
+		if (mada_count > 76000) { // 760
 			resetTheta();
 			this->setArm3(robo,is_migi,arm1,arm2);
 			if (is_migi) {
@@ -1010,6 +1010,383 @@ int ArmPositioner::positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECT
 //	if (und) {
 //		return KTROBO_ARMPOSITION_OK;
 //	}
+
+	return KTROBO_ARMPOSITION_DAME;
+}
+
+
+int ArmPositioner::new_positionArm3(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi) {
+
+
+
+
+
+	MeshBone* arm1;
+	MeshBone* arm2;
+	MeshBone* handjoint;
+
+	if (is_migi) {
+		arm1 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["handBone"]];
+		//		robo->arm->rarm->animate(40, false);
+	}
+	else {
+		arm1 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]];
+		arm2 = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]];
+		handjoint = robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["handBone"]];
+		//		robo->arm->larm->animate(40, false);
+	}
+
+	// 各ボーンの位置を求めて長さを求める
+	MYVECTOR3 arm1_pos(0, 0, 0);
+	MYVECTOR3 arm2_pos(0, 0, 0);
+	MYVECTOR3 joint_pos(0, 0, 0);
+
+	MYMATRIX mma;
+
+	MyMatrixMultiply(mma, arm1->matrix_local, arm1->combined_matrix);
+	MYMATRIX mmt;
+	//	MyMatrixTranspose(mmt, mma);
+	MyVec3TransformCoord(arm1_pos, arm1_pos, mma);
+
+	MyMatrixMultiply(mma, arm2->matrix_local, arm2->combined_matrix);
+	//	MyMatrixTranspose(mmt, mma);
+	MyVec3TransformCoord(arm2_pos, arm2_pos, mma);
+
+	MyMatrixMultiply(mma, handjoint->matrix_local, handjoint->combined_matrix);
+	//	MyMatrixTranspose(mmt, mma);
+	MyVec3TransformCoord(joint_pos, joint_pos, mma);
+
+	MYVECTOR3 jyusin = (arm2_pos * 2 + arm1_pos + joint_pos * 3) / 6.0f;
+	MYVECTOR3 jyusin2moku = *moku - jyusin;
+	float jyusin2mokulen = MyVec3Length(jyusin2moku);
+
+	MYVECTOR3 arm2tomoku = *moku - arm2_pos;
+	MYVECTOR3 arm2joint = arm2_pos - joint_pos;
+	MYVECTOR3 arm1arm2 = arm2_pos - arm1_pos;
+	float arm2jointlen = MyVec3Length(arm2joint);
+	float arm2arm1len = MyVec3Length(arm1arm2);
+	MyVec3Normalize(arm2tomoku, arm2tomoku);
+	arm2tomoku = arm2tomoku * (arm2jointlen);
+	jyusin2moku = jyusin2moku / jyusin2mokulen * arm2jointlen;
+
+	static float unko = 0;
+
+	MYVECTOR3 mokuhf = arm2tomoku + arm2_pos;
+	MYVECTOR3 tyouunko = mokuhf - joint_pos;
+	float tyouunkolen = MyVec3Length(tyouunko);
+	MYVECTOR3 mokudd = tyouunko * max(tyouunkolen, 0.3f) / tyouunkolen + joint_pos;
+	static MYVECTOR3 maemoku(0, 0, 0);
+	mokuhf = (maemoku*0.2 + mokudd * 0.8);// +joint_pos;
+
+	maemoku = mokuhf;
+
+	MYMATRIX wo;
+	MyMatrixIdentity(wo);
+	//wo = robo->atarihan->world;
+	OBB re;
+	re.c = MYVECTOR3(10, -10, 10);// mokuhf;
+	mokudayo = mokuhf;
+
+
+	MYVECTOR3 moku_len;
+	moku_len = mokuhf - joint_pos;
+
+
+	MYVECTOR3 unkovec = joint_pos - arm2_pos;
+	MyVec3Normalize(unkovec, unkovec);
+	MYVECTOR3 mokutoarm2 = *moku - arm2_pos;
+	float dd = MyVec3Dot(unkovec, mokutoarm2);
+	float ddd = MyVec3Length(mokutoarm2);
+	float dddd = sqrt(ddd * ddd - dd * dd);// kyori
+
+	MYVECTOR3 tempmoku;
+	tempmoku = arm2_pos + unkovec * dd;
+	dmoku = tempmoku - *moku;
+
+
+	float len = dddd;
+	float mlen = MyVec3Length(moku_len);
+	static int mada_count = 0;
+	float warukazu = 1;
+	static bool und = false;
+	und = false;
+	char buf[512];
+	WCHAR wbuf[512];
+	memset(buf, 0, 512);
+	if (len * 1000 < 9500) {
+	_itoa_s(len * 1000, buf, 10);
+	stringconverter sc;
+	sc.charToWCHAR(buf, wbuf);
+	DebugTexts::instance()->setText(g, wcslen(wbuf), wbuf);
+	//mokuhf = *moku;
+	}
+
+	if (len < 9.2f) {
+		mada_count = 0;
+		return KTROBO_ARMPOSITION_FINISH;// すでに到達している
+	}
+	else {
+		if (len < 9.42f) {//0.62 //1.62
+			mada_count = 0;
+			warukazu = 600000;
+			return KTROBO_ARMPOSITION_FINISH;
+			//und = true;
+		}
+		else if (mlen < 0.12f) {
+			mada_count = 0;
+			warukazu = 400;
+			und = true;
+		}
+		else if (mlen < 0.32f) {
+			mada_count = 0;
+			warukazu = 380;//380
+			und = true;
+		}
+		else if (mlen < 0.9f) {
+			mada_count -= 1;
+			warukazu = 160;//160
+			und = true;
+
+		}
+		else if (mlen <1.8f) {
+
+			warukazu = 2;
+		}
+		else {
+			warukazu = 1;
+			mada_count += 3;
+		//	resetTheta();
+			positionArm33(g, view, robo, moku, is_migi);
+
+		}
+
+		mada_count++;
+		if (mada_count > 460) { // 760
+			resetTheta();
+			warukazu = 600000;
+			this->setArm3(robo, is_migi, arm1, arm2);
+			if (is_migi) {
+				robo->arm->rarm->animate(40, false);
+			}
+			else {
+				robo->arm->larm->animate(40, false);
+			}
+			mada_count = 0;
+			//	und = false;//true;
+		}
+	}
+
+
+	if (is_migi) {
+
+
+	
+		MyIKMODOKI modoki(robo->arm->rarm, &robo->atarihan->world, &mokuhf, "modoruBone", "handBone");
+		modoki.setXFreeBone("downarmBone");
+		modoki.setYFreeBone("downarmBone");
+		modoki.setZFreeBone("downarmBone");
+
+		modoki.setXFreeBone("uparmBone");
+		modoki.setYFreeBone("uparmBone");
+		modoki.setZFreeBone("uparmBone");
+		float dthetazenbu = 0;
+		for (int i = 0; i<11; i++) {
+
+
+			for (int k = 0; k < 4; k++) {
+				modoki.updateStep();
+			}
+			float dthetax = modoki.getdthetaXBone("uparmBone") / 60.0 / warukazu;
+			float dthetay = modoki.getdthetaYBone("uparmBone") / 60.0 / warukazu;
+			float dthetaz = modoki.getdthetaZBone("uparmBone") / 60.0 / warukazu;
+
+			if (isnan(dthetax) || isnan(dthetay) || isnan(dthetaz)) {
+				robo->arm->rarm->animate(40, true);
+				resetTheta();
+				break;
+			}
+
+			unsigned int unko_count = 0;
+			if (abs(dthetax) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetay) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetaz) < 0.000001) {
+				unko_count++;
+			}
+
+			if (und) {
+				dthetax /= 2.0f;
+				dthetay /= 2.0f;
+				dthetaz /= 2.0f;
+			}
+
+			dthetaxa += dthetax;
+
+
+			dthetaya += dthetay;
+
+			dthetaza += dthetaz;
+			dthetazenbu += dthetax + dthetay + dthetaz;
+
+
+			dthetax = modoki.getdthetaXBone("downarmBone") / 60 / warukazu;
+			dthetay = modoki.getdthetaYBone("downarmBone") / 60 / warukazu;
+			dthetaz = modoki.getdthetaZBone("downarmBone") / 60 / warukazu;
+
+			if (isnan(dthetax) || isnan(dthetay) || isnan(dthetaz)) {
+				robo->arm->rarm->animate(40, true);
+				resetTheta();
+				break;
+
+			}
+
+			if (abs(dthetax) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetay) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetaz) < 0.000001) {
+				unko_count++;
+			}
+
+			if (und) {
+				dthetax /= 2.0f;
+				dthetay /= 2.0f;
+				dthetaz /= 2.0f;
+			}
+
+
+
+
+
+
+			dthetaxb += dthetax;
+			dthetayb += dthetay;
+			dthetazb += dthetaz;
+			dthetazenbu += dthetax + dthetay + dthetaz;
+			if ((unko_count == 6) && !und) {
+				resetTheta();
+			}
+
+			this->setArm3(robo, true, arm1, arm2);
+			robo->arm->rarm->animate(40, false);
+			if (dthetazenbu >= 0.01f) {
+				//break;
+			}
+		}
+	}
+	else {
+
+
+		MyIKMODOKI modoki(robo->arm->larm, &robo->atarihan->world, &mokuhf, "modoruBone", "handBone");
+		modoki.setXFreeBone("downarmBone");
+		modoki.setYFreeBone("downarmBone");
+		modoki.setZFreeBone("downarmBone");
+
+		modoki.setXFreeBone("uparmBone");
+		modoki.setYFreeBone("uparmBone");
+		modoki.setZFreeBone("uparmBone");
+
+		for (int i = 0; i<13; i++) {
+
+
+			for (int k = 0; k < 1; k++) {
+				modoki.updateStep();
+			}
+			float dthetax = modoki.getdthetaXBone("uparmBone") / 60.0 / warukazu;
+			float dthetay = modoki.getdthetaYBone("uparmBone") / 60.0 / warukazu;
+			float dthetaz = modoki.getdthetaZBone("uparmBone") / 60.0 / warukazu;
+
+			if (isnan(dthetax) || isnan(dthetay) || isnan(dthetaz)) {
+				robo->arm->larm->animate(40, true);
+				resetTheta();
+				break;
+
+			}
+
+			unsigned int unko_count = 0;
+			if (abs(dthetax) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetay) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetaz) < 0.000001) {
+				unko_count++;
+			}
+
+			if (und) {
+				dthetax /= 2.0f;
+				dthetay /= 2.0f;
+				dthetaz /= 2.0f;
+			}
+
+			dthetaxa += dthetax;
+
+
+			dthetaya += dthetay;
+
+			dthetaza += dthetaz;
+
+
+
+			dthetax = modoki.getdthetaXBone("downarmBone") / 60 / warukazu;
+			dthetay = modoki.getdthetaYBone("downarmBone") / 60 / warukazu;
+			dthetaz = modoki.getdthetaZBone("downarmBone") / 60 / warukazu;
+
+			if (isnan(dthetax) || isnan(dthetay) || isnan(dthetaz)) {
+				robo->arm->larm->animate(40, true);
+				resetTheta();
+				break;
+
+			}
+
+
+			if (abs(dthetax) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetay) < 0.000001) {
+				unko_count++;
+			}
+			if (abs(dthetaz) < 0.000001) {
+				unko_count++;
+			}
+
+			if (und) {
+				dthetax /= 2.0f;
+				dthetay /= 2.0f;
+				dthetaz /= 2.0f;
+			}
+
+
+
+
+
+
+			dthetaxb += dthetax;
+			dthetayb += dthetay;
+			dthetazb += dthetaz;
+
+			if ((unko_count == 6) && !und) {
+				resetTheta();
+			}
+
+			this->setArm3(robo, false, arm1, arm2);
+			robo->arm->larm->animate(40, false);
+
+		}
+
+	}
+
+	//	if (und) {
+	//		return KTROBO_ARMPOSITION_OK;
+	//	}
 
 	return KTROBO_ARMPOSITION_DAME;
 }
@@ -1570,6 +1947,7 @@ bool ShudouArmPositioner::update() {
 
 	if (gui->getTriedToSendFromButton(toggle_button)) {
 		t2 = true;
+//		ap->resetTheta();
 	}
 
 	if (t) {
@@ -1579,12 +1957,12 @@ bool ShudouArmPositioner::update() {
 		dthetayb = gui->getNowFromSlider(slider_dyb);
 		dthetaza = gui->getNowFromSlider(slider_dza);
 		dthetazb = gui->getNowFromSlider(slider_dzb);
-		//ap->resetTheta();
+		ap->resetTheta();
 		ap->setIsSet(true);
 		ap->setTheta(dthetaxa, dthetaxb, dthetaya, dthetayb, dthetaza, dthetazb);
 		
 	}
-
+	
 	if (t2) {
 		if (ap->getIsSet()) {
 			ap->setIsSet(false);
@@ -1592,7 +1970,7 @@ bool ShudouArmPositioner::update() {
 			ap->setIsSet(true);
 		}
 	}
-
+	
 	return t;
 }
 
@@ -1697,8 +2075,12 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 		return ans;
 	}
 */
-
-	double sumhi = hi1 + hi2+hi3;
+	bool sumhizero = false;
+	double sumhi = abs(hi1) + abs(hi2)+abs(hi3);
+	if (sumhi < 0.000001) {
+		sumhi = 1;
+		sumhizero = true;
+	}
 	// dtheta の計算を行う
 	double dthetaxa1 = kitenpoint->dthetaxa * ( 1-hi1) + point1->dthetaxa * hi1;
 	double dthetaxb1 = kitenpoint->dthetaxb * ( 1-hi1) + point1->dthetaxb * hi1;
@@ -1721,12 +2103,20 @@ ArmPoint getPointPart(ArmPoint* kitenpoint, ArmPoint* point1, ArmPoint* point2, 
 	double dthetaza3 = kitenpoint->dthetaza * ( 1-hi3) + point3->dthetaza * hi3;
 	double dthetazb3 = kitenpoint->dthetazb * ( 1-hi3) + point3->dthetazb * hi3;
 
-	ans.dthetaxa = (float)(dthetaxa1 * hi1/sumhi + dthetaxa2 * hi2/sumhi + dthetaxa3 * hi3/sumhi);//- 2*kitenpoint->dthetaxa;
-	ans.dthetaxb =(float)(dthetaxb1 * hi1/sumhi + dthetaxb2 * hi2/sumhi + dthetaxb3 * hi3/sumhi);//- 2*kitenpoint->dthetaxb;
-	ans.dthetaya =(float)(dthetaya1 * hi1/sumhi + dthetaya2 * hi2/sumhi + dthetaya3 * hi3/sumhi);//- 2*kitenpoint->dthetaya;
-	ans.dthetayb =(float)(dthetayb1 * hi1/sumhi + dthetayb2 * hi2/sumhi + dthetayb3 * hi3/sumhi);//- 2*kitenpoint->dthetayb;
-	ans.dthetaza =(float)(dthetaza1 * hi1/sumhi + dthetaza2 * hi2/sumhi + dthetaza3 * hi3/sumhi);//- 2*kitenpoint->dthetaza;
-	ans.dthetazb =(float)(dthetazb1 * hi1/sumhi + dthetazb2 * hi2/sumhi + dthetazb3 * hi3/sumhi);//- 2*kitenpoint->dthetazb;
+	ans.dthetaxa = (float)(dthetaxa1 * abs(hi1/sumhi) + dthetaxa2 * abs(hi2/sumhi) + dthetaxa3 * abs(hi3/sumhi));//- 2*kitenpoint->dthetaxa;
+	ans.dthetaxb =(float)(dthetaxb1 *abs(hi1/sumhi)+ dthetaxb2 *abs(hi2/sumhi) + dthetaxb3 *abs( hi3/sumhi));//- 2*kitenpoint->dthetaxb;
+	ans.dthetaya =(float)(dthetaya1 *abs(hi1/sumhi)+ dthetaya2 *abs(hi2/sumhi) + dthetaya3 *abs( hi3/sumhi));//- 2*kitenpoint->dthetaya;
+	ans.dthetayb =(float)(dthetayb1 *abs(hi1/sumhi)+ dthetayb2 *abs(hi2/sumhi) + dthetayb3 *abs( hi3/sumhi));//- 2*kitenpoint->dthetayb;
+	ans.dthetaza =(float)(dthetaza1 *abs(hi1/sumhi)+ dthetaza2 *abs(hi2/sumhi) + dthetaza3 *abs( hi3/sumhi));//- 2*kitenpoint->dthetaza;
+	ans.dthetazb =(float)(dthetazb1 *abs(hi1/sumhi)+ dthetazb2 *abs(hi2/sumhi) + dthetazb3 *abs( hi3/sumhi));//- 2*kitenpoint->dthetazb;
+	if (sumhizero) {
+		ans.dthetaxa = dthetaxa1;
+		ans.dthetaxb = dthetaxb1;
+		ans.dthetaya = dthetaya1;
+		ans.dthetayb = dthetayb1;
+		ans.dthetaza = dthetaza1;
+		ans.dthetazb = dthetazb1;
+	}
 	ans.pos = kitenpoint->pos + n_vec1 * x1a+ n_vec2*x2a+ n_vec3*x3a;
 
 	ans.is_ok = true;
@@ -1967,6 +2357,12 @@ void ArmPositionerHelper::byougaAP8(Graphics* g, MYMATRIX* view) {
 	ob.c = ap8.points[i].pos;
 	g->drawOBB(g,0xFFFFFFFF, &robo->atarihan->world,view,g->getProj(), &ob);
 	}
+	ob.c = tempmoku;
+	//g->drawOBBFill(g, 0xFFFFFFFF, &robo->atarihan->world, view, g->getProj(), &ob);
+	ob.c = ap->mokudayo;
+	ob.e = MYVECTOR3(2, 2, 2);
+	//g->drawOBBFill(g, 0xFFFFFFFF, &robo->atarihan->world, view, g->getProj(), &ob);
+
 }
 void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 		
@@ -1986,15 +2382,15 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 			ap->setTheta(anp.dthetaxa,anp.dthetaxb,anp.dthetaya,anp.dthetayb,anp.dthetaza,anp.dthetazb);
 		}
 	
-		if (is_calced) {
-			return;
-		}
+//		if (is_calced) {
+//			return;
+//		}
 
 	} else {
 		
-		if (is_calced) {
-			return;
-		}
+//		if (is_calced) {
+//			return;
+//		}
 		
 
 		// dmokuをしようする
@@ -2130,6 +2526,223 @@ void ArmPositionerHelper::calc(Graphics* g, MYMATRIX* view) {
 	if (ap->getReseted()) {
 		nocalcyet = true;
 	}
+}
+
+
+void ArmPositionerHelper::new_calc(Graphics* g, MYMATRIX* view) {
+	MYVECTOR3 ttmp = moku;
+
+	if (ap->getIsSet()) {
+
+		ap->hanneiSetTheta(robo, is_migi);
+
+		ddmoku = MYVECTOR3(0, 0, 0);
+		ddunko = MYVECTOR3(0, 0, 0);
+		dbb = 100000;
+		unko_count = 0;
+		bairitu = 1;
+		uunko = false;
+		dmoku = MYVECTOR3(0, 0, 0);
+		nocalcyet = false;
+		ap->setDMOKU(&dmoku);
+		return;
+	}
+
+
+	if (ap->getReseted()) {
+		
+		ap->hanneiSetTheta(robo, is_migi);
+
+		ddmoku = MYVECTOR3(0, 0, 0);
+		ddunko = MYVECTOR3(0, 0, 0);
+		dbb = 100000;
+		unko_count = 0;
+		bairitu = 1;
+		uunko = false;
+		dmoku = MYVECTOR3(0, 0, 0);
+		nocalcyet = false;
+	}
+
+	if (nocalcyet) {
+		ddmoku = MYVECTOR3(0, 0, 0);
+		ddunko = MYVECTOR3(0, 0, 0);
+		dbb = 100000;
+		unko_count = 0;
+		bairitu = 1;
+		uunko = false;
+
+		ArmPoint anp = ap8.getPoint(&moku);
+		if (anp.is_ok) {
+			ap->setTheta(anp.dthetaxa, anp.dthetaxb, anp.dthetaya, anp.dthetayb, anp.dthetaza, anp.dthetazb);
+		}
+
+		//		if (is_calced) {
+		//			return;
+		//		}
+
+	}
+	else {
+
+		// tempmokuを計算する
+		float unko = MyVec3Length(dmoku);
+		//unko = unko/10;
+		if (unko < 0.000001) {
+			unko = 1;
+		}
+
+		bairitu = MyVec3Length(moku);
+		tempmoku = moku - ddunko / 2.0f; //*unko/bairitu;
+		MYVECTOR3 dd = dmoku;
+		MYVECTOR3 dd2 = ddmoku;
+		float dotdd = MyVec3Dot(dd, dd2);
+		float ddd = MyVec3Length(dd);
+		float ddd2 = MyVec3Length(dd2);
+		if (dotdd < 0) {
+			//	bairitu *= 0.399992f;
+			float ddunkod = MyVec3Length(ddunko);
+			if (abs(ddunkod) == 0) {
+				ddunkod = 1;
+				ddunko.float3.z = 1.0f;
+			}
+			if (ddunkod > 100000) {
+				ddunko = ddunko / 100;
+			}
+			MYVECTOR3 dmokudayo = dmoku / bairitu * 1.5;
+			if (abs(dmokudayo.float3.z) > 3.3f) {
+				dmokudayo.float3.z /= 100.0f;
+				dd.float3.z /= 100;
+			}
+			ddunko = ddunko - dmokudayo / bairitu/*ddunkod**/ * 2.5;
+			uunko = false;
+			DebugTexts::instance()->setText(g, 1, L"反");
+
+		}
+		else {
+
+			if (ddd > ddd2) {
+				DebugTexts::instance()->setText(g, 1, L"遠");
+				MYVECTOR3 dmokudayo = dmoku / bairitu / 1.5;
+				float ddunkod = MyVec3Length(ddunko);
+				ddunko = ddunko + dmokudayo / ddunkod * MyVec3Length(dmoku)*5.5;/// ddunkod;
+			}
+			else {
+				DebugTexts::instance()->setText(g, 1, L"近");
+
+
+
+				// 近づいているので
+				//	bairitu *= 1.2002f;
+				uunko = false;
+				float ddunkod = MyVec3Length(ddunko);
+				if (abs(ddunkod) == 0) {
+					ddunkod = 1;
+					ddunko.float3.z = 1.0f;
+				}
+				if (ddunkod > 100000) {
+					ddunko = ddunko / 100;
+				}
+				MYVECTOR3 dmokudayo = dmoku / bairitu * 1.5;
+				if (abs(dmokudayo.float3.z) > 3.3f) {
+					dmokudayo.float3.z /= 1000.0f;
+					dd.float3.z /= 100;
+				}
+				if (abs(dmokudayo.float3.x) > 3.3f) {
+					dmokudayo.float3.x /= 1000.0f;
+					dd.float3.x /= 100;
+				}
+			
+			ddunko = ddunko + dmokudayo / ddunkod * MyVec3Length(dmoku)*2.5;/// ddunkod;
+			//DebugTexts::instance()->setText(g, 1, L"近");
+			}
+
+
+		}
+		dbb = ddd;
+
+		ddmoku = dmoku;
+		MYVECTOR3 dddmoku = ddmoku - dmoku;
+/*		if (unko_count || ((abs(dd.float3.z) < 1.95 && MyVec3Length(dddmoku) < 0.7f))) {
+			// ないときはsetthetaしない
+			//ap->resetTheta();
+			if (unko_count == 0) {
+				unko_count = 10;
+			}
+			unko_count--;
+		}
+		else {
+		*/
+//			MYMATRIX wo;
+//			MyMatrixIdentity(wo);
+//			wo = robo->atarihan->world;
+//			OBB ob;
+
+			//	if (ap8.isInPoint(&tempmoku)) {
+	/*
+			ob.c = tempmoku;
+			g->drawOBBFill(g, 0xFFFFFF00, &wo, view, g->getProj(), &ob);
+
+			ob.c = ap->mokudayo;
+			g->drawOBBFill(g, 0xFFFFFFFF, &wo, view, g->getProj(), &ob);
+	*/
+			ArmPoint anp = ap8.getPoint(&tempmoku);
+			if (anp.is_ok) {
+
+				ap->setTheta(anp.dthetaxa, anp.dthetaxb, anp.dthetaya, anp.dthetayb, anp.dthetaza, anp.dthetazb);
+			}
+			else {
+
+			}
+	//	}
+	}
+
+	if (ap->new_positionArm3(g, view, robo, &ttmp, is_migi) != KTROBO_ARMPOSITION_DAME) {
+
+
+		if (is_migi) {
+
+			ap->setArm3(robo, true, robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["uparmBone"]],
+				robo->arm->rarm->Bones[robo->arm->rarm->BoneIndexes["downarmBone"]]);
+		}
+		else {
+			ap->setArm3(robo, false, robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["uparmBone"]],
+				robo->arm->larm->Bones[robo->arm->larm->BoneIndexes["downarmBone"]]);
+
+		}
+		if (nocalcyet) {
+			nocalcyet = false;
+			dmoku = MYVECTOR3(0, 0, 0);
+		}
+		else {
+			dmoku = ap->getDMOKU();
+		}
+		
+		if (is_migi) {
+			robo->arm->rarm->animate(40, false);
+		}
+		else {
+			robo->arm->larm->animate(40, false);
+		}
+
+		is_calced = true;
+	}
+	else {
+		if (nocalcyet) {
+			nocalcyet = false;
+			dmoku = MYVECTOR3(0, 0, 0);
+		}
+		else {
+			dmoku = ap->getDMOKU();
+		}
+	
+		if (is_migi) {
+			robo->arm->rarm->animate(40, false);
+		}
+		else {
+			robo->arm->larm->animate(40, false);
+		}
+	}
+
+
 }
 
 
@@ -2388,7 +3001,7 @@ void ArmPointIndexInfo::setNextIndex() {
 			apw = new ArmPointWithIndex();
 			apw->indexinfo = this;
 			apw->index = nexindex;
-	
+			now_index = apw->index;
 			apw->point.pos = getIndexPos();
 			apw->point.dthetaxa = 0;
 			apw->point.dthetaxb = 0;

@@ -69,7 +69,9 @@ namespace KTROBO {
 
 #define KTROBO_MISSION_GAMEN_PILOT_PNG "resrc/sample/pilot.png"
 
-	
+#define KTROBO_MISSION_MESH_DUMMY_FILENAME "resrc/model/cube/pkcube.mesh"
+#define KTROBO_MISSION_MESH_ANIME_DUMMY_FILENAME "resrc/model/cube/pkcube.anime"
+
 
 class Mission
 {
@@ -124,11 +126,16 @@ private:
 public:
 	MYVECTOR3 lookat;
 	MYVECTOR3 lookfrom;
+
+	MYVECTOR3 tempp_lookfrom;
 public:
 	MYMATRIX view;
 public:
 	Robo* robo;
 	Mission mis;
+	Mesh* cubemesh;
+	UMeshUnit* cameraunit;
+	bool is_atari_tikei_camera;
 public:
 	Gamen_MISSION(Texture* t, Texture* t2) {
 		this->t = t;
@@ -156,7 +163,8 @@ public:
 		lookfromspeed = 0;
 		screen_tex2=0;
 		bullet_c = 0;
-
+		cubemesh = 0;
+		is_atari_tikei_camera = false;
 	}
 	~Gamen_MISSION() {
 	}
@@ -166,6 +174,18 @@ public:
 			bullet_c->Release();
 			delete bullet_c;
 			bullet_c = 0;
+		}
+
+		if (cameraunit) {
+			delete cameraunit;
+			cameraunit = 0;
+		}
+
+		if (cubemesh) {
+			cubemesh->Release();
+			delete cubemesh;
+			cubemesh = 0;
+
 		}
 	}
 
@@ -177,7 +197,7 @@ public:
 	void setTexSuuji(int suuji,int tex_id);
 	void setHoui(float rotz);
 	void setView(MYMATRIX* world, float R, float dsecond);
-
+	void atariShori(Graphics* g, AtariHantei* hantei, float dsecond, int stamp);
 	void posButukari(Graphics* g, Scene* scene, Game* game, AtariHantei* hantei, float dsecond, int stamp);
 	void renderhojyo(Graphics* g, float dsecond, int stamp);
 

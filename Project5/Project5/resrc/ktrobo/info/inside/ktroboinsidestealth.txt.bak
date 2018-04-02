@@ -1,0 +1,17 @@
+{
+id=13301;
+name="KTINSTE001-TYA";
+WEIGHT=1150;
+AMMO=5;
+EDRAIN=700;
+FIREEDRAIN=5000;
+STEALTHTIME=10000;
+STEALTHE=2000;
+RELOAD=100;
+BAIRITU=3;
+PRICE=35000;
+COMMENT="ロックオンを不可にするステルスです。";
+mesh="resrc/inside/stealth/insidestealtha.mesh";
+anime="resrc/inside/stealth/insidestealtha.anime";
+
+};

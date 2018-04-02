@@ -213,6 +213,10 @@ class ArmPositioner
 	bool is_set;
 	MYVECTOR3 dmoku;
 public:
+	MYVECTOR3 mokudayo;
+	void setDMOKU(MYVECTOR3* ve) {
+		dmoku = *ve;
+	}
 	ArmPositioner(float theta, float theta2, float nobabairitu) {
 		this->theta = theta;
 		this->theta2 = theta2;
@@ -241,6 +245,7 @@ public:
 	MYVECTOR3 getDMOKU() {return dmoku;}
 	void setIsSet(bool t) {is_set = t;}
 	int positionArm3(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
+	int new_positionArm3(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	bool positionArm33(Graphics* g, MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	int positionArm34(Graphics* g , MYMATRIX* view, Robo* robo, MYVECTOR3* moku, bool is_migi);
 	
@@ -386,6 +391,9 @@ public:
 		this->ap->getTheta(&app);
 		return app;
 	}
+
+	void new_calc(Graphics* g, MYMATRIX* view);
+
 };
 }
 #endif

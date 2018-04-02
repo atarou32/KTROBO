@@ -47,11 +47,16 @@ private:
 	void calcYMat();
 	
 public:
-	MyIKMODOKI(Mesh* m, MYMATRIX* wo,MYVECTOR3* mo, const char* moto, const char* moku) {
+	MyIKMODOKI(Mesh* m, MYMATRIX* wo, MYVECTOR3* mo, const char* moto, const char* moku) {
 		setMesh(m);
 		setMokuhyou(mo);
 		setbonename(moto, moku);
 		world = *wo;
+		for (int i = 0; i < GYOURETU_MAX * GYOURETU_MAX; i++) {
+			dthetadayo[i] = 0;
+			ymat[i] = 0;
+			inv_ymat[i] = 0;
+		}
 	}
 	float getfreenum() {
 		return x_freebone.size()+y_freebone.size()+z_freebone.size();

@@ -39,16 +39,28 @@ int Mission::get_now_state() {
 
 
 void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
-
+	
 	MYVECTOR3 up(0,0,1);
+	
 	MYVECTOR3 pos(0,0,0);
 	MYVECTOR3 vec(0,-1,0);
 	MyVec3TransformCoord(pos,pos,*world);
 	MyVec3TransformNormal(vec,vec,*world);
-	MYVECTOR3 temp_lookfrom = up * R *3+ pos - vec * R*5;
+	tempp_lookfrom = up * R *3+ pos - vec * R*5;
+	MYVECTOR3 temp_lookfrom;
 	if (vec.float3.z > 0.8) {//0.5
-		temp_lookfrom = temp_lookfrom + up * R*2 + vec * R * 7;
+		tempp_lookfrom = tempp_lookfrom + up * R*2 + vec * R * 7;
 	}
+	temp_lookfrom = tempp_lookfrom;
+	if (is_atari_tikei_camera) {
+		// 地形とカメラがあたっているので
+		// lookat方向へ少し動かす
+		temp_lookfrom = (tempp_lookfrom*0.5 + pos * 0.5) + up * R * 2;
+	}
+
+
+
+
 	float offset = 1;
 	float maxspeed = 1.57 / 2.0f*3; // 最大速度
 	if (vec.float3.z > 0.8f) {//0.5
@@ -94,6 +106,7 @@ void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
 	}
 
 
+
 	maxspeed = 1.57/1.0f*100.0f;
 	if (vec.float3.z > 0.8f) {//0.5
 		maxspeed *= 100.0f;
@@ -135,12 +148,12 @@ void Gamen_MISSION::setView(MYMATRIX* world, float R, float dsecond) {
 	} else {
 		lookatspeed /= 1.1f;
 	}
-
-	/*
-	lookfrom = MYVECTOR3(50,50,0);
-	lookat = MYVECTOR3(0,0,0);
+	
+/*
+	lookfrom = MYVECTOR3(0,30,10);
+	lookat = MYVECTOR3(0,-50,0);
 	up = MYVECTOR3(0,0,1);
-	*/
+*/	
 	MyMatrixLookAtRH(view,lookfrom,lookat,up);
 
 
@@ -277,6 +290,18 @@ void Gamen_MISSION::Init(Graphics* g, AtariHantei* hantei, MyTextureLoader* load
 		bullet_c = new BulletController();
 		bullet_c->Init(g, hantei, loader);
 	//}
+		cubemesh = new Mesh();
+		cubemesh->readMesh(g, KTROBO_MISSION_MESH_DUMMY_FILENAME,loader);
+		cubemesh->readAnime(KTROBO_MISSION_MESH_ANIME_DUMMY_FILENAME);
+		cubemesh->animate(0, true);
+		cameraunit = new UMeshUnit();
+		MYMATRIX idenmat;
+		MyMatrixScaling(idenmat,30,30,30);
+		UMesh* umesh = new UMesh(g, KTROBO_MISSION_MESH_DUMMY_FILENAME, loader, cubemesh, false, &idenmat, NULL, KTROBO_MESH_BONE_NULL, false);
+		cameraunit->setUMesh(umesh);
+		cameraunit->calcJyusinAndR();
+		hantei->setUMeshUnit(cameraunit, KTROBO::AtariUnit::AtariType::ATARI_WAZA);
+
 }
 void Gamen_MISSION::clickedShori(int id) {
 
@@ -630,6 +655,7 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 				Robo* roboaitedayo = game->roboaitedayo;
 
 				if (hantei->canGetAns()) {
+					this->atariShori(g, hantei, test,(int)stamp);
 				if (robodayo->atarihan) {
 					robodayo->atarihan->calcJyusinAndR();
 					robodayo->atarishori(g, &game->view, hantei, test, (int)stamp);
@@ -657,9 +683,10 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 					if (robodayo->setkabe_state == &robodayo->setkabe) {
 						DebugTexts::instance()->setText(g,5,L"setka");
 					}
-				//	robodayo->setTarget(&MYVECTOR3(roboaitedayo->atarihan->x,roboaitedayo->atarihan->y,roboaitedayo->atarihan->z));
-					robodayo->aim(g, &game->view);
-				//	robodayo->atariAim(g, &game->view, frameTime, (int)frame);
+					robodayo->setTarget(&MYVECTOR3(roboaitedayo->atarihan->x,roboaitedayo->atarihan->y,roboaitedayo->atarihan->z));
+		//			robodayo->aim(g, &game->view);
+		//			robodayo->atariAim(g, &game->view, test, (int)stamp);
+		//			robodayo->calcAim(g, &game->view, test, (int)stamp);// frameTime, (int)frame);
 				}
 
 				if (roboaitedayo->atarihan) {
@@ -677,7 +704,39 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 
 
 }
+void Gamen_MISSION::atariShori(Graphics* g, AtariHantei* hantei, float dsecond, int stamp) {
+	AtariUnitAnsKWSK kuwasiku[2048];
+	// cameraunit の位置を更新
+	//MYMATRIX mat;
+	//MyMatrixTranslation(mat, lookfrom.float3.x, lookfrom.float3.y, lookfrom.float3.z);
+	//cameraunit->setWorld(&mat);
+	cameraunit->setXYZ(tempp_lookfrom.float3.x, tempp_lookfrom.float3.y, tempp_lookfrom.float3.z);
+	cameraunit->calcJyusinAndR(true);
 
+	int temp = hantei->getAnsWaza(kuwasiku, 2048);
+	is_atari_tikei_camera = false;
+	for (int i = 0; i < temp; i++) {
+		if (kuwasiku[i].aite_umesh && kuwasiku[i].my_umesh) {
+			if (kuwasiku[i].my_umeshunit == cameraunit) {
+				if (kuwasiku[i].aite_type == KTROBO::AtariUnit::AtariType::ATARI_TIKEI) {
+					// ぶつかっている
+					is_atari_tikei_camera = true;
+					break;
+
+				}
+
+
+			}
+		}
+
+
+
+	}
+
+
+
+
+}
 void Gamen_MISSION::renderhojyo(Graphics* g, float dsecond, int stamp) {
 
 	if (bullet_c) {
