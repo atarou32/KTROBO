@@ -60,12 +60,13 @@ Game::Game(void)
 		Ls[i]=0;
 	}
 
+	/*
 	mesh = 0;
 	mesh2 = 0;
 	for (int i = 0 ; i < 11; i++) {
 		mesh3[i] = 0;
 	}
-
+	*/
 	
 	texdayo = 0;
 	//mytest_for_vt = 0;
@@ -257,7 +258,7 @@ void BUTUKARIPOSTCB2(TCB* thisTCB) {
 	AtariHantei* hantei = (AtariHantei*)thisTCB->data;
 	Task* t = (Task*)thisTCB->Work[0];
 	Graphics* g = (Graphics*)thisTCB->Work[1];
-	vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
+//	vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
 //	CS::instance()->enter(CS_DEVICECON_CS, "ref");
 //	CS::instance()->enter(CS_RENDERDATA_CS,"def");
 	//CS::instance()->enter(CS_RENDERDATA_CS,"unko");
@@ -297,7 +298,7 @@ void BUTUKARIPOSTCB(TCB* thisTCB) {
 	AtariHantei* hantei = (AtariHantei*)thisTCB->data;
 	Task* t = (Task*)thisTCB->Work[0];
 	Graphics* g = (Graphics*)thisTCB->Work[1];
-	vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
+	//vector<UMeshUnit*>* m = (vector<UMeshUnit*>*)thisTCB->Work[2];
 	CS::instance()->enter(CS_DEVICECON_CS, "ref");
 	CS::instance()->enter(CS_RENDERDATA_CS,"def");
 //	AtariHantei::compileShader(g);
@@ -383,339 +384,23 @@ bool Game::Init(HWND hwnd) {
 	telop_texts->Init(g,demo->font);
 	telop_texts->readFile(g,"resrc/sample/terop.txt",30,14,&MYVECTOR4(1,1,1,1),0.03);
 	
-	mesh = new Mesh();
-	mesh->readMesh(g, "resrc/model/tikei/tikei_douro.MESH", demo->tex_loader);
-	mesh->readAnime("resrc/model/tikei/tikei_douro.ANIME");
-
-	mesh2 = new Mesh();
-	mesh2->readMesh(g, "resrc/model/tikei/tikei_densin.MESH", demo->tex_loader);
-	mesh2->readAnime("resrc/model/tikei/tikei_densin.ANIME");
-	mesh3[0] = new Mesh();
-	mesh3[0]->readMesh(g, "resrc/model/tikei/tikei_house.MESH", demo->tex_loader);
-	mesh3[0]->readAnime("resrc/model/tikei/tikei_house.ANIME");
-
-	mesh3[1] = new Mesh();
-	//mesh3[1]->readMesh(g, "resrc/model/ponko2-3/pk2hidarime.MESH", demo->tex_loader);
-	//mesh3[1]->readAnime("resrc/model/ponko2-3/pk2hidarime.ANIME");
-	mesh3[1]->readMesh(g, "resrc/model/poriface/poriface.MESH", demo->tex_loader);
-	mesh3[1]->readAnime("resrc/model/poriface/poriface.ANIME");
-
-
-
-
-	mesh3[2] = new Mesh();
-	mesh3[2]->readMesh(g, "resrc/model/ponko2-3/pk2hidarimedama.MESH", demo->tex_loader);
-	mesh3[2]->readAnime("resrc/model/ponko2-3/pk2hidarimedama.ANIME");
-
-	mesh3[3] = new Mesh();
-	mesh3[3]->readMesh(g, "resrc/model/ponko2-3/pk2kami.MESH", demo->tex_loader);
-	mesh3[3]->readAnime("resrc/model/ponko2-3/pk2kami.ANIME");
-
-	mesh3[4] = new Mesh();
-	mesh3[4]->readMesh(g, "resrc/model/ponko2-3/pk2kuti.MESH", demo->tex_loader);
-	mesh3[4]->readAnime("resrc/model/ponko2-3/pk2kuti.ANIME");
-
-	mesh3[5] = new Mesh();
-	mesh3[5]->readMesh(g, "resrc/model/ponko2-3/pk2kubi.MESH", demo->tex_loader);
-	mesh3[5]->readAnime("resrc/model/ponko2-3/pk2kubi.ANIME");
-
-	mesh3[6] = new Mesh();
-	mesh3[6]->readMesh(g, "resrc/model/ponko2-3/pk2mayuge.MESH", demo->tex_loader);
-	mesh3[6]->readAnime("resrc/model/ponko2-3/pk2mayuge.ANIME");
-	/*
-	mesh3[7] = new Mesh();
-	mesh3[7]->readMesh(g, "resrc/model/ponko2-3/pk2midarime.MESH", demo->tex_loader);
-	mesh3[7]->readAnime("resrc/model/ponko2-3/pk2midarime.ANIME");
-	*/
-
-	mesh3[8] = new Mesh();
-	mesh3[8]->readMesh(g, "resrc/model/ponko2-3/pk2migimedama.MESH", demo->tex_loader);
-	mesh3[8]->readAnime("resrc/model/ponko2-3/pk2migimedama.ANIME");
 	
-	
-	mesh3[7] = new Mesh();
-	mesh3[7]->readMesh(g, "resrc/model/ponko2-4/pk2migihanddayo.MESH", demo->tex_loader);
-	mesh3[7]->readAnime("resrc/model/ponko2-4/pk2migihanddayo.ANIME");
-	mesh3[7]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];
-	mesh3[7]->RootBone->parent_bone_index = mesh2->BoneIndexes["migiArmTekubiBone"];
-	mesh3[7]->RootBone_connect_without_material_local = true;
-	
-	mesh3[10] = new Mesh();
-	mesh3[10]->readMesh(g, "resrc/model/ponko2-4/pk2hidarihand.MESH", demo->tex_loader);
-	mesh3[10]->readAnime("resrc/model/ponko2-4/pk2hidarihand.ANIME");
-	mesh3[10]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["hidariArmTekubiBone"]];
-	mesh3[10]->RootBone->parent_bone_index = mesh2->BoneIndexes["hidariArmTekubiBone"];// = mesh3[9]->RootBone->parent_bone->bone_index;
-	mesh3[10]->RootBone_connect_without_material_local = true;
-
-	
-	mesh3[9] = new Mesh();
-	mesh3[9]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
-	mesh3[9]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
-	mesh3[9]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];//mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
-	mesh3[9]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
-	mesh3[9]->RootBone_connect_without_material_local = false;
-/*
-	mesh3[8] = new Mesh();
-	mesh3[8]->readMesh(g, "resrc/model/bazooka/rweaponbazookaguna.MESH", demo->tex_loader);
-	mesh3[8]->readAnime("resrc/model/bazooka/rweaponbazookaguna.ANIME");
-	mesh3[8]->RootBone->parent_bone = mesh3[7]->Bones[mesh3[7]->BoneIndexes["MigiHandMotiBone"]];
-	mesh3[8]->RootBone->parent_bone_index = mesh3[7]->BoneIndexes["MigiHandMotiBone"];
-	mesh3[8]->RootBone_connect_without_material_local = false;
-*/	
-
-	//throw new GameError(FATAL_ERROR,"test");
-	
-
-
-	MYMATRIX mat;
-	MyMatrixIdentity(mat);
-	MYMATRIX worldforg;
-		MyMatrixRotationZ(worldforg, 3.14/2);
-	MyMatrixMultiply(mat, mat, worldforg);
-	
-	MyMatrixScaling(worldforg, 1/3.0,1/3.0,1/3.0);
-	MyMatrixMultiply(mat, mat, worldforg);
-	
-	MyMatrixRotationY(worldforg, -3.14/2);
-	MyMatrixMultiply(mat, mat, worldforg);
-
-	
-//	MYMATRIX worldforg;
-	MyMatrixRotationZ(worldforg, 3.14/2);
-	MyMatrixMultiply(mesh3[9]->rootbone_matrix_local_kakeru, mesh3[9]->rootbone_matrix_local_kakeru, worldforg);
-	
-	MyMatrixScaling(worldforg, 1/3.0,1/3.0,1/3.0);
-	MyMatrixMultiply(mesh3[9]->rootbone_matrix_local_kakeru, mesh3[9]->rootbone_matrix_local_kakeru, worldforg);
-	
-	MyMatrixRotationY(worldforg, -3.14/2);
-	MyMatrixMultiply(mesh3[9]->rootbone_matrix_local_kakeru, mesh3[9]->rootbone_matrix_local_kakeru, worldforg);
-
 	AtariHantei::compileShader(g);
 	hantei = new AtariHantei();
 	//hantei->maecalcdayo(g);
 
-	robodayo = new Robo();
-	robodayo->init(g,demo->tex_loader,hantei);
-	InputMessageDispatcher::registerImpl(robodayo, NULL,NULL);
-	robodayo->atarihan->setXYZ(0,3,5);
-	roboaitedayo = new Robo();
-	roboaitedayo->init(g,demo->tex_loader,hantei);
 
 
 	
 
 	
-	for (int i=0;i<1;i++) {
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailor.MESH", demo->tex_loader,mesh2,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	bool tyo_unko=true;
-	float frame_anime=0;
-
-	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,0,10);
-	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	}
-	
-	}
-	UMeshUnit* uum;
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	uum = umesh_unit;
-
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH"/*"resrc/model/cube/pkcube.MESH"*/
-	, demo->tex_loader,mesh2,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	bool tyo_unko=true;
-	float frame_anime=0;
-
-	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,3,-5);
-	umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-
-	/*sinai = new Sinai();
-	sinai->init(g, demo->tex_loader,hantei);
-	ss = new SinaiNigiru(sinai,umesh_unit);
-
-	sfuru = new SinaiFuru(sinai,umesh_unit);
-	*/
-	/*
-	SinaiFuruPart p;
-	p.dt =0.1;
-	p.rotx = 0;
-	p.rotz = 0;
-	p.tuka_dpos = MYVECTOR3(0,0,0);
-	sfuru->setMenParts(&p);
-	*/
-/*
-	p.dt = 10;
-	p.rotx = -1.57;
-	p.rotz = 0;
-	p.tuka_dpos = MYVECTOR3(0,0.7f,1.1f);
-	sfuru->setMenParts(&p);
-
-	p.dt = 20;
-	p.rotx = 0.05f;
-	p.rotz = 0;
-	p.tuka_dpos = MYVECTOR3(0,0,1);
-	sfuru->setMenParts(&p);
-	*/
-//	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
-
-	}
-
-
-	/*
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	}*/
 
 	MeshInstanceds::Init(g);
 	mesh_instanceds = new MeshInstanceds(g, this->demo->tex_loader);
-	mesh_instanceds->setSkeleton(mesh);
+	//mesh_instanceds->setSkeleton(mesh);
 
 	
 	
-	
-	for(int i=0;i<5;i++) {
-		for(int k=0;k<5;k++) {
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/tikei/tikei_douro.MESH", demo->tex_loader,mesh,false,&idenmat,
-		0,KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
-
-	mesh_is[i+5*k] = mesh_instanceds->makeInstanced(mesh,mesh,NULL,NULL,false,&idenmat);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	umesh_unit->setSCALEXYZ(100,100,130);
-	umesh_unit->setXYZ((i-2)*200,(k-2)*200,-4);
-	umesh_unit->calcJyusinAndR();
-	mesh_is[i+5*k]->setWorld(&umesh_unit->world);
-	mesh_is[i+5*k]->setIsRender(true);
-
-	bool tyo_unko=true;
-	float frame_anime = 0;
-
-	//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-	//umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
-	}
-		}
-	}
-
-	for (int i = 0; i<5; i++) {
-		for (int k = 0; k<5; k++) {
-			{
-				MYMATRIX idenmat;
-				MyMatrixIdentity(idenmat);
-				UMeshUnit* umesh_unit = new UMeshUnit();
-				UMesh* um = new UMesh(g, "resrc/model/tikei/tikei_densin.MESH", demo->tex_loader, mesh2, false, &idenmat,
-					0, KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
-
-				mesh_is[i + 5 * k+25] = mesh_instanceds->makeInstanced(mesh2, mesh2, NULL, NULL, false, &idenmat);
-				umesh_unit->setUMesh(um);
-				umesh_units.push_back(umesh_unit);
-				umesh_unit->setSCALEXYZ(100, 100, 130);
-				umesh_unit->setXYZ((i - 2) * 200, (k - 2) * 200, 0);
-				umesh_unit->calcJyusinAndR();
-				mesh_is[i + 5 * k+25]->setWorld(&umesh_unit->world);
-				mesh_is[i + 5 * k+25]->setIsRender(true);
-
-				bool tyo_unko = true;
-				float frame_anime = 0;
-
-				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-				//umesh_unit->calcJyusinAndR();
-				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
-			}
-		}
-	}
-
-	for (int i = 0; i<5; i++) {
-		for (int k = 0; k<5; k++) {
-			{
-				MYMATRIX idenmat;
-				MyMatrixIdentity(idenmat);
-				UMeshUnit* umesh_unit = new UMeshUnit();
-				UMesh* um = new UMesh(g, "resrc/model/tikei/tikei_house.MESH", demo->tex_loader, mesh3[0], false, &idenmat,
-					0, KTROBO_MESH_BONE_NULL, true); // doBone‚Ìobb‚ªtrue‚É‚È‚é‚Ì‚Å‘åä•v
-
-				mesh_is[i + 5 * k + 50] = mesh_instanceds->makeInstanced(mesh3[0], mesh3[0], NULL, NULL, false, &idenmat);
-				umesh_unit->setUMesh(um);
-				umesh_units.push_back(umesh_unit);
-				umesh_unit->setSCALEXYZ(50, 50, 50);
-				umesh_unit->setXYZ((i - 2) * 200-100, (k - 2) * 200-100, 0);
-				umesh_unit->calcJyusinAndR();
-				mesh_is[i + 5 * k + 50]->setWorld(&umesh_unit->world);
-				mesh_is[i + 5 * k + 50]->setIsRender(true);
-
-				bool tyo_unko = true;
-				float frame_anime = 0;
-
-				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-				//umesh_unit->calcJyusinAndR();
-				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
-			}
-		}
-	}
-
-
-
- //*//
-	
-	/*
-	MyMatrixRotationX(worldforg, -3.14/4*2);
-	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
-	MyMatrixRotationZ(worldforg, 3.14/2);
-	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
-
-	MyMatrixRotationY(worldforg, 3.14/2);
-	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
-	MyMatrixRotationZ(worldforg, 3.14);
-	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
-	MyMatrixRotationY(worldforg, 3.14/2);
-	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
-	
-	*/
-
-	float frame = 0;
-	
-	mesh->animate(frame, true);
-	mesh2->animate(frame, true);
-	for (int i = 0 ; i <= 10 ; i++) {
-		mesh3[i]->animate(frame, true);
-		if (i ==9) {
-			mesh3[i]->animate(0,true);
-		}
-	}
-	mesh3[7]->animate(frame,true);
-	mesh3[8]->animate(frame,true);
-
 	
 	MYMATRIX kakeru;
 	MyMatrixIdentity(kakeru);
@@ -843,7 +528,8 @@ bool Game::Init(HWND hwnd) {
 	//InputMessageDispatcher::registerImpl(slih,NULL,NULL);
 	//InputMessageDispatcher::registerImpl(but, NULL,NULL);
 	//InputMessageDispatcher::registerImpl(inputtext, NULL,NULL);
-
+	MYMATRIX mat;
+	MyMatrixIdentity(mat);
 	int j = texdayo->getInstance(0)->getRenderTex(i,0xFFFFFFFF,50,0,200,200,0,0,512,512);
 	int kk = texdayo->getInstance(0)->getRenderText("ganbaru",0,0,10,100,100);
 	int ppl = texdayo->getInstance(0)->getRenderBillBoard(i,0xFFFFFFFF,&mat,1,1,0,0,1,1);
@@ -874,6 +560,12 @@ bool Game::Init(HWND hwnd) {
 /*	ksgene = new KendoSinaiGenerator();
 	ksgene->Init(hwnd,texdayo->getInstance(0),L,g->getScreenWidth(),g->getScreenHeight());
 	*/
+
+	rmap = new RMap();
+	rmap->Init(hantei, mesh_instanceds);
+
+	RMapSetterExample(g, this, hantei, mesh_instanceds, demo->tex_loader, rmap);
+
 	sap = new ShudouArmPositioner(robodayo, robodayo->ap);
 	sap->Init(hwnd, texdayo->getInstance(0), L , g->getScreenWidth(),g->getScreenHeight());
 	
@@ -993,7 +685,7 @@ bool Game::Init(HWND hwnd) {
 	memset(work,0, sizeof(work));
 	work[1] = (unsigned long)g_for_task_threads[TASKTHREADS_UPDATEPOSBUTUKARI];
 	work[0] = (unsigned long)task_threads[TASKTHREADS_UPDATEPOSBUTUKARI];
-	work[2] = (unsigned long)(&umesh_units);
+	//work[2] = (unsigned long)(&umesh_units);
 	task_threads[TASKTHREADS_UPDATEPOSBUTUKARI]->make(BUTUKARIPOSTCB,hantei,work,0x0000FFFF);
 
 
@@ -1022,7 +714,7 @@ bool Game::Init(HWND hwnd) {
 
 	
 	
-//	SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
+	//SceneGarage* sg = new SceneGarage(g, hantei,texdayo->getInstance(0), texdayo->getInstance(1), demo->tex_loader);
 
 	
 
@@ -1215,7 +907,7 @@ void Game::Del() {
 		Ls[i] = 0;
 		}
 	}
-
+	/*
 	if (robodayo) {
 		robodayo->release();
 		delete robodayo;
@@ -1227,7 +919,7 @@ void Game::Del() {
 		delete roboaitedayo;
 		roboaitedayo = 0;
 	}
-
+	*/
 
 	 if (cmeshs) {
 		 delete cmeshs;
@@ -1342,6 +1034,7 @@ void Game::Del() {
 		c = 0;
 	}
 
+	/*
 	if (mesh) {
 		delete mesh;
 		mesh = 0;
@@ -1357,6 +1050,7 @@ void Game::Del() {
 		mesh3[i] = 0;
 		}
 	}
+	*/
 
 	if (sound) {
 		delete sound;
@@ -1367,7 +1061,7 @@ void Game::Del() {
 		delete temp_input_shori;
 		temp_input_shori = 0;
 	}
-	
+	/*
 	vector<UMeshUnit*>::iterator itttt = umesh_units.begin();
 	while(itttt != umesh_units.end()) {
 
@@ -1377,6 +1071,7 @@ void Game::Del() {
 		itttt++;
 	}
 	umesh_units.clear();
+	*/
 	/*
 	if (sinai) {
 	delete sinai;
@@ -1580,6 +1275,9 @@ void Game::Run() {
 
 	CS::instance()->enter(CS_MESSAGE_CS, "render");
 
+	
+
+
 	MYMATRIX rotzmat;
 	MyMatrixRotationZ(rotzmat, temp_input_shori->testdayo);
 //	MyMatrixMultiply(view,rotzmat,view);
@@ -1626,14 +1324,6 @@ void Game::Run() {
 
 
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
-//	mesh_i->setBoneIndexInfo(animf, animl, animw);
-//	mesh_i2->setBoneIndexInfo(animf,animl,animw);
-	for (int i=0;i<50;i++) {
-		if (mesh_is[i]) {
-		mesh_is[i]->setBoneIndexInfo(animf,animl,animw);
-		}
-//		mesh_is2[i]->setBoneIndexInfo(animf,animl,animw);
-	}
 
 
 
@@ -1739,6 +1429,7 @@ void Game::Run() {
 	testdray.dir = temp_input_shori->ray.dir;
 	MyVec3Normalize(testdray.dir,testdray.dir);
 	testdray.dir = testdray.dir * 50;
+	/*
 	int sb = mesh2->Bones.size();
 	bool is_ma=false;
 	for (int i=0;i<sb;i++) {
@@ -1782,6 +1473,7 @@ void Game::Run() {
 		}
 
 	}
+	*/
 	CS::instance()->leave(CS_MESSAGE_CS, "testt");
 	CS::instance()->enter(CS_MESSAGE_CS, "test");
 	temp_input_shori->setMAT(&world,&view,&proj);
@@ -1798,7 +1490,7 @@ void Game::Run() {
 //	texdayo->getInstance(0)->setRenderBillBoardPos(0,&rotX);
 
 	CS::instance()->leave(CS_DEVICECON_CS, "render game");
-
+	/*
 	static Mesh* mm = mesh;
 	if (ff > 3.0f) {
 		CS::instance()->enter(CS_DEVICECON_CS, "lock");
@@ -1813,11 +1505,12 @@ void Game::Run() {
 			mm = mesh;
 		}
 
-	}
+	}*/
 
 	CS::instance()->enter(CS_DEVICECON_CS, "render game");
 
 	mesh_instanceds->setViewProj(g, &view,&proj, &MYVECTOR4(testr.float3.x,testr.float3.y,testr.float3.z,1));
+	/*
 	OBB testobb = mesh2->houkatuobb;
 
 	MYMATRIX idenmat;
@@ -1835,7 +1528,7 @@ void Game::Run() {
 //		g->drawOBB(g,0xFF888888,&idenmat,&view,&proj,&testobb);
 	}
 
-
+	*/
 
 
 	//g->drawRAY(g,0xFFFF0000,&idenmat,&view,&proj,50,&temp_input_shori->ray);
@@ -1863,15 +1556,16 @@ void Game::Run() {
 	}
 
 
-	//MYMATRIX idenmat;
+	MYMATRIX idenmat;
 	MyMatrixIdentity(idenmat);
-
-	if (TestSegmentOBB(&tempray, &mesh2->houkatuobb)) {
+	
+	//if (TestSegmentOBB(&tempray, &mesh2->houkatuobb)) {
 	//	g->drawRAY(g,0xFFFF00FF,&idenmat,&view,&proj,50/*MyVec3Length(tempray.dir)*/,&tempray);
 	//	g->drawOBB(g,0xFFFFFF00,&idenmat,&view,&proj,&mesh2->houkatuobb);
-	} else {
+	//} else {
 	//	g->drawRAY(g,0xFF000000,&idenmat,&view,&proj,50/*MyVec3Length(tempray.dir)*/,&tempray);
-	}
+	//}
+	
 //	mesh->draw(g, &world, &view, &proj);
 	//texdayo->getInstance(0)->setViewProj(g,&view,&proj,&a,&b);
 	//texdayo->setRenderBillBoardPos(0,&world);
@@ -1930,20 +1624,21 @@ void Game::Run() {
 		bui = bui - 4.98*0.0001f * millisecond/1000 * millisecond/1000;
 		static float bb = 0;
 		bb = bb + bui*millisecond;
-		UMeshUnit* umesh_unit = umesh_units[0];
+		/*UMeshUnit* umesh_unit = umesh_units[0];
 		umesh_unit->setDT(millisecond/1000);
 		umesh_unit->setV(&MYVECTOR3(0,0,bui));
 
 	umesh_unit->setROTXYZ(0,0,0);
-	umesh_unit->setSCALEXYZ(1,1,1);
-	umesh_unit->setXYZ(0,0,0);//testcc,testcc,bb);//5-testcc/*-testcc*/);
+	umesh_unit->setSCALEXYZ(1,1,1);*/
+	//umesh_unit->setXYZ(0,0,0);//testcc,testcc,bb);//5-testcc/*-testcc*/);
+	
 	float frame_a=testcc;
 	bool com=true;
 
 //	umesh_unit->calcAnimeFrame(1,&frame_a,&com);
 //	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
-	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+	//umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	}
 
 	
@@ -1952,7 +1647,7 @@ void Game::Run() {
 		bui = bui - 4.98*0.0001f * millisecond/1000 * millisecond/1000;
 		static float bb = 0;
 		bb = bb + bui*millisecond;
-		UMeshUnit* umesh_unit = umesh_units[1];
+//		UMeshUnit* umesh_unit = umesh_units[1];
 		//umesh_unit->setDT(millisecond/1000);
 		//umesh_unit->setV(&MYVECTOR3(0,0,bui));
 
@@ -2008,13 +1703,13 @@ void Game::Run() {
 
 	bool calcom = true;
 	
-	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
+	//umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	
 	}
 	CS::instance()->leave(CS_RENDERDATA_CS, "render game");
 	static float tester = 0;
 	tester += 0.1f;
-	UMeshUnit* umesh_unit = umesh_units[2+30];
+//	UMeshUnit* umesh_unit = umesh_units[2+30];
 	//umesh_unit->setXYZ(0,0,205);
 	//umesh_unit->setROTXYZ(0,0,0);//1.57+tester/1000.0f,tester/100.00f,0);
 	
@@ -2022,16 +1717,17 @@ void Game::Run() {
 	//mesh_is[2+30]->setWorld(&umesh_unit->world);
 	for(int i=0;i<75;i++) {
 	{
-		UMeshUnit* umesh_unit = umesh_units[i];
+//		UMeshUnit* umesh_unit = umesh_units[i];
 //	umesh_unit->setROTXYZ(0,0,0);//testcc/3.00f);
 //	umesh_unit->setSCALEXYZ(2,2,1);
 //	umesh_unit->setXYZ(0,0,0);
 //	umesh_unit->calcJyusinAndR();
 	bool calcom = true;
-	umesh_unit->calcJyusinAndR();
+//	umesh_unit->calcJyusinAndR();
 //	umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	}
 	}
+	/*
 	{
 		UMeshUnit* um2 = umesh_units[0];
 		UMeshUnit* um1 = umesh_units[1];
@@ -2060,7 +1756,7 @@ void Game::Run() {
 			}
 		}
 	}
-
+	*/
 
 	/*
 	{

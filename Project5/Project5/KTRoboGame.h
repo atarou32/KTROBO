@@ -36,6 +36,7 @@
 #include "KTRoboEffect.h"
 #include "KTRoboEffectSuuji.h"
 #include "KTRoboWeapon.h"
+#include "KTRoboMap.h"
 
 namespace KTROBO {
 
@@ -126,15 +127,20 @@ public:
 	MYMATRIX view;
 	MYVECTOR3 lookfromtoat;
 private:
+	RMap * rmap;
+	/*
 	Mesh* mesh;
 	Mesh* mesh2;
 	Mesh* mesh3[11];
+	*/
 	MeshInstanceds* mesh_instanceds;
+	/*
 	IMeshInstanced* mesh_i;
 	IMeshInstanced* mesh_i2;
 	MeshInstanced* mesh_is[100];
 	IMeshInstanced* mesh_is2[30];
 	vector<UMeshUnit*> umesh_units;
+	*/
 	AtariHantei* hantei;
 
 	TextFromLuas* cltf;

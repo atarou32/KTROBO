@@ -3671,6 +3671,22 @@ void RoboFCS::init(MyTokenAnalyzer* ma, RoboDataMetaData* meta_data, Graphics* g
 	if (strcmp(ma->Toke(),"{") != 0) {
 		throw new GameError(KTROBO::FATAL_ERROR,"there is no { in init robo");
 	}
+	int testindex = 0;
+	while (testindex < 5) {
+		ma->GetToken();
+		if (strcmp(ma->Toke(), "}") == 0) {
+			testindex++;
+		} else {
+
+		}
+
+	}
+	ma->GetToken();
+	if (strcmp(ma->Toke(), "{") != 0) {
+		throw new GameError(KTROBO::FATAL_ERROR, "threre is no { in init robo");
+	}
+
+
 
 	while(!ma->enddayo()) {
 		ma->GetToken();

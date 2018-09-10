@@ -912,3 +912,77 @@ MYVECTOR3 LockOnSystem::getPosOfStudyPoint(int index, float rmin, float rmax, fl
 
 	return MYVECTOR3(0,0,0);
 }
+
+
+
+
+void TargetControlSystemPart::getPosOfFire(MYVECTOR3* ans, int tcs_weapon) {
+
+
+
+}
+void TargetControlSystemPart::getVecOfFire(MYVECTOR3* ans, int tcs_weapon) {
+
+
+}
+void TargetControlSystemPart::setTargetNo() {
+
+}
+void TargetControlSystemPart::setTarget(AtariBase* tget) {
+
+}
+void TargetControlSystemPart::updateLockCount(float dsecond, int stamp) {
+
+}
+void TargetControlSystemPart::calcTyusinRadAndTyusinD() {
+
+}
+float TargetControlSystemPart::getTyusinRad() {
+
+}
+float TargetControlSystemPart::getTyusinD() {
+
+}
+
+
+
+void TargetControlSystem::calcNearestTCS() {
+
+}
+void TargetControlSystem::setTarget(AtariBase** bases, int num_bases) {
+	// bases ‚ÍŒvŽZ‚³‚ê‚Ä“n‚³‚ê‚Ä‚­‚é
+}
+void TargetControlSystem::updateCount(float dsecond, int stamp) {
+
+	int dsec = ceil(dsecond);
+	secondstamp += dsec;
+	if (secondstamp > maesecondstamp + 1000) {
+		calcNearestTCS();
+		secondstamp = 0;
+		maesecondstamp = 0;
+	}
+
+	if (nearest_tcs) {
+		nearest_tcs->updateLockCount(dsecond, stamp);
+	}
+}
+bool TargetControlSystem::getPosOfFire(MYVECTOR3* pos, int tcs_weapon) {
+	if (nearest_tcs) {
+		nearest_tcs->getPosOfFire(pos, tcs_weapon);
+		return true;
+	}
+	else {
+		return false;
+	}
+
+}
+bool TargetControlSystem::getVecOfFire(MYVECTOR3* vec, int tcs_weapon) {
+	if (nearest_tcs) {
+		nearest_tcs->getVecOfFire(vec, tcs_weapon);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
