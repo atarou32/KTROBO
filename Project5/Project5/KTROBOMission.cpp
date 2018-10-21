@@ -627,6 +627,8 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 	game->watches_for_keisoku.startWatch(3);
 	hantei->runComputeShaderAida(g);
 	game->watches_for_keisoku.stopWatch(3);
+
+
 	//Sleep(10000);
 	//hantei->copyKekkaToBufferForCopy(g,true);
 	
@@ -645,8 +647,8 @@ void Gamen_MISSION::posButukari(Graphics* g, Scene* scene, Game* game, AtariHant
 		//CS::instance()->enter(CS_DEVICECON_CS, "unko");
 		//CS::instance()->enter(CS_RENDERDATA_CS, "unko");
 		
-			if ((hr =hantei->copyKekkaToBufferForCopy2(g)) == S_OK) {
-				
+			if ((hr =hantei->copyKekkaToBufferForCopy2(g)) == S_OK) { // copy2
+				game->rmap->update();
 				game->watches_for_keisoku.stopWatch(1);
 				game->watches_for_keisoku.stopWatch(0);
 				double test = game->watches_for_keisoku.times[0];

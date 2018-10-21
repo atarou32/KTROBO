@@ -157,7 +157,7 @@ void BulletController::atariShori(Game* game, AtariHantei* hantei, MYMATRIX* vie
 				MYVECTOR3 pos(0,0,0);
 				MyVec3TransformCoord(pos,pos,b->atarihan->world);
 				MyMatrixTranslation(worldd,pos[0],pos[1],pos[2]);
-				game->weapon_effect_manager->makeWeaponEffect("bakuhatu_weaponpulsegun", 1500,false,&worldd,NULL,NULL);
+				game->weapon_effect_manager->makeWeaponEffect("bakuhatu_weaponrifle", 1500,false,&worldd,NULL,NULL);
 				// “–‚½‚è”»’è‚ª‚¨‚«‚é‚Ì‚ð‚Ó‚¹‚®‚½‚ß‚Éƒ‰ƒ“ƒ_ƒ€‚ÉˆÚ“®‚³‚¹‚é
 				b->atarihan->setXYZ((rand() % 256)/256 * 100,(rand() % 256)/256 * 100, (rand() % 256)/256*100);
 				b->atarihan->calcJyusinAndR(true);

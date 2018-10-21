@@ -2227,7 +2227,7 @@ void Robo::init(Graphics* g, MyTextureLoader* tex_loader, AtariHantei* hantei) {
 
 	roboparam.calcParam();
 
-	//atarihan->calcJyusinAndR();
+	atarihan->calcJyusinAndR();
 }
 
 void Robo::release() {

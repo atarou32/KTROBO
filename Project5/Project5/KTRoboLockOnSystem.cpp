@@ -938,10 +938,10 @@ void TargetControlSystemPart::calcTyusinRadAndTyusinD() {
 
 }
 float TargetControlSystemPart::getTyusinRad() {
-
+	return 0;
 }
 float TargetControlSystemPart::getTyusinD() {
-
+	return 0;
 }
 
 

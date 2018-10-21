@@ -90,7 +90,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 		KTROBO::mylog::writelog(KTROBO::FATAL_ERROR, "init device failure");
 		KTROBO::mylog::writelog(err->getErrorCode(),err->getMessage());
-	//	MessageBoxA(g_hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
+		MessageBoxA(g_hWnd,err->getMessage(),KTROBO::GameError::getErrorCodeString(err->getErrorCode()),MB_OK);
 		delete err;
 		
 

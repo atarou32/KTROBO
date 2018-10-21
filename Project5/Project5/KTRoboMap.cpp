@@ -90,26 +90,30 @@ MAP_ENT_ROBO::~MAP_ENT_ROBO()
 
 
 
-RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hantei,MeshInstanceds* mids, MyTextureLoader* loader, RMap* m) {
+RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hantei, MeshInstanceds* mids, MyTextureLoader* loader, RMap* m) {
 	Mesh* mesh;
 	Mesh* mesh2;
 	Mesh* mesh3[11];
 	MeshInstanced* mesh_is[100];
 	MeshInstanced* mesh_is2[30];
+	float frame = 0;
 
 	mesh = new Mesh();
 	mesh->readMesh(g, "resrc/model/tikei/tikei_douro.MESH", loader);
 	mesh->readAnime("resrc/model/tikei/tikei_douro.ANIME");
+	mesh->animate(frame, true);
 	m->registerMesh("resrc/model/tikei/tikei_douro.MESH", mesh);
 
 	mesh2 = new Mesh();
 	mesh2->readMesh(g, "resrc/model/tikei/tikei_densin.MESH", loader);
 	mesh2->readAnime("resrc/model/tikei/tikei_densin.ANIME");
+	mesh2->animate(frame, true);
 	m->registerMesh("resrc/model/tikei/tikei_densin.MESH", mesh2);
 
 	mesh3[0] = new Mesh();
 	mesh3[0]->readMesh(g, "resrc/model/tikei/tikei_house.MESH", loader);
 	mesh3[0]->readAnime("resrc/model/tikei/tikei_house.ANIME");
+	mesh3[0]->animate(frame, true);
 	m->registerMesh("resrc/model/tikei/tikei_house.MESH", mesh3[0]);
 
 	mesh3[1] = new Mesh();
@@ -117,6 +121,7 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	//mesh3[1]->readAnime("resrc/model/ponko2-3/pk2hidarime.ANIME");
 	mesh3[1]->readMesh(g, "resrc/model/poriface/poriface.MESH", loader);
 	mesh3[1]->readAnime("resrc/model/poriface/poriface.ANIME");
+	mesh3[1]->animate(frame, true);
 	m->registerMesh("resrc/model/poriface/poriface.MESH", mesh3[1]);
 
 
@@ -124,27 +129,32 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	mesh3[2] = new Mesh();
 	mesh3[2]->readMesh(g, "resrc/model/ponko2-3/pk2hidarimedama.MESH", loader);
 	mesh3[2]->readAnime("resrc/model/ponko2-3/pk2hidarimedama.ANIME");
+	mesh3[2]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-3/pk2hidarimedama.MESH", mesh3[2]);
 
 
 	mesh3[3] = new Mesh();
-	mesh3[3]->readMesh(g, "resrc/model/ponko2-3/pk2kami.MESH",loader);
+	mesh3[3]->readMesh(g, "resrc/model/ponko2-3/pk2kami.MESH", loader);
 	mesh3[3]->readAnime("resrc/model/ponko2-3/pk2kami.ANIME");
+	mesh3[3]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-3/pk2kami.MESH", mesh3[3]);
 
 	mesh3[4] = new Mesh();
 	mesh3[4]->readMesh(g, "resrc/model/ponko2-3/pk2kuti.MESH", loader);
 	mesh3[4]->readAnime("resrc/model/ponko2-3/pk2kuti.ANIME");
+	mesh3[4]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-3/pk2kuti.MESH", mesh3[4]);
 
 	mesh3[5] = new Mesh();
 	mesh3[5]->readMesh(g, "resrc/model/ponko2-3/pk2kubi.MESH", loader);
 	mesh3[5]->readAnime("resrc/model/ponko2-3/pk2kubi.ANIME");
+	mesh3[5]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-3/pk2kubi.MESH", mesh3[5]);
 
 	mesh3[6] = new Mesh();
 	mesh3[6]->readMesh(g, "resrc/model/ponko2-3/pk2mayuge.MESH", loader);
 	mesh3[6]->readAnime("resrc/model/ponko2-3/pk2mayuge.ANIME");
+	mesh3[6]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-3/pk2mayuge.MESH", mesh3[6]);
 
 	/*
@@ -156,6 +166,7 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	mesh3[8] = new Mesh();
 	mesh3[8]->readMesh(g, "resrc/model/ponko2-3/pk2migimedama.MESH", loader);
 	mesh3[8]->readAnime("resrc/model/ponko2-3/pk2migimedama.ANIME");
+	mesh3[8]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-3/pk2migimedama.MESH", mesh3[8]);
 
 
@@ -165,6 +176,7 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	mesh3[7]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];
 	mesh3[7]->RootBone->parent_bone_index = mesh2->BoneIndexes["migiArmTekubiBone"];
 	mesh3[7]->RootBone_connect_without_material_local = true;
+	mesh3[7]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-4/pk2migihanddayo.MESH", mesh3[7]);
 
 
@@ -174,6 +186,7 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	mesh3[10]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["hidariArmTekubiBone"]];
 	mesh3[10]->RootBone->parent_bone_index = mesh2->BoneIndexes["hidariArmTekubiBone"];// = mesh3[9]->RootBone->parent_bone->bone_index;
 	mesh3[10]->RootBone_connect_without_material_local = true;
+	mesh3[10]->animate(frame, true);
 	m->registerMesh("resrc/model/ponko2-4/pk2hidarihand.MESH", mesh3[10]);
 
 	mesh3[9] = new Mesh();
@@ -182,7 +195,23 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	mesh3[9]->RootBone->parent_bone = mesh2->Bones[mesh2->BoneIndexes["migiArmTekubiBone"]];//mesh3[9]->Bones[mesh3[9]->BoneIndexes["MigiHandMotiBone"]];
 	mesh3[9]->RootBone->parent_bone_index = mesh3[10]->RootBone->parent_bone->bone_index;
 	mesh3[9]->RootBone_connect_without_material_local = false;
+	mesh3[9]->animate(frame, true);
 	m->registerMesh("resrc/model/bazooka/rweaponbazookaguna.MESH", mesh3[9]);
+
+
+	
+
+
+	/*
+	for (int i = 0; i <= 10; i++) {
+		
+		if (i == 9) {
+			mesh3[i]->animate(0, true);
+		}
+	}
+	mesh3[7]->animate(frame, true);
+	mesh3[8]->animate(frame, true);
+	*/
 
 	/*
 	mesh3[8] = new Mesh();
@@ -264,65 +293,65 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 		uum = umesh_unit;
 
 		UMesh* um = new UMesh(g, "resrc/model/ponko2-4/pk2sailordayo.MESH"/*"resrc/model/cube/pkcube.MESH"*/
-	/*
-			, loader, mesh2, false, &idenmat,
-			0, KTROBO_MESH_BONE_NULL, false);
-		umesh_unit->setUMesh(um);
-		umesh_units.push_back(umesh_unit);
-		bool tyo_unko = true;
-		float frame_anime = 0;
-
-		umesh_unit->setSCALEXYZ(1, 1, 1);
-		umesh_unit->setXYZ(0, 3, -5);
-		umesh_unit->calcAnimeFrame(1, &frame_anime, &tyo_unko);
-
-		umesh_unit->calcJyusinAndR();
-		hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-*/
-		/*sinai = new Sinai();
-		sinai->init(g, demo->tex_loader,hantei);
-		ss = new SinaiNigiru(sinai,umesh_unit);
-
-		sfuru = new SinaiFuru(sinai,umesh_unit);
-		*/
 		/*
-		SinaiFuruPart p;
-		p.dt =0.1;
-		p.rotx = 0;
-		p.rotz = 0;
-		p.tuka_dpos = MYVECTOR3(0,0,0);
-		sfuru->setMenParts(&p);
-		*/
-		/*
-		p.dt = 10;
-		p.rotx = -1.57;
-		p.rotz = 0;
-		p.tuka_dpos = MYVECTOR3(0,0.7f,1.1f);
-		sfuru->setMenParts(&p);
+				, loader, mesh2, false, &idenmat,
+				0, KTROBO_MESH_BONE_NULL, false);
+			umesh_unit->setUMesh(um);
+			umesh_units.push_back(umesh_unit);
+			bool tyo_unko = true;
+			float frame_anime = 0;
 
-		p.dt = 20;
-		p.rotx = 0.05f;
-		p.rotz = 0;
-		p.tuka_dpos = MYVECTOR3(0,0,1);
-		sfuru->setMenParts(&p);
-		*/
-		//	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
-	/*
-	}
+			umesh_unit->setSCALEXYZ(1, 1, 1);
+			umesh_unit->setXYZ(0, 3, -5);
+			umesh_unit->calcAnimeFrame(1, &frame_anime, &tyo_unko);
+
+			umesh_unit->calcJyusinAndR();
+			hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
 	*/
+	/*sinai = new Sinai();
+	sinai->init(g, demo->tex_loader,hantei);
+	ss = new SinaiNigiru(sinai,umesh_unit);
 
+	sfuru = new SinaiFuru(sinai,umesh_unit);
+	*/
 	/*
-	{
-	MYMATRIX idenmat;
-	MyMatrixIdentity(idenmat);
-	UMeshUnit* umesh_unit = new UMeshUnit();
-	UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
-	0,KTROBO_MESH_BONE_NULL,false);
-	umesh_unit->setUMesh(um);
-	umesh_units.push_back(umesh_unit);
-	umesh_unit->calcJyusinAndR();
-	hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
-	}*/
+	SinaiFuruPart p;
+	p.dt =0.1;
+	p.rotx = 0;
+	p.rotz = 0;
+	p.tuka_dpos = MYVECTOR3(0,0,0);
+	sfuru->setMenParts(&p);
+	*/
+	/*
+	p.dt = 10;
+	p.rotx = -1.57;
+	p.rotz = 0;
+	p.tuka_dpos = MYVECTOR3(0,0.7f,1.1f);
+	sfuru->setMenParts(&p);
+
+	p.dt = 20;
+	p.rotx = 0.05f;
+	p.rotz = 0;
+	p.tuka_dpos = MYVECTOR3(0,0,1);
+	sfuru->setMenParts(&p);
+	*/
+	//	sfuru->setKAMAE(-0.12,0,&MYVECTOR3(0,1.9,-0.20));
+/*
+}
+*/
+
+/*
+{
+MYMATRIX idenmat;
+MyMatrixIdentity(idenmat);
+UMeshUnit* umesh_unit = new UMeshUnit();
+UMesh* um = new UMesh(g,"resrc/model/ponko2-4/pk2sailordayo.MESH", demo->tex_loader,mesh2,false,&idenmat,
+0,KTROBO_MESH_BONE_NULL,false);
+umesh_unit->setUMesh(um);
+umesh_units.push_back(umesh_unit);
+umesh_unit->calcJyusinAndR();
+hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_CHARA);
+}*/
 
 
 	unsigned short animf[KTROBO_MESH_INSTANCED_BONE_MAX];
@@ -334,8 +363,8 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	memset(animw, 0, sizeof(animw));
 
 
-	for (int i = 0; i<5; i++) {
-		for (int k = 0; k<5; k++) {
+	for (int i = 0; i < 5; i++) {
+		for (int k = 0; k < 5; k++) {
 			{
 				MYMATRIX idenmat;
 				MyMatrixIdentity(idenmat);
@@ -350,6 +379,8 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 				//umesh_units.push_back(umesh_unit);
 				umesh_unit->setSCALEXYZ(100, 100, 130);
 				umesh_unit->setXYZ((i - 2) * 200, (k - 2) * 200, -4);
+				um->setAnimeFrame(0);
+				um->Animate(true);
 				umesh_unit->calcJyusinAndR();
 				mesh_is[i + 5 * k]->setWorld(&umesh_unit->world);
 				mesh_is[i + 5 * k]->setIsRender(true);
@@ -357,15 +388,15 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 				bool tyo_unko = true;
 				float frame_anime = 0;
 
-				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-				//umesh_unit->calcJyusinAndR();
+				//		umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+				//		umesh_unit->calcJyusinAndR();
 				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
 			}
 		}
 	}
 
-	for (int i = 0; i<5; i++) {
-		for (int k = 0; k<5; k++) {
+	for (int i = 0; i < 5; i++) {
+		for (int k = 0; k < 5; k++) {
 			{
 				MYMATRIX idenmat;
 				MyMatrixIdentity(idenmat);
@@ -375,11 +406,13 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 
 				mesh_is[i + 5 * k + 25] = mids->makeInstanced(mesh2, mesh2, NULL, NULL, false, &idenmat);
 				umesh_unit->setUMesh(um);
-				m->registerTikei(umesh_unit, mesh_is[i + 5 * k+25]);
+				m->registerTikei(umesh_unit, mesh_is[i + 5 * k + 25]);
 
-//				umesh_units.push_back(umesh_unit);
+				//				umesh_units.push_back(umesh_unit);
 				umesh_unit->setSCALEXYZ(100, 100, 130);
 				umesh_unit->setXYZ((i - 2) * 200, (k - 2) * 200, 0);
+				um->setAnimeFrame(0);
+				um->Animate(true);
 				umesh_unit->calcJyusinAndR();
 				mesh_is[i + 5 * k + 25]->setWorld(&umesh_unit->world);
 				mesh_is[i + 5 * k + 25]->setIsRender(true);
@@ -387,15 +420,15 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 				bool tyo_unko = true;
 				float frame_anime = 0;
 
-				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-				//umesh_unit->calcJyusinAndR();
+				//		umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+				//		umesh_unit->calcJyusinAndR();
 				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
 			}
 		}
 	}
 
-	for (int i = 0; i<5; i++) {
-		for (int k = 0; k<5; k++) {
+	for (int i = 0; i < 5; i++) {
+		for (int k = 0; k < 5; k++) {
 			{
 				MYMATRIX idenmat;
 				MyMatrixIdentity(idenmat);
@@ -405,11 +438,13 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 
 				mesh_is[i + 5 * k + 50] = mids->makeInstanced(mesh3[0], mesh3[0], NULL, NULL, false, &idenmat);
 				umesh_unit->setUMesh(um);
-				m->registerTikei(umesh_unit, mesh_is[i+5*k+50]);
+				m->registerTikei(umesh_unit, mesh_is[i + 5 * k + 50]);
 
-//				umesh_units.push_back(umesh_unit);
+				//				umesh_units.push_back(umesh_unit);
 				umesh_unit->setSCALEXYZ(50, 50, 50);
 				umesh_unit->setXYZ((i - 2) * 200 - 100, (k - 2) * 200 - 100, 0);
+				um->setAnimeFrame(0);
+				um->Animate(true);
 				umesh_unit->calcJyusinAndR();
 				mesh_is[i + 5 * k + 50]->setWorld(&umesh_unit->world);
 				mesh_is[i + 5 * k + 50]->setIsRender(true);
@@ -417,9 +452,10 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 				bool tyo_unko = true;
 				float frame_anime = 0;
 
-				//umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
-				//umesh_unit->calcJyusinAndR();
+				//		umesh_unit->calcAnimeFrame(1,&frame_anime,&tyo_unko);
+				//		umesh_unit->calcJyusinAndR();
 				hantei->setUMeshUnit(umesh_unit, AtariUnit::AtariType::ATARI_TIKEI);
+
 			}
 		}
 	}
@@ -442,18 +478,85 @@ RMapSetterExample::RMapSetterExample(Graphics* g, Game* game, AtariHantei* hante
 	MyMatrixMultiply(mesh3[10]->RootBone->matrix_local, mesh3[10]->RootBone->matrix_local, worldforg);
 
 	*/
+}
 
-	float frame = 0;
+void MAP_ENT_TIKEI::update() {
+	unit->setXYZ(unit->x, unit->y, unit->z);
+	unit->calcJyusinAndR();
+	mesh_inst->setWorld(&unit->world);
 
-	mesh->animate(frame, true);
-	mesh2->animate(frame, true);
-	for (int i = 0; i <= 10; i++) {
-		mesh3[i]->animate(frame, true);
-		if (i == 9) {
-			mesh3[i]->animate(0, true);
-		}
+}
+void RMap::update() {
+	
+	vector<UMeshUnit*>::iterator it = map_umeshunits.begin();
+	while (it != map_umeshunits.end()) {
+		UMeshUnit* mm = *it;
+		mm->setDT(5);
+	//	mm->setXYZ(mm->x + 0.01f, mm->y, mm->z);
+		mm->calcJyusinAndR();
+
+
+		it++;
 	}
-	mesh3[7]->animate(frame, true);
-	mesh3[8]->animate(frame, true);
+	
+	vector<MAP_STRUCT*>::iterator itt = map_structs.begin();
+	while (itt != map_structs.end()) {
+		MAP_STRUCT* ma = *itt;
+		ma->ent->update();
+		itt++;
+	}
+
+	/*
+	unsigned short animf[KTROBO_MESH_INSTANCED_BONE_MAX];
+	unsigned short animl[KTROBO_MESH_INSTANCED_BONE_MAX];
+	float animw[KTROBO_MESH_INSTANCED_BONE_MAX];
+
+	memset(animf, 0, sizeof(animf));
+	memset(animl, 0, sizeof(animl));
+	memset(animw, 0, sizeof(animw));
+	vector<MeshInstanced*>::iterator itt = map_meshinstanceds.begin();
+	while (itt != map_meshinstanceds.end()) {
+		MeshInstanced* mi  = *itt;
+		mi->setBoneIndexInfo(animf, animl, animw);
+		itt++;
+	}
+	*/
+}
+
+
+void RMap::byougaHojyo(Graphics*g, MYMATRIX* view, MYMATRIX* proj) {
+
+	MYMATRIX world;
+	OBB r;
+
+	vector<UMeshUnit*>::iterator it = map_umeshunits.begin();
+	while (it != map_umeshunits.end()) {
+		UMeshUnit* mm = *it;
+		mm->setDT(5);
+		mm->setXYZ(mm->x + 0.01f, mm->y, mm->z);
+		mm->calcJyusinAndR();
+ 		//MyMatrixTranslation(world, mm->x, mm->y, mm->z);
+		MyMatrixIdentity(world);
+		for (int k = 0; k < mm->meshs.size();k++) {
+			for (int i = 0; i < KTROBO_MESH_BONE_MAX; i++) {
+				if (mm->meshs[k]->is_bone_obbs_use[i]) {
+					r = mm->meshs[k]->bone_obbs[i];
+					g->drawOBB(g, 0xFFFF0000, &world, view, proj, &r);
+				}
+			}
+		}
+		it++;
+	}
+	
+
+
+
+
+
+
+
+
+
+
 
 }

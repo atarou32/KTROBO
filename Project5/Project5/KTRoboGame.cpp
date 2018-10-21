@@ -1706,9 +1706,13 @@ void Game::Run() {
 	//umesh_unit->draw(g,&view,&proj,1, &testcc,&calcom,true, false/*is_calc_anime*/, false,true);
 	
 	}
+
+	//rmap->update();
+
 	CS::instance()->leave(CS_RENDERDATA_CS, "render game");
 	static float tester = 0;
 	tester += 0.1f;
+	
 //	UMeshUnit* umesh_unit = umesh_units[2+30];
 	//umesh_unit->setXYZ(0,0,205);
 	//umesh_unit->setROTXYZ(0,0,0);//1.57+tester/1000.0f,tester/100.00f,0);
@@ -1973,7 +1977,7 @@ void Game::Run() {
 		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		//	robodayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
-		robodayo->atarihan->calcJyusinAndR();
+		//robodayo->atarihan->calcJyusinAndR();
 
 		if (robodayo_boostereffect_count % 2 == 0) {
 			robodayo->boosterEffect(this, g, frameTime, timestamp);
@@ -1994,7 +1998,7 @@ void Game::Run() {
 		//robodayo->atarishori(g, &view, hantei, frameTime, (int)frame);
 		//roboaitedayo->fireUpdate(g,demo->tex_loader, &view, hantei, frameTime, (int)frame, this, 	texdayo->getInstance(0)); 
 		//robodayo->atarihan->setV(&MYVECTOR3(temp_input_shori->testdayo/100.0f,0, robodayo->atarihan->v.float3.z));
-		roboaitedayo->atarihan->calcJyusinAndR();
+		//roboaitedayo->atarihan->calcJyusinAndR();
 
 		if (robodayo_boostereffect_count % 2 == 0) {
 			roboaitedayo->boosterEffect(this, g, frameTime, timestamp);
@@ -2025,6 +2029,10 @@ void Game::Run() {
 		
 	//}
 	watches_for_keisoku.stopWatch(3);
+
+	rmap->byougaHojyo(g, &this->view, g->getProj());
+
+
 	CS::instance()->leave(CS_RENDERDATA_CS, "unko");
 
 //	g->getDeviceContext()->RSSetViewports(1, g->getViewPort());

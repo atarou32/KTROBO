@@ -159,16 +159,39 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 				OBB henkanobb = em->mesh->Bones[i]->houkatuobb;
 				MyMatrixMultiply(henkanmat,cm,world);
 				//MyMatrixMultiply(henkanmat,henkanmat
+				MYVECTOR3 ux= henkanobb.u[0] + henkanobb.c;
+				MYVECTOR3 uy = henkanobb.u[1] + henkanobb.c;
+				MYVECTOR3 uz = henkanobb.u[2] + henkanobb.c;
+
+				MyVec3TransformCoord(ux, ux, henkanmat);
+				MyVec3TransformCoord(uy, uy,henkanmat);
+				MyVec3TransformCoord(uz, uz, henkanmat);
+
+
+
 				MyVec3TransformCoord(henkanobb.c,henkanobb.c,henkanmat);
 				MyVec3TransformNormal(henkanobb.u[0],henkanobb.u[0],henkanmat);
-				henkanobb.e.float3.x = henkanobb.e.float3.x * MyVec3Length(henkanobb.u[0]);
+			//	henkanobb.e.float3.x = henkanobb.e.float3.x * MyVec3Length(henkanobb.u[0]);
 				MyVec3Normalize(henkanobb.u[0],henkanobb.u[0]);
 				MyVec3TransformNormal(henkanobb.u[1],henkanobb.u[1],henkanmat);
-				henkanobb.e.float3.y = henkanobb.e.float3.y * MyVec3Length(henkanobb.u[1]);
+			//	henkanobb.e.float3.y = henkanobb.e.float3.y * MyVec3Length(henkanobb.u[1]);
 				MyVec3Normalize(henkanobb.u[1],henkanobb.u[1]);
 				MyVec3TransformNormal(henkanobb.u[2],henkanobb.u[2],henkanmat);
-				henkanobb.e.float3.z = henkanobb.e.float3.z * MyVec3Length(henkanobb.u[2]);
+			//	henkanobb.e.float3.z = henkanobb.e.float3.z * MyVec3Length(henkanobb.u[2]);
 				MyVec3Normalize(henkanobb.u[2],henkanobb.u[2]);
+				
+
+			
+				MyVec3Subtract(ux, ux, henkanobb.c);
+				MyVec3Subtract(uy, uy, henkanobb.c);
+				MyVec3Subtract(uz, uz, henkanobb.c);
+
+				henkanobb.e.float3.x = 2*MyVec3Length(ux)*henkanobb.e.float3.x;
+				henkanobb.e.float3.y = 2*MyVec3Length(uy)*henkanobb.e.float3.y;
+				henkanobb.e.float3.z = 2*MyVec3Length(uz)*henkanobb.e.float3.z;
+
+
+
 				// henkanobb の大きさをｖ＊ｄｔに応じて大きくする
 			/*	henkanobb.e.float3.x += abs(v.float3.x) * dt;
 				henkanobb.e.float3.y += abs(v.float3.y) * dt;
@@ -231,7 +254,16 @@ void UMeshUnit::calcJyusinAndR(bool calcWorld) {
 				MYVECTOR3 tmp;
 				float tempp=0;
 				tmp = em->bone_obbs[i].c - ans_jyusin;
-				tempp = MyVec3Length(tmp) + 2* MyVec3Dot(em->bone_obbs[i].e,em->bone_obbs[i].e);
+				MYVECTOR3 tt = em->bone_obbs[i].u[0] * em->bone_obbs[i].e[0];
+				MYVECTOR3 tt2 = em->bone_obbs[i].u[1]*em->bone_obbs[i].e[1] ;
+				float ppp = abs(MyVec3Length(tt ));
+				float ooo =	abs(MyVec3Length(tt2));
+				float ttt = max(ppp, ooo);
+				MYVECTOR3 tt3 = em->bone_obbs[i].u[2] * em->bone_obbs[i].e[2];
+				float ppp2 = MyVec3Length(tt3);				
+				ttt = max(ttt, ppp2);
+
+				tempp = MyVec3Length(tmp) + 1*MyVec3Dot(em->bone_obbs[i].e, em->bone_obbs[i].e);
 				if (tempp > ans_r) {
 					ans_r = tempp;
 				}
@@ -821,31 +853,38 @@ void AtariHantei::clearDummyInfo(bool is_use_in_mae_dummy) {
 }
 
 void AtariHantei::calcKumi(Graphics* g) {
-		// 組の変数に値を入れる
+	// 組の変数に値を入れる
 	if (!atari_start) return;
 	if (!need_calc_kumi) {
-		
-	g->getDeviceContext()->UpdateSubresource(buffer_kumi,0,0,kumi,0,0);
-//	g->getDeviceContext()->Map(buffer_kumi,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
-//	memcpy(subresource.pData, kumi, sizeof(AtariUnitKumi) * temp);
-//	g->getDeviceContext()->Unmap(buffer_kumi,0);
-	g->getDeviceContext()->UpdateSubresource(buffer_autts,0,0,autts,0,0);
-//	subresource.pData = autts;
-//	g->getDeviceContext()->Map(buffer_autts,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
-//	memcpy(subresource.pData, autts, sizeof(AtariUnitTikeiToSoreigai) * temp_tosoreigai);
-//	g->getDeviceContext()->Unmap(buffer_autts,0);
-	g->getDeviceContext()->UpdateSubresource(buffer_autid,0,0,autid,0,0);		
-		
-		
+		if (g->isCopied()) {
+			ID3D11DeviceContext* context;
+			context = g->getImmediateContext();
+			context->UpdateSubresource(buffer_kumi, 0, 0, kumi, 0, 0);
+			context->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+			context->UpdateSubresource(buffer_autid, 0, 0, autid, 0, 0);
+		}
+		else {
+			g->getDeviceContext()->UpdateSubresource(buffer_kumi, 0, 0, kumi, 0, 0);
+			//	g->getDeviceContext()->Map(buffer_kumi,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+			//	memcpy(subresource.pData, kumi, sizeof(AtariUnitKumi) * temp);
+			//	g->getDeviceContext()->Unmap(buffer_kumi,0);
+			g->getDeviceContext()->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+			//	subresource.pData = autts;
+			//	g->getDeviceContext()->Map(buffer_autts,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+			//	memcpy(subresource.pData, autts, sizeof(AtariUnitTikeiToSoreigai) * temp_tosoreigai);
+			//	g->getDeviceContext()->Unmap(buffer_autts,0);
+			g->getDeviceContext()->UpdateSubresource(buffer_autid, 0, 0, autid, 0, 0);
+		}
+
 		return;
 	}
 	int temp = 0;
 	int temp_igaidousi = 0;
 	int temp_tosoreigai = 0;
-	for (int i = 0;i<au_count;i++) {
-		for (int k=0;k<au_count;k++) {
+	for (int i = 0; i < au_count; i++) {
+		for (int k = 0; k < au_count; k++) {
 			if (i >= k) continue;
-			
+
 			AtariUnit* aui = &units[i];
 			AtariUnit* auk = &units[k];
 
@@ -854,65 +893,65 @@ void AtariHantei::calcKumi(Graphics* g) {
 
 			if ((aui->type == AtariUnit::AtariType::ATARI_TIKEI)
 				&& (auk->type == AtariUnit::AtariType::ATARI_TIKEI)) {
-					continue;
+				continue;
 			}
 
 			if ((aui->type != AtariUnit::AtariType::ATARI_TIKEI)
 				&& auk->type != AtariUnit::AtariType::ATARI_TIKEI) {
-					// igaidousi
-					autid[temp_igaidousi].atariidx = aui->atariidx;
-					autid[temp_igaidousi].atariidx2 = auk->atariidx;
-					for (int t=0;t<KTROBO_MESH_BONE_MAX;t++) {
-						for (int h=0;h<KTROBO_MESH_BONE_MAX;h++) {
-							if (aui->umesh->is_bone_obbs_use[t] && auk->umesh->is_bone_obbs_use[h]) {
-								autid[temp_igaidousi].obbidx = aui->umesh->bone_obbs_idx[t];
-								autid[temp_igaidousi].obbidx2 = auk->umesh->bone_obbs_idx[h];
-								temp_igaidousi++;
-								if (temp_igaidousi >= max_count.igaidousi_count) {
-									throw new GameError(KTROBO::FATAL_ERROR, "igaidousicount over no nono ");
-								}
-
-								autid[temp_igaidousi].atariidx = aui->atariidx;
-								autid[temp_igaidousi].atariidx2 = auk->atariidx;
+				// igaidousi
+				autid[temp_igaidousi].atariidx = aui->atariidx;
+				autid[temp_igaidousi].atariidx2 = auk->atariidx;
+				for (int t = 0; t < KTROBO_MESH_BONE_MAX; t++) {
+					for (int h = 0; h < KTROBO_MESH_BONE_MAX; h++) {
+						if (aui->umesh->is_bone_obbs_use[t] && auk->umesh->is_bone_obbs_use[h]) {
+							autid[temp_igaidousi].obbidx = aui->umesh->bone_obbs_idx[t];
+							autid[temp_igaidousi].obbidx2 = auk->umesh->bone_obbs_idx[h];
+							temp_igaidousi++;
+							if (temp_igaidousi >= max_count.igaidousi_count) {
+								throw new GameError(KTROBO::FATAL_ERROR, "igaidousicount over no nono ");
 							}
+
+							autid[temp_igaidousi].atariidx = aui->atariidx;
+							autid[temp_igaidousi].atariidx2 = auk->atariidx;
 						}
 					}
+				}
 			}
 			if ((aui->type == AtariUnit::AtariType::ATARI_TIKEI)
 				&& auk->type != AtariUnit::AtariType::ATARI_TIKEI) {
-					// tosoreigai
-					autts[temp_tosoreigai].atariidx = auk->atariidx;
-					autts[temp_tosoreigai].atariidx2 = aui->atariidx;
-					for (int h=0;h<KTROBO_MESH_BONE_MAX;h++) {
-						if (auk->umesh->is_bone_obbs_use[h]) {
-							autts[temp_tosoreigai].obbidx = auk->umesh->bone_obbs_idx[h];
-							temp_tosoreigai++;
-							if (temp_tosoreigai >= max_count.soreigai_count) {
-								throw new GameError(KTROBO::FATAL_ERROR, "tosoreigai count over no nono");
-							}
-
-							autts[temp_tosoreigai].atariidx = auk->atariidx;
-							autts[temp_tosoreigai].atariidx2 = aui->atariidx;
+				// tosoreigai
+				autts[temp_tosoreigai].atariidx = auk->atariidx;
+				autts[temp_tosoreigai].atariidx2 = aui->atariidx;
+				for (int h = 0; h < KTROBO_MESH_BONE_MAX; h++) {
+					if (auk->umesh->is_bone_obbs_use[h]) {
+						autts[temp_tosoreigai].obbidx = auk->umesh->bone_obbs_idx[h];
+						temp_tosoreigai++;
+						if (temp_tosoreigai >= max_count.soreigai_count) {
+							throw new GameError(KTROBO::FATAL_ERROR, "tosoreigai count over no nono");
 						}
+
+						autts[temp_tosoreigai].atariidx = auk->atariidx;
+						autts[temp_tosoreigai].atariidx2 = aui->atariidx;
 					}
+				}
 			}
 			if ((aui->type != AtariUnit::AtariType::ATARI_TIKEI)
 				&& auk->type == AtariUnit::AtariType::ATARI_TIKEI) {
-					// tosoreigai
-					autts[temp_tosoreigai].atariidx = aui->atariidx;
-					autts[temp_tosoreigai].atariidx2 = auk->atariidx;
-					for (int t=0;t<KTROBO_MESH_BONE_MAX;t++) {
-						if (aui->umesh->is_bone_obbs_use[t]) {
-							autts[temp_tosoreigai].obbidx = aui->umesh->bone_obbs_idx[t];
-							temp_tosoreigai++;
-							if (temp_tosoreigai >= max_count.soreigai_count) {
-								throw new GameError(KTROBO::FATAL_ERROR, " no no no ");
-							}
-
-							autts[temp_tosoreigai].atariidx = aui->atariidx;
-							autts[temp_tosoreigai].atariidx2 = auk->atariidx;
+				// tosoreigai
+				autts[temp_tosoreigai].atariidx = aui->atariidx;
+				autts[temp_tosoreigai].atariidx2 = auk->atariidx;
+				for (int t = 0; t < KTROBO_MESH_BONE_MAX; t++) {
+					if (aui->umesh->is_bone_obbs_use[t]) {
+						autts[temp_tosoreigai].obbidx = aui->umesh->bone_obbs_idx[t];
+						temp_tosoreigai++;
+						if (temp_tosoreigai >= max_count.soreigai_count) {
+							throw new GameError(KTROBO::FATAL_ERROR, " no no no ");
 						}
+
+						autts[temp_tosoreigai].atariidx = aui->atariidx;
+						autts[temp_tosoreigai].atariidx2 = auk->atariidx;
 					}
+				}
 			}
 
 			kumi[temp].atari_idx = aui->atariidx;
@@ -932,20 +971,32 @@ void AtariHantei::calcKumi(Graphics* g) {
 	subresource.pData = kumi;
 	subresource.DepthPitch = 0;
 	subresource.RowPitch = 0;
-	g->getDeviceContext()->UpdateSubresource(buffer_kumi,0,0,kumi,0,0);
-//	g->getDeviceContext()->Map(buffer_kumi,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
-//	memcpy(subresource.pData, kumi, sizeof(AtariUnitKumi) * temp);
-//	g->getDeviceContext()->Unmap(buffer_kumi,0);
-	g->getDeviceContext()->UpdateSubresource(buffer_autts,0,0,autts,0,0);
-//	subresource.pData = autts;
-//	g->getDeviceContext()->Map(buffer_autts,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
-//	memcpy(subresource.pData, autts, sizeof(AtariUnitTikeiToSoreigai) * temp_tosoreigai);
-//	g->getDeviceContext()->Unmap(buffer_autts,0);
-	g->getDeviceContext()->UpdateSubresource(buffer_autid,0,0,autid,0,0);
-//	subresource.pData = autid;
-//	g->getDeviceContext()->Map(buffer_autid,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
-//	memcpy(subresource.pData, autid, sizeof(AtariUnitTikeiIgaiDousi) * temp_igaidousi);
-//	g->getDeviceContext()->Unmap(buffer_autid,0);
+
+
+	if (g->isCopied()) {
+		ID3D11DeviceContext* context;
+		context = g->getImmediateContext();
+		context->UpdateSubresource(buffer_kumi, 0, 0, kumi, 0, 0);
+		context->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+		context->UpdateSubresource(buffer_autid, 0, 0, autid, 0, 0);
+	}
+	else {
+
+	g->getDeviceContext()->UpdateSubresource(buffer_kumi, 0, 0, kumi, 0, 0);
+	//	g->getDeviceContext()->Map(buffer_kumi,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	//	memcpy(subresource.pData, kumi, sizeof(AtariUnitKumi) * temp);
+	//	g->getDeviceContext()->Unmap(buffer_kumi,0);
+	g->getDeviceContext()->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+	//	subresource.pData = autts;
+	//	g->getDeviceContext()->Map(buffer_autts,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	//	memcpy(subresource.pData, autts, sizeof(AtariUnitTikeiToSoreigai) * temp_tosoreigai);
+	//	g->getDeviceContext()->Unmap(buffer_autts,0);
+	g->getDeviceContext()->UpdateSubresource(buffer_autid, 0, 0, autid, 0, 0);
+	//	subresource.pData = autid;
+	//	g->getDeviceContext()->Map(buffer_autid,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+	//	memcpy(subresource.pData, autid, sizeof(AtariUnitTikeiIgaiDousi) * temp_igaidousi);
+	//	g->getDeviceContext()->Unmap(buffer_autid,0);
+	}
 	need_calc_kumi = false;
 }
 
@@ -1036,10 +1087,27 @@ void AtariHantei::calcKumiKuwasiku(Graphics* g) {
 
 	// buffer に値を入れる
 	if (buffer_autts) {
-	g->getDeviceContext()->UpdateSubresource(buffer_autts,0,0,autts,0,0);
+		if (g->isCopied()) {
+			ID3D11DeviceContext* context;
+			context = g->getImmediateContext();
+			context->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+//			g->getDeviceContext()->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+
+		}
+		else {
+			g->getDeviceContext()->UpdateSubresource(buffer_autts, 0, 0, autts, 0, 0);
+		}
 	}
 	if (buffer_autid) {
-	g->getDeviceContext()->UpdateSubresource(buffer_autid,0,0,autid,0,0);
+
+		if (g->isCopied()) {
+			ID3D11DeviceContext* context;
+			context = g->getImmediateContext();
+			context->UpdateSubresource(buffer_autid, 0, 0, autid, 0, 0);
+		}
+		else {
+		g->getDeviceContext()->UpdateSubresource(buffer_autid, 0, 0, autid, 0, 0);
+		}
 	}
 }
 
@@ -1118,10 +1186,20 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 		subresource.pData = au_info;
 		subresource.DepthPitch = 0;
 		subresource.RowPitch = 0;
-*/		g->getDeviceContext()->UpdateSubresource(buffer_au_info,0,0,au_info,0,0);
-		g->getDeviceContext()->UpdateSubresource(buffer_vertexs,0,0,max_tikei_vertexs,0,0);
-		g->getDeviceContext()->UpdateSubresource(buffer_indexs,0,0,max_tikei_indexs,0,0);
-
+		*/
+		if (g->isCopied()) {
+		ID3D11DeviceContext* context;
+		context = g->getImmediateContext();
+		context->UpdateSubresource(buffer_au_info, 0, 0, au_info, 0, 0);
+		context->UpdateSubresource(buffer_vertexs, 0, 0, max_tikei_vertexs, 0, 0);
+		context->UpdateSubresource(buffer_indexs, 0, 0, max_tikei_indexs, 0, 0);
+		
+		}
+		else {
+			g->getDeviceContext()->UpdateSubresource(buffer_au_info, 0, 0, au_info, 0, 0);
+			g->getDeviceContext()->UpdateSubresource(buffer_vertexs, 0, 0, max_tikei_vertexs, 0, 0);
+			g->getDeviceContext()->UpdateSubresource(buffer_indexs, 0, 0, max_tikei_indexs, 0, 0);
+		}
 /*
 		g->getDeviceContext()->Map(buffer_au_info,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 		memcpy(subresource.pData, au_info, sizeof(AtariUnitInfo) * au_count);
@@ -1137,12 +1215,20 @@ void AtariHantei::calcAuInfo(Graphics* g, bool calc_vertex_and_index) {
 		memcpy(subresource.pData, max_tikei_indexs, sizeof(UINT) * temp_index_place);
 		g->getDeviceContext()->Unmap(buffer_indexs,0);
 */
-	} else {
-/*		D3D11_MAPPED_SUBRESOURCE subresource;
-		subresource.pData = au_info;
-		subresource.DepthPitch = 0;
-		subresource.RowPitch = 0;
-*/		g->getDeviceContext()->UpdateSubresource(buffer_au_info,0,0,au_info,0,0);
+	}
+	else {
+		/*		D3D11_MAPPED_SUBRESOURCE subresource;
+				subresource.pData = au_info;
+				subresource.DepthPitch = 0;
+				subresource.RowPitch = 0;
+		*/		if (g->isCopied()) {
+				ID3D11DeviceContext* context;
+				context = g->getImmediateContext();
+				context->UpdateSubresource(buffer_au_info, 0, 0, au_info, 0, 0);
+				} else {
+				g->getDeviceContext()->UpdateSubresource(buffer_au_info, 0, 0, au_info, 0, 0);
+				}
+
 /*
 		g->getDeviceContext()->Map(buffer_au_info,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
 		memcpy(subresource.pData, au_info, sizeof(AtariUnitInfo) * au_count);
@@ -1191,8 +1277,13 @@ void AtariHantei::calcObb(Graphics* g) {
 	subresource.DepthPitch = 0;
 	subresource.RowPitch = 0;
 */
-	g->getDeviceContext()->UpdateSubresource(buffer_obbs,0,0,obbs,0,0);
-
+	if (g->isCopied()) {
+		ID3D11DeviceContext* context;
+		context = g->getImmediateContext();
+		context->UpdateSubresource(buffer_obbs, 0, 0, obbs, 0, 0);
+	} else {
+		g->getDeviceContext()->UpdateSubresource(buffer_obbs, 0, 0, obbs, 0, 0);
+	}
 	
 /*
 	g->getDeviceContext()->Map(buffer_obbs,0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
@@ -1367,8 +1458,16 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 		for (int i=0;i<max_count.ans_count;i++) {
 			ans[i].is_use = 0;
 		}
-
-		g->getDeviceContext()->CopyResource(buffer_ans2_copy, buffer_ans2);
+		if (g->isCopied()) {
+			ID3D11DeviceContext* context;
+			//g->getDevice()->GetImmediateContext(&context);
+			context = g->getImmediateContext();
+			context->CopyResource(buffer_ans2_copy, buffer_ans2);
+		}
+		else {
+			g->getDeviceContext()->CopyResource(buffer_ans2_copy, buffer_ans2);
+		}
+		
 		// マップ.
 		int i_count=0;
 		AtariUnitAns temp_ans[128];
@@ -1376,7 +1475,15 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 			temp_ans[i].is_use = 0;
 			//memset
 		}
-		g->getDeviceContext()->Map(buffer_ans2_copy, 0, D3D11_MAP_READ, 0, &subRes );
+		if (g->isCopied()) {
+			ID3D11DeviceContext* context;
+			//g->getDevice()->GetImmediateContext(&context);
+			context = g->getImmediateContext();
+			context->Map(buffer_ans2_copy, 0, D3D11_MAP_READ, 0, &subRes);
+		}
+		else {
+			g->getDeviceContext()->Map(buffer_ans2_copy, 0, D3D11_MAP_READ, 0, &subRes);
+		}
 		anspo = (AtariUnitAns*)subRes.pData;
 		if (temp_count.ans_count > 256) {
 		
@@ -1388,13 +1495,17 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 				memcpy_s(&ans[i_count],sizeof(AtariUnitAns)*256,anspo,sizeof(AtariUnitAns)*256);
 				for (int i=0;i<256;i++) {
 					if (ans[i+temp_c].is_use) {
-					//	ans[i_count].atari_idx = temp_ans[i].atari_idx;
-					//	ans[i_count].atari_idx2 = temp_ans[i].atari_idx2;
-					//	ans[i_count].kouten_housen = temp_ans[i].kouten_housen;
-					//	ans[i_count].kouten_jyusin = temp_ans[i].kouten_jyusin;
-					//	ans[i_count].obbidx = temp_ans[i].obbidx;
-					//	ans[i_count].obbidx2 = temp_ans[i].obbidx2;
-					//	ans[i_count].is_use = 1;
+						
+						ans[i_count].atari_idx = anspo[i].atari_idx;
+						ans[i_count].atari_idx2 = anspo[i].atari_idx2;
+						ans[i_count].kouten_housen = anspo[i].kouten_housen;
+						ans[i_count].kouten_jyusin = anspo[i].kouten_jyusin;
+						ans[i_count].obbidx = anspo[i].obbidx;
+						ans[i_count].obbidx2 = anspo[i].obbidx2;
+						ans[i_count].is_use = 1;
+						
+
+
 						i_count++;
 					} else {
 						is_loop = false;
@@ -1403,32 +1514,64 @@ HRESULT AtariHantei::copyKekkaToBufferForCopy(Graphics* g,bool isans1) {
 				}
 				}
 			}
-			g->getDeviceContext()->Unmap(buffer_ans2_copy,0);	
+			if (g->isCopied()) {
+				ID3D11DeviceContext* context;
+				//g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
+				context->Unmap(buffer_ans2_copy, 0);
+			}
+			else {
+				g->getDeviceContext()->Unmap(buffer_ans2_copy, 0);
+			}
 			atatta_count = i_count;
-		} else {
+		}
+		else {
 			if (anspo) {
-			for (int i=0;i<temp_count.ans_count;i++) {
-				if (anspo[i].is_use) {
-				ans[i_count].atari_idx = anspo[i].atari_idx;
-				ans[i_count].atari_idx2 = anspo[i].atari_idx2;
-				ans[i_count].kouten_housen = anspo[i].kouten_housen;
-				ans[i_count].kouten_jyusin = anspo[i].kouten_jyusin;
-				ans[i_count].obbidx = anspo[i].obbidx;
-				ans[i_count].obbidx2 = anspo[i].obbidx2;
-				ans[i_count].is_use = 1;
+				for (int i = 0; i < temp_count.ans_count; i++) {
+					if (anspo[i].is_use) {
+						ans[i_count].atari_idx = anspo[i].atari_idx;
+						ans[i_count].atari_idx2 = anspo[i].atari_idx2;
+						ans[i_count].kouten_housen = anspo[i].kouten_housen;
+						ans[i_count].kouten_jyusin = anspo[i].kouten_jyusin;
+						ans[i_count].obbidx = anspo[i].obbidx;
+						ans[i_count].obbidx2 = anspo[i].obbidx2;
+						ans[i_count].is_use = 1;
 
-				i_count++;
-				} else {
-					break;
+						i_count++;
+					}
+					else {
+						break;
+					}
 				}
 			}
+			if (g->isCopied()) {
+				ID3D11DeviceContext* context;
+				//g->getDevice()->GetImmediateContext(&context);
+				context = g->getImmediateContext();
+				context->Unmap(buffer_ans2_copy, 0);
 			}
-			g->getDeviceContext()->Unmap(buffer_ans2_copy,0);
+			else {
+			g->getDeviceContext()->Unmap(buffer_ans2_copy, 0);
+			}
 			atatta_count = i_count;
 		}
 	}
 	is_updated = false;
+/*
+	for (int i = 0; i < 512; i++) {
+		char test[8192];
+		memset(test, 0, 8192);
+		sprintf_s(test,"adx=%d adx2=%d oidx=%d,oidx2=%d, hs=(%f, %f,%f), js=%3.3f,%3.3f,%3.3f\n", 
+			ans[i].atari_idx, ans[i].atari_idx2, ans[i].obbidx, ans[i].obbidx2,
+			ans[i].kouten_housen.float3.x, ans[i].kouten_housen.float3.y, ans[i].kouten_housen.float3.z,
+			ans[i].kouten_jyusin.float3.x, ans[i].kouten_jyusin.float3.y, ans[i].kouten_jyusin.float3.z);
+		mylog::writelog("testfile.txt", test);
 
+	}
+
+	Sleep(1000);
+	//throw new GameError(KTROBO::FATAL_ERROR, "testdesu");
+	*/
 	return S_OK;
 
 }
@@ -1645,14 +1788,14 @@ void AtariHantei::runComputeShaderAida(Graphics* g) {
 	ID3D11ShaderResourceView* pSRVs[8] = { buffer_vertexs_view, buffer_indexs_view, buffer_obbs_view, buffer_au_info_view,
 		buffer_kumi_view, buffer_autts_view, buffer_autid_view,0};
 
-	g->getDeviceContext()->CSSetShaderResources(0, 1, &buffer_vertexs_view);
+	/*g->getDeviceContext()->CSSetShaderResources(0, 1, &buffer_vertexs_view);
 	g->getDeviceContext()->CSSetShaderResources(1, 1, &buffer_indexs_view);
 	g->getDeviceContext()->CSSetShaderResources(2, 1, &buffer_obbs_view);
 	g->getDeviceContext()->CSSetShaderResources(3, 1, &buffer_au_info_view);
 	g->getDeviceContext()->CSSetShaderResources(4, 1, &buffer_kumi_view);
 	g->getDeviceContext()->CSSetShaderResources(5, 1, &buffer_autts_view);
-	g->getDeviceContext()->CSSetShaderResources(6, 1, &buffer_autid_view);
-	//g->getDeviceContext()->CSSetShaderResources(7, 1, pSRVs);
+	g->getDeviceContext()->CSSetShaderResources(6, 1, &buffer_autid_view);*/
+	g->getDeviceContext()->CSSetShaderResources(0, 7, pSRVs);
 
 
 	//g->getDeviceContext()->CSSetUnorderedAccessViews( 0, 2, pUAV, 0 );
@@ -1669,7 +1812,7 @@ void AtariHantei::runComputeShaderAida(Graphics* g) {
 	g->getDeviceContext()->CSSetConstantBuffers( 0, 1, ppCB );
  
 	int zenbuoki = temp_count.kumi_count + temp_count.igaidousi_count + temp_count.soreigai_count;
-	int x = 32*16;
+	int x = 32*16; // 32*16 32 32
 	int y = 32;
 	int z = 32;
 

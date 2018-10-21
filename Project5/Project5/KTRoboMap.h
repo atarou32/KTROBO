@@ -23,6 +23,7 @@ public:
 	MAP_ENT() {};
 	virtual ~MAP_ENT() {};
 
+	virtual void update() {};
 	
 
 };
@@ -48,7 +49,7 @@ public:
 		mesh_inst = mi;
 	};
 	virtual ~MAP_ENT_TIKEI() {};
-
+	virtual void update();
 };
 
 class MAP_ENT_OBJECT : public MAP_ENT {
@@ -82,7 +83,7 @@ class RMap
 {
 private:
 	AtariHantei * hantei;
-	MeshInstanceds* mesh_instanceds;
+	MeshInstanceds * mesh_instanceds;
 
 	private:
 		map <string, int> map_mesh_names;
@@ -92,7 +93,7 @@ private:
 		vector<MAP_STRUCT*> map_structs;
 		int max_struct_id;
 		Robo* player_robo;
-	
+		
 	public:
 		RMap() { max_struct_id = 0; hantei = 0; mesh_instanceds = 0; player_robo = 0; };
 		~RMap() {};
@@ -104,6 +105,8 @@ private:
 		void registerChara(UMeshUnit* um);
 		void changePlayer(Robo* r); // player_robo‚¾‚¯‚ð’u‚«Š·‚¦‚é
 
+		void update();
+		void byougaHojyo(Graphics*g, MYMATRIX* view, MYMATRIX* proj);
 
 		void Init(AtariHantei* h, MeshInstanceds* mids) {
 			this->hantei = h;

@@ -485,6 +485,7 @@ public:
 		umesh_unit_types.push_back(type);
 		u->setType(type);
 		is_unit_updated = true;
+		need_calc_kumi = true;
 	}
 	void ataristart() {atari_start =true;}
 	void maeCalcDummy(Graphics* g); // maecalcdayo‚ÌŒã‚ÉŒÄ‚Ô

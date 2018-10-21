@@ -126,8 +126,9 @@ private:
 public:
 	MYMATRIX view;
 	MYVECTOR3 lookfromtoat;
-private:
+public:
 	RMap * rmap;
+private:
 	/*
 	Mesh* mesh;
 	Mesh* mesh2;
